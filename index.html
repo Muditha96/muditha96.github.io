@@ -58,8 +58,8 @@
 <li><a href="gallery.html">Gallery</a></li>
 <li><a href="certifications.html">Certifications</a></li>
 <li><a href="about.html">About</a></li>
-<li><a href="contact.html#comments">Recommendations</a></li>
-<li><a href="contact.html">Contact</a></li></ul>
+<li><a href="index.html#comments">Recommendations</a></li>
+</ul>
       <a class="header-cv" href="assets/docs/Muditha-Priyasad-CV.pdf" download>Download CV</a>
     </nav>
   </header>
@@ -73,11 +73,17 @@
         <p class="hero-title">Mechanical & Automation Engineer</p>
         <p class="hero-subtitle">Machine Design | Factory Automation | Industrial Troubleshooting | Rapid Prototyping</p>
         <p class="hero-summary">Designing reliable machines, smarter automation systems and practical manufacturing solutions through hands-on engineering, CAD design, PLC-based troubleshooting and rapid prototyping.</p>
-        <div class="hero-actions"><a class="button primary" href="projects.html">View Projects</a><a class="button secondary" href="assets/docs/Muditha-Priyasad-CV.pdf" download>Download CV</a><a class="button secondary" href="contact.html">Contact Me</a></div>
+        <div class="hero-actions"><a class="button primary" href="projects.html">View Projects</a><a class="button secondary" href="assets/docs/Muditha-Priyasad-CV.pdf" download>Download CV</a><a class="button secondary" href="index.html#comments">Contact Me</a></div>
       </div>
       <div class="hero-art">
         <div class="portrait-glow" aria-hidden="true"></div>
         <img class="hero-photo" src="assets/images/hero/hero-portrait.png" alt="Portrait of Muditha Priyasad">
+        <ul class="hero-contact" aria-label="Contact details">
+          <li><span>Email</span><a href="mailto:muditha00@icloud.com">muditha00@icloud.com</a></li>
+          <li><span>Phone</span><a href="tel:+94717599667">+94 71 7599 667</a></li>
+          <li><span>LinkedIn</span><a href="https://www.linkedin.com/in/muditha00" target="_blank" rel="noopener noreferrer">linkedin.com/in/muditha00</a></li>
+          <li><span>Location</span><strong>Sri Lanka</strong></li>
+        </ul>
       </div>
     </section>
 
@@ -170,6 +176,33 @@
       <div class="hero-actions"><a class="button primary" href="projects.html">Projects</a><a class="button secondary" href="gallery.html">Gallery</a></div>
     </section>
 
+    <!-- ===== Testimonials / Comments ===== -->
+    <section class="section-head" id="comments">
+      <p class="eyebrow">What people say</p>
+      <h2>Recommendations &amp; comments</h2>
+      <p>Comments from people who know my work. New comments are reviewed before they appear here.</p>
+    </section>
+    <section class="testimonial-grid" data-render="testimonials"></section>
+
+    <!-- ===== Leave a comment ===== -->
+    <section class="comment-form-wrap">
+      <article class="glass-card">
+        <h2>Leave a comment</h2>
+        <p>Worked with me or know my work? Share a short comment. I review every submission before it is published.</p>
+        <form id="commentForm" class="comment-form" novalidate>
+          <div class="cf-row">
+            <label>Your name *<input type="text" name="name" required maxlength="80" autocomplete="name"></label>
+            <label>Role / Company *<input type="text" name="role" required maxlength="120" placeholder="e.g. Manager at MARQO, University colleague"></label>
+          </div>
+          <label>Comment *<textarea name="message" required maxlength="800" rows="4" placeholder="Your comment or recommendation"></textarea></label>
+          <label class="cf-private">Email (optional, kept private)<input type="email" name="email" maxlength="120" autocomplete="email" placeholder="So I can verify you — never shown publicly"></label>
+          <!-- simple anti-spam honeypot (leave empty) -->
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+          <button type="submit" class="button primary cf-submit">Submit comment</button>
+          <p class="cf-status" role="status" aria-live="polite"></p>
+        </form>
+      </article>
+    </section>
   </main>
   <footer class="footer">
     <p>&copy; <span id="year">2026</span> Muditha Priyasad. Engineering Portfolio.</p>

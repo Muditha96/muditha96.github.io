@@ -54,321 +54,28 @@ window.portfolioData = {
   ],
 
   projects: [
+    // ====== PROJECTS — add your own below ======
+    // Copy this block for each project. Keep the comma between blocks.
+    // filter options (controls which button shows it): automation, fixtures, printing,
+    //   machine, robotics, software, calibration, thermal, training
+    // images: rotating photos on the card (first one is the cover). videos: YouTube links.
+    // doc: a PDF in assets/docs/projects/. Set featured:true to show it on the homepage.
     {
-      title: "LED Bulb Assembly Machine Troubleshooting",
-      category: "Automation / Troubleshooting",
+      title: "Project Title Here",
+      category: "Category / Type",
       filter: "automation",
-      summary: "Public-safe summary of reliability support for an LED bulb assembly machine, covering fault isolation, mechanical checks, sensor checks and recovery actions.",
-      tools: ["PLC support", "Sensors", "Pneumatics", "Root cause"],
-      image: "assets/images/projects/led-bulb.svg",
-      page: "project-led-bulb.html",
-      featured: true
-    },
-    {
-      title: "Fan Motor Assembly Jig / Fixture",
-      category: "Jigs & Fixtures",
-      filter: "fixtures",
-      summary: "Fixture concept for fan motor assembly work, with attention to nut positioning, shaft oiling, part holding and operator-friendly handling.",
-      tools: ["SOLIDWORKS", "3D printing", "Laser cut SS", "Assembly support"],
+      summary: "One or two sentence public-safe summary of the project and the outcome.",
+      tools: ["Tool 1", "Tool 2", "Tool 3"],
       image: "assets/images/projects/fan-fixture.svg",
-      page: "project-fan-fixture.html",
+      images: [
+        "assets/images/projects/fan-fixture.svg"
+      ],
+      videos: [],
+      doc: "",
+      page: "projects.html",
       featured: true
-    },
-    {
-      title: "Gravity Feed Nut Storage System",
-      category: "Small-Part Feeding",
-      filter: "fixtures",
-      summary: "Low-complexity feed and storage concept for presenting small nuts in a more consistent and ergonomic way for repetitive assembly.",
-      tools: ["Gravity feed", "Orientation", "Production support", "3D printing"],
-      image: "assets/images/projects/gravity-feed.svg",
-      page: "project-gravity-feed.html",
-      featured: true
-    },
-    {
-      title: "Plug Testing Fixture",
-      category: "Testing / Fixture Design",
-      filter: "fixtures",
-      summary: "Testing fixture concept for plug-top checking with consistent loading, simple feedback and operator-friendly use.",
-      tools: ["Testing", "Fixture design", "Indicators", "Operator safety"],
-      image: "assets/images/projects/plug-testing.svg",
-      page: "project-plug-testing.html",
-      featured: true
-    },
-    {
-      title: "MTone ERP / Engineering Software",
-      category: "Software / ERP",
-      filter: "software",
-      summary: "Engineering software concept for inventory visibility, quotation workflows, KPI thinking and manufacturing information flow.",
-      tools: ["ERP thinking", "Power BI", "Workflow design", "Documentation"],
-      image: "assets/images/projects/mtone-erp.svg",
-      page: "project-mtone-erp.html",
-      featured: false
-    },
-    {
-      title: "3D Printed Production Jigs & Fixtures",
-      category: "3D Printing / Prototyping",
-      filter: "printing fixtures",
-      summary: "Practical printed aids for assembly support, fit checking, positioning and rapid iteration before committing to harder tooling.",
-      tools: ["FDM printing", "OrcaSlicer", "Cura", "Iteration"],
-      image: "assets/images/projects/printed-jigs.svg",
-      page: "project-printed-jigs.html",
-      featured: false
-    },
-    {
-      title: "Rotary Indexing Calibration",
-      category: "Calibration / Reliability",
-      filter: "calibration automation",
-      summary: "Public-safe calibration support story focused on repeatability, alignment thinking, observation and systematic adjustment.",
-      tools: ["Calibration", "Indexing", "Repeatability", "Troubleshooting"],
-      image: "assets/images/projects/rotary-indexing.svg",
-      page: "project-rotary-indexing.html",
-      featured: false
-    },
-    {
-      title: "Cooling Block Design Concept",
-      category: "Thermal / Machine Reliability",
-      filter: "thermal",
-      summary: "Public-safe cooling improvement concept for machine reliability, based on heat path thinking and practical maintenance needs.",
-      tools: ["Thermal thinking", "CAD concept", "Maintenance", "Reliability"],
-      image: "assets/images/projects/cooling-block.svg",
-      page: "project-cooling-block.html",
-      featured: false
-    },
-    {
-      slug: "industrial-gripper-design",
-      doc: "assets/docs/projects/self-tighten-gripper.pdf",
-      title: "Tensile Machine Gripper Mechanism",
-      category: "Training Project / Fixture Design",
-      filter: "fixtures training",
-      summary: "Training-derived fixture project for a tensile testing machine, focused on safe holding, easy loading, fabrication readiness and repeatable use.",
-      tools: ["SOLIDWORKS", "2D drawings", "Fabrication support", "Assembly testing"],
-            image: "assets/images/projects-gallery/gripper/01.jpg",
-      images: [
-        "assets/images/projects-gallery/gripper/01.jpg",
-        "assets/images/projects-gallery/gripper/02.jpg"
-      ],
-      videos: [],      page: "project-detail.html?project=industrial-gripper-design",
-      featured: false,
-      details: {
-        problem: "A testing setup needed a practical gripping mechanism that could hold samples reliably while remaining compact, easy to assemble and operator-friendly.",
-        role: "Supported the mechanism design workflow from concept sketches and CAD modelling through 2D drawing preparation, fabrication follow-up, assembly checks and correction notes.",
-        approach: "Converted the machine requirement into a compact fixture concept, reviewed assembly access, prepared simplified CAD evidence and refined the design after physical fit and usability checks.",
-        solution: "A public-safe gripper mechanism concept suitable for fabrication, assembly and repeated testing work, with confidential dimensions and machine drawings removed.",
-        result: "Improved understanding of fixture design, design-for-fabrication, tolerance thinking, assembly order and practical testing-machine support.",
-        tools: ["SOLIDWORKS", "2D drawings", "Fabrication support", "Assembly review"],
-        note: "Simplified from industrial training material. No customer names, exact dimensions, drawings or production information are shown."
-      }
-    },
-    {
-      slug: "combustion-chamber-scada",
-      doc: "assets/docs/projects/combustion-chamber-scada.pdf",
-      title: "Combustion Chamber PLC / SCADA Support",
-      category: "Training Project / Automation",
-      filter: "automation training software",
-      summary: "Automation support for a research-type combustion chamber system, using public-safe wording around PLC, SCADA, sensors and parameter display.",
-      tools: ["PLC basics", "Haiwell SCADA", "Sensors", "Electrical wiring"],
-            image: "assets/images/projects-gallery/combustion/305.jpg",
-      images: [
-        "assets/images/projects-gallery/combustion/305.jpg",
-        "assets/images/projects-gallery/combustion/307.jpg",
-        "assets/images/projects-gallery/combustion/308.jpg",
-        "assets/images/projects-gallery/combustion/309.jpg",
-        "assets/images/projects-gallery/combustion/311.jpg"
-      ],
-      videos: [],      page: "project-detail.html?project=combustion-chamber-scada",
-      featured: false,
-      details: {
-        problem: "A research equipment setup needed clear monitoring of process parameters such as temperature, pressure and flow without exposing the actual control files.",
-        role: "Assisted with wiring understanding, PLC/SCADA learning, GUI modification and public-safe documentation of the control-system concept.",
-        approach: "Studied PLC inputs and outputs, reviewed sensor signals, updated simplified SCADA screen elements and documented the relationship between field signals and operator display.",
-        solution: "A safe automation case study showing how PLC and SCADA systems can be used to monitor an industrial research process.",
-        result: "Built practical confidence in SCADA interface thinking, machine signal flow, instrumentation and automation documentation.",
-        tools: ["PLC I/O understanding", "Haiwell SCADA", "Sensor signals", "Electrical wiring basics"],
-        note: "No PLC program, HMI source file, wiring diagram or exact process data is published."
-      }
-    },
-    {
-      slug: "liquid-filling-machine",
-      title: "Liquid Filling Machine Concept",
-      category: "Training Project / Machine Design",
-      filter: "automation fixtures training",
-      summary: "Concept development for liquid filling equipment, comparing different layouts for bottle positioning, volume control, tray handling and operator access.",
-      tools: ["SOLIDWORKS", "Mechanism design", "Pneumatics concept", "Process flow"],
-      image: "assets/images/real/liquid-filling.png",
-      page: "project-detail.html?project=liquid-filling-machine",
-      featured: false,
-      details: {
-        problem: "A filling process required a concept that could handle liquid transfer more consistently while considering different container sizes and operator workflow.",
-        role: "Prepared multiple machine concepts and compared layout, bottle holding, filling sequence, volume control and maintainability.",
-        approach: "Explored conveyor-based and compact concepts, reviewed valve and cylinder options at a high level, and converted the strongest ideas into CAD visuals.",
-        solution: "A set of public-safe filling-machine concepts showing the design thinking without releasing exact dimensions or customer-specific requirements.",
-        result: "Improved concept-generation skill for automation equipment, especially around process sequence, packaging ergonomics and practical manufacturability.",
-        tools: ["SOLIDWORKS", "Pneumatic concept", "Conveyor layout", "Valve sequence thinking"],
-        note: "Concept images are simplified. No customer data, production numbers or detailed manufacturing drawings are included."
-      }
-    },
-    {
-      slug: "screen-printer-mechanism",
-      doc: "assets/docs/projects/itl-screen-printer-control.pdf",
-      title: "Screen Printer Mechanism Concept",
-      category: "Training Project / Automation",
-      filter: "automation fixtures training",
-      summary: "Machine concept for applying ink to small fabric rolls using pneumatic motion, a controlled print stroke and maintenance-friendly mechanism thinking.",
-      tools: ["Pneumatics", "SOLIDWORKS", "Mechanism layout", "Maintenance thinking"],
-            image: "assets/images/projects-gallery/screen-printer/210.jpg",
-      images: [
-        "assets/images/projects-gallery/screen-printer/210.jpg",
-        "assets/images/projects-gallery/screen-printer/222.jpg",
-        "assets/images/projects-gallery/screen-printer/227.jpg"
-      ],
-      videos: [],      page: "project-detail.html?project=screen-printer-mechanism",
-      featured: false,
-      details: {
-        problem: "A repetitive printing operation needed a more consistent mechanism for print contact, motion control and operator handling.",
-        role: "Supported the mechanical concept and CAD layout for a pneumatic screen-printing mechanism.",
-        approach: "Studied the movement sequence, compared cylinder placement options, considered brush/blade contact and prepared a simplified CAD representation.",
-        solution: "A public-safe concept for a pneumatic print mechanism with controlled motion and easier maintenance access.",
-        result: "Strengthened practical understanding of pneumatic sequencing, operator loading, mechanism packaging and machine maintainability.",
-        tools: ["Pneumatic cylinders", "SOLIDWORKS", "Mechanism design", "Maintenance access review"],
-        note: "No proprietary machine drawings, customer names, source files or exact settings are shown."
-      }
-    },
-    {
-      slug: "oil-dripping-tray",
-      doc: "assets/docs/projects/oil-dripping-tray-redesign.pdf",
-      title: "Oil Dripping Tray Mechanism",
-      category: "Training Project / Process Improvement",
-      filter: "fixtures training thermal",
-      summary: "Simple mechanical improvement concept for collecting and managing oil flow in a cleaner, safer and easier-to-maintain way.",
-      tools: ["CAD concept", "Manufacturing support", "Maintenance", "Process improvement"],
-            image: "assets/images/projects-gallery/oil-tray/01.jpg",
-      images: [
-        "assets/images/projects-gallery/oil-tray/01.jpg"
-      ],
-      videos: [],      page: "project-detail.html?project=oil-dripping-tray",
-      featured: false,
-      details: {
-        problem: "A machine area needed cleaner handling of oil drips to reduce mess, maintenance time and avoidable process disturbance.",
-        role: "Prepared a practical tray/mechanism concept with attention to placement, access and ease of cleaning.",
-        approach: "Focused on simple geometry, accessible cleaning points, fit around existing machine constraints and low-complexity fabrication.",
-        solution: "A simplified oil-drip management concept that can be adapted around an existing industrial machine.",
-        result: "Shows cost-conscious mechanical thinking for small improvements that support safety, cleanliness and maintenance.",
-        tools: ["SOLIDWORKS", "Sheet-metal thinking", "Maintenance review", "Process observation"],
-        note: "Only simplified concept evidence is shown; no factory layout, production data or internal machine drawing is published."
-      }
-    },
-    {
-      slug: "coconut-feeding-mechanism",
-      title: "Coconut Piece Feeding Mechanism",
-      category: "Training Project / Material Handling",
-      filter: "automation fixtures training",
-      summary: "Concept for feeding dry coconut pieces into multiple extraction rows with a more controlled and repeatable material-flow arrangement.",
-      tools: ["CAD concept", "Belt drive thinking", "Material handling", "Process flow"],
-      image: "assets/images/training-extracted/training-report-74.png",
-      page: "project-detail.html?project=coconut-feeding-mechanism",
-      featured: false,
-      details: {
-        problem: "A manual feeding process needed a concept for distributing dry coconut pieces more evenly across extraction equipment.",
-        role: "Developed a public-safe mechanism concept and CAD visual for material feeding and distribution.",
-        approach: "Considered feed direction, belt movement, row distribution, operator access and a layout that could be explained clearly to non-technical stakeholders.",
-        solution: "A simplified feeding concept that shows the material-flow idea without exposing machine dimensions or client-specific information.",
-        result: "Demonstrates early machine-design thinking for food/process equipment and practical layout communication.",
-        tools: ["SOLIDWORKS", "Material-flow mapping", "Belt drive concept", "Presentation visuals"],
-        note: "The public page avoids customer names, exact dimensions and production information."
-      }
-    },
-    {
-      slug: "ferrous-metal-separator",
-      title: "Ferrous Metal Separator Concept",
-      category: "Training Project / Machine Concept",
-      filter: "automation training",
-      summary: "Concept study for separating ferrous particles from a material stream using magnetic separation and rotating-cylinder thinking.",
-      tools: ["Magnetic separation", "CAD concept", "Mechanism study", "Process improvement"],
-      image: "assets/images/training-extracted/training-report-75.png",
-      page: "project-detail.html?project=ferrous-metal-separator",
-      featured: false,
-      details: {
-        problem: "A process needed a safer way to remove ferrous contamination or particles from a material path.",
-        role: "Supported concept exploration and visual communication for a magnetic separation approach.",
-        approach: "Studied magnetic-field use, rotating-cylinder behavior, material flow and how separated particles could be collected safely.",
-        solution: "A public-safe concept page for a ferrous separator, presented as engineering thinking rather than a finished proprietary machine.",
-        result: "Shows ability to turn a process problem into a mechanical concept and communicate the operating principle visually.",
-        tools: ["CAD concept", "Magnetic separation principle", "Mechanism review", "Process observation"],
-        note: "This is a simplified concept summary. It excludes exact dimensions, detailed drawings and customer context."
-      }
-    },
-    {
-      slug: "bonding-tape-machine",
-      doc: "assets/docs/projects/ottuthal-bonding-tape-machine.pdf",
-      title: "Bonding Tape Automation Machine",
-      category: "Training Project / Industrial Automation",
-      filter: "automation training fixtures",
-      summary: "Training-derived automation project for feeding, measuring, cutting and bonding tape onto fabric with pneumatic motion, heating control and safety switches.",
-      tools: ["PLC", "PID control", "Pneumatics", "Stepper motor", "Thermocouple"],
-            image: "assets/images/projects-gallery/bonding-tape/01.jpg",
-      images: [
-        "assets/images/projects-gallery/bonding-tape/01.jpg",
-        "assets/images/projects-gallery/bonding-tape/03.jpg",
-        "assets/images/projects-gallery/bonding-tape/05.jpg",
-        "assets/images/projects-gallery/bonding-tape/07.jpg"
-      ],
-      videos: [{ youtube: "PASTE_YOUTUBE_LINK_OR_ID", title: "Bonding tape machine running" }],      page: "project-detail.html?project=bonding-tape-machine",
-      featured: false,
-      details: {
-        problem: "A manual fabric-bonding operation required repeated measuring, cutting and heat bonding, creating a strong opportunity for automation.",
-        role: "Contributed to the machine concept, component understanding, testing observations and documentation of the automation sequence.",
-        approach: "Mapped the cycle into tape feeding, length setting, cutting, heated bonding, fabric movement, sensor confirmation and two-hand start safety logic.",
-        solution: "A public-safe automation case study showing a machine that combines stepper-based tape feed, pneumatic cutting, heated bonding, PID temperature control and operator safety controls.",
-        result: "Built strong practical exposure to industrial automation components, pneumatic sequencing, temperature control, machine testing and safety-minded design.",
-        tools: ["PLC concept", "PID controller", "Pneumatic cylinders", "Solenoid valves", "Stepper motor", "Thermocouple"],
-        note: "Company names, buyer names, budgets, internal drawings, detailed dimensions and control programs are intentionally excluded."
-      }
-    },
-    {
-      title: "CNC Laser Engraving Machine Build",
-      category: "Personal Machine Build",
-      filter: "machine",
-      summary: "Personal CNC laser engraver build and testing work covering motion hardware, controller setup, engraving trials and process tuning.",
-      tools: ["Motion system", "LightBurn", "LaserGRBL", "Engraving tests"],
-            image: "assets/images/projects-gallery/cnc-laser/IMG_7651.jpg",
-      images: [
-        "assets/images/projects-gallery/cnc-laser/IMG_7651.jpg",
-        "assets/images/projects-gallery/cnc-laser/IMG_7652.jpg",
-        "assets/images/projects-gallery/cnc-laser/IMG_7653.jpg",
-        "assets/images/projects-gallery/cnc-laser/IMG_7654.jpg"
-      ],
-      videos: [{ youtube: "PASTE_YOUTUBE_LINK_OR_ID", title: "CNC laser engraving in action" }],      page: "project-cnc-laser.html",
-      featured: false
-    },
-    {
-      title: "FDM 3D Printer Build & Upgrade",
-      doc: "assets/docs/projects/custom-fdm-3d-printer.pdf",
-      category: "3D Printing / Machine Build",
-      filter: "printing machine",
-      summary: "Personal 3D printer build and upgrade work used to learn motion systems, calibration, slicing, material behavior and iterative prototyping.",
-      tools: ["FDM printing", "Machine build", "Calibration", "Slicer workflow"],
-            image: "assets/images/projects-gallery/3d-printer/01.jpg",
-      images: [
-        "assets/images/projects-gallery/3d-printer/01.jpg",
-        "assets/images/projects-gallery/3d-printer/02.jpg",
-        "assets/images/projects-gallery/3d-printer/03.jpg",
-        "assets/images/projects-gallery/3d-printer/04.jpg"
-      ],
-      videos: [{ youtube: "PASTE_YOUTUBE_LINK_OR_ID", title: "3D printer printing a part" }],      page: "project-3d-printer-build.html",
-      featured: false
-    },
-    {
-      title: "Battle Robot & Exhibition Projects",
-      category: "Robotics / University Innovation",
-      filter: "robotics",
-      summary: "University exhibition and battle robot work showing hands-on fabrication, mechanism thinking, teamwork and public engineering presentation.",
-      tools: ["Fabrication", "Mechanisms", "Team project", "Exhibition"],
-      image: "assets/Achievment/While fabricating battle robot.JPG",
-      page: "project-battle-robot.html",
-      featured: false
     }
   ],
-
   skills: {
     toolMap: ["Design & modelling", "Automation support", "Digital fabrication", "Documentation & analysis"],
     groups: [
@@ -419,76 +126,18 @@ window.portfolioData = {
   },
 
   machines: [
+    // ====== MACHINES — add your own below ======
+    // Copy this block for each machine you have worked with. Keep the comma between blocks.
     {
-      slug: "fiber-laser-machine",
-      title: "Fiber Laser Machine",
-      image: "assets/images/real/cnc-laser-machine-2.jpg",
-      description: "A fiber laser marking machine is used for permanent marking, engraving and traceability work on suitable industrial materials.",
-      experience: "Setup observation, marking workflow exposure and production support thinking.",
-      technologies: "Marking, fixtures, safety, material behavior",
-      contribution: "Add your public-safe contribution here: setup support, fixture work, marking trial support, maintenance checks or process improvement."
-    },
-    {
-      slug: "spot-welder",
-      title: "Spot Welder",
-      image: "assets/images/projects/spot-welder.svg",
-      description: "A spot welder joins sheet-metal or conductive parts using pressure and electrical resistance heating at controlled contact points.",
-      experience: "Troubleshooting, cooling improvement concept and electrode/water-cooling review.",
-      technologies: "Thermal management, electrodes, cooling, maintenance, reliability",
-      contribution: "Add your public-safe contribution here: cooling block concept, fault observation, maintenance support or reliability improvement."
-    },
-    {
-      slug: "screw-feeder-machine",
-      title: "Screw Feeder Machine",
-      image: "assets/images/machines/screw-feeder.svg",
-      description: "A screw feeder machine presents screws or small fasteners in a controlled way to improve repetitive assembly flow.",
-      experience: "Maintenance checks, failure behavior review and production support.",
-      technologies: "Feeding, vibration, mechanical drive, control logic",
-      contribution: "Add your public-safe contribution here: maintenance checks, root cause notes, feeding issue review or operator support."
-    },
-    {
-      slug: "packing-machine",
-      title: "Packing Machine",
-      image: "assets/images/machines/extracted/packing-machine-06.jpg",
-      description: "A continuous packing machine controls film feeding, sealing, cutting, speed, counting and package output through mechanical motion and HMI-controlled settings.",
-      experience: "Factory support and troubleshooting exposure using the machine manual and operational screens.",
-      technologies: "Sensors, pneumatics, timing, belt speed, HMI settings, production flow",
-      contribution: "Add your public-safe contribution here: troubleshooting, operator support, setting checks, sensor checks or downtime-reduction work.",
-      sourceNote: "Image extracted from the public-safe packing machine PDF/manual asset."
-    },
-    {
-      slug: "bonding-tape-machine",
-      title: "Bonding Tape Automation Machine",
-      image: "assets/images/training-extracted/ottuthal-training-50.png",
-      description: "A bonding tape automation machine feeds tape, measures length, cuts it and applies heat/pressure to bond the tape to fabric in a repeatable cycle.",
-      experience: "Training project exposure to pneumatic sequencing, stepper-based feeding, heating control, testing and safety-minded operation.",
-      technologies: "PLC concept, PID temperature control, pneumatics, solenoid valves, stepper motor, sensors",
-      contribution: "Add your public-safe contribution here: cycle mapping, component testing, temperature-control support, safety switch logic or documentation.",
-      sourceNote: "Image extracted from a public-safe training document; internal names and detailed drawings are not published."
-    },
-    {
-      slug: "assembly-machines",
-      title: "Assembly Machines",
-      image: "assets/images/machines/extracted/ottuthal-machine-58.jpg",
-      description: "Industrial assembly machines combine mechanisms, fixtures, sensors, actuators and control logic to improve repeatability and production flow.",
-      experience: "Automation support, commissioning thinking and machine reliability work.",
-      technologies: "PLC, HMI, sensors, pneumatics, mechanisms, fixtures",
-      contribution: "Add your public-safe contribution here: troubleshooting, fixture support, calibration, sensor checks, cycle improvement or documentation.",
-      sourceNote: "Image extracted from a public-safe machine/project PDF asset."
-    },
-    {
-      slug: "testing-fixtures",
-      title: "Testing Fixtures",
+      slug: "machine-slug-here",
+      title: "Machine Name",
       image: "assets/images/machines/testing-fixture.svg",
-      description: "Testing fixtures help operators check parts consistently by controlling part placement, loading direction, sensing and feedback.",
-      experience: "Fixture-based checking concepts with simple feedback and operator-friendly use.",
-      technologies: "Sensing, indicators, ergonomics, repeatability",
-      contribution: "Add your public-safe contribution here: fixture concept, test sequence, safety check, operator feedback or documentation."
+      description: "What this machine does (public-safe).",
+      experience: "Your exposure: setup, troubleshooting, support, maintenance, etc.",
+      technologies: "Key systems involved, comma separated",
+      contribution: "Your public-safe contribution to this machine."
     }
   ],
-
-  industrialTechnologies: ["PLC Systems", "HMI Panels", "Proximity Sensors", "Photoelectric Sensors", "Pneumatic Cylinders", "Solenoid Valves", "Motor Control", "Rotary Indexing", "Jigs & Fixtures", "3D Printing"],
-
   gallery: [
     // ====== VIDEO GALLERY (YouTube) ======
     // To show a video: upload it to YouTube (Unlisted is fine), then paste the link or ID
