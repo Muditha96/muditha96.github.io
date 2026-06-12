@@ -109,7 +109,7 @@ function renderEditableContent(){
     const summary = document.querySelector('.hero-summary');
     const photo = document.querySelector('.hero-photo');
     if (status) status.innerHTML = `<span class="pulse-dot"></span>${escapeHtml(profile.status)}`;
-    if (credential) credential.textContent = profile.credential;
+    // credential rendered statically as two lines in HTML
     if (title) title.textContent = profile.role;
     if (subtitle) subtitle.textContent = profile.subtitle;
     if (summary) summary.textContent = profile.summary;

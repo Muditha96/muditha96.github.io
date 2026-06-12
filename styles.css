@@ -527,3 +527,23 @@ h1,h2,h3,.brand-copy strong,.hero-id h1,.bf-label,.skill-head h2,.sc-head h3{col
 /* YouTube fallback link in video popup */
 .lb-yt-link{display:block;margin-top:.6rem;text-align:center;color:#fff;font-weight:800;text-decoration:none}
 .lb-yt-link:hover{text-decoration:underline}
+
+/* ====== Proofs header row with More button ====== */
+.proofs-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin:.7rem 0 .5rem}
+.proofs-head h2{font-size:1.5rem;margin:.1rem 0}
+.proofs-head .eyebrow{font-size:.7rem}
+.more-btn{flex:0 0 auto;padding:.55rem 1.1rem;border-radius:8px;background:linear-gradient(135deg,#0e7490,#6d28d9);color:#fff;font-weight:900;font-size:.88rem;text-decoration:none}
+.more-btn:hover{filter:brightness(1.08)}
+
+/* ====== Clean availability badge (replaces ugly card) ====== */
+.avail-badge{display:inline-flex;align-items:center;gap:.5rem;margin:.2rem auto 0;padding:.45rem .9rem;border-radius:999px;background:rgba(21,128,61,.1);border:1px solid rgba(21,128,61,.35);color:#15803d;font-weight:900;font-size:.9rem;white-space:nowrap}
+
+/* ====== Reduce hero empty space ====== */
+.home-hero{align-items:start!important;padding:1.2rem 1.5rem!important;gap:1rem!important}
+.hero-copy{align-self:start}
+.hero-photo-wrap{align-self:start}
+.hero-contact-col{align-self:start}
+.hero-summary{max-width:480px}
+.capability-chips{margin-top:.6rem!important}
+/* second credential line spacing */
+.hero-credential2{margin-top:.1rem!important}
