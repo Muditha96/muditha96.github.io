@@ -6,8 +6,8 @@ window.portfolioData = {
     name: "Muditha Priyasad",
     role: "Mechanical & Automation Engineer",
     credential: "BSc (Hons) in Mechanical Engineering | IESL Associate Member: AM-32795",
-    subtitle: "Machine Design · Factory Automation · PLC/SCADA Commissioning · Rapid Prototyping",
-    summary: "I take industrial machines from concept to running line — SolidWorks design, fabrication, electrical wiring, PLC/SCADA control and on-site commissioning. 2+ years, 15+ real builds.",
+    subtitle: "Factory automation · Machine design · Jigs & fixtures · PLC/HMI troubleshooting · 3D printed tooling",
+    summary: "I help factories improve machines, reduce manual work, troubleshoot automation faults, and develop low-cost practical engineering solutions.",
     status: "Open to Better Opportunities",
     cv: "assets/docs/Muditha-Priyasad-CV.pdf",
     photo: "assets/images/hero/hero-portrait.png",
@@ -21,14 +21,19 @@ window.portfolioData = {
     whatsapp: "https://wa.me/94717599667",
     whatsappLabel: "+94 71 7599 667",
     location: "Sri Lanka",
+    experience: "2+ years professional industry experience · 5+ years combined engineering study, internship and project experience.",
+    bestFitRoles: ["Automation Engineer", "Mechatronics Engineer", "Mechanical Design Engineer", "Production Engineer", "Maintenance / Reliability Engineer", "R&D / Machine Development Engineer"],
+    openTo: "Automation / Mechatronics / Mechanical Design / Production Engineering roles",
+    capabilityHighlights: ["Machine troubleshooting", "Jigs & fixtures", "PLC / HMI support", "3D printed tooling", "Factory improvement"],
+    confidentiality: "Some factory projects contain confidential machine details, drawings, PLC logic, wiring and production information. This portfolio shows public-safe summaries only. Detailed technical approach can be discussed during interviews while respecting confidentiality.",
     motto: "No matter how hard the dream, I won't stop until I make it real."
   },
 
   stats: [
     { value: "15+", label: "Practical Projects" },
-    { value: "2+", label: "Years Experience" },
+    { value: "2+", label: "Years Industry Experience" },
     { value: "9+", label: "Certifications" },
-    { value: "Public", label: "Safe Project Evidence" }
+    { value: "5+", label: "Years Combined Engineering" }
   ],
 
   recruiterQuickView: {
@@ -54,25 +59,109 @@ window.portfolioData = {
   ],
 
   projects: [
-    // ====== PROJECTS — add your own below ======
-    // Copy this block for each project. Keep the comma between blocks.
-    // filter options (controls which button shows it): automation, fixtures, printing,
-    //   machine, robotics, software, calibration, thermal, training
-    // images: rotating photos on the card (first one is the cover). videos: YouTube links.
-    // doc: a PDF in assets/docs/projects/. Set featured:true to show it on the homepage.
     {
-      title: "Project Title Here",
-      category: "Category / Type",
+      slug: "led-bulb-machine",
+      title: "LED Bulb Assembly Machine — Troubleshooting",
+      category: "Machine Troubleshooting",
       filter: "automation",
-      summary: "One or two sentence public-safe summary of the project and the outcome.",
-      tools: ["Tool 1", "Tool 2", "Tool 3"],
-      image: "assets/images/projects/fan-fixture.svg",
-      images: [
-        "assets/images/projects/fan-fixture.svg"
-      ],
-      videos: [],
+      oneLineProblem: "Repeated stoppages and unstable machine behaviour.",
+      contribution: "Checked mechanical, pneumatic, sensor and PLC/HMI fault areas to isolate causes.",
+      tools: ["PLC/HMI", "Sensors", "Pneumatics", "Fault finding"],
+      impact: "Improved troubleshooting flow and machine maintainability.",
+      summary: "Reliability support for an LED bulb assembly machine: structured fault isolation across mechanical, pneumatic, sensor and control areas.",
+      problem: "The machine had repeated stoppages and unstable behaviour during production, disrupting output and operator confidence.",
+      role: "I led the hands-on fault finding — observing the machine cycle, reproducing the faults, and checking each subsystem methodically rather than guessing.",
+      method: "Worked through mechanical movement, pneumatic sequencing, sensor alignment and PLC/HMI signals in turn; isolated the failing areas and documented a repeatable troubleshooting flow for operators.",
+      result: "Improved troubleshooting flow and machine maintainability; faults became faster to locate and recover from.",
+      image: "assets/images/projects/led-bulb.svg",
+      images: ["assets/images/projects/led-bulb.svg"],
+      videos: [{ youtube: "https://youtu.be/iFlCn68JsZg", title: "1W LED bulb assembling machine" }],
       doc: "",
-      page: "projects.html",
+      page: "project-detail.html?project=led-bulb-machine",
+      featured: true
+    },
+    {
+      slug: "fan-motor-fixture",
+      title: "Fan Motor Assembly Fixture",
+      category: "Jig & Fixture Design",
+      filter: "fixtures",
+      oneLineProblem: "Assembly support and repeatability needed improvement.",
+      contribution: "Developed fixture concepts using mechanical design and rapid prototyping.",
+      tools: ["SOLIDWORKS", "Fixtures", "3D Printing", "Assembly"],
+      impact: "Improved assembly support and reduced manual handling difficulty.",
+      summary: "Assembly fixture concept for fan motor work, focused on repeatability and easier operator handling.",
+      problem: "Manual fan motor assembly lacked consistent support, making repeatability and handling harder than needed.",
+      role: "I developed the fixture concept — modelling it in SOLIDWORKS and using rapid prototyping to test fit and handling.",
+      method: "Mechanical design of the holding/locating features, design-for-3D-printing, and iterative prototype checks for part positioning and operator access.",
+      result: "Improved assembly support and reduced manual handling difficulty, supporting more consistent assembly.",
+      image: "assets/images/projects/fan-fixture.svg",
+      images: ["assets/images/projects/fan-fixture.svg"],
+      videos: [{ youtube: "https://youtube.com/shorts/EN6CXNIlDGc", title: "Low-cost motor assembling jig" }],
+      doc: "",
+      page: "project-detail.html?project=fan-motor-fixture",
+      featured: true
+    },
+    {
+      slug: "gravity-feed-nut",
+      title: "Gravity Feed Nut Storage System",
+      category: "Low-Cost Automation",
+      filter: "fixtures",
+      oneLineProblem: "Small-part handling slowed preparation and assembly flow.",
+      contribution: "Designed a passive gravity-feed storage and presentation concept.",
+      tools: ["Gravity Feed", "Low-Cost Automation", "Production Support"],
+      impact: "Reduced handling complexity using a simple non-actuated mechanism.",
+      summary: "A passive, non-actuated gravity-feed system that presents small nuts consistently for repetitive assembly.",
+      problem: "Handling loose small parts slowed down preparation and assembly flow and added operator effort.",
+      role: "I designed the gravity-feed storage and presentation concept end to end, keeping it low-cost and maintenance-free.",
+      method: "Mechanism thinking and design for 3D printing — using gravity and geometry instead of actuators to orient and present parts.",
+      result: "Reduced handling complexity and supported smoother assembly flow with a simple, low-cost mechanism.",
+      image: "assets/images/projects/gravity-feed.svg",
+      images: ["assets/images/projects/gravity-feed.svg"],
+      videos: [{ youtube: "PASTE_YOUTUBE_LINK_OR_ID", title: "Gravity feed nut storage system" }],
+      doc: "",
+      page: "project-detail.html?project=gravity-feed-nut",
+      featured: true
+    },
+    {
+      slug: "eyelet-puncher",
+      title: "Eyelet Puncher Machine",
+      category: "Machine Build / Automation",
+      filter: "automation",
+      oneLineProblem: "Eyelet punching needed a faster, repeatable, operator-safe cycle.",
+      contribution: "Worked on the punching mechanism, feeding and a consistent, safe operating cycle.",
+      tools: ["Mechanism design", "Pneumatics", "Production support", "Safety"],
+      impact: "Improved punching repeatability and operator handling.",
+      summary: "An eyelet punching machine that feeds material and punches eyelets in a repeatable, operator-safe cycle.",
+      problem: "Eyelet punching required a faster, more repeatable cycle with safer operator handling.",
+      role: "I worked on the punching mechanism, material feeding and the overall operating cycle.",
+      method: "Mechanism design, pneumatic actuation and feed/sequence work to make the punch consistent and safe to run.",
+      result: "Improved punching repeatability, smoother feeding and safer operator handling.",
+      image: "assets/images/projects/plug-testing.svg",
+      images: ["assets/images/projects/plug-testing.svg"],
+      videos: [{ youtube: "https://youtube.com/shorts/rZMN3a7nWfA", title: "Eyelet puncher machine" }],
+      doc: "",
+      page: "project-detail.html?project=eyelet-puncher",
+      featured: true
+    },
+    {
+      slug: "mtone-erp",
+      title: "MTone ERP Concept",
+      category: "Digital Engineering Workflow",
+      filter: "software",
+      oneLineProblem: "Job costing, material tracking, quotations and print workflow needed structure.",
+      contribution: "Developed an ERP-style workflow concept for 3D printing and engineering services.",
+      tools: ["ERP", "Costing", "Inventory", "Python", "Workflow"],
+      impact: "Clearer tracking of jobs, inventory, costs and quotations.",
+      summary: "An ERP-style workflow concept that structures job costing, material tracking, quotations and the printing workflow for an engineering/3D-printing service.",
+      problem: "Job costing, material tracking, quotations and the printing workflow lacked structure, making the service harder to manage.",
+      role: "I developed the ERP-style workflow concept — mapping how jobs, inventory, costs and quotations should flow.",
+      method: "Workflow modelling and digital-tool thinking (Python app concepts, costing and inventory logic) to structure the engineering-services process.",
+      result: "Clearer tracking of jobs, inventory, costs and quotations across the workflow.",
+      image: "assets/images/projects/mtone-erp.svg",
+      images: ["assets/images/projects/mtone-erp.svg"],
+      videos: [{ youtube: "PASTE_YOUTUBE_LINK_OR_ID", title: "MTone ERP concept" }],
+      doc: "",
+      page: "project-detail.html?project=mtone-erp",
       featured: true
     }
   ],
@@ -80,45 +169,46 @@ window.portfolioData = {
     toolMap: ["Design & modelling", "Automation support", "Digital fabrication", "Documentation & analysis"],
     groups: [
       {
-        title: "CAD / Design",
+        title: "Mechanical Design",
+        level: "Strong / Practical",
         tools: [
-          ["SOLIDWORKS", "Fixtures, assemblies and concepts"],
-          ["AutoCAD", "2D drafting support"],
-          ["Inkscape", "Vector layouts"],
-          ["Illustrator", "Technical graphics"],
-          ["Photoshop", "Image preparation"]
+          ["SOLIDWORKS", "Parts, assemblies, fixtures"],
+          ["Machine parts", "Mechanism & component design"],
+          ["Jigs & fixtures", "Assembly and test tooling"],
+          ["Design for 3D printing", "Printable, low-cost tooling"]
         ]
       },
       {
-        title: "Automation / Industrial",
+        title: "Automation & Controls",
+        level: "Practical / Working knowledge",
         tools: [
-          ["PLC Systems", "Machine support and diagnostics"],
-          ["HMI Troubleshooting", "Operator interface checks"],
-          ["Sensors", "Detection and fault finding"],
-          ["Pneumatics", "Automation hardware"],
-          ["Electrical Wiring Understanding", "Panel and machine support"],
-          ["Visio", "Process and workflow diagrams"]
+          ["PLC / HMI troubleshooting", "Fault isolation & recovery"],
+          ["Sensors", "Detection & alignment"],
+          ["Pneumatics", "Sequencing & actuation"],
+          ["Machine fault finding", "Structured diagnosis"],
+          ["Wiring understanding", "Panel & machine support"]
         ]
       },
       {
-        title: "Manufacturing / Digital Fabrication",
+        title: "Production Engineering",
+        level: "Practical",
         tools: [
-          ["OrcaSlicer", "FDM print preparation"],
-          ["Cura", "Prototype slicing"],
-          ["Creality Print", "Printer workflow"],
-          ["LightBurn", "Laser engraving workflow"],
-          ["LaserGRBL", "CNC laser control"],
-          ["3D Printing Workflow", "Jigs, fixtures and trials"]
+          ["Assembly improvement", "Smoother, repeatable flow"],
+          ["Testing fixtures", "Safer QC handling"],
+          ["Operator support", "Easier, safer workflows"],
+          ["Maintenance thinking", "Access & reliability"],
+          ["Low-cost automation", "Simple, effective solutions"]
         ]
       },
       {
-        title: "Data / Engineering Software",
+        title: "Digital Tools",
+        level: "Developing / Practical",
         tools: [
-          ["Power BI", "Dashboard concepts"],
-          ["MATLAB", "Engineering calculation support"],
-          ["MS Excel", "Tracking and analysis"],
-          ["MS Office", "Reports and documentation"],
-          ["AI Assisted Engineering", "Research and workflow planning"]
+          ["ERP concept", "Costing, inventory, quotations"],
+          ["Excel", "Tracking & analysis"],
+          ["Power BI", "Dashboards"],
+          ["Documentation", "Clear engineering records"],
+          ["Python app concepts", "Workflow tooling"]
         ]
       }
     ],
