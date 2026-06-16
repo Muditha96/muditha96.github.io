@@ -10,3 +10,11 @@ desktop.ini
 *.docx
 *.pptx
 *.xlsx
+
+# Unused hero image variants (optimized hero-portrait-web.png is the one used)
+assets/images/hero/hero-portrait.png
+assets/images/hero/portrait-blend.png
+assets/images/hero/portrait-square.jpg
+assets/images/hero/q256.png
+assets/images/hero/hero-portrait-opt.png
+assets/images/hero/hero-portrait-opt.jpg

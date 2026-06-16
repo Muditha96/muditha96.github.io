@@ -330,7 +330,7 @@ window.portfolioData = {
         ]
       },
       {
-        title: "Production Engineering",
+        title: "Manufacturing & Maintenance",
         level: "Practical",
         tools: [
           ["Assembly improvement", "Smoother, repeatable flow"],
@@ -350,22 +350,75 @@ window.portfolioData = {
           ["Documentation", "Clear engineering records"],
           ["Python app concepts", "Workflow tooling"]
         ]
+      },
+      {
+        title: "3D Printing / Rapid Prototyping",
+        level: "Practical",
+        tools: [
+          ["FDM 3D printing", "Jigs, fixtures & prototypes"],
+          ["PETG / ABS / ASA", "Material selection for tooling"],
+          ["Design for printing", "Printable, low-cost parts"],
+          ["Slicing & tuning", "OrcaSlicer, Cura"]
+        ]
       }
     ],
     strengths: ["Root Cause Analysis", "Machine Troubleshooting", "Fixture Design", "Rapid Prototyping", "Manufacturing Support", "Documentation", "Cost-conscious Design", "Continuous Learning"]
   },
 
   machines: [
-    // ====== MACHINES — add your own below ======
-    // Copy this block for each machine you have worked with. Keep the comma between blocks.
     {
-      slug: "machine-slug-here",
-      title: "Machine Name",
+      slug: "led-bulb-assembly",
+      title: "LED Bulb Assembly Machine",
       image: "assets/images/machines/testing-fixture.svg",
-      description: "What this machine does (public-safe).",
-      experience: "Your exposure: setup, troubleshooting, support, maintenance, etc.",
-      technologies: "Key systems involved, comma separated",
-      contribution: "Your public-safe contribution to this machine."
+      description: "An automated machine that assembles 1W LED bulbs through a sequenced feed, place and fix cycle.",
+      experience: "Built and ran a working prototype; supported troubleshooting of the assembly cycle.",
+      technologies: "Pneumatics, sensors, actuators, control logic, mechanical design",
+      contribution: "Designed and built the prototype, set up the actuation sequence and resolved cycle faults."
+    },
+    {
+      slug: "fan-base-filling",
+      title: "Fan Base Filling Machine",
+      image: "assets/images/machines/screw-feeder.svg",
+      description: "A production-support machine that fills concrete fan bases in a controlled, repeatable cycle.",
+      experience: "Worked on the filling mechanism and the operating cycle for consistent output.",
+      technologies: "Pneumatics, mechanism design, production support",
+      contribution: "Built the filling mechanism and tuned the cycle for repeatable, lower-effort operation."
+    },
+    {
+      slug: "eyelet-puncher",
+      title: "Eyelet Puncher Machine",
+      image: "assets/images/machines/fiber-laser.svg",
+      description: "A machine that feeds material and punches eyelets in a repeatable, operator-safe cycle.",
+      experience: "Worked on the punching mechanism, feeding and a safe operating cycle.",
+      technologies: "Mechanism design, pneumatics, safety, production support",
+      contribution: "Improved punching repeatability and operator handling through mechanism and feed work."
+    },
+    {
+      slug: "spot-welder",
+      title: "Spot Welder",
+      image: "assets/images/machines/testing-fixture.svg",
+      description: "A spot welder joining sheet-metal parts using pressure and resistance heating at controlled points.",
+      experience: "Troubleshooting and cooling/electrode review for reliability.",
+      technologies: "Thermal management, electrodes, cooling, maintenance",
+      contribution: "Reviewed cooling and electrode wear and supported fault diagnosis and maintenance."
+    },
+    {
+      slug: "bonding-tape",
+      title: "Bonding Tape Attaching Machine",
+      image: "assets/images/machines/screw-feeder.svg",
+      description: "An automation machine that feeds, measures, cuts and heat-bonds tape onto fabric in a repeatable cycle.",
+      experience: "Training-project work on pneumatic sequencing, heating control and feeding.",
+      technologies: "PLC concept, PID temperature control, pneumatics, stepper motor, sensors",
+      contribution: "Worked on the cycle sequencing, temperature control and feed mechanism."
+    },
+    {
+      slug: "cnc-systems",
+      title: "CNC Systems (Laser & PCB Drilling)",
+      image: "assets/images/machines/fiber-laser.svg",
+      description: "Custom CNC machines built for laser engraving/cutting and precise PCB drilling.",
+      experience: "Designed, built and set up motion and control for these CNC systems.",
+      technologies: "CNC, stepper/motion control, GRBL, LightBurn, electronics",
+      contribution: "Built the motion systems and configured control for accurate, repeatable operation."
     }
   ],
   gallery: [

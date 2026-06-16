@@ -604,3 +604,16 @@ h1,h2,h3,.brand-copy strong,.hero-id h1,.bf-label,.skill-head h2,.sc-head h3{col
 .gate-unlocked .contact-list{margin:.6rem 0}
 .gate-unlocked .big-cv{margin-top:.4rem}
 .gate-thanks{color:#15803d;font-weight:700;margin:.6rem 0 0;font-size:.88rem}
+
+/* ====== Recruiter Quick View cards ====== */
+.quickview{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin:.9rem 0 .4rem}
+.qv-card{border:1px solid var(--line);border-radius:12px;background:#fff;padding:1rem;box-shadow:var(--shadow)}
+.qv-ico{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:10px;background:rgba(14,116,144,.1);border:1px solid rgba(14,116,144,.3);font-size:1.25rem;margin-bottom:.5rem}
+.qv-card h3{margin:.2rem 0 .35rem;font-size:1rem;color:#0f1b2d}
+.qv-card p{margin:0;font-size:.86rem;color:#4a5870;line-height:1.45}
+@media(max-width:1000px){.quickview{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.quickview{grid-template-columns:1fr}}
+
+/* ====== Accessibility: minimum legible label sizes ====== */
+.eyebrow,.fc-col small,.hc-col small,.vc-body .eyebrow{font-size:.72rem!important}
+.proof-card .pc-row,.vc-body h3,.qv-card p{font-size:.88rem}
