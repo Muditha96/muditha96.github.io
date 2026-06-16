@@ -434,3 +434,17 @@ function initCommentForm(){
 
 renderTestimonials();
 initCommentForm();
+
+
+/* ====== Under-development notice (all pages) ====== */
+function initDevNotice(){
+  if (document.getElementById('devNotice')) return;
+  const header = document.querySelector('.site-header');
+  if (!header) return;
+  const bar = document.createElement('div');
+  bar.id = 'devNotice';
+  bar.className = 'dev-notice';
+  bar.innerHTML = '<span>🚧 This portfolio is actively being updated — more projects, photos and case studies are being added. Thanks for visiting.</span>';
+  header.insertAdjacentElement('afterend', bar);
+}
+initDevNotice();
