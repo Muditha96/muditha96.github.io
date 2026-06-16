@@ -38,7 +38,6 @@
         <li><a href="skills.html">Skills</a></li>
         <li><a class="active" href="cv-contact.html">CV / Contact</a></li>
       </ul>
-      <a class="header-cv" href="assets/docs/Muditha-Priyasad-CV.pdf" download>Download CV</a>
     </nav>
   </header>
 
@@ -51,7 +50,32 @@
     </section>
 
     <section class="cv-actions">
-      <a class="button primary big-cv" href="assets/docs/Muditha-Priyasad-CV.pdf" download>⬇ Download CV (PDF)</a>
+      <article class="glass-card gate-card" id="unlockCard">
+        <div class="gate-locked">
+          <h2>🔒 CV &amp; phone number</h2>
+          <p>To keep my details safe from spam, my CV and phone number are available on request. Enter your name and email and they'll appear instantly — I'm also notified so I know who's interested.</p>
+          <form id="unlockForm" class="gate-form" novalidate>
+            <div class="cf-row">
+              <label>Your name *<input type="text" name="name" required maxlength="80" autocomplete="name"></label>
+              <label>Your email *<input type="email" name="email" required maxlength="120" autocomplete="email"></label>
+            </div>
+            <label>Company / role (optional)<input type="text" name="company" maxlength="120" placeholder="e.g. Recruiter at ABC Industries"></label>
+            <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+            <input type="hidden" name="_subject" value="Portfolio: CV/phone unlocked">
+            <button type="submit" class="button primary">Unlock CV &amp; phone</button>
+            <p class="gate-status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+        <div class="gate-unlocked" hidden>
+          <h2>✅ Here you go</h2>
+          <ul class="contact-list">
+            <li><span>Phone</span><a href="tel:+94717599667">+94 71 7599 667</a></li>
+            <li><span>WhatsApp</span><a href="https://wa.me/94717599667" target="_blank" rel="noopener noreferrer">+94 71 7599 667</a></li>
+          </ul>
+          <a class="button primary big-cv" href="assets/docs/Muditha-Priyasad-CV.pdf" download>⬇ Download CV (PDF)</a>
+          <p class="gate-thanks">Thanks — feel free to reach out anytime.</p>
+        </div>
+      </article>
     </section>
 
     <section class="contact-layout">
@@ -59,8 +83,6 @@
         <h2>Contact</h2>
         <ul class="contact-list">
           <li><span>Email</span><a href="mailto:muditha00@icloud.com">muditha00@icloud.com</a></li>
-          <li><span>Phone</span><a href="tel:+94717599667">+94 71 7599 667</a></li>
-          <li><span>WhatsApp</span><a href="https://wa.me/94717599667" target="_blank" rel="noopener noreferrer">+94 71 7599 667</a></li>
           <li><span>LinkedIn</span><a href="https://www.linkedin.com/in/muditha00" target="_blank" rel="noopener noreferrer">linkedin.com/in/muditha00</a></li>
           <li><span>Location</span><strong>Sri Lanka</strong></li>
         </ul>
@@ -86,7 +108,7 @@
 <section class="section-head" id="comments">
       <p class="eyebrow">What people say</p>
       <h2>Recommendations &amp; comments</h2>
-      <p>Comments from people who know my work. New comments are reviewed before they appear here.</p>
+      <p>Worked with me, studied with me, or know my engineering work? Please leave a short recommendation below. Every submission is reviewed by me and only published with my approval.</p>
     </section>
     <section class="testimonial-grid" data-render="testimonials"></section>
     <section class="comment-form-wrap">
@@ -101,6 +123,7 @@
           <label>Comment *<textarea name="message" required maxlength="800" rows="4" placeholder="Your comment or recommendation"></textarea></label>
           <label class="cf-private">Email (optional, kept private)<input type="email" name="email" maxlength="120" autocomplete="email" placeholder="So I can verify you — never shown publicly"></label>
           <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+          <p class="cf-privacy">By submitting, you agree your name, role and comment may be published on this site after my review. Your email stays private and is never shown.</p>
           <button type="submit" class="button primary cf-submit">Submit comment</button>
           <p class="cf-status" role="status" aria-live="polite"></p>
         </form>

@@ -23,41 +23,33 @@ function tagList(items){
 
 let __pid = 0;
 function projectCard(project){
-  // Build the rotating image set (no duplicates; main image included once)
-  const imgs = (project.images && project.images.length ? project.images : (project.image ? [project.image] : []));
-  const uniq = [...new Set(imgs)];
   const id = 'pj' + (++__pid);
-  const slides = uniq.map((src,i) =>
-    `<img class="slide${i===0?' active':''}" src="${escapeHtml(src)}" alt="${escapeHtml(project.title)} image ${i+1}" loading="lazy">`
-  ).join('');
-  const dataImgs = encodeURIComponent(JSON.stringify(uniq));
-  const dataVids = encodeURIComponent(JSON.stringify(project.videos || []));
-  const hasImages = uniq.length > 0;
-  const hasVideos = (project.videos || []).some(v => v && v.youtube && !String(v.youtube).includes('PASTE_'));
-  const hasDoc = !!project.doc;
-
-  const btn = (type,label,extra='') =>
-    `<button class="media-btn" data-media="${type}" data-card="${id}"${extra}>${label}</button>`;
-
-  return `<article class="project-card" data-category="${escapeHtml(project.filter || project.category || '')}">
-  <div class="card-slideshow" id="${id}" data-images="${dataImgs}" data-videos="${dataVids}" data-title="${escapeHtml(project.title)}"${hasDoc?` data-doc="${escapeHtml(project.doc)}"`:''}>
-    ${slides || `<img class="slide active" src="" alt="">`}
-  </div>
-  <div class="project-card-body">
-    <p class="eyebrow">${escapeHtml(project.category)}</p>
-    <h3>${escapeHtml(project.title)}</h3>
-    <p>${escapeHtml(project.summary)}</p>
-    <div class="tag-row">${tagList(project.tools)}</div>
-    <div class="media-btn-row">
-      ${hasImages ? btn('images','🖼 Images') : ''}
-      ${hasVideos ? btn('videos','▶ Videos') : ''}
-      ${hasDoc ? btn('document','📄 Document') : ''}
+  const vids = (project.videos || []).filter(v => v && v.youtube);
+  const v0 = vids[0];
+  const realLink = v0 && !String(v0.youtube).includes('PASTE_');
+  const ytid = realLink ? youTubeId(v0.youtube) : '';
+  const poster = ytid ? `https://i.ytimg.com/vi/${ytid}/hqdefault.jpg`
+               : ((project.images || []).find(s => /\.(jpe?g|png|webp)$/i.test(s)) || '');
+  const vidTitle = (v0 && v0.title) || project.title;
+  const dataVids = encodeURIComponent(JSON.stringify(vids));
+  // Thumbnail: real video -> opens lightbox; otherwise opens case study
+  const fbk = ytid ? `https://i.ytimg.com/vi/${ytid}/mqdefault.jpg` : '';
+  const thumbInner = poster
+    ? `<img class="vt-img" src="${escapeHtml(poster)}" alt="${escapeHtml(vidTitle)}" loading="lazy" onerror="if(this.dataset.fb!=='1'&&'${fbk}'){this.dataset.fb='1';this.src='${fbk}';}else{this.style.display='none';}">`
+    : `<div class="vt-ph"><span class="vt-ph-ico">▷</span><span class="vt-ph-txt">Video coming soon</span></div>`;
+  const num = `<span class="vt-num">${id.replace('pj','')}</span>`;
+  const playOverlay = `<span class="vt-play" aria-hidden="true"></span>`;
+  const clickable = realLink
+    ? `<button class="vt-thumb" data-vids="${dataVids}" aria-label="Play video: ${escapeHtml(vidTitle)}">${thumbInner}${playOverlay}${num}</button>`
+    : `<a class="vt-thumb" href="${escapeHtml(project.page || 'projects.html')}" aria-label="${escapeHtml(project.title)} case study">${thumbInner}${playOverlay}${num}</a>`;
+  return `<article class="video-card" data-category="${escapeHtml(project.filter || project.category || '')}">
+    ${clickable}
+    <div class="vc-body">
+      <p class="eyebrow">${escapeHtml(project.category || '')}</p>
+      <h3>${escapeHtml(project.title)}</h3>
+      <a class="vc-cta" href="${escapeHtml(project.page || 'projects.html')}">View case study →</a>
     </div>
-    <div class="card-links">
-      <a class="text-link" href="${escapeHtml(project.page || 'projects.html')}">View project details</a>
-    </div>
-  </div>
-</article>`;
+  </article>`;
 }
 
 function youTubeId(url){
@@ -95,7 +87,7 @@ function initYouTubeLite(){
       iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
       iframe.setAttribute('allowfullscreen', '');
       iframe.setAttribute('title', 'YouTube video player');
-      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+      iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1`;
       el.replaceWith(iframe);
     };
     el.addEventListener('click', load);
@@ -117,7 +109,7 @@ function renderEditableContent(){
     const summary = document.querySelector('.hero-summary');
     const photo = document.querySelector('.hero-photo');
     if (status) status.innerHTML = `<span class="pulse-dot"></span>${escapeHtml(profile.status)}`;
-    if (credential) credential.textContent = profile.credential;
+    // credential rendered statically as two lines in HTML
     if (title) title.textContent = profile.role;
     if (subtitle) subtitle.textContent = profile.subtitle;
     if (summary) summary.textContent = profile.summary;
@@ -158,7 +150,7 @@ function renderEditableContent(){
 
   const skillGrid = document.querySelector('[data-render="skills"]');
   if (skillGrid) {
-    skillGrid.innerHTML = (portfolioData.skills?.groups || []).map(group => `<article class="glass-card skill-panel"><h2>${escapeHtml(group.title)}</h2><div class="tool-list">${(group.tools || []).map(tool => `<div class="tool-item"><strong>${escapeHtml(tool[0])}</strong><span>${escapeHtml(tool[1])}</span></div>`).join('')}</div></article>`).join('');
+    skillGrid.innerHTML = (portfolioData.skills?.groups || []).map(group => `<article class="glass-card skill-panel"><div class="skill-head"><h2>${escapeHtml(group.title)}</h2>${group.level?`<span class="skill-level">${escapeHtml(group.level)}</span>`:''}</div><div class="skill-chips">${(group.tools || []).map(tool => `<span class="skill-chip" title="${escapeHtml(tool[1]||'')}">${escapeHtml(tool[0])}</span>`).join('')}</div></article>`).join('');
   }
 
   const strengths = document.querySelector('[data-render="strengths"]');
@@ -205,13 +197,25 @@ function renderEditableContent(){
   const projectDetail = document.querySelector('[data-render="project-detail"]');
   if (projectDetail) {
     const slug = new URLSearchParams(window.location.search).get('project');
-    const project = (portfolioData.projects || []).find(item => item.slug === slug) || portfolioData.projects?.find(item => item.details) || portfolioData.projects?.[0];
+    const project = (portfolioData.projects || []).find(item => item.slug === slug) || portfolioData.projects?.[0];
     if (project) {
-      const details = project.details || {};
-      const tools = details.tools || project.tools || [];
+      const tools = project.tools || [];
       document.title = `${project.title} | Muditha Priyasad`;
-      projectDetail.innerHTML = `<section class="project-detail-hero"><div><p class="eyebrow">${escapeHtml(project.category || 'Project Case Study')}</p><h1>${escapeHtml(project.title)}</h1><p>${escapeHtml(project.summary)}</p><div class="tag-row">${tagList(tools)}</div>${project.doc ? `<p style="margin-top:1rem"><a class="text-link doc-link" href="${escapeHtml(project.doc)}" target="_blank" rel="noopener noreferrer">📄 View full project document (PDF)</a></p>` : ''}</div><img src="${escapeHtml(project.image)}" alt="${escapeHtml(project.title)} public-safe project evidence"></section>
-      <section class="detail-layout"><article class="glass-card detail-card"><h2>Problem</h2><p>${escapeHtml(details.problem || project.summary)}</p></article><article class="glass-card detail-card"><h2>My Role</h2><p>${escapeHtml(details.role || 'Public-safe role summary to be edited in data/portfolio-data.js.')}</p></article><article class="glass-card detail-card"><h2>Engineering Approach</h2><p>${escapeHtml(details.approach || 'Add the public-safe engineering approach here.')}</p></article><article class="glass-card detail-card"><h2>Solution</h2><p>${escapeHtml(details.solution || 'Add the public-safe solution summary here.')}</p></article><article class="glass-card detail-card"><h2>Result</h2><p>${escapeHtml(details.result || 'Add a simplified result without production data or confidential numbers.')}</p></article><article class="glass-card detail-card"><h2>Tools Used</h2><div class="tag-row">${tagList(tools)}</div></article><article class="glass-card detail-card"><h2>Safety / Confidentiality Note</h2><p>${escapeHtml(details.note || 'This page uses only general descriptions and public-safe media. Do not add PLC programs, HMI source files, wiring diagrams, exact CAD dimensions, customer names, supplier names, factory layouts, production data, internal financial data, full machine drawings or source code from company projects.')}</p></article><article class="glass-card detail-card"><h2>Edit This Page</h2><p>Update this project in data/portfolio-data.js. Replace images with cropped, blurred or rendered public-safe media only.</p></article></section>`;
+      const evidence = (project.images || []).some(s => /\.(jpe?g|png|webp)$/i.test(s)) || project.doc
+        ? `<div class="tag-row">${(project.images||[]).filter(s=>/\.(jpe?g|png|webp)$/i.test(s)).length?'<span>Photos available</span>':''}${project.doc?'<span>Project document (PDF)</span>':''}</div>`
+        : `<p>Public-safe photos, diagrams and project evidence are being prepared. Confidential factory details are not published.</p>`;
+      const card = (h,b) => `<article class="glass-card detail-card"><h2>${h}</h2>${b}</article>`;
+      projectDetail.innerHTML = `<section class="detail-head"><p class="eyebrow">${escapeHtml(project.category || 'Case Study')}</p><h1>${escapeHtml(project.title)}</h1><p class="detail-summary">${escapeHtml(project.summary||'')}</p><div class="tag-row">${tagList(tools)}</div>${project.doc ? `<p style="margin-top:.8rem"><a class="text-link doc-link" href="${escapeHtml(project.doc)}" target="_blank" rel="noopener noreferrer">View full project document (PDF)</a></p>` : ''}</section>
+      <section class="detail-layout">
+        ${card('Problem', `<p>${escapeHtml(project.problem || project.oneLineProblem || project.summary || '')}</p>`)}
+        ${card('My Role', `<p>${escapeHtml(project.role || project.contribution || '')}</p>`)}
+        ${card('Engineering Method', `<p>${escapeHtml(project.method || '')}</p>`)}
+        ${card('Tools / Technologies', `<div class="tag-row">${tagList(tools)}</div>`)}
+        ${card('Result / Impact', `<p>${escapeHtml(project.result || project.impact || '')}</p>`)}
+        ${card('Evidence', evidence)}
+      </section>
+      <section class="note-panel"><p><strong>Confidentiality:</strong> Public-safe summary only. Detailed technical approach can be discussed during interviews while respecting confidentiality.</p></section>
+      <section class="page-nav"><a class="button secondary" href="projects.html">&larr; All projects</a><a class="button secondary" href="cv-contact.html">Contact</a></section>`;
     }
   }
 }
@@ -311,7 +315,7 @@ function lbRender(){
   } else if (lbMode === 'videos'){
     const id = youTubeId(item.youtube);
     c.innerHTML = id
-      ? `<div class="lb-video"><iframe src="https://www.youtube-nocookie.com/embed/${id}?rel=0&autoplay=1" title="${escapeHtml(item.title||'Video')}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`
+      ? `<div class="lb-video"><iframe src="https://www.youtube.com/embed/${id}?rel=0&autoplay=1&playsinline=1" title="${escapeHtml(item.title||'Video')}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe><a class="lb-yt-link" href="https://youtu.be/${id}" target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a></div>`
       : `<p class="lb-msg">This video hasn't been added yet.</p>`;
   } else if (lbMode === 'document'){
     c.innerHTML = `<div class="lb-doc"><iframe src="${item}" title="Project document"></iframe><a class="lb-doc-open" href="${item}" target="_blank" rel="noopener noreferrer">Open / Download PDF ↗</a></div>`;
@@ -328,21 +332,24 @@ function openLightbox(mode, items, start=0){
 }
 
 function initMediaButtons(){
+  // Legacy media buttons (if any remain)
   document.querySelectorAll('.media-btn').forEach(btn => {
     if (btn.dataset.bound) return; btn.dataset.bound='1';
     btn.addEventListener('click', () => {
-      const box = document.getElementById(btn.dataset.card);
+      const box = btn.closest('.media-btn-row');
       if (!box) return;
       const type = btn.dataset.media;
-      if (type === 'images'){
-        const imgs = JSON.parse(decodeURIComponent(box.dataset.images || '[]'));
-        openLightbox('images', imgs, 0);
-      } else if (type === 'videos'){
-        const vids = JSON.parse(decodeURIComponent(box.dataset.videos || '[]'));
-        openLightbox('videos', vids, 0);
-      } else if (type === 'document'){
-        openLightbox('document', [box.dataset.doc], 0);
-      }
+      if (type === 'images') openLightbox('images', JSON.parse(decodeURIComponent(box.dataset.images || '[]')), 0);
+      else if (type === 'videos') openLightbox('videos', JSON.parse(decodeURIComponent(box.dataset.videos || '[]')), 0);
+      else if (type === 'document') openLightbox('document', [box.dataset.doc], 0);
+    });
+  });
+  // Video-thumbnail cards
+  document.querySelectorAll('button.vt-thumb').forEach(btn => {
+    if (btn.dataset.bound) return; btn.dataset.bound='1';
+    btn.addEventListener('click', () => {
+      const vids = JSON.parse(decodeURIComponent(btn.dataset.vids || '[]'));
+      if (vids.length) openLightbox('videos', vids, 0);
     });
   });
 }
@@ -354,19 +361,15 @@ initProjectMedia();
 function initContactBar(){
   if (document.getElementById('contactBar')) return;
   const pf = (window.portfolioData && window.portfolioData.profile) || {};
-  const links = [];
-  if (pf.email) links.push(`<a href="mailto:${pf.email}" aria-label="Email"><span class="cb-ico">✉</span><span class="cb-txt">Email</span></a>`);
-  const phoneHref = pf.phoneHref || (pf.phone ? 'tel:' + pf.phone.replace(/[^0-9+]/g,'') : '');
-  if (phoneHref) links.push(`<a href="${phoneHref}" aria-label="Call"><span class="cb-ico">✆</span><span class="cb-txt">Call</span></a>`);
-  if (pf.whatsapp) links.push(`<a href="${pf.whatsapp}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><span class="cb-ico">💬</span><span class="cb-txt">WhatsApp</span></a>`);
-  if (pf.linkedin) links.push(`<a href="${pf.linkedin}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><span class="cb-ico">in</span><span class="cb-txt">LinkedIn</span></a>`);
-  if (pf.github) links.push(`<a href="${pf.github}" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><span class="cb-ico">⌂</span><span class="cb-txt">GitHub</span></a>`);
   const cv = pf.cv || 'assets/docs/Muditha-Priyasad-CV.pdf';
-  links.push(`<a class="cb-cv" href="${cv}" download><span class="cb-ico">⬇</span><span class="cb-txt">CV</span></a>`);
   const bar = document.createElement('div');
   bar.id = 'contactBar';
-  bar.className = 'contact-bar';
-  bar.innerHTML = `<div class="cb-inner">${links.join('')}</div>`;
+  bar.className = 'contact-bar mobile-actions';
+  bar.innerHTML = `<div class="cb-inner">
+    <a href="projects.html"><span class="cb-ico">▦</span><span class="cb-txt">Projects</span></a>
+    <a class="cb-cv" href="${cv}" download><span class="cb-ico">⬇</span><span class="cb-txt">CV</span></a>
+    <a href="cv-contact.html"><span class="cb-ico">✉</span><span class="cb-txt">Contact</span></a>
+  </div>`;
   document.body.appendChild(bar);
   document.body.classList.add('has-contact-bar');
 }
@@ -431,3 +434,48 @@ function initCommentForm(){
 
 renderTestimonials();
 initCommentForm();
+
+
+/* ====== Under-development notice (all pages) ====== */
+function initDevNotice(){
+  if (document.getElementById('devNotice')) return;
+  const header = document.querySelector('.site-header');
+  if (!header) return;
+  const bar = document.createElement('div');
+  bar.id = 'devNotice';
+  bar.className = 'dev-notice';
+  bar.innerHTML = '<span>✨ New projects, photos and videos added regularly — check back for updates.</span>';
+  header.insertAdjacentElement('afterend', bar);
+}
+initDevNotice();
+
+/* ====== Soft gate: unlock CV + phone (lead capture) ====== */
+function initUnlockGate(){
+  const form = document.getElementById('unlockForm');
+  if (!form) return;
+  const card = document.getElementById('unlockCard');
+  const status = form.querySelector('.gate-status');
+  const endpoint = (window.portfolioData && window.portfolioData.commentsEndpoint) || '';
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (form._gotcha && form._gotcha.value) return;
+    const data = Object.fromEntries(new FormData(form).entries());
+    if (!data.name || !data.email){
+      status.textContent = 'Please enter your name and email.';
+      status.className = 'gate-status err';
+      return;
+    }
+    const reveal = () => {
+      card.querySelector('.gate-locked').hidden = true;
+      card.querySelector('.gate-unlocked').hidden = false;
+    };
+    if (!endpoint){ reveal(); return; }   // still reveal even if not wired
+    status.textContent = 'Unlocking…';
+    status.className = 'gate-status';
+    try {
+      await fetch(endpoint, { method:'POST', headers:{'Accept':'application/json'}, body:new FormData(form) });
+    } catch(_) { /* reveal regardless — lead capture is best-effort */ }
+    reveal();
+  });
+}
+initUnlockGate();
