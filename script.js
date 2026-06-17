@@ -361,13 +361,12 @@ initProjectMedia();
 function initContactBar(){
   if (document.getElementById('contactBar')) return;
   const pf = (window.portfolioData && window.portfolioData.profile) || {};
-  const cv = pf.cv || 'assets/docs/Muditha-Priyasad-CV.pdf';
   const bar = document.createElement('div');
   bar.id = 'contactBar';
   bar.className = 'contact-bar mobile-actions';
   bar.innerHTML = `<div class="cb-inner">
     <a href="projects.html"><span class="cb-ico">▦</span><span class="cb-txt">Projects</span></a>
-    <a class="cb-cv" href="${cv}" download><span class="cb-ico">⬇</span><span class="cb-txt">CV</span></a>
+    <a class="cb-cv" href="cv-contact.html#unlockCard"><span class="cb-ico">⬇</span><span class="cb-txt">Get CV</span></a>
     <a href="cv-contact.html"><span class="cb-ico">✉</span><span class="cb-txt">Contact</span></a>
   </div>`;
   document.body.appendChild(bar);
