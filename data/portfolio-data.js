@@ -485,11 +485,11 @@ window.portfolioData = {
   // Paste your free Formspree endpoint here so the "Leave a comment" form works.
   // Get it at https://formspree.io (see HOW-TO-COMMENTS.md). Example: "https://formspree.io/f/xxxxxx"
   commentsEndpoint: "https://formspree.io/f/xojzbjkp",
+  // ====== Supabase (feedback with your approval) ======
+  supabaseUrl: "https://moavlqmeeaozautstdwo.supabase.co",
+  supabaseKey: "sb_publishable_USF5QpA9ILbcwtsBogC5DA_j5iEv0aN",
 
   // Only comments YOU add here appear on the site (approval = you paste an approved one in).
   // To add an approved comment: copy a block below, fill it in, keep the comma.
-  testimonials: [
-    // Example (you can delete or replace):
-    { name: "Sample Reviewer", role: "Manager, Example Pvt Ltd", message: "Muditha is a hands-on engineer who takes a machine from concept to a running line. Reliable, practical and quick to troubleshoot.", date: "2026" }
-  ]
+  testimonials: []
 };

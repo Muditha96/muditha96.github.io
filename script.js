@@ -375,64 +375,10 @@ function initContactBar(){
 initContactBar();
 
 /* ====== Testimonials display + comment form ====== */
-function renderTestimonials(){
-  const wrap = document.querySelector('[data-render="testimonials"]');
-  if (!wrap) return;
-  const items = (window.portfolioData && window.portfolioData.testimonials) || [];
-  if (!items.length){
-    wrap.innerHTML = `<p class="testimonial-empty">No comments yet — be the first to leave one below.</p>`;
-    return;
-  }
-  wrap.innerHTML = items.map(t => `
-    <article class="glass-card testimonial-card">
-      <p class="testimonial-msg">“${escapeHtml(t.message)}”</p>
-      <p class="testimonial-by"><strong>${escapeHtml(t.name)}</strong>${t.role ? `<span>${escapeHtml(t.role)}</span>` : ''}${t.date ? `<small>${escapeHtml(t.date)}</small>` : ''}</p>
-    </article>`).join('');
-}
 
-function initCommentForm(){
-  const form = document.getElementById('commentForm');
-  if (!form) return;
-  const status = form.querySelector('.cf-status');
-  const endpoint = (window.portfolioData && window.portfolioData.commentsEndpoint) || '';
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (form._gotcha && form._gotcha.value) return;            // honeypot tripped
-    const data = Object.fromEntries(new FormData(form).entries());
-    if (!data.name || !data.role || !data.message){
-      status.textContent = 'Please fill in your name, role and comment.';
-      status.className = 'cf-status err';
-      return;
-    }
-    if (!endpoint){
-      status.innerHTML = 'Comment form is not connected yet. Please email <a href="mailto:muditha00@icloud.com">muditha00@icloud.com</a>.';
-      status.className = 'cf-status err';
-      return;
-    }
-    status.textContent = 'Sending…';
-    status.className = 'cf-status';
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Accept': 'application/json' },
-        body: new FormData(form)
-      });
-      if (res.ok){
-        form.reset();
-        status.textContent = 'Thank you! Your comment was sent and will appear after I review it.';
-        status.className = 'cf-status ok';
-      } else {
-        throw new Error('Submission failed');
-      }
-    } catch (err){
-      status.innerHTML = 'Sorry, something went wrong. Please email <a href="mailto:muditha00@icloud.com">muditha00@icloud.com</a>.';
-      status.className = 'cf-status err';
-    }
-  });
-}
 
-renderTestimonials();
-initCommentForm();
+
+
 
 
 /* ====== Under-development notice (all pages) ====== */
@@ -478,3 +424,70 @@ function initUnlockGate(){
   });
 }
 initUnlockGate();
+
+/* ====== Feedback via Supabase (shows only what you approve) ====== */
+function getSupabase(){
+  const pd = window.portfolioData || {};
+  if (!pd.supabaseUrl || !pd.supabaseKey || !window.supabase) return null;
+  if (!window.__sbClient) window.__sbClient = window.supabase.createClient(pd.supabaseUrl, pd.supabaseKey);
+  return window.__sbClient;
+}
+
+async function renderTestimonials(){
+  const wrap = document.querySelector('[data-render="testimonials"]');
+  if (!wrap) return;
+  const empty = '<p class="testimonial-empty">No recommendations yet — be the first to leave one below.</p>';
+  const sb = getSupabase();
+  let items = (window.portfolioData && window.portfolioData.testimonials) || [];
+  if (sb){
+    try {
+      const { data, error } = await sb.from('feedback_public').select('name,role,message,created_at').order('created_at',{ascending:false});
+      if (!error && Array.isArray(data)) items = data;
+    } catch(_){}
+  }
+  if (!items.length){ wrap.innerHTML = empty; return; }
+  wrap.innerHTML = items.map(t => {
+    const yr = t.created_at ? new Date(t.created_at).getFullYear() : (t.date||'');
+    return `<article class="glass-card testimonial-card">
+      <p class="testimonial-msg">“${escapeHtml(t.message)}”</p>
+      <p class="testimonial-by"><strong>${escapeHtml(t.name)}</strong>${t.role?`<span>${escapeHtml(t.role)}</span>`:''}${yr?`<small>${escapeHtml(String(yr))}</small>`:''}</p>
+    </article>`;
+  }).join('');
+}
+
+function initCommentForm(){
+  const form = document.getElementById('commentForm');
+  if (!form) return;
+  const status = form.querySelector('.cf-status');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (form._gotcha && form._gotcha.value) return;
+    const data = Object.fromEntries(new FormData(form).entries());
+    if (!data.name || !data.role || !data.message){
+      status.textContent = 'Please fill in your name, role and comment.';
+      status.className = 'cf-status err'; return;
+    }
+    const sb = getSupabase();
+    if (!sb){
+      status.innerHTML = 'Feedback is temporarily unavailable. Please email <a href="mailto:muditha00@icloud.com">muditha00@icloud.com</a>.';
+      status.className = 'cf-status err'; return;
+    }
+    status.textContent = 'Sending…'; status.className = 'cf-status';
+    try {
+      const { error } = await sb.from('feedback').insert({
+        name: data.name, role: data.role, message: data.message,
+        email: data.email || null, approved: false
+      });
+      if (error) throw error;
+      form.reset();
+      status.textContent = 'Thank you! Your recommendation was sent and will appear after I review it.';
+      status.className = 'cf-status ok';
+    } catch(err){
+      status.innerHTML = 'Sorry, something went wrong. Please email <a href="mailto:muditha00@icloud.com">muditha00@icloud.com</a>.';
+      status.className = 'cf-status err';
+    }
+  });
+}
+
+renderTestimonials();
+initCommentForm();
