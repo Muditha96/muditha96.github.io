@@ -629,3 +629,9 @@ h1,h2,h3,.brand-copy strong,.hero-id h1,.bf-label,.skill-head h2,.sc-head h3{col
 .hero-stacked .best-fit-line,.hero-stacked .capability-chips{justify-content:center}
 .hero-stacked .hero-summary{margin-left:auto;margin-right:auto}
 .hero-stacked .avail-badge{margin:0 auto}
+
+/* ====== Certificate thumbnails ====== */
+.cert-card{display:flex;flex-direction:column}
+.cert-thumb{border:1px solid var(--line);border-radius:8px;overflow:hidden;padding:0;margin:0 0 .7rem;cursor:pointer;background:#fff;width:100%}
+.cert-thumb img{display:block;width:100%;height:auto}
+.cert-thumb:hover{border-color:#0e7490}

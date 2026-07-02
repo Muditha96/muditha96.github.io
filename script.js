@@ -172,7 +172,19 @@ function renderEditableContent(){
 
   const certifications = document.querySelector('[data-render="certifications"]');
   if (certifications) {
-    certifications.innerHTML = (portfolioData.certifications || []).map(cert => `<article class="glass-card cert-card"><p class="eyebrow">${escapeHtml(cert.issuer)}</p><h3>${escapeHtml(cert.name)}</h3><p>${escapeHtml(cert.detail)}</p>${cert.file ? `<a class="text-link" href="${escapeHtml(cert.file)}" target="_blank" rel="noopener noreferrer">View certificate</a>` : ''}</article>`).join('');
+    certifications.innerHTML = (portfolioData.certifications || []).map(cert => {
+      const thumb = cert.image
+        ? `<button class="cert-thumb" data-cert-img="${escapeHtml(cert.image)}" aria-label="View ${escapeHtml(cert.name)} certificate"><img src="${escapeHtml(cert.image)}" alt="${escapeHtml(cert.name)} certificate" loading="lazy"></button>`
+        : '';
+      const link = cert.file
+        ? `<a class="text-link" href="${escapeHtml(cert.file)}" target="_blank" rel="noopener noreferrer">View certificate (PDF)</a>`
+        : '';
+      return `<article class="glass-card cert-card">${thumb}<p class="eyebrow">${escapeHtml(cert.issuer)}</p><h3>${escapeHtml(cert.name)}</h3><p>${escapeHtml(cert.detail)}</p>${link}</article>`;
+    }).join('');
+    document.querySelectorAll('.cert-thumb').forEach(b => {
+      if (b.dataset.bound) return; b.dataset.bound='1';
+      b.addEventListener('click', () => openLightbox('images', [b.dataset.certImg], 0));
+    });
   }
 
   const contactList = document.querySelector('[data-render="contact"]');

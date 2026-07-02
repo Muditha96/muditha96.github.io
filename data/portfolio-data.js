@@ -472,13 +472,13 @@ window.portfolioData = {
   certifications: [
     { name: "BSc (Hons) Mechanical Engineering", issuer: "University of Jaffna", detail: "Faculty of Engineering · Oct 2017 – Feb 2024." },
     { name: "IESL Associate Member", issuer: "Institution of Engineers Sri Lanka", detail: "Membership AM-32795." },
-    { name: "SOLIDWORKS CSWA — CAD Design", issuer: "Dassault Systèmes SOLIDWORKS", detail: "Certified SOLIDWORKS Associate (mechanical design).", file: "assets/certificates/Certificate_C-T7NHSLZ59X.pdf" },
-    { name: "SOLIDWORKS CSWA-AM — Additive Manufacturing", issuer: "Dassault Systèmes SOLIDWORKS", detail: "Certified SOLIDWORKS Associate, Additive Manufacturing.", file: "assets/certificates/Certificate_C-UQGLWM7JCK.pdf" },
-    { name: "Designing, Maintaining & Troubleshooting of PLC-Based Automated Systems", issuer: "University of Moratuwa", detail: "Robotics & Control Systems Laboratory · 15 Feb 2025." },
+    { name: "SOLIDWORKS CSWA — CAD Design", issuer: "Dassault Systèmes SOLIDWORKS", detail: "Certified SOLIDWORKS Associate (mechanical design).", file: "assets/certificates/Certificate_C-T7NHSLZ59X.pdf", image: "assets/certificates/img/Certificate_C-T7NHSLZ59X.jpg" },
+    { name: "SOLIDWORKS CSWA-AM — Additive Manufacturing", issuer: "Dassault Systèmes SOLIDWORKS", detail: "Certified SOLIDWORKS Associate, Additive Manufacturing.", file: "assets/certificates/Certificate_C-UQGLWM7JCK.pdf", image: "assets/certificates/img/Certificate_C-UQGLWM7JCK.jpg" },
+    { name: "Designing, Maintaining & Troubleshooting of PLC-Based Automated Systems", issuer: "University of Moratuwa", detail: "Robotics & Control Systems Laboratory · 15 Feb 2025.", image: "assets/certificates/img/plc-moratuwa.jpg" },
     { name: "PLC Programming Course", issuer: "Epic Engineering", detail: "Industrial PLC programming · 2024." },
-    { name: "Maintenance of Industrial Plant & Machinery", issuer: "NERDC", detail: "Mechatronics Engineering Dept · 24–25 Jan 2026." },
-    { name: "Industrial Motor Operation & Control Systems", issuer: "NERDC", detail: "Mechatronics Engineering Dept · 3–4 May 2025." },
-    { name: "Advanced Plastic Injection Molding Technology", issuer: "Industrial Development Board of Ceylon (IDB)", detail: "Technical Services Division · 16 Dec 2025." }
+    { name: "Maintenance of Industrial Plant & Machinery", issuer: "NERDC", detail: "Mechatronics Engineering Dept · 24–25 Jan 2026.", image: "assets/certificates/img/nerdc-maintenance.jpg" },
+    { name: "Industrial Motor Operation & Control Systems", issuer: "NERDC", detail: "Mechatronics Engineering Dept · 3–4 May 2025.", image: "assets/certificates/img/nerdc-motor-control.jpg" },
+    { name: "Advanced Plastic Injection Molding Technology", issuer: "Industrial Development Board of Ceylon (IDB)", detail: "Technical Services Division · 16 Dec 2025.", image: "assets/certificates/img/idb-injection-molding.jpg" }
   ],
 
   availableFor: ["Automation Engineering", "Mechanical Design", "Machine Troubleshooting", "Fixture Design", "3D Printing & Prototyping", "Engineering Documentation"],
