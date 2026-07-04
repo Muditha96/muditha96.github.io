@@ -1,4 +1,8 @@
 ## 2026-07-04 Codex
+- Moved the homepage project gallery back to the right side, bottom-aligned with the hero section.
+- Added optimized public-safe images from `Gallary images` into `assets/images/gallery/home` and updated `marquee[]` to use named entries.
+- Set homepage gallery images to `object-fit: contain` so project/artwork images are not cropped.
+## 2026-07-04 Codex
 - Fixed the oversized homepage project gallery window by capping the desktop gallery height, restoring fixed image-card heights, and keeping the gallery in the left column.
 - This overrides the earlier uncropped auto-height gallery rules that made the project gallery panel too long.
 ## 2026-07-04 Codex

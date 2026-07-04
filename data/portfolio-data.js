@@ -492,18 +492,21 @@ window.portfolioData = {
   // ====== Homepage running project image strip ======
   // Use meaningful public-safe project/artwork images. Title becomes the visible label.
   marquee: [
-    { title: "CNC Laser Machine", image: "assets/images/real/cnc-laser-machine.jpg", href: "project-detail.html?project=cnc-laser-engraver" },
-    { title: "CNC Laser Machine Build", image: "assets/images/real/cnc-laser-machine-2.jpg", href: "project-detail.html?project=cnc-laser-engraver" },
-    { title: "Custom FDM 3D Printer", image: "assets/images/real/3d-printer-build.jpg", href: "project-detail.html?project=custom-3d-printer" },
-    { title: "3D Printer Motion Prototype", image: "assets/images/gallery/curated/3d-printer-prototype.jpg", href: "project-detail.html?project=custom-3d-printer" },
-    { title: "Self-Tighten Gripper", image: "assets/images/real/gripper.jpg", href: "projects.html" },
-    { title: "Line Follower Robot", image: "assets/images/real/line-follower-robot.jpg", href: "projects.html" },
-    { title: "Combustion Chamber SCADA", image: "assets/images/real/combustion-scada.png", href: "projects.html" },
-    { title: "Screen Printer Mechanism", image: "assets/images/real/screen-printer.png", href: "projects.html" },
-    { title: "Oil Dripping Tray Redesign", image: "assets/images/real/oil-tray.png", href: "projects.html" },
-    { title: "Laser Engraving Artwork", image: "assets/images/business/engraving-painted.jpg", href: "gallery.html" },
-    { title: "3D Printed Lithophane Artwork", image: "assets/images/business/lithophane.jpg", href: "gallery.html" },
-    { title: "Wood Engraving Sample", image: "assets/images/gallery/curated/wood-engraving-sample.jpg", href: "gallery.html" }
+    { title: "3D Model vs Assembled Part", image: "assets/images/gallery/home/3d-model-vs-assembled-part.jpg", href: "projects.html" },
+    { title: "CAD Design vs Printed Part", image: "assets/images/gallery/home/cad-design-vs-printed-part.jpg", href: "projects.html" },
+    { title: "3D Printed Gripper", image: "assets/images/gallery/home/3d-printed-gripper.jpg", href: "projects.html" },
+    { title: "3D Printed Robot", image: "assets/images/gallery/home/3d-printed-robot.jpg", href: "projects.html" },
+    { title: "Redesigned 3D Printed Vehicle Part", image: "assets/images/gallery/home/redesigned-3d-printed-vehicle-part-upper.jpg", href: "projects.html" },
+    { title: "Laser Engraver Build", image: "assets/images/gallery/home/laser-engraver-v5.jpg", href: "project-detail.html?project=cnc-laser-engraver" },
+    { title: "Laser Engraving on Jack Wood", image: "assets/images/gallery/home/laser-engrave-on-jack-wood.jpg", href: "gallery.html" },
+    { title: "Laser Engraving on Mirror", image: "assets/images/gallery/home/laser-engraving-on-mirror.jpg", href: "gallery.html" },
+    { title: "Laser Engraving on Leaves", image: "assets/images/gallery/home/laser-engraving-on-leaves.jpg", href: "gallery.html" },
+    { title: "Painted Plate Laser Artwork", image: "assets/images/gallery/home/laser-engrave-painted-plate.jpg", href: "gallery.html" },
+    { title: "3D Printed Lithophane Artwork", image: "assets/images/gallery/home/3d-printed-lithophane-art.jpg", href: "gallery.html" },
+    { title: "Gamunu Combat Robot", image: "assets/images/gallery/home/gamunu-combat-robot.jpg", href: "project-detail.html?project=combat-robots" },
+    { title: "Air Tattoo Exhibition Project Stall", image: "assets/images/gallery/home/air-tattoo-exhibition-project-stall.jpg", href: "gallery.html" },
+    { title: "Techno 2023 Project Display", image: "assets/images/gallery/home/techno-2023-project-display.jpg", href: "gallery.html" },
+    { title: "YGC Innovation Festival 2023", image: "assets/images/gallery/home/ygc-innovation-festival-2023.jpg", href: "gallery.html" }
   ],
 
   // Only comments YOU add here appear on the site (approval = you paste an approved one in).
