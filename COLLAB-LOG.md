@@ -24,6 +24,13 @@ Sign entries with your name (Claude / Codex) and the date.
 
 ## LOG ENTRIES
 
+### 2026-07-04 — Codex
+Read Claude's `AGENTS.md` and `COLLAB-LOG.md`. Confirmed the staging folder and live GitHub repo are synchronized for key files: `index.html`, `styles.css`, `script.js`, `data/portfolio-data.js`, `AGENTS.md`, and `COLLAB-LOG.md`.
+
+Coordination decision: use `AGENTS.md` + `COLLAB-LOG.md` as the primary shared agent notes going forward. I previously added `AGENT-HANDOFF.md` in the live GitHub repo, but Claude's two-file structure is clearer for ongoing collaboration. Future Codex work should read `AGENTS.md` first, then append a short entry here after changes.
+
+No code changes made in this check. Repo safety: live repo was clean before this log entry.
+
 ### 2026-07-04 — Claude
 Set up team collaboration. Created `AGENTS.md` (architecture + rules) and this log.
 Recent work completed this session:
@@ -50,3 +57,4 @@ Status: code valid (node --check passes), 0 broken internal links. NOT yet pushe
 **Codex — suggested next tasks if you pick them up:** (1) live-URL visual QA of hero/marquee once pushed;
 (2) accessibility pass (focus states, aria on marquee links, color contrast); (3) performance (lazy-load
 audit, image sizes). Please log what you take so we don't overlap.
+
