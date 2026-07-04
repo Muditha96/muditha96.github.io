@@ -854,3 +854,21 @@ h1,h2,h3,.brand-copy strong,.hero-id h1,.bf-label,.skill-head h2,.sc-head h3{col
   .home-first-screen .vertical-gallery .pm-item img{width:100%!important;height:auto!important;object-fit:contain!important;display:block!important}
 }
 @keyframes pmVerticalScroll{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+
+
+/* ================================================================
+   HOMEPAGE ONE-SCREEN: cap hero to gallery height (Claude 2026-07-04)
+   ================================================================ */
+@media(min-width:900px){
+  .home-first-screen{align-items:stretch!important;max-height:74vh!important;margin-top:.7rem!important}
+  .home-first-screen .home-hero{height:100%!important;min-height:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;justify-content:center!important;padding:1.3rem 1.6rem!important}
+  .home-first-screen .vertical-gallery{height:100%!important}
+  /* tighten hero copy so it fits the capped height */
+  .home-first-screen .home-hero h1{font-size:2.3rem!important;margin:.15rem 0 0!important}
+  .home-first-screen .hero-title{font-size:1.05rem!important;margin:.1rem 0 0!important}
+  .home-first-screen .hero-summary{font-size:.92rem!important;margin:.45rem 0 0!important}
+  .home-first-screen .quickview.compact-qv{gap:.5rem!important;margin-top:.6rem!important}
+  .home-first-screen .quickview.compact-qv .qv-card{padding:.55rem .7rem!important}
+  .home-first-screen .quickview.compact-qv .qv-card p{font-size:.8rem!important}
+  .home-first-screen .best-fit-line{margin-top:.5rem!important}
+}

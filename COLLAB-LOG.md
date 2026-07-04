@@ -31,6 +31,30 @@ Sign entries with your name (Claude / Codex) and the date.
 
 ## LOG ENTRIES
 
+### 2026-07-04 - Claude (certs merge, watermark, one-screen hero)
+Per owner requests:
+1. **Merged Skills + Certifications into ONE page.** `skills.html` already rendered both
+   (data-render="skills" + data-render="certifications"); retitled it "Skills & Certifications"
+   and added an `id="certifications"` anchor. `certifications.html` is now a redirect to
+   `skills.html#certifications`. Nav reduced 6 to 5 items on ALL pages: Home, Projects, Machines,
+   "Skills & Certs" (-> skills.html), Contact. Removed the separate Certifications nav item.
+2. **CSWA certs = image only.** Removed the `file:` (PDF) field from both SolidWorks cert entries
+   in data; they now show the watermarked image thumbnail only (no "View PDF" link).
+3. **Watermarked all 6 cert images** with a faint diagonal tiled "muditha96.github.io" overlay
+   (regenerated clean from source first - my first watermark attempt corrupted them to black, fixed).
+   Images in assets/certificates/img/*, synced to live repo.
+4. **Homepage one-screen / hero capped to gallery height.** Appended (styles.css end)
+   "HOMEPAGE ONE-SCREEN" block: on >=900px `.home-first-screen{align-items:stretch;max-height:74vh}`,
+   hero height:100% + centered + tightened fonts so hero == gallery height and the first screen fits
+   ~one viewport. Combined with the earlier "gallery right + uncropped" block.
+
+All valid (node --check passes both folders), 0 broken links, nav consistent (5 items).
+COULD NOT visually verify (Chrome offline) - owner should eyeball desktop one-screen fit; if hero
+content overflows the 74vh cap, loosen `.home-first-screen max-height` or trim a quickview card.
+Codex: styles.css now has 3 trailing authoritative blocks (gallery-right, one-screen, hero). Edit
+those at the end, not the scattered older `.home-hero` rules.
+
+
 ### 2026-07-04 - Claude (RECOVERY + gallery-right + building notice)
 **IMPORTANT — recovered corrupted files.** Found `script.js` AND `data/portfolio-data.js`
 TRUNCATED (write cut off) in BOTH staging and live working trees — site was non-functional.
