@@ -1214,3 +1214,63 @@ h1,h2,h3,.brand-copy strong,.hero-id h1,.bf-label,.skill-head h2,.sc-head h3{col
 .proofs-head{
   overflow:visible!important;
 }
+/* Certificate watermark overlay: protects public display without editing original files. */
+.cert-thumb{
+  position:relative!important;
+}
+.cert-thumb::after{
+  content:"Muditha Priyasad Portfolio";
+  position:absolute;
+  right:.65rem;
+  bottom:.55rem;
+  z-index:2;
+  pointer-events:none;
+  padding:.28rem .5rem;
+  border-radius:6px;
+  background:rgba(5,8,22,.46);
+  color:rgba(255,255,255,.82);
+  border:1px solid rgba(255,255,255,.22);
+  font-size:clamp(.58rem,.9vw,.72rem);
+  font-weight:800;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  backdrop-filter:blur(3px);
+}
+.cert-thumb img{
+  object-fit:contain!important;
+}
+@media(max-width:560px){
+  .cert-thumb::after{
+    right:.45rem;
+    bottom:.4rem;
+    font-size:.56rem;
+    padding:.22rem .38rem;
+  }
+}
+/* Watermark for enlarged certificate preview. */
+.lb-cert-wrap{
+  position:relative;
+  display:inline-flex;
+  max-width:100%;
+  max-height:86vh;
+}
+.lb-cert-wrap .lb-img{
+  display:block;
+}
+.lb-cert-wrap span{
+  position:absolute;
+  right:.9rem;
+  bottom:.75rem;
+  z-index:2;
+  pointer-events:none;
+  padding:.34rem .62rem;
+  border-radius:7px;
+  background:rgba(5,8,22,.44);
+  color:rgba(255,255,255,.82);
+  border:1px solid rgba(255,255,255,.2);
+  font-size:clamp(.62rem,1vw,.78rem);
+  font-weight:800;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  backdrop-filter:blur(3px);
+}

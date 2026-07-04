@@ -471,8 +471,8 @@ window.portfolioData = {
   certifications: [
     { name: "BSc (Hons) Mechanical Engineering", issuer: "University of Jaffna", detail: "Faculty of Engineering - Oct 2017 to Feb 2024." },
     { name: "IESL Associate Member", issuer: "Institution of Engineers Sri Lanka", detail: "Membership AM-32795." },
-    { name: "CSWA - Mechanical Design", issuer: "Dassault Systemes SOLIDWORKS", detail: "Certified SOLIDWORKS Associate - Mechanical Design.", image: "assets/certificates/img/Certificate_C-T7NHSLZ59X.jpg" },
-    { name: "CSWA-AM - Additive Manufacturing", issuer: "Dassault Systemes SOLIDWORKS", detail: "Certified SOLIDWORKS Associate - Additive Manufacturing.", image: "assets/certificates/img/Certificate_C-UQGLWM7JCK.jpg" },
+    { name: "Certified SOLIDWORKS Associate in Mechanical Design", issuer: "Dassault Systemes SOLIDWORKS", detail: "CSWA - Mechanical Design certification.", image: "assets/certificates/img/Certificate_C-T7NHSLZ59X.jpg", file: "assets/certificates/Certificate_C-T7NHSLZ59X.pdf" },
+    { name: "Certified SOLIDWORKS Associate in Additive Manufacturing", issuer: "Dassault Systemes SOLIDWORKS", detail: "CSWA-AM - Additive Manufacturing certification.", image: "assets/certificates/img/Certificate_C-UQGLWM7JCK.jpg", file: "assets/certificates/Certificate_C-UQGLWM7JCK.pdf" },
     { name: "PLC Training", issuer: "University of Moratuwa", detail: "PLC training - Robotics & Control Systems Laboratory, 2025.", image: "assets/certificates/img/plc-moratuwa.jpg" },
     { name: "PLC Programming Course", issuer: "Epic Engineering", detail: "Industrial PLC programming - 2024." },
     { name: "Maintenance of Industrial Plant & Machinery", issuer: "NERDC", detail: "Maintenance of Industrial Plant & Machinery - 2026.", image: "assets/certificates/img/nerdc-maintenance.jpg" },

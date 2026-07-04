@@ -183,7 +183,7 @@ function renderEditableContent(){
     }).join('');
     document.querySelectorAll('.cert-thumb').forEach(b => {
       if (b.dataset.bound) return; b.dataset.bound='1';
-      b.addEventListener('click', () => openLightbox('images', [b.dataset.certImg], 0));
+      b.addEventListener('click', () => openLightbox('certificates', [b.dataset.certImg], 0));
     });
   }
 
@@ -324,6 +324,8 @@ function lbRender(){
   const item = lbItems[lbIndex];
   if (lbMode === 'images'){
     c.innerHTML = `<img class="lb-img" src="${item}" alt="Project image ${lbIndex+1}">`;
+  } else if (lbMode === 'certificates'){
+    c.innerHTML = `<div class="lb-cert-wrap"><img class="lb-img" src="${item}" alt="Certificate ${lbIndex+1}"><span>Muditha Priyasad Portfolio</span></div>`;
   } else if (lbMode === 'videos'){
     const id = youTubeId(item.youtube);
     c.innerHTML = id
