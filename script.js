@@ -503,3 +503,15 @@ function initCommentForm(){
 
 renderTestimonials();
 initCommentForm();
+
+/* ====== Homepage running project image strip (marquee) ====== */
+function renderMarquee(){
+  const track = document.querySelector('[data-render="marquee"]');
+  if (!track) return;
+  const imgs = (window.portfolioData && window.portfolioData.marquee) || [];
+  if (!imgs.length){ track.closest('.proj-marquee')?.remove(); return; }
+  const one = imgs.map(src => `<a class="pm-item" href="projects.html" aria-label="View projects"><img src="${escapeHtml(src)}" alt="Engineering project photo" loading="lazy" decoding="async"></a>`).join('');
+  track.innerHTML = one + one; // duplicate for seamless loop
+  track.style.setProperty('--pm-count', imgs.length);
+}
+renderMarquee();

@@ -490,6 +490,21 @@ window.portfolioData = {
   // ====== Supabase (feedback with your approval) ======
   supabaseUrl: "https://moavlqmeeaozautstdwo.supabase.co",
   supabaseKey: "sb_publishable_USF5QpA9ILbcwtsBogC5DA_j5iEv0aN",
+  // ====== Homepage running project image strip ======
+  marquee: [
+    "assets/images/projects-gallery/3d-printer/01.jpg",
+    "assets/images/projects-gallery/cnc-laser/IMG_7651.jpg",
+    "assets/images/projects-gallery/gripper/01.jpg",
+    "assets/images/projects-gallery/bonding-tape/01.jpg",
+    "assets/images/projects-gallery/line-follower/01.jpg",
+    "assets/images/projects-gallery/screen-printer/210.jpg",
+    "assets/images/projects-gallery/combustion/305.jpg",
+    "assets/images/projects-gallery/3d-printer/03.jpg",
+    "assets/images/projects-gallery/cnc-laser/IMG_7653.jpg",
+    "assets/images/projects-gallery/bonding-tape/05.jpg",
+    "assets/images/projects-gallery/oil-tray/01.jpg",
+    "assets/images/projects-gallery/screen-printer/222.jpg"
+  ],
 
   // Only comments YOU add here appear on the site (approval = you paste an approved one in).
   // To add an approved comment: copy a block below, fill it in, keep the comma.
