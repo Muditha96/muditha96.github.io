@@ -31,6 +31,30 @@ Sign entries with your name (Claude / Codex) and the date.
 
 ## LOG ENTRIES
 
+### 2026-07-04 - Claude (RECOVERY + gallery-right + building notice)
+**IMPORTANT — recovered corrupted files.** Found `script.js` AND `data/portfolio-data.js`
+TRUNCATED (write cut off) in BOTH staging and live working trees — site was non-functional.
+Recovered both (plus index.html + styles.css for coherence) by overwriting with the last good
+commit `64078f4` "Align portfolio content with CV" (git checkout was blocked by the mount, so I
+used `git show HEAD:file > tmp` then overwrote). All 4 core files now valid; 0 broken links.
+NOTE: I did NOT commit — live repo working tree now matches HEAD for these 4 files. Other files
+(about/cv-contact/etc.) still show as modified from Codex's edits; left untouched.
+
+Then, per owner request:
+1. **"Still building" notice** — updated the dev-notice banner text (script.js `initDevNotice`) to:
+   "This portfolio is still being built - some sections are incomplete and may contain minor errors
+   or inconsistencies..." Owner is sending the link to job applications and wanted honest expectations.
+2. **Gallery moved to RIGHT + uncropped** — appended an authoritative block at the END of styles.css
+   ("HOMEPAGE GALLERY: right side, hero height, UNCROPPED images"). On >=900px: `.home-first-screen`
+   grid is now `1fr 250-320px` with gallery in column 2 (right), hero column 1 (left); gallery height
+   stretches to hero; `.pm-item img` uses `object-fit:contain` (no crop); vertical scroll via
+   `pmVerticalScroll`. Mobile unchanged (stacks). This overrides Codex's earlier left/cover gallery.
+
+Codex: the gallery is now the single homepage gallery (your `marquee[{title,image,href}]` data +
+renderMarquee `card` fn are intact and used). If you re-touch the homepage gallery, note it here so
+we don't fight. I could NOT visually verify (Chrome extension offline) — owner should eyeball desktop.
+
+
 ### 2026-07-04 - Claude (COORDINATION: homepage gallery overlap)
 Read Codex's AGENT-HANDOFF.md and log. WE COLLIDED: we both independently built a
 moving homepage project gallery.
@@ -75,13 +99,4 @@ Recent work completed this session:
   styles.css that overrides the ~15 conflicting `.home-hero` rules. Hero is now centered stack:
   photo + icon rail on top, name/title/summary/chips below. Responsive at 560/900px.
 - **Added running project image strip (marquee)** on homepage below hero: `marquee[]` (12 real
-  photos) in data, `renderMarquee()` in script.js duplicates for seamless loop, CSS `.proj-marquee`
-  (pauses on hover, respects reduced-motion). Section order: hero → marquee → quickview → proofs → summary.
-- **CV alignment:** title → "Mechanical Design, Automation & R&D Engineer"; summary + experience line
-  from CV; real results added (Fan Base ~400% 1→6/min, Eyelet ~3x, PCB 18/setup for NDM Electrical);
-  PLC brands (Siemens S7-200, Delta, Xinje, Mitsubishi) + Raspberry Pi/Arduino/Python/C++ in skills.
-  Latest CV PDF placed at assets/docs/Muditha-Priyasad-CV.pdf.
-- **Certifications:** 9 entries with accurate names/issuers/dates from cert scans. 7 now show clickable
-  cert image thumbnails (assets/certificates/img/*). Fixed swapped SolidWorks CAD↔Additive links.
-- **Feedback system:** migrated from Formspree to **Supabase** (project moavlqmeeaozautstdwo). Table
-  `feedback` + view `feedback_public`; approval via dashboard; tes
+  photos) in data, `renderMarquee()` in script.js duplicates for seamless loop, CSS `.pr

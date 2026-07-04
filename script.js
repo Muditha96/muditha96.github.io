@@ -401,7 +401,7 @@ function initDevNotice(){
   const bar = document.createElement('div');
   bar.id = 'devNotice';
   bar.className = 'dev-notice';
-  bar.innerHTML = '<span>✨ New projects, photos and videos added regularly — check back for updates.</span>';
+  bar.innerHTML = '<span>🚧 This portfolio is still being built — some sections are incomplete and may contain minor errors or inconsistencies. Thanks for your understanding while I keep improving it.</span>';
   header.insertAdjacentElement('afterend', bar);
 }
 initDevNotice();

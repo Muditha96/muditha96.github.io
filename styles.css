@@ -837,3 +837,20 @@ h1,h2,h3,.brand-copy strong,.hero-id h1,.bf-label,.skill-head h2,.sc-head h3{col
   .vertical-gallery .pm-track{animation:none!important;flex-wrap:wrap!important;width:100%!important}
   .vertical-gallery .pm-item{flex:1 1 180px!important}
 }
+
+
+/* ================================================================
+   HOMEPAGE GALLERY: right side, hero height, UNCROPPED images
+   (Claude, per owner request 2026-07-04 — appended last to win)
+   ================================================================ */
+@media(min-width:900px){
+  .home-first-screen{grid-template-columns:minmax(0,1fr) minmax(250px,320px)!important;align-items:stretch!important;gap:1.2rem!important}
+  .home-first-screen .home-hero{grid-column:1!important;order:1!important}
+  .home-first-screen .vertical-gallery{grid-column:2!important;order:2!important;height:100%!important;max-height:none!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 6%,#000 94%,transparent)!important;mask-image:linear-gradient(to bottom,transparent,#000 6%,#000 94%,transparent)!important}
+  .home-first-screen .vertical-gallery .vg-head{flex:0 0 auto;-webkit-mask-image:none;mask-image:none}
+  .home-first-screen .vertical-gallery .pm-track{flex:1 1 auto!important;flex-direction:column!important;width:100%!important;height:max-content!important;gap:.6rem!important;animation:pmVerticalScroll 48s linear infinite!important}
+  .home-first-screen .vertical-gallery:hover .pm-track{animation-play-state:paused!important}
+  .home-first-screen .vertical-gallery .pm-item{width:100%!important;height:auto!important;flex:0 0 auto!important;background:#f4f6fb!important;border:1px solid var(--line)!important;border-radius:8px!important;overflow:hidden!important}
+  .home-first-screen .vertical-gallery .pm-item img{width:100%!important;height:auto!important;object-fit:contain!important;display:block!important}
+}
+@keyframes pmVerticalScroll{from{transform:translateY(0)}to{transform:translateY(-50%)}}
