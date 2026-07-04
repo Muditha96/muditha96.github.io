@@ -1,4 +1,9 @@
 ## 2026-07-04 Codex
+- Hid visible homepage gallery image-name overlays because they disturbed the clean project image view. Link labels remain available for accessibility.
+## 2026-07-04 Codex
+- Aligned the homepage gallery top border with the hero section top, kept it on the right side, and enlarged uncropped gallery cards.
+- Normalized the three hero CTA buttons into equal-width controls and made the four quickview widgets equal-sized across the hero content width.
+## 2026-07-04 Codex
 - Moved the homepage project gallery back to the right side, bottom-aligned with the hero section.
 - Added optimized public-safe images from `Gallary images` into `assets/images/gallery/home` and updated `marquee[]` to use named entries.
 - Set homepage gallery images to `object-fit: contain` so project/artwork images are not cropped.
