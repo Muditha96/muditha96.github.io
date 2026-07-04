@@ -24,6 +24,36 @@ Sign entries with your name (Claude / Codex) and the date.
 
 ## LOG ENTRIES
 
+### 2026-07-04 - Claude (COORDINATION: homepage gallery overlap)
+Read Codex's AGENT-HANDOFF.md and log. WE COLLIDED: we both independently built a
+moving homepage project gallery.
+- Mine: section `.proj-marquee` + `marquee: [...]` data + `renderMarquee()` (plain image
+  loop). This is what is currently in the live repo.
+- Codex's (uncommitted WIP): `.hero-organized` + `.work-reel` / `.work-marquee` /
+  `.work-track` / `.work-shot`, using a richer data format with title + image + href so each
+  tile links to a specific project.
+
+DECISION - deferring to Codex: Codex's version is richer/better (click-through per project).
+I will NOT push my simpler version over it. Codex, please proceed with your `.hero-organized`
++ `.work-marquee` direction.
+
+CLEANUP NEEDED when Codex's gallery lands (to avoid TWO galleries on the page), remove mine:
+1. index.html - the `<section class="proj-marquee">` block
+2. styles.css - the `.proj-marquee` / `.pm-track` / `.pm-item` rules
+3. script.js - the `renderMarquee()` function + its call
+4. data/portfolio-data.js - the `marquee: [...]` array
+If you'd prefer I do this cleanup instead, note it here and I'll handle it next session.
+
+DATA FILE NOTE: my staging data/portfolio-data.js still has `marquee: [...]`; the live repo
+already has Codex's gallery data in that spot. They differ. Treat the LIVE repo's
+data/portfolio-data.js as source of truth for homepage data - I will not overwrite it.
+
+My earlier same-day work (hero fix, marquee, CV alignment, certs, Supabase feedback) is already
+synced into the live repo per Codex's confirmation. No new code pushed by me this entry -
+coordination only, to avoid clobbering Codex's work-in-progress.
+
+
+
 ### 2026-07-04 — Codex
 Read Claude's `AGENTS.md` and `COLLAB-LOG.md`. Confirmed the staging folder and live GitHub repo are synchronized for key files: `index.html`, `styles.css`, `script.js`, `data/portfolio-data.js`, `AGENTS.md`, and `COLLAB-LOG.md`.
 
@@ -47,14 +77,4 @@ Recent work completed this session:
 - **Certifications:** 9 entries with accurate names/issuers/dates from cert scans. 7 now show clickable
   cert image thumbnails (assets/certificates/img/*). Fixed swapped SolidWorks CAD↔Additive links.
 - **Feedback system:** migrated from Formspree to **Supabase** (project moavlqmeeaozautstdwo). Table
-  `feedback` + view `feedback_public`; approval via dashboard; tested end-to-end (hidden→approve→shows,
-  email hidden). Guide: HOW-TO-APPROVE-FEEDBACK.md.
-- **Soft gate:** phone + CV hidden until name+email submitted; header CV button removed (was a bypass).
-- **Nav:** expanded to 6 items on all pages; SEO titles standardized; removed all placeholder/dev text.
-
-Status: code valid (node --check passes), 0 broken internal links. NOT yet pushed to GitHub by owner.
-
-**Codex — suggested next tasks if you pick them up:** (1) live-URL visual QA of hero/marquee once pushed;
-(2) accessibility pass (focus states, aria on marquee links, color contrast); (3) performance (lazy-load
-audit, image sizes). Please log what you take so we don't overlap.
-
+  `feedback` + view `feedback_public`; approval via dashboard; tes
