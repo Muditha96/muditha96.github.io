@@ -6,22 +6,22 @@ window.portfolioData = {
     name: "Muditha Priyasad",
     role: "Mechanical Design, Automation & R&D Engineer",
     credential: "BSc (Hons) in Mechanical Engineering | IESL Associate Member: AM-32795",
-    subtitle: "Factory automation · Machine design · Jigs & fixtures · PLC/HMI troubleshooting · 3D printed tooling",
-    summary: "Hands-on Mechanical Engineer who builds production machines from concept through commissioning — connecting mechanical design with automation, PLC controls, pneumatics, troubleshooting and rapid prototyping.",
+    subtitle: "Machine design | Prototyping | Commissioning | Troubleshooting | PLC-based control | Pneumatics | DfMA",
+    summary: "Mechanical Design, Automation & R&D Engineer with 2+ years experience across 15+ delivered projects spanning machine design, prototyping, commissioning and troubleshooting of production equipment. Skilled in PLC-based control, pneumatics, DfMA and rapid prototyping, with a track record of delivering low-cost automation and tooling that measurably improve throughput, consistency and operator productivity.",
     status: "Open to Better Opportunities",
     cv: "assets/docs/Muditha-Priyasad-CV.pdf",
     photo: "assets/images/hero/hero-portrait.png",
     email: "muditha00@icloud.com",
     phone: "+94 71 7599 667",
     phoneHref: "tel:+94717599667",
-    tagline: "Mechanical & Automation Engineer — I design, build, wire and commission industrial machines (SolidWorks · PLC/SCADA · automation).",
+    tagline: "Mechanical Design, Automation & R&D Engineer - low-cost automation, tooling, commissioning and production troubleshooting.",
     github: "",  // optional: paste your GitHub profile URL, e.g. https://github.com/yourname
     linkedin: "https://www.linkedin.com/in/muditha00",
     linkedinLabel: "linkedin.com/in/muditha00",
     whatsapp: "https://wa.me/94717599667",
     whatsappLabel: "+94 71 7599 667",
     location: "Sri Lanka",
-    experience: "15+ practical projects · 4 industrial environments · 5+ industrial training programs.",
+    experience: "2+ years experience across 15+ delivered projects | 20+ MTone custom jobs | 4 industrial environments.",
     bestFitRoles: ["Automation Engineer", "Mechatronics Engineer", "Mechanical Design Engineer", "Production Engineer", "Maintenance / Reliability Engineer", "R&D / Machine Development Engineer"],
     openTo: "Automation / Mechatronics / Mechanical Design / Production Engineering roles",
     capabilityHighlights: ["Machine troubleshooting", "Jigs & fixtures", "PLC / HMI support", "3D printed tooling", "Factory improvement"],
@@ -30,19 +30,19 @@ window.portfolioData = {
   },
 
   stats: [
-    { value: "15+", label: "Practical Projects" },
-    { value: "2+", label: "Years Industry Experience" },
-    { value: "9+", label: "Certifications" },
-    { value: "5+", label: "Years Combined Engineering" }
+    { value: "15+", label: "Delivered Projects" },
+    { value: "2+", label: "Years Experience" },
+    { value: "6", label: "CV Certifications" },
+    { value: "20+", label: "MTone Custom Jobs" }
   ],
 
   recruiterQuickView: {
-    target: "Mechanical / Automation Engineering roles focused on machine design, industrial troubleshooting, fixture development and factory automation support.",
-    strengths: ["Machine troubleshooting", "Fixture and jig design", "PLC / HMI support", "3D printing and prototyping", "Engineering documentation"],
+    target: "Mechanical Design, Automation & R&D roles focused on machine design, prototyping, commissioning, production troubleshooting and low-cost automation.",
+    strengths: ["Machine design", "Prototyping", "Commissioning", "Production troubleshooting", "PLC-based control", "Pneumatics", "DfMA", "Rapid prototyping"],
     evidence: [
-      { label: "Best project evidence", value: "LED machine troubleshooting, bonding tape automation, fixture design and training case studies." },
-      { label: "Machines exposed to", value: "Assembly machines, packing machines, spot welders, screw feeders, testing fixtures and laser systems." },
-      { label: "Software and tools", value: "SOLIDWORKS, AutoCAD, Power BI, MATLAB, PLC/HMI basics, slicers and documentation tools." }
+      { label: "Best project evidence", value: "Production machines, jigs, fixtures, pneumatic mechanisms, custom 3D printers, laser machines and training case studies." },
+      { label: "Machines exposed to", value: "Spot welding, packing, pad printing, LED cup installation, screen-printer troubleshooting, testing, oil filling and glove-making machine service." },
+      { label: "Software and tools", value: "SOLIDWORKS, Siemens STEP 7 Micro/WIN, Delta ISPSoft, Mitsubishi GX Works, Xinje PLC Software, MS Excel, OrcaSlicer, Cura, LightBurn, Inkscape, Arduino IDE, Python, C++, Raspberry Pi. Also familiar with AutoCAD, MATLAB and Power BI." }
     ],
     links: [
       { label: "Projects", href: "projects.html" },
@@ -306,26 +306,26 @@ window.portfolioData = {
     }
   ],
   skills: {
-    toolMap: ["Design & modelling", "Automation support", "Digital fabrication", "Documentation & analysis"],
+    toolMap: ["Mechanical design & DfMA", "Automation & commissioning", "Manufacturing improvement", "Digital fabrication"],
     groups: [
       {
         title: "Mechanical Design",
         level: "Strong / Practical",
         tools: [
           ["SOLIDWORKS", "Parts, assemblies, fixtures"],
-          ["Machine parts", "Mechanism & component design"],
+          ["Mechanisms", "Jigs, fixtures, 3D CAD and DfMA"],
           ["Jigs & fixtures", "Assembly and test tooling"],
-          ["Design for 3D printing", "Printable, low-cost tooling"]
+          ["Fabrication support", "Buildable parts, tooling and production aids"]
         ]
       },
       {
         title: "Automation & Controls",
         level: "Practical / Working knowledge",
         tools: [
-          ["PLC programming", "Siemens S7-200, Delta, Xinje, Mitsubishi"],
+          ["PLC programming", "Siemens STEP 7 Micro/WIN, Delta ISPSoft, Mitsubishi GX Works, Xinje PLC Software"],
           ["HMI & troubleshooting", "Fault isolation & recovery"],
           ["Sensors", "Detection & alignment"],
-          ["Pneumatics", "Sequencing & actuation"],
+          ["Pneumatics", "Sequencing, actuation and commissioning"],
           ["Machine fault finding", "Structured diagnosis"],
           ["Wiring understanding", "Panel & machine support"]
         ]
@@ -334,9 +334,9 @@ window.portfolioData = {
         title: "Manufacturing & Maintenance",
         level: "Practical",
         tools: [
-          ["Assembly improvement", "Smoother, repeatable flow"],
-          ["Testing fixtures", "Safer QC handling"],
-          ["Operator support", "Easier, safer workflows"],
+          ["Root-cause analysis", "Structured production problem solving"],
+          ["TPM / 5S / Kaizen", "Manufacturing improvement support"],
+          ["SOPs / KPI tracking", "Operational checklists and reporting support"],
           ["Maintenance thinking", "Access & reliability"],
           ["Low-cost automation", "Simple, effective solutions"]
         ]
@@ -345,12 +345,11 @@ window.portfolioData = {
         title: "Digital Tools",
         level: "Developing / Practical",
         tools: [
-          ["ERP concept", "Costing, inventory, quotations"],
-          ["Excel", "Tracking & analysis"],
-          ["Power BI", "Dashboards"],
-          ["Documentation", "Clear engineering records"],
-          ["Python / C++", "Automation & tooling scripts"],
-          ["Raspberry Pi / Arduino", "Embedded prototyping"]
+          ["MS Excel", "Tracking, analysis and KPI support"],
+          ["AutoCAD / MATLAB / Power BI", "Also familiar with"],
+          ["LightBurn / Inkscape", "Laser and artwork preparation"],
+          ["Python / C++", "Automation, tooling and learning projects"],
+          ["Arduino IDE / Raspberry Pi", "Embedded prototyping"]
         ]
       },
       {
@@ -364,7 +363,7 @@ window.portfolioData = {
         ]
       }
     ],
-    strengths: ["Root Cause Analysis", "Machine Troubleshooting", "Fixture Design", "Rapid Prototyping", "Manufacturing Support", "Documentation", "Cost-conscious Design", "Continuous Learning"]
+    strengths: ["Root Cause Analysis", "Machine Troubleshooting", "Fixture Design", "Rapid Prototyping", "DfMA", "TPM / 5S / Kaizen", "Commissioning", "Continuous Improvement"]
   },
 
   machines: [
@@ -470,15 +469,15 @@ window.portfolioData = {
   ],
 
   certifications: [
-    { name: "BSc (Hons) Mechanical Engineering", issuer: "University of Jaffna", detail: "Faculty of Engineering · Oct 2017 – Feb 2024." },
+    { name: "BSc (Hons) Mechanical Engineering", issuer: "University of Jaffna", detail: "Faculty of Engineering - Oct 2017 to Feb 2024." },
     { name: "IESL Associate Member", issuer: "Institution of Engineers Sri Lanka", detail: "Membership AM-32795." },
-    { name: "SOLIDWORKS CSWA — CAD Design", issuer: "Dassault Systèmes SOLIDWORKS", detail: "Certified SOLIDWORKS Associate (mechanical design).", file: "assets/certificates/Certificate_C-T7NHSLZ59X.pdf", image: "assets/certificates/img/Certificate_C-T7NHSLZ59X.jpg" },
-    { name: "SOLIDWORKS CSWA-AM — Additive Manufacturing", issuer: "Dassault Systèmes SOLIDWORKS", detail: "Certified SOLIDWORKS Associate, Additive Manufacturing.", file: "assets/certificates/Certificate_C-UQGLWM7JCK.pdf", image: "assets/certificates/img/Certificate_C-UQGLWM7JCK.jpg" },
-    { name: "Designing, Maintaining & Troubleshooting of PLC-Based Automated Systems", issuer: "University of Moratuwa", detail: "Robotics & Control Systems Laboratory · 15 Feb 2025.", image: "assets/certificates/img/plc-moratuwa.jpg" },
-    { name: "PLC Programming Course", issuer: "Epic Engineering", detail: "Industrial PLC programming · 2024." },
-    { name: "Maintenance of Industrial Plant & Machinery", issuer: "NERDC", detail: "Mechatronics Engineering Dept · 24–25 Jan 2026.", image: "assets/certificates/img/nerdc-maintenance.jpg" },
-    { name: "Industrial Motor Operation & Control Systems", issuer: "NERDC", detail: "Mechatronics Engineering Dept · 3–4 May 2025.", image: "assets/certificates/img/nerdc-motor-control.jpg" },
-    { name: "Advanced Plastic Injection Molding Technology", issuer: "Industrial Development Board of Ceylon (IDB)", detail: "Technical Services Division · 16 Dec 2025.", image: "assets/certificates/img/idb-injection-molding.jpg" }
+    { name: "CSWA - Mechanical Design", issuer: "Dassault Systemes SOLIDWORKS", detail: "Certified SOLIDWORKS Associate - Mechanical Design.", file: "assets/certificates/Certificate_C-T7NHSLZ59X.pdf", image: "assets/certificates/img/Certificate_C-T7NHSLZ59X.jpg" },
+    { name: "CSWA-AM - Additive Manufacturing", issuer: "Dassault Systemes SOLIDWORKS", detail: "Certified SOLIDWORKS Associate - Additive Manufacturing.", file: "assets/certificates/Certificate_C-UQGLWM7JCK.pdf", image: "assets/certificates/img/Certificate_C-UQGLWM7JCK.jpg" },
+    { name: "PLC Training", issuer: "University of Moratuwa", detail: "PLC training - Robotics & Control Systems Laboratory, 2025.", image: "assets/certificates/img/plc-moratuwa.jpg" },
+    { name: "PLC Programming Course", issuer: "Epic Engineering", detail: "Industrial PLC programming - 2024." },
+    { name: "Maintenance of Industrial Plant & Machinery", issuer: "NERDC", detail: "Maintenance of Industrial Plant & Machinery - 2026.", image: "assets/certificates/img/nerdc-maintenance.jpg" },
+    { name: "Industrial Motor Operation & Control", issuer: "NERDC", detail: "Industrial Motor Operation & Control - 2025.", image: "assets/certificates/img/nerdc-motor-control.jpg" },
+    { name: "Advanced Injection Moulding", issuer: "Industrial Development Board of Ceylon (IDB)", detail: "Advanced Injection Moulding - 2026.", image: "assets/certificates/img/idb-injection-molding.jpg" }
   ],
 
   availableFor: ["Automation Engineering", "Mechanical Design", "Machine Troubleshooting", "Fixture Design", "3D Printing & Prototyping", "Engineering Documentation"],

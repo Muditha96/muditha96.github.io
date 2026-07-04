@@ -1,4 +1,7 @@
 ## 2026-07-04 Codex
+- Aligned portfolio wording with the latest CV PDF (`Muditha-Priyasad-CV.pdf`): exact role title, professional summary, stats, core tools, certification names and dates.
+- Treated the CV as the source of truth and kept extra portfolio project detail public-safe without adding conflicting claims.
+## 2026-07-04 Codex
 - Reworked the home first viewport into a denser two-column recruiter view: vertical selected-work gallery on the left, profile details and hero photo on the right.
 - Updated `marquee[]` to use named public-safe project/artwork entries and taught `renderMarquee()` to show image labels while keeping old string entries compatible.
 - Kept gallery links to valid public pages only; no confidential files, private dimensions, programs or production data were added.
