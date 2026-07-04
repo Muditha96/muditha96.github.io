@@ -1,4 +1,7 @@
 ## 2026-07-04 Codex
+- Fixed the oversized homepage project gallery window by capping the desktop gallery height, restoring fixed image-card heights, and keeping the gallery in the left column.
+- This overrides the earlier uncropped auto-height gallery rules that made the project gallery panel too long.
+## 2026-07-04 Codex
 - Aligned portfolio wording with the latest CV PDF (`Muditha-Priyasad-CV.pdf`): exact role title, professional summary, stats, core tools, certification names and dates.
 - Treated the CV as the source of truth and kept extra portfolio project detail public-safe without adding conflicting claims.
 ## 2026-07-04 Codex

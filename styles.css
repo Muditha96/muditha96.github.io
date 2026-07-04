@@ -872,3 +872,74 @@ h1,h2,h3,.brand-copy strong,.hero-id h1,.bf-label,.skill-head h2,.sc-head h3{col
   .home-first-screen .quickview.compact-qv .qv-card p{font-size:.8rem!important}
   .home-first-screen .best-fit-line{margin-top:.5rem!important}
 }
+/* ================================================================
+   FIX: compact homepage project gallery window (Codex 2026-07-04)
+   Prevents the moving gallery from becoming a tall page-length panel.
+   ================================================================ */
+@media(min-width:900px){
+  .home-first-screen{
+    grid-template-columns:minmax(250px,320px) minmax(0,1fr)!important;
+    align-items:start!important;
+    min-height:0!important;
+    max-height:none!important;
+    gap:1rem!important;
+  }
+  .home-first-screen .vertical-gallery{
+    grid-column:1!important;
+    order:1!important;
+    align-self:start!important;
+    height:clamp(420px,calc(100vh - 150px),560px)!important;
+    max-height:560px!important;
+    min-height:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+  }
+  .home-first-screen .home-hero{
+    grid-column:2!important;
+    order:2!important;
+    min-height:0!important;
+    height:auto!important;
+    overflow:visible!important;
+  }
+  .home-first-screen .vertical-gallery .vg-head{
+    flex:0 0 auto!important;
+    padding-bottom:.55rem!important;
+    margin-bottom:.55rem!important;
+  }
+  .home-first-screen .vertical-gallery .pm-track{
+    flex:0 0 auto!important;
+    flex-direction:column!important;
+    width:100%!important;
+    height:auto!important;
+    gap:.55rem!important;
+    animation:pmVerticalScroll 42s linear infinite!important;
+  }
+  .home-first-screen .vertical-gallery .pm-item{
+    width:100%!important;
+    height:118px!important;
+    flex:0 0 118px!important;
+    background:#0a1020!important;
+    border:1px solid rgba(112,136,190,.32)!important;
+    border-radius:9px!important;
+    overflow:hidden!important;
+  }
+  .home-first-screen .vertical-gallery .pm-item img{
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+    display:block!important;
+  }
+  .home-first-screen .vertical-gallery .pm-item span{
+    font-size:.72rem!important;
+    padding:.3rem .42rem!important;
+  }
+}
+@media(max-width:899px){
+  .home-first-screen .vertical-gallery{
+    height:auto!important;
+    max-height:none!important;
+  }
+}
