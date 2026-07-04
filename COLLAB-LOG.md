@@ -1,3 +1,7 @@
+## 2026-07-04 Codex
+- Reworked the home first viewport into a denser two-column recruiter view: vertical selected-work gallery on the left, profile details and hero photo on the right.
+- Updated `marquee[]` to use named public-safe project/artwork entries and taught `renderMarquee()` to show image labels while keeping old string entries compatible.
+- Kept gallery links to valid public pages only; no confidential files, private dimensions, programs or production data were added.
 # COLLAB-LOG.md — Shared change log (Claude ⇄ Codex)
 
 Team log so Claude and Codex don't collide. **Append new entries at the TOP.**

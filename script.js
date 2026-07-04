@@ -508,10 +508,20 @@ initCommentForm();
 function renderMarquee(){
   const track = document.querySelector('[data-render="marquee"]');
   if (!track) return;
-  const imgs = (window.portfolioData && window.portfolioData.marquee) || [];
-  if (!imgs.length){ track.closest('.proj-marquee')?.remove(); return; }
-  const one = imgs.map(src => `<a class="pm-item" href="projects.html" aria-label="View projects"><img src="${escapeHtml(src)}" alt="Engineering project photo" loading="lazy" decoding="async"></a>`).join('');
+  const items = (window.portfolioData && window.portfolioData.marquee) || [];
+  if (!items.length){ track.closest('.proj-marquee')?.remove(); return; }
+  const card = item => {
+    const data = typeof item === 'string'
+      ? { image: item, title: 'Engineering project evidence', href: 'projects.html' }
+      : item;
+    const title = data.title || 'Engineering project evidence';
+    const href = data.href || 'projects.html';
+    const image = data.image || data.src || '';
+    if (!image) return '';
+    return `<a class="pm-item" href="${escapeHtml(href)}" aria-label="View ${escapeHtml(title)}"><img src="${escapeHtml(image)}" alt="${escapeHtml(title)}" loading="lazy" decoding="async"><span>${escapeHtml(title)}</span></a>`;
+  };
+  const one = items.map(card).join('');
   track.innerHTML = one + one; // duplicate for seamless loop
-  track.style.setProperty('--pm-count', imgs.length);
+  track.style.setProperty('--pm-count', items.length);
 }
 renderMarquee();

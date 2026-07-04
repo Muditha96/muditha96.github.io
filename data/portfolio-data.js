@@ -491,19 +491,20 @@ window.portfolioData = {
   supabaseUrl: "https://moavlqmeeaozautstdwo.supabase.co",
   supabaseKey: "sb_publishable_USF5QpA9ILbcwtsBogC5DA_j5iEv0aN",
   // ====== Homepage running project image strip ======
+  // Use meaningful public-safe project/artwork images. Title becomes the visible label.
   marquee: [
-    "assets/images/projects-gallery/3d-printer/01.jpg",
-    "assets/images/projects-gallery/cnc-laser/IMG_7651.jpg",
-    "assets/images/projects-gallery/gripper/01.jpg",
-    "assets/images/projects-gallery/bonding-tape/01.jpg",
-    "assets/images/projects-gallery/line-follower/01.jpg",
-    "assets/images/projects-gallery/screen-printer/210.jpg",
-    "assets/images/projects-gallery/combustion/305.jpg",
-    "assets/images/projects-gallery/3d-printer/03.jpg",
-    "assets/images/projects-gallery/cnc-laser/IMG_7653.jpg",
-    "assets/images/projects-gallery/bonding-tape/05.jpg",
-    "assets/images/projects-gallery/oil-tray/01.jpg",
-    "assets/images/projects-gallery/screen-printer/222.jpg"
+    { title: "CNC Laser Machine", image: "assets/images/real/cnc-laser-machine.jpg", href: "project-detail.html?project=cnc-laser-engraver" },
+    { title: "CNC Laser Machine Build", image: "assets/images/real/cnc-laser-machine-2.jpg", href: "project-detail.html?project=cnc-laser-engraver" },
+    { title: "Custom FDM 3D Printer", image: "assets/images/real/3d-printer-build.jpg", href: "project-detail.html?project=custom-3d-printer" },
+    { title: "3D Printer Motion Prototype", image: "assets/images/gallery/curated/3d-printer-prototype.jpg", href: "project-detail.html?project=custom-3d-printer" },
+    { title: "Self-Tighten Gripper", image: "assets/images/real/gripper.jpg", href: "projects.html" },
+    { title: "Line Follower Robot", image: "assets/images/real/line-follower-robot.jpg", href: "projects.html" },
+    { title: "Combustion Chamber SCADA", image: "assets/images/real/combustion-scada.png", href: "projects.html" },
+    { title: "Screen Printer Mechanism", image: "assets/images/real/screen-printer.png", href: "projects.html" },
+    { title: "Oil Dripping Tray Redesign", image: "assets/images/real/oil-tray.png", href: "projects.html" },
+    { title: "Laser Engraving Artwork", image: "assets/images/business/engraving-painted.jpg", href: "gallery.html" },
+    { title: "3D Printed Lithophane Artwork", image: "assets/images/business/lithophane.jpg", href: "gallery.html" },
+    { title: "Wood Engraving Sample", image: "assets/images/gallery/curated/wood-engraving-sample.jpg", href: "gallery.html" }
   ],
 
   // Only comments YOU add here appear on the site (approval = you paste an approved one in).
