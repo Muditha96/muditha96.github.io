@@ -1527,3 +1527,93 @@ h1,h2,h3,.brand-copy strong,.hero-id h1,.bf-label,.skill-head h2,.sc-head h3{col
     flex-basis:150px!important;
   }
 }
+/* HERO OPPORTUNITY AND CONTACT RAIL ALIGNMENT: opportunity after intro, icons beside portrait. */
+@media (min-width:900px){
+  .compact-hero-panel .hero-blend{
+    width:min(100%,220px)!important;
+    max-width:220px!important;
+  }
+  .home-first-screen .hero-copy .intro-opportunity{
+    margin:.68rem 0 0!important;
+    width:max-content!important;
+    max-width:100%!important;
+    min-height:34px!important;
+    padding:.42rem .78rem!important;
+    justify-content:flex-start!important;
+    background:rgba(15,23,42,.72)!important;
+    color:#f2f7ff!important;
+    border-color:rgba(35,213,255,.38)!important;
+  }
+  .home-first-screen .compact-hero-media{
+    display:grid!important;
+    grid-template-columns:minmax(0,220px) 42px!important;
+    grid-template-areas:"photo icons"!important;
+    column-gap:.52rem!important;
+    align-items:center!important;
+    justify-content:center!important;
+    justify-items:center!important;
+    width:100%!important;
+  }
+  .home-first-screen .compact-hero-media .hero-photo-wrap{
+    grid-area:photo!important;
+    align-self:center!important;
+    justify-self:end!important;
+    width:100%!important;
+    max-width:220px!important;
+  }
+  .home-first-screen .compact-hero-media .hero-icon-rail{
+    grid-area:icons!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-self:center!important;
+    justify-self:start!important;
+    margin:0!important;
+    gap:.42rem!important;
+  }
+  .home-first-screen .compact-hero-media .hero-icon-rail a{
+    width:38px!important;
+    height:38px!important;
+  }
+}
+@media (max-width:899px){
+  .home-first-screen .hero-copy .intro-opportunity{
+    margin:.6rem auto 0!important;
+    justify-content:center!important;
+  }
+  .home-first-screen .compact-hero-media .hero-icon-rail{
+    flex-direction:row!important;
+    justify-content:center!important;
+  }
+}
+/* HERO FIELD SPACING: tighten gap below opportunity badge and above engineering cards. */
+@media (min-width:900px){
+  .home-first-screen .home-hero.compact-hero-panel{
+    row-gap:.42rem!important;
+  }
+  .home-first-screen .hero-copy .intro-opportunity{
+    margin:.48rem 0 0!important;
+  }
+  .compact-hero-panel .best-fit-line,
+  .home-first-screen .best-fit-line{
+    margin:.12rem 0 0!important;
+    gap:.26rem!important;
+  }
+  .compact-hero-panel .best-fit-roles{
+    gap:.25rem!important;
+  }
+  .compact-hero-panel .best-fit-roles li{
+    padding:.24rem .42rem!important;
+  }
+  .home-first-screen .home-hero.compact-hero-panel > .compact-qv.quickview{
+    margin-top:0!important;
+  }
+}
+@media (max-width:899px){
+  .home-first-screen .hero-copy .intro-opportunity{
+    margin:.42rem auto 0!important;
+  }
+  .compact-hero-panel .best-fit-line,
+  .home-first-screen .best-fit-line{
+    margin:.16rem 0 0!important;
+  }
+}
