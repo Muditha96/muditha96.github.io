@@ -1617,3 +1617,53 @@ h1,h2,h3,.brand-copy strong,.hero-id h1,.bf-label,.skill-head h2,.sc-head h3{col
     margin:.16rem 0 0!important;
   }
 }
+/* HERO GAP FIX: remove leftover margin inside role chips and pull field cards closer. */
+@media (min-width:900px){
+  .home-first-screen .home-hero.compact-hero-panel{
+    row-gap:.24rem!important;
+  }
+  .home-first-screen .hero-copy .intro-opportunity{
+    margin:.42rem 0 .16rem!important;
+  }
+  .home-first-screen .best-fit-line,
+  .compact-hero-panel .best-fit-line{
+    margin:0!important;
+    gap:.22rem .28rem!important;
+    align-items:center!important;
+  }
+  .home-first-screen .bf-label{
+    flex:0 0 auto!important;
+    line-height:1!important;
+    margin:0!important;
+  }
+  .home-first-screen .best-fit-roles,
+  .compact-hero-panel .best-fit-roles{
+    flex:1 1 420px!important;
+    min-width:0!important;
+    margin:0!important;
+    gap:.24rem!important;
+  }
+  .home-first-screen .best-fit-roles li,
+  .compact-hero-panel .best-fit-roles li{
+    padding:.23rem .42rem!important;
+    line-height:1.05!important;
+  }
+  .home-first-screen .home-hero.compact-hero-panel > .compact-qv.quickview{
+    margin-top:.16rem!important;
+  }
+}
+@media (max-width:899px){
+  .home-first-screen .hero-copy .intro-opportunity{
+    margin:.38rem auto .12rem!important;
+  }
+  .home-first-screen .best-fit-line,
+  .compact-hero-panel .best-fit-line{
+    margin:0!important;
+    gap:.24rem!important;
+  }
+  .home-first-screen .best-fit-roles,
+  .compact-hero-panel .best-fit-roles{
+    flex:1 1 100%!important;
+    margin:0!important;
+  }
+}
