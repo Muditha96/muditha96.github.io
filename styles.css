@@ -1454,3 +1454,76 @@ h1,h2,h3,.brand-copy strong,.hero-id h1,.bf-label,.skill-head h2,.sc-head h3{col
 @media (prefers-reduced-motion:reduce){
   .home-first-screen .vertical-gallery .pm-track{animation:none!important;transform:none!important;}
 }
+/* HOMEPAGE COMPACT HEIGHT PASS: remove empty vertical band. */
+@media (min-width:900px){
+  .home-first-screen{
+    align-items:start!important;
+    gap:.85rem!important;
+    margin-top:.55rem!important;
+  }
+  .home-first-screen .home-hero.compact-hero-panel{
+    min-height:520px!important;
+    height:auto!important;
+    max-height:none!important;
+    align-content:start!important;
+    row-gap:.6rem!important;
+    padding:.95rem 1.1rem!important;
+  }
+  .home-first-screen .home-hero.compact-hero-panel > .compact-qv.quickview{
+    align-self:start!important;
+    margin-top:0!important;
+  }
+  .home-first-screen .compact-qv.quickview .qv-card{
+    min-height:104px!important;
+    padding:.58rem!important;
+  }
+  .home-first-screen .compact-qv.quickview .qv-card h3{
+    font-size:.86rem!important;
+    margin-bottom:.22rem!important;
+  }
+  .home-first-screen .compact-qv.quickview .qv-card p{
+    font-size:.74rem!important;
+    line-height:1.25!important;
+  }
+  .home-first-screen .vertical-gallery{
+    height:520px!important;
+    min-height:520px!important;
+    max-height:520px!important;
+    padding:.62rem!important;
+  }
+  .home-first-screen .vertical-gallery .pm-track{
+    gap:.72rem!important;
+  }
+  .home-first-screen .vertical-gallery .pm-item{
+    height:220px!important;
+    flex-basis:220px!important;
+  }
+  .proofs-head{
+    margin:.42rem 0 .32rem!important;
+  }
+}
+@media (min-width:900px) and (max-width:1120px){
+  .home-first-screen .home-hero.compact-hero-panel{
+    min-height:500px!important;
+  }
+  .home-first-screen .vertical-gallery{
+    height:500px!important;
+    min-height:500px!important;
+    max-height:500px!important;
+  }
+  .home-first-screen .vertical-gallery .pm-item{
+    height:210px!important;
+    flex-basis:210px!important;
+  }
+}
+@media (max-width:899px){
+  .home-first-screen .vertical-gallery{
+    height:330px!important;
+    min-height:330px!important;
+    max-height:330px!important;
+  }
+  .home-first-screen .vertical-gallery .pm-item{
+    height:150px!important;
+    flex-basis:150px!important;
+  }
+}
