@@ -11,17 +11,17 @@ This repository is the live GitHub Pages portfolio for Muditha Priyasad.
 
 Do not create a separate portfolio or parallel version. Continue improving this same repo and keep changes integrated.
 
-## Current Codex work in progress
+## Current Codex homepage direction
 
-Codex is improving the homepage organization because the previous first page felt cluttered and did not quickly show project evidence.
+Codex rebuilt the homepage as a desktop-first static page focused on the 1366x768 first viewport.
 
-Current uncommitted homepage direction:
+Current homepage structure:
 
-- `index.html`: replace the stacked hero with a cleaner recruiter-first hero.
-- `index.html`: add a moving work gallery near the top using existing public-safe project images.
-- `styles.css`: add scoped CSS for `.hero-organized`, `.work-reel`, `.work-marquee`, `.work-track`, and `.work-shot`.
+- `index.html`: compact header, split hero, six-stat strip, Engineering in Practice bento preview, then normal below-fold sections.
+- `homepage.css`: scoped homepage-only layout and styling for the desktop-first rebuild.
+- `script.js`: skips the under-development notice only on `body.homepage-v2` so the first viewport can stay compact.
 
-Before making overlapping homepage changes, inspect the current `git diff` and either continue this direction or discuss a replacement. Do not overwrite these changes blindly.
+Before making overlapping homepage changes, inspect the current `git diff` and keep the same `homepage-v2` structure unless the user asks for another redesign.
 
 ## Safety rules
 
