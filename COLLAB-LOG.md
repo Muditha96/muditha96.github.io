@@ -1,3 +1,12 @@
+## 2026-07-06 Claude
+- Recovered truncated working-tree files: `data/portfolio-data.js` and `script.js` were cut off (line ~506 "Gamunu Combat Robot" entry) in BOTH staging and live. Restored from git HEAD (valid, includes Codex's `gallery/home` marquee + Gamunu/laser/lithophane entries). data + script now pass `node --check`.
+- Fixed `homepage.css` truncation: file ended mid-rule at a stray `@media (max-width:980px){ .hp-` fragment (nothing salvageable; a complete 980px block already exists earlier). Removed the incomplete fragment so braces balance 132/132.
+- Fixed the hero visual (the "empty box" that made the homepage look broken): the portrait was loading (200 OK) but rendered tiny/hidden over a faint machine backdrop. Reworked `.hp-frame` / `.hp-machine` / `.hp-portrait` / `.hp-frame:after` so the portrait now FILLS the diagonally-cut frame (object-fit:cover, object-position 50% 16%), machine dropped to a faint .12 underlay, and edge gradients blend the light-grey studio background into the navy. Verified visually on desktop against the live portrait image - matches the mockup.
+- Kept Codex's `homepage-v2` structure intact; only touched the hero-visual CSS + the truncation repairs. No HTML rewritten.
+- Sync: staging (`SITE-READY-TO-UPLOAD`) and live repo `homepage.css` are byte-identical. 0 broken links site-wide.
+- OPEN ITEMS: (1) not yet committed/pushed - live site still shows the old broken hero until someone pushes. (2) Please sanity-check `assets/images/projects-gallery/combustion/305.jpg` used in the "Combustion Test Chamber" bento card is public-safe (reads as a labelled lab schematic).
+- NOTE on repeated corruption: both truncations (data/script earlier, homepage.css now) came from us writing the same files around the same time. Suggest we avoid simultaneous edits to `homepage.css`/`data/portfolio-data.js` and always run `node --check` + a brace-balance check before saving.
+
 ## 2026-07-04 Codex
 - Hid visible homepage gallery image-name overlays because they disturbed the clean project image view. Link labels remain available for accessibility.
 ## 2026-07-04 Codex
@@ -122,17 +131,4 @@ coordination only, to avoid clobbering Codex's work-in-progress.
 
 
 ### 2026-07-04 — Codex
-Read Claude's `AGENTS.md` and `COLLAB-LOG.md`. Confirmed the staging folder and live GitHub repo are synchronized for key files: `index.html`, `styles.css`, `script.js`, `data/portfolio-data.js`, `AGENTS.md`, and `COLLAB-LOG.md`.
-
-Coordination decision: use `AGENTS.md` + `COLLAB-LOG.md` as the primary shared agent notes going forward. I previously added `AGENT-HANDOFF.md` in the live GitHub repo, but Claude's two-file structure is clearer for ongoing collaboration. Future Codex work should read `AGENTS.md` first, then append a short entry here after changes.
-
-No code changes made in this check. Repo safety: live repo was clean before this log entry.
-
-### 2026-07-04 — Claude
-Set up team collaboration. Created `AGENTS.md` (architecture + rules) and this log.
-Recent work completed this session:
-- **Fixed desktop hero "mess":** appended one authoritative hero layout block at the END of
-  styles.css that overrides the ~15 conflicting `.home-hero` rules. Hero is now centered stack:
-  photo + icon rail on top, name/title/summary/chips below. Responsive at 560/900px.
-- **Added running project image strip (marquee)** on homepage below hero: `marquee[]` (12 real
-  photos) in data, `renderMarquee()` in script.js duplicates for seamless loop, CSS `.pr
+Read Claude's `AGENTS.md` and `COLLAB-LOG.md`. Confirmed the staging folder and live GitHub repo are synchronized for key files: `

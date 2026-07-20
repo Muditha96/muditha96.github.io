@@ -1,63 +1,29 @@
-# AGENTS.md — Project context for AI agents (Claude & Codex)
+# Repository Guidelines
 
-This file gives any AI agent the shared context needed to work on this project safely.
-**Read this first, then read `COLLAB-LOG.md` for the running change log.**
+## Project Structure & Module Organization
+This workspace contains source assets and the publishable static portfolio. Treat `SITE-READY-TO-UPLOAD/` as the working site folder for GitHub Pages. Top-level `assets/`, `certificates/`, and `Gallary images/` are staging/reference assets; move only public-safe, optimized files into the site. Inside `SITE-READY-TO-UPLOAD/`, HTML pages live at the root, shared content is in `data/portfolio-data.js`, behavior is in `script.js`, and styling is split across `styles.css`, `recruiter.css`, and homepage-specific `homepage.css`. Public images and CV files belong under `assets/images/` and `assets/docs/`.
 
-## What this is
-Static personal portfolio site for **Muditha Priyasad** — Mechanical Design, Automation & R&D Engineer.
-- Live site: https://muditha96.github.io
-- Hosting: GitHub Pages (repo: `muditha96/muditha96.github.io`)
-- Stack: **plain static HTML + CSS + vanilla JS**. NO framework, NO build step, NO bundler.
-- Goal: recruiter-friendly, evidence-based, professional. Light theme.
+## Build, Test, and Development Commands
+There is no build step, backend, database, login, or tracking script. Use:
 
-## Architecture (important)
-- **`data/portfolio-data.js`** — single source of truth. Sets `window.portfolioData = {...}`
-  containing: `profile`, `stats`, `projects[]`, `skills{}`, `machines[]`, `gallery[]`,
-  `certifications[]`, `testimonials[]`, `marquee[]`, plus config keys
-  (`commentsEndpoint`, `supabaseUrl`, `supabaseKey`).
-- **`script.js`** — all behaviour. Reads `portfolioData`, renders into elements marked
-  `data-render="..."` (e.g. `featured-projects`, `projects`, `machines`, `skills`,
-  `certifications`, `testimonials`, `marquee`). Also: lightbox, video thumbnails,
-  hero icon rail, mobile action bar, dev-notice banner, feedback (Supabase), unlock gate.
-- **`styles.css`** — one big stylesheet. ⚠️ It has accumulated many overrides from
-  iterative design. The **LAST matching rule wins** — when fixing layout, prefer appending
-  a clean authoritative block at the END rather than editing scattered earlier rules.
-  There is already an "AUTHORITATIVE HERO LAYOUT" block at the end — keep hero changes there.
-- **HTML pages** (21): index, projects, skills, machines, certifications, cv-contact,
-  gallery, about, machine-detail, project-detail, plus older standalone project-*.html.
-  Nav is duplicated in each page's `<header>` (6 items: Home · Projects · Machines · Skills ·
-  Certifications · Contact). If you change nav, change it on ALL pages consistently.
+```bash
+cd SITE-READY-TO-UPLOAD
+python -m http.server 8000
+node --check script.js
+node --check data/portfolio-data.js
+git diff --check
+```
 
-## Key features & how they work
-- **Projects**: homepage shows `featured:true` only (5); Projects page shows all (12).
-  Cards render as video thumbnails; real YouTube link → playable, else "Video coming soon".
-- **Certifications**: 9 entries; those with an `image` field show a clickable thumbnail
-  (opens lightbox). Images in `assets/certificates/img/`.
-- **Feedback / recommendations**: Supabase backend. Table `feedback` (approved=false by
-  default) + public view `feedback_public` (approved only, email hidden). Site shows only
-  approved rows. Owner approves in Supabase dashboard. Project ref: `moavlqmeeaozautstdwo`.
-- **Contact privacy (soft gate)**: phone + CV are hidden on cv-contact.html until a visitor
-  submits name+email (`gate-unlocked` block, revealed by JS). Email/LinkedIn/Location are public.
-- **Running image strip (marquee)**: homepage, `marquee[]` in data, rendered + duplicated
-  by `renderMarquee()` for a seamless CSS loop.
+The server command previews the site locally. The Node commands validate JavaScript syntax. `git diff --check` catches whitespace and patch problems.
 
-## RULES — do not break these
-1. Keep it static & GitHub-Pages compatible. No servers, no build tools, no npm deps in the site.
-2. Don't expose confidential employer data. Public-safe summaries only (there's a confidentiality note).
-3. Don't put the phone number or CV link anywhere PUBLIC — they live only inside the soft-gate
-   `gate-unlocked` block on cv-contact.html. (The header CV button was removed on purpose.)
-4. The Supabase **publishable key is public by design** — safe in the browser; security is via
-   Row-Level Security. Do NOT add service_role/secret keys to the site.
-5. Validate after edits: `node --check script.js` and `node --check data/portfolio-data.js`,
-   and check for broken internal links before finishing.
-6. Don't invent fake numbers, companies, results, or testimonials. Real CV figures only.
-7. Two files are the "guides" the owner uses: HOW-TO-*.md — keep them accurate if behaviour changes.
+## Coding Style & Naming Conventions
+Use plain HTML, CSS, and vanilla JavaScript. Prefer two-space indentation, semantic HTML, accessible labels, and high-contrast text. Use lowercase hyphenated CSS classes; keep homepage-only selectors prefixed with `hp-`. The primary title must remain `Mechanical Design | Industrial Automation | R&D Engineer`. Use `Engineering in Practice`, not `Image Gallery`. Keep wording concise, recruiter-friendly, and focused on practical engineering evidence.
 
-## Working folder
-`SITE-READY-TO-UPLOAD/` is the source of truth the owner copies to the GitHub repo folder
-(`Documents/GitHub/muditha96.github.io`) and pushes via GitHub Desktop. Edit here.
+## Testing Guidelines
+No formal test framework is used. Before marking work complete, open the site in a browser and check `1366x768`, `1440x900`, `1920x1080`, and `390px` mobile. Verify no horizontal overflow, no console errors, working navigation, project links, image/video rendering, and CV download behavior.
 
-## How to test quickly
-- `node --check script.js` / `node --check data/portfolio-data.js`
-- Grep for broken links (href/src pointing to missing local files).
-- Open index.html in a browser for visual QA (do this for layout changes).
+## Commit & Pull Request Guidelines
+Use short imperative commit messages, for example `Rebuild desktop-first homepage` or `Update certification images`. Pull requests should include the purpose, files changed, desktop and mobile screenshots for layout work, tests run, and any content-safety notes.
+
+## Security & Content Safety
+Preserve existing links, project data, images, CV files, and routes unless explicitly asked. Do not add Supabase, backend services, analytics, login, or unnecessary dependencies. Never publish confidential CAD files, PLC programs, HMI sources, wiring diagrams, customer names, supplier names, factory layouts, production data, or internal financial data.
