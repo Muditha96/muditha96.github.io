@@ -423,6 +423,7 @@ window.portfolioData = {
     }
   ],
   gallery: [
+    ...(window.portfolioGalleryLibrary || []),
     // ====== VIDEO GALLERY (YouTube) ======
     // To show a video: upload it to YouTube (Unlisted is fine), then paste the link or ID
     // into the "youtube" field below. Optionally set "image" to a custom thumbnail; if left
