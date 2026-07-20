@@ -397,7 +397,6 @@ initContactBar();
 
 /* ====== Under-development notice (all pages) ====== */
 function initDevNotice(){
-  if (document.body.classList.contains('homepage-v2')) return;
   if (document.getElementById('devNotice')) return;
   const header = document.querySelector('.site-header');
   if (!header) return;
