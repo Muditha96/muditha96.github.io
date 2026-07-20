@@ -183,7 +183,7 @@ function renderEditableContent(){
     }).join('');
     document.querySelectorAll('.cert-thumb').forEach(b => {
       if (b.dataset.bound) return; b.dataset.bound='1';
-      b.addEventListener('click', () => openLightbox('certificates', [b.dataset.certImg], 0));
+      b.addEventListener('click', () => openLightbox('images', [b.dataset.certImg], 0));
     });
   }
 
@@ -324,8 +324,6 @@ function lbRender(){
   const item = lbItems[lbIndex];
   if (lbMode === 'images'){
     c.innerHTML = `<img class="lb-img" src="${item}" alt="Project image ${lbIndex+1}">`;
-  } else if (lbMode === 'certificates'){
-    c.innerHTML = `<div class="lb-cert-wrap"><img class="lb-img" src="${item}" alt="Certificate ${lbIndex+1}"><span>Muditha Priyasad Portfolio</span></div>`;
   } else if (lbMode === 'videos'){
     const id = youTubeId(item.youtube);
     c.innerHTML = id
@@ -397,14 +395,13 @@ initContactBar();
 
 /* ====== Under-development notice (all pages) ====== */
 function initDevNotice(){
-  if (document.body.classList.contains('homepage-v2')) return;
   if (document.getElementById('devNotice')) return;
   const header = document.querySelector('.site-header');
   if (!header) return;
   const bar = document.createElement('div');
   bar.id = 'devNotice';
   bar.className = 'dev-notice';
-  bar.innerHTML = '<span>🚧 This portfolio is still being built — some sections are incomplete and may contain minor errors or inconsistencies. Thanks for your understanding while I keep improving it.</span>';
+  bar.innerHTML = '<span>✨ New projects, photos and videos added regularly — check back for updates.</span>';
   header.insertAdjacentElement('afterend', bar);
 }
 initDevNotice();
@@ -511,20 +508,10 @@ initCommentForm();
 function renderMarquee(){
   const track = document.querySelector('[data-render="marquee"]');
   if (!track) return;
-  const items = (window.portfolioData && window.portfolioData.marquee) || [];
-  if (!items.length){ track.closest('.proj-marquee')?.remove(); return; }
-  const card = item => {
-    const data = typeof item === 'string'
-      ? { image: item, title: 'Engineering project evidence', href: 'projects.html' }
-      : item;
-    const title = data.title || 'Engineering project evidence';
-    const href = data.href || 'projects.html';
-    const image = data.image || data.src || '';
-    if (!image) return '';
-    return `<a class="pm-item" href="${escapeHtml(href)}" aria-label="View ${escapeHtml(title)}"><img src="${escapeHtml(image)}" alt="${escapeHtml(title)}" loading="lazy" decoding="async"><span>${escapeHtml(title)}</span></a>`;
-  };
-  const one = items.map(card).join('');
+  const imgs = (window.portfolioData && window.portfolioData.marquee) || [];
+  if (!imgs.length){ track.closest('.proj-marquee')?.remove(); return; }
+  const one = imgs.map(src => `<a class="pm-item" href="projects.html" aria-label="View projects"><img src="${escapeHtml(src)}" alt="Engineering project photo" loading="lazy" decoding="async"></a>`).join('');
   track.innerHTML = one + one; // duplicate for seamless loop
-  track.style.setProperty('--pm-count', items.length);
+  track.style.setProperty('--pm-count', imgs.length);
 }
 renderMarquee();
