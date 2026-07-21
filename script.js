@@ -525,5 +525,6 @@ function renderMarquee(){
   const one = items.map(card).join('');
   track.innerHTML = one + one; // duplicate for seamless loop
   track.style.setProperty('--pm-count', items.length);
+  track.style.setProperty('--pm-duration', `${Math.max(64, Math.round(items.length * 2.2))}s`);
 }
 renderMarquee();

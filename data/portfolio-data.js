@@ -499,6 +499,7 @@ window.portfolioData = {
   // ====== Homepage running project image strip ======
   // Use meaningful public-safe project/artwork images. Title becomes the visible label.
   marquee: [
+    ...(window.portfolioGalleryLibrary || []).map(item => ({ title: item.title, image: item.image, href: "gallery.html" })),
     { title: "3D Model vs Assembled Part", image: "assets/images/gallery/home/3d-model-vs-assembled-part.jpg", href: "projects.html" },
     { title: "CAD Design vs Printed Part", image: "assets/images/gallery/home/cad-design-vs-printed-part.jpg", href: "projects.html" },
     { title: "3D Printed Gripper", image: "assets/images/gallery/home/3d-printed-gripper.jpg", href: "projects.html" },

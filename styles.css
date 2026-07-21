@@ -1399,7 +1399,7 @@ h1,h2,h3,.brand-copy strong,.hero-id h1,.bf-label,.skill-head h2,.sc-head h3{col
     width:100%!important;
     margin:0!important;
     padding:0!important;
-    animation:pmVerticalScroll 64s linear infinite!important;
+    animation:pmVerticalScroll var(--pm-duration,64s) linear infinite!important;
   }
   .home-first-screen .vertical-gallery:hover .pm-track,
   .home-first-screen .vertical-gallery:focus-within .pm-track{animation-play-state:paused!important;}
@@ -1441,7 +1441,7 @@ h1,h2,h3,.brand-copy strong,.hero-id h1,.bf-label,.skill-head h2,.sc-head h3{col
   .home-first-screen .compact-actions{display:grid!important;grid-template-columns:1fr!important;gap:.55rem!important;width:100%!important;}
   .home-first-screen .compact-actions .button{width:100%!important;min-height:46px!important;}
   .home-first-screen .vertical-gallery{height:390px!important;min-height:390px!important;max-height:390px!important;padding:.7rem!important;overflow:hidden!important;}
-  .home-first-screen .vertical-gallery .pm-track{display:flex!important;flex-direction:column!important;gap:.65rem!important;width:100%!important;animation:pmVerticalScroll 68s linear infinite!important;}
+  .home-first-screen .vertical-gallery .pm-track{display:flex!important;flex-direction:column!important;gap:.65rem!important;width:100%!important;animation:pmVerticalScroll var(--pm-duration,68s) linear infinite!important;}
   .home-first-screen .vertical-gallery .pm-item{width:100%!important;height:170px!important;flex:0 0 170px!important;background:#07101f!important;}
   .home-first-screen .vertical-gallery .pm-item img{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center!important;background:#07101f!important;}
 }
