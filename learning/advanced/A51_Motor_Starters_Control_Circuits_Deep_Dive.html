@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Motor Starters &amp; Control Circuits · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #f97316;       /* contactor copper-orange */
+    --accent-soft: #fdba74;
+    --accent-2: #38bdf8;      /* control-circuit sky */
+    --accent-3: #a3e635;      /* run-status lime */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(249,115,22,0.13), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(56,189,248,0.06), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(249,115,22,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(249,115,22,0.14), rgba(56,189,248,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(249,115,22,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-2)!important; } .c-sky .big{color:var(--accent-2)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #f97316, #7c2d12); color: #fff7ed; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(255,247,237,0.8); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(249,115,22,0.10); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:70px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Electrical Wiring &amp; Installation · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🔄</span>Motor Starters &amp; Control Circuits</h1>
+  <p class="hero-sub">How three-phase motors are actually switched, protected and commanded: the contactor as an electromagnet with a job, DOL and its seal-in ladder, overload relays and trip classes, reversing interlocks, the star-delta ⅓ trick, autotransformer and soft-start reduced-voltage methods, the VFD as the modern starter, and the craft of control-circuit design — jog, sequence, interlock, E-stop — to IEC 60947-4-1 and IEC 60204-1.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>A full advanced module. Related:</span>
+    <a href="A08_VFD_Deep_Dive.html">A08 VFD →</a>
+    <a href="A46_Control_Panel_Wiring_Deep_Dive.html">A46 Panel Wiring →</a>
+    <a href="A30_Three_Phase_Power_Deep_Dive.html">A30 Three-Phase →</a>
+    <a href="A44_Domestic_Wiring_Deep_Dive.html">A44 Domestic Wiring →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · The Starting Problem</a>
+    <a href="#p2">2 · The Contactor</a>
+    <a href="#p3">3 · DOL &amp; the Seal-In</a>
+    <a href="#p4">4 · Overload Protection</a>
+    <a href="#p5">5 · Reversing</a>
+    <a href="#p6">6 · Star-Delta</a>
+    <a href="#p7">7 · Reduced-Voltage Family</a>
+    <a href="#p8">8 · Soft Starters</a>
+    <a href="#p9">9 · VFD &amp; Selection</a>
+    <a href="#p10">10 · Control-Circuit Craft</a>
+    <a href="#p11">11 · Coordination &amp; Sizing</a>
+    <a href="#p12">12 · Recap &amp; Quiz</a>
+    <a href="#p13">13 · Worked Examples</a>
+    <a href="#p14">14 · Problem Set</a>
+    <a href="#p15">15 · Derivations &amp; Traps</a>
+    <a href="#p16">16 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ============ PAGE 1 ============ -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 16 · Foundations</span>
+    <h2 class="page-title">The Motor Starting Problem</h2>
+    <p class="page-sub">An induction motor at standstill is nearly a short circuit — every starter ever invented is a different answer to that one fact.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead">A <span class="hl">motor starter</span> is the combination of switching and protection devices that safely connects a motor to the supply, carries its running current, and disconnects it on command or on fault. Every starter must do four jobs: <span class="hl2">switch</span> the motor on and off, <span class="hl">carry</span> its current continuously, <span class="hl3">protect</span> it from overload, and let a <strong>small control signal command large power</strong>.</p>
+      <p class="body">Why is this hard? At standstill the rotor has no back-EMF; the motor draws its <strong>locked-rotor current</strong> — typically <span class="hl">6–8× full-load current (FLC)</span> — until it accelerates (see <a href="A30_Three_Phase_Power_Deep_Dive.html" style="color:var(--accent-soft)">A30</a> for the slip physics). A 30 kW motor with FLC ≈ 55 A briefly demands ~400 A. That inrush stresses cables, dips the supply voltage for every neighbour, hammers the mechanical drivetrain with 1.5–2.5× rated torque, and heats the rotor. Starters manage <em>how</em> that first second happens.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The family tree</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="arA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#fdba74"/></marker></defs>
+          <g font-size="12" text-anchor="middle" font-weight="600">
+            <rect x="255" y="12" width="190" height="44" rx="12" fill="#f97316"/>
+            <text x="350" y="31" fill="#0b0f14">MOTOR STARTERS</text>
+            <text x="350" y="47" fill="#7c2d12" font-size="10.5">manage the first second</text>
+            <line x1="350" y1="56" x2="350" y2="76" stroke="#fdba74" stroke-width="2"/>
+            <line x1="120" y1="76" x2="580" y2="76" stroke="#fdba74" stroke-width="2"/>
+            <line x1="120" y1="76" x2="120" y2="94" stroke="#fdba74" stroke-width="2" marker-end="url(#arA)"/>
+            <line x1="350" y1="76" x2="350" y2="94" stroke="#fdba74" stroke-width="2" marker-end="url(#arA)"/>
+            <line x1="580" y1="76" x2="580" y2="94" stroke="#fdba74" stroke-width="2" marker-end="url(#arA)"/>
+            <rect x="40" y="98" width="160" height="58" rx="12" fill="#232d3f" stroke="#a3e635" stroke-width="2"/>
+            <text x="120" y="120" fill="#d9f99d">FULL VOLTAGE</text>
+            <text x="120" y="138" fill="#94a3b8" font-size="10.5">DOL · reversing DOL</text>
+            <rect x="270" y="98" width="160" height="58" rx="12" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+            <text x="350" y="120" fill="#7dd3fc">REDUCED VOLTAGE</text>
+            <text x="350" y="138" fill="#94a3b8" font-size="10.5">star-delta · autoTx · soft</text>
+            <rect x="500" y="98" width="160" height="58" rx="12" fill="#232d3f" stroke="#c084fc" stroke-width="2"/>
+            <text x="580" y="120" fill="#e9d5ff">VARIABLE FREQ.</text>
+            <text x="580" y="138" fill="#94a3b8" font-size="10.5">VFD → A08</text>
+            <g font-size="10.5">
+              <rect x="40" y="176" width="160" height="52" rx="10" fill="#11161f" stroke="#334155"/>
+              <text x="120" y="196" fill="#d9f99d" font-size="11">6–8× inrush · full torque</text>
+              <text x="120" y="213" fill="#94a3b8">simple · cheap · brutal</text>
+              <rect x="270" y="176" width="160" height="52" rx="10" fill="#11161f" stroke="#334155"/>
+              <text x="350" y="196" fill="#7dd3fc" font-size="11">2–4× inrush · V² torque tax</text>
+              <text x="350" y="213" fill="#94a3b8">gentler · needs headroom</text>
+              <rect x="500" y="176" width="160" height="52" rx="10" fill="#11161f" stroke="#334155"/>
+              <text x="580" y="196" fill="#e9d5ff" font-size="11">≈1× FLC · full torque at 0 rpm</text>
+              <text x="580" y="213" fill="#94a3b8">costliest · full control</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Three philosophies: hit it with everything (DOL), feed it less voltage (reduced-voltage), or feed it a different frequency (VFD).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive · inrush reality check</div>
+      <p class="body">Pick a motor size and locked-rotor multiplier — see what the three families ask of your supply.</p>
+      <div class="demo">
+        <div class="demo-row"><span>Motor rating (400 V, 3φ)</span><b><span id="d1kw">15</span> kW</b></div>
+        <input type="range" id="d1kwR" min="1" max="90" step="1" value="15">
+        <div class="demo-row"><span>Locked-rotor multiple (from nameplate / code letter)</span><b><span id="d1lr">7.0</span> ×</b></div>
+        <input type="range" id="d1lrR" min="4" max="9" step="0.5" value="7">
+        <div class="demo-out" id="d1out"></div>
+      </div>
+      <p class="cap">FLC estimated as I ≈ P / (√3 · 400 V · 0.85 pf · 0.90 η) — the classic "≈ 2 A per kW at 400 V" rule.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Why it matters</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Voltage dip.</strong> Inrush through the supply impedance dips the busbar voltage; contactors elsewhere can drop out below ~85% U<sub>n</sub>, and lighting flickers. Utilities and IEC 60034-12 limit starting current for large machines.</span></li>
+        <li><span class="num">2</span><span><strong>Thermal budget.</strong> Rotor heating during a start ∝ I²t is enormous — motors are rated for a limited number of <em>starts per hour</em>. Two hot starts back-to-back can cook a rotor cage.</span></li>
+        <li><span class="num">3</span><span><strong>Mechanical shock.</strong> DOL torque steps from zero to ~2× rated instantly — couplings, belts and gearboxes (A20) feel every start. Soft methods multiply drivetrain life.</span></li>
+        <li><span class="num">4</span><span><strong>The trade-off law.</strong> Any method that reduces starting <em>current</em> by feeding less voltage also reduces starting <em>torque</em> as V² — you cannot have low current and high torque from a fixed frequency. Only the VFD escapes (A08).</span></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A 22 kW motor (FLC 41 A) starts DOL with a locked-rotor multiple of 7.5. What current does the cable see at the moment of closing, and why doesn't the overload relay trip?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Inrush ≈ 7.5 × 41 ≈ <b>308 A</b> (plus a brief asymmetric DC-offset peak that can approach 2× that on the worst phase). The overload relay doesn't trip because it is a <b>thermal</b> device deliberately made slow: its trip class (Page 4) guarantees it rides through a normal start (e.g. Class 10 allows ~10 s at 7.2× I<sub>e</sub>). Short-circuit protection is a separate, fast device — the division of labour that Page 11 formalises as coordination.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 ============ -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 16 · The Workhorse</span>
+    <h2 class="page-title">The Contactor — an Electromagnet with a Job</h2>
+    <p class="page-sub">A relay grown up: a coil that costs watts commands contacts that carry kilowatts.</p>
+
+    <div class="card">
+      <div class="label">Anatomy &amp; principle</div>
+      <p class="lead">A <span class="hl">contactor</span> is an electromagnetically operated switch designed for high make/break duty. Energise the coil (terminals <span class="mono hl2">A1–A2</span>) → the magnetic circuit closes the armature → three <strong>main contacts</strong> (1-2, 3-4, 5-6) close together, connecting L1L2L3 to T1T2T3. De-energise → springs open them. The genius is the <span class="hl">separation of circuits</span>: a 3 W coil at 24 V DC switches a 55 kW motor at 400 V.</p>
+      <p class="body">Coil behaviour matters: the open magnetic circuit draws an <strong>inrush ~6–10× the holding VA</strong> (AC coils) until the armature seats — size control transformers for it (A46). Below ~75–85% U<sub>n</sub> the magnet can't hold: the contactor <strong>drops out</strong>. That's a feature — it is your free undervoltage protection, and why 3-wire control (Page 3) doesn't restart after a power dip.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Control commands power — the split</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" font-weight="600">
+            <rect x="15" y="15" width="330" height="230" rx="14" fill="#11161f" stroke="#38bdf8" stroke-width="2"/>
+            <text x="180" y="40" fill="#7dd3fc" text-anchor="middle">CONTROL CIRCUIT · 24 V DC / 230 V AC</text>
+            <text x="180" y="58" fill="#94a3b8" font-size="10.5" text-anchor="middle">milliamps · thin wire · people press things here</text>
+            <circle cx="80" cy="100" r="16" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+            <text x="80" y="140" fill="#4ade80" font-size="10.5" text-anchor="middle">START (NO)</text>
+            <circle cx="180" cy="100" r="16" fill="none" stroke="#f87171" stroke-width="2.5"/>
+            <line x1="168" y1="88" x2="192" y2="112" stroke="#f87171" stroke-width="2.5"/>
+            <text x="180" y="140" fill="#fca5a5" font-size="10.5" text-anchor="middle">STOP (NC)</text>
+            <rect x="250" y="82" width="66" height="36" rx="8" fill="#232d3f" stroke="#f97316" stroke-width="2"/>
+            <text x="283" y="104" fill="#fdba74" text-anchor="middle">K1 coil</text>
+            <text x="283" y="130" fill="#94a3b8" font-size="10.5" text-anchor="middle">A1–A2 · ~3 W</text>
+            <text x="180" y="185" fill="#94a3b8" font-size="11" text-anchor="middle">the coil is the only bridge</text>
+            <path d="M 283 118 C 283 175 380 175 388 148" fill="none" stroke="#fdba74" stroke-width="2.5" stroke-dasharray="7 5"/>
+            <text x="345" y="205" fill="#fdba74" font-size="11" text-anchor="middle">magnetic link — no copper crosses</text>
+            <rect x="370" y="15" width="315" height="230" rx="14" fill="#11161f" stroke="#f97316" stroke-width="2"/>
+            <text x="528" y="40" fill="#fdba74" text-anchor="middle">POWER CIRCUIT · 400 V 3φ</text>
+            <text x="528" y="58" fill="#94a3b8" font-size="10.5" text-anchor="middle">tens–hundreds of amps · fat copper</text>
+            <g stroke="#cbd5e1" stroke-width="2.5">
+              <line x1="450" y1="75" x2="450" y2="100"/><line x1="528" y1="75" x2="528" y2="100"/><line x1="606" y1="75" x2="606" y2="100"/>
+              <line x1="450" y1="100" x2="462" y2="122"/><line x1="528" y1="100" x2="540" y2="122"/><line x1="606" y1="100" x2="618" y2="122"/>
+              <line x1="450" y1="126" x2="450" y2="150"/><line x1="528" y1="126" x2="528" y2="150"/><line x1="606" y1="126" x2="606" y2="150"/>
+            </g>
+            <text x="435" y="72" fill="#94a3b8" font-size="10.5">L1</text><text x="513" y="72" fill="#94a3b8" font-size="10.5">L2</text><text x="591" y="72" fill="#94a3b8" font-size="10.5">L3</text>
+            <rect x="425" y="112" width="206" height="8" rx="4" fill="#f97316" opacity="0.55"/>
+            <text x="648" y="122" fill="#fdba74" font-size="10.5">K1</text>
+            <rect x="470" y="158" width="116" height="34" rx="8" fill="#232d3f" stroke="#fbbf24" stroke-width="2"/>
+            <text x="528" y="180" fill="#fde68a" text-anchor="middle">OL RELAY F1</text>
+            <circle cx="528" cy="222" r="18" fill="none" stroke="#a3e635" stroke-width="2.5"/>
+            <text x="528" y="227" fill="#d9f99d" text-anchor="middle" font-size="11">M</text>
+            <line x1="528" y1="192" x2="528" y2="204" stroke="#cbd5e1" stroke-width="2.5"/>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Two worlds, one magnetic bridge. The control side decides; the power side obeys. All three main poles move on one carrier — they make and break together.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Utilization categories — the rating that actually matters</div>
+      <p class="body">A contactor's headline amp rating is meaningless without its <span class="hl">utilization category</span> (IEC 60947-4-1), which encodes how hard making and breaking is:</p>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Category</th><th>Duty</th><th>Make / break stress</th><th>Typical use</th></tr>
+          <tr><td><b>AC-1</b></td><td>Non-inductive / resistive loads</td><td>Break ≈ 1× I<sub>e</sub>, cos φ ≈ 0.95</td><td>Heaters, distribution</td></tr>
+          <tr><td><b>AC-2</b></td><td>Slip-ring motors</td><td>Make/break ≈ 2.5× I<sub>e</sub></td><td>Crane wound-rotor machines</td></tr>
+          <tr><td><b>AC-3</b></td><td><b>Squirrel-cage motors</b> — make inrush, break running current</td><td>Make 6–8×, break 1× I<sub>e</sub></td><td><b>Standard motor starting</b></td></tr>
+          <tr><td><b>AC-4</b></td><td>Inching, plugging, rapid reversing</td><td>Make <em>and break</em> 6–8× I<sub>e</sub></td><td>Jog-heavy duty — derate hard</td></tr>
+          <tr><td><b>DC-13</b></td><td>DC electromagnets (control side)</td><td>Inductive L/R break arcs</td><td>Interposing relays, valves</td></tr>
+        </table>
+      </div>
+      <p class="body">The same physical contactor might be rated <strong>50 A AC-1 but only 32 A / 15 kW AC-3</strong>, and less again for AC-4. Breaking 6× current draws a long arc that erodes contacts — a contactor that jogs all day needs the AC-4 column of the datasheet, not the cover sticker.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Terminals &amp; auxiliaries — the standard grammar</div>
+      <div class="grid-3">
+        <div class="mini"><h4>Main poles</h4><p class="big">1-2 · 3-4 · 5-6</p><p>Odd = line side, even = load side. Carry and break motor current.</p></div>
+        <div class="mini c-sky"><h4>Coil</h4><p class="big">A1 – A2</p><p>The command input. Note coil voltage on the front: 24 V DC, 230 V AC…</p></div>
+        <div class="mini c-grn"><h4>Aux NO</h4><p class="big">13-14 · 23-24</p><p>x3-x4 = normally open. Used for seal-in, status to PLC, cascading.</p></div>
+        <div class="mini c-red"><h4>Aux NC</h4><p class="big">21-22 · 31-32</p><p>x1-x2 = normally closed. Used for interlocks and "not running" logic.</p></div>
+        <div class="mini c-amb"><h4>OL trip contact</h4><p class="big">95-96</p><p>NC, opens on overload — always wired in series with the coil path.</p></div>
+        <div class="mini c-purp"><h4>OL alarm</h4><p class="big">97-98</p><p>NO, closes on trip — lights the fault lamp / tells the PLC (A07).</p></div>
+      </div>
+      <p class="body" style="margin-top:14px"><strong>Mirror contacts</strong> (IEC 60947-4-1 Annex F): a guaranteed relationship that an NC auxiliary <em>cannot</em> be closed while any main pole is welded closed — the property that lets safety relays verify a contactor really opened (EDM in A35/A46).</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A panel builder picks a contactor whose label says "40 A" for a 18.5 kW / 400 V motor (FLC ≈ 35 A) that will be jogged frequently on a packaging line. What two mistakes are hiding here?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">(1) The 40 A is almost certainly the <b>AC-1</b> (resistive) rating — its AC-3 motor rating might be only 25–32 A, already marginal for 35 A FLC. (2) Frequent jogging is <b>AC-4</b> duty: each jog <em>breaks</em> 6–8× current, so the contactor must be derated further (AC-4 rating is typically ~40% of AC-3). Select from the AC-3/AC-4 kW tables at the actual duty cycle, never from the headline amps.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 ============ -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 16 · The Canonical Circuit</span>
+    <h2 class="page-title">DOL &amp; the Seal-In — Industry's First Memory Bit</h2>
+    <p class="page-sub">Direct-On-Line: the simplest starter, and the control-circuit idiom every automation engineer must be able to draw asleep.</p>
+
+    <div class="card">
+      <div class="label">The circuit</div>
+      <p class="lead">DOL applies <span class="hl">full line voltage</span> in one shot: MCCB/fuses → contactor K1 → overload relay F1 → motor. The magic is in the control circuit: pressing START energises K1, and K1's own auxiliary contact <span class="mono hl3">13-14</span> closes <em>in parallel with the START button</em> — so the coil keeps itself alive when the button is released. That parallel contact is the <span class="hl">seal-in (latch)</span>: a 1-bit memory made of copper, the ancestor of every PLC latch rung (A07).</p>
+      <div class="eqn"><b>Coil path:</b>  L → STOP(NC) → [ START(NO) ∥ K1:13-14 ] → F1:95-96(NC) → K1 coil → N
+<span class="v2">START pressed</span> → K1 pulls in → 13-14 closes → <span class="v3">release START, K1 holds</span>
+<span class="v2">STOP or OL trip or voltage dip</span> → coil path broken → K1 drops → 13-14 opens → <b>stays off</b></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Drawn as wired</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" font-weight="600">
+            <!-- power side -->
+            <text x="120" y="26" fill="#fdba74" text-anchor="middle">POWER</text>
+            <g stroke="#cbd5e1" stroke-width="2.5">
+              <line x1="60" y1="40" x2="60" y2="62"/><line x1="120" y1="40" x2="120" y2="62"/><line x1="180" y1="40" x2="180" y2="62"/>
+            </g>
+            <text x="45" y="38" fill="#94a3b8" font-size="10.5">L1</text><text x="105" y="38" fill="#94a3b8" font-size="10.5">L2</text><text x="165" y="38" fill="#94a3b8" font-size="10.5">L3</text>
+            <rect x="40" y="62" width="160" height="30" rx="8" fill="#232d3f" stroke="#f87171" stroke-width="2"/>
+            <text x="120" y="82" fill="#fca5a5" text-anchor="middle" font-size="11">MCCB / fuses — short-circuit duty</text>
+            <g stroke="#cbd5e1" stroke-width="2.5">
+              <line x1="60" y1="92" x2="60" y2="112"/><line x1="120" y1="92" x2="120" y2="112"/><line x1="180" y1="92" x2="180" y2="112"/>
+              <line x1="60" y1="112" x2="72" y2="132"/><line x1="120" y1="112" x2="132" y2="132"/><line x1="180" y1="112" x2="192" y2="132"/>
+              <line x1="60" y1="136" x2="60" y2="158"/><line x1="120" y1="136" x2="120" y2="158"/><line x1="180" y1="136" x2="180" y2="158"/>
+            </g>
+            <rect x="36" y="120" width="170" height="7" rx="3.5" fill="#f97316" opacity="0.55"/>
+            <text x="218" y="130" fill="#fdba74" font-size="11">K1</text>
+            <rect x="40" y="158" width="160" height="30" rx="8" fill="#232d3f" stroke="#fbbf24" stroke-width="2"/>
+            <text x="120" y="178" fill="#fde68a" text-anchor="middle" font-size="11">F1 overload — thermal image</text>
+            <g stroke="#cbd5e1" stroke-width="2.5"><line x1="120" y1="188" x2="120" y2="212"/></g>
+            <circle cx="120" cy="234" r="20" fill="none" stroke="#a3e635" stroke-width="2.5"/>
+            <text x="120" y="240" fill="#d9f99d" text-anchor="middle">M</text>
+            <text x="120" y="278" fill="#94a3b8" font-size="10.5" text-anchor="middle">3φ cage motor</text>
+            <!-- control side -->
+            <text x="480" y="26" fill="#7dd3fc" text-anchor="middle">CONTROL (one line + neutral shown)</text>
+            <line x1="300" y1="50" x2="660" y2="50" stroke="#38bdf8" stroke-width="2.5"/>
+            <text x="290" y="54" fill="#94a3b8" font-size="10.5" text-anchor="end">L</text>
+            <line x1="300" y1="272" x2="660" y2="272" stroke="#64748b" stroke-width="2.5"/>
+            <text x="290" y="276" fill="#94a3b8" font-size="10.5" text-anchor="end">N</text>
+            <!-- stop -->
+            <line x1="480" y1="50" x2="480" y2="86" stroke="#cbd5e1" stroke-width="2.5"/>
+            <rect x="452" y="86" width="56" height="30" rx="8" fill="none" stroke="#f87171" stroke-width="2.5"/>
+            <text x="480" y="106" fill="#fca5a5" text-anchor="middle" font-size="11">STOP</text>
+            <line x1="480" y1="116" x2="480" y2="140" stroke="#cbd5e1" stroke-width="2.5"/>
+            <!-- start + seal-in parallel -->
+            <line x1="480" y1="140" x2="410" y2="140" stroke="#cbd5e1" stroke-width="2.5"/>
+            <line x1="480" y1="140" x2="560" y2="140" stroke="#cbd5e1" stroke-width="2.5"/>
+            <rect x="382" y="152" width="56" height="30" rx="8" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+            <text x="410" y="172" fill="#86efac" text-anchor="middle" font-size="11">START</text>
+            <rect x="532" y="152" width="56" height="30" rx="8" fill="none" stroke="#a3e635" stroke-width="2.5" stroke-dasharray="6 4"/>
+            <text x="560" y="172" fill="#d9f99d" text-anchor="middle" font-size="11">K1 13-14</text>
+            <line x1="410" y1="140" x2="410" y2="152" stroke="#cbd5e1" stroke-width="2.5"/>
+            <line x1="560" y1="140" x2="560" y2="152" stroke="#cbd5e1" stroke-width="2.5"/>
+            <line x1="410" y1="182" x2="410" y2="196" stroke="#cbd5e1" stroke-width="2.5"/>
+            <line x1="560" y1="182" x2="560" y2="196" stroke="#cbd5e1" stroke-width="2.5"/>
+            <line x1="410" y1="196" x2="560" y2="196" stroke="#cbd5e1" stroke-width="2.5"/>
+            <text x="620" y="172" fill="#a3e635" font-size="10.5">seal-in</text>
+            <!-- OL contact + coil -->
+            <line x1="480" y1="196" x2="480" y2="210" stroke="#cbd5e1" stroke-width="2.5"/>
+            <rect x="446" y="210" width="68" height="26" rx="8" fill="none" stroke="#fbbf24" stroke-width="2.5"/>
+            <text x="480" y="228" fill="#fde68a" text-anchor="middle" font-size="11">F1 95-96</text>
+            <line x1="480" y1="236" x2="480" y2="244" stroke="#cbd5e1" stroke-width="2.5"/>
+            <rect x="450" y="244" width="60" height="28" rx="8" fill="#232d3f" stroke="#f97316" stroke-width="2.5"/>
+            <text x="480" y="263" fill="#fdba74" text-anchor="middle" font-size="11">K1 A1-A2</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">The whole idiom in one frame: STOP and the OL contact in series (any of them kills it), START and the seal-in in parallel (either of them feeds it — but only K1 can <em>keep</em> feeding it).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">2-wire vs 3-wire control — a safety decision</div>
+      <div class="grid-2">
+        <div class="mini c-sky"><h4>3-wire (momentary)</h4><p>START/STOP pushbuttons + seal-in. After a supply dip the seal-in has opened → the machine <b>stays off</b> until a human presses START again. Required wherever unexpected restart endangers people (IEC 60204-1 §7.5).</p></div>
+        <div class="mini c-amb"><h4>2-wire (maintained)</h4><p>A selector switch, float switch or thermostat simply holds the coil circuit closed. Power returns → motor <b>restarts by itself</b>. Correct for remote pumps and fans; dangerous for anything with an operator near moving parts.</p></div>
+      </div>
+      <p class="body" style="margin-top:14px">This distinction — <span class="hl">undervoltage release as restart protection</span> — is the single most safety-relevant idea in basic motor control. A dropped contactor is not a bug to be "fixed" with an auto-restart relay unless the risk assessment (A35) says so.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">During a brownout the plant lights blink and every DOL machine stops. An apprentice proposes wiring the K1 seal-in contact <em>before</em> the STOP button "so it's neater". Why is the standard order — STOP first, then START∥seal-in — not negotiable?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Functionally the series circuit is the same in steady state — but the rule exists for <b>fault thinking</b>: every series break device (STOP, OL 95-96, E-stop chain, door switches) must sit between the supply and the <em>whole</em> latch, so that any one of them opening guarantees the coil is dead regardless of which parallel path is closed. Bury a stop element downstream of only one branch and a welded seal-in or wiring error can hold the coil through a "stop". Same principle as A35's rule: stop functions live in series, start functions in parallel — and a wire-to-wire short must never bypass a stop (that is why safer circuits also earth-reference the control transformer so a ground fault blows the fuse instead of energising the coil).</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 ============ -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 16 · Protection</span>
+    <h2 class="page-title">Overload Relays &amp; Trip Classes</h2>
+    <p class="page-sub">The overload relay is a thermal model of the motor — it trips when the <em>model</em> overheats, hopefully just before the motor does.</p>
+
+    <div class="card">
+      <div class="label">Principle</div>
+      <p class="lead">An <span class="hl">overload relay</span> protects the motor against sustained overcurrent — jammed loads, lost phases, low voltage, too-frequent starts. The classic <strong>bimetal type</strong> passes motor current through small heaters that bend bimetal strips; sustained overcurrent bends them far enough to trip contact <span class="mono hl2">95-96</span>, breaking the contactor coil circuit. It stores a <span class="hl">thermal image ∝ ∫I²dt</span> — exactly the quantity that heats copper.</p>
+      <p class="body"><strong>Electronic overloads</strong> compute the same I²t model from CTs — adding phase-loss and unbalance detection (a lost phase raises the remaining line currents ~√3× and cooks one winding fast), adjustable classes, and communication. <strong>Set the dial to the motor's nameplate FLC</strong> — not the cable rating, not "a bit higher so it stops nuisance-tripping". The OL guards the motor's thermal life; the mysterious nuisance trip is information (Page 12).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Trip classes — matching the start</div>
+      <p class="body">IEC 60947-4-1 defines <span class="hl">trip class</span> as the maximum trip time at 7.2× set current from cold: the class number ≈ seconds. The relay must ride through the start yet still protect:</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" font-weight="600">
+            <line x1="70" y1="215" x2="670" y2="215" stroke="#475569" stroke-width="2"/>
+            <line x1="70" y1="215" x2="70" y2="25" stroke="#475569" stroke-width="2"/>
+            <text x="370" y="248" fill="#94a3b8" text-anchor="middle">current (× set current I<tspan font-size="9" dy="3">e</tspan><tspan dy="-3">)</tspan></text>
+            <text x="30" y="120" fill="#94a3b8" transform="rotate(-90 30 120)" text-anchor="middle">trip time (log s)</text>
+            <g font-size="10.5" fill="#64748b">
+              <text x="115" y="230">1.05</text><text x="175" y="230">1.2</text><text x="300" y="230">2</text><text x="450" y="230">4</text><text x="590" y="230">7.2</text>
+            </g>
+            <path d="M 120 40 C 200 55 320 95 460 150 C 530 176 580 190 600 194" fill="none" stroke="#a3e635" stroke-width="3"/>
+            <path d="M 120 32 C 210 45 340 82 480 132 C 550 158 592 172 606 177" fill="none" stroke="#fbbf24" stroke-width="3"/>
+            <path d="M 120 25 C 220 36 360 70 500 116 C 565 138 600 152 612 160" fill="none" stroke="#f87171" stroke-width="3"/>
+            <text x="640" y="196" fill="#a3e635" font-size="11">Cl 10</text>
+            <text x="644" y="178" fill="#fbbf24" font-size="11">Cl 20</text>
+            <text x="648" y="160" fill="#f87171" font-size="11">Cl 30</text>
+            <line x1="120" y1="25" x2="120" y2="215" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <text x="122" y="40" fill="#7dd3fc" font-size="10.5">no-trip below 1.05×</text>
+            <line x1="590" y1="25" x2="590" y2="215" stroke="#f97316" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <text x="586" y="40" fill="#fdba74" font-size="10.5" text-anchor="end">7.2× = class definition point</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Inverse-time curves: more current → faster trip. Class 10 for normal machines, 20 for heavy starts, 30 for very high inertia (big fans, centrifuges). Class 10A trips even faster (2–10 s).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive · will it ride through the start?</div>
+      <div class="demo">
+        <div class="demo-row"><span>Actual start (acceleration) time</span><b><span id="d2st">8</span> s</b></div>
+        <input type="range" id="d2stR" min="1" max="40" step="1" value="8">
+        <div class="demo-row"><span>Trip class</span></div>
+        <div class="seg" id="d2seg">
+          <button data-c="10" class="on">Class 10</button>
+          <button data-c="20">Class 20</button>
+          <button data-c="30">Class 30</button>
+        </div>
+        <div class="demo-out" id="d2out"></div>
+      </div>
+      <p class="cap">Rule of thumb used: at a typical 6–7× start current the relay allows roughly its class number in seconds (definition point is 7.2×). Real selection uses the manufacturer's cold curve.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The wider protection family</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Device</th><th>Protects against</th><th>Notes</th></tr>
+          <tr><td><b>Thermal OL relay</b></td><td>Overload, stall, phase loss (differential lever)</td><td>Cheap, self-powered, class fixed</td></tr>
+          <tr><td><b>Electronic OL</b></td><td>+ unbalance, earth fault, underload (dry pump)</td><td>Wide range, selectable class, fieldbus option</td></tr>
+          <tr><td><b>MPCB / manual motor starter</b></td><td>Overload + short circuit in one frame</td><td>Magnetic + thermal elements; gives Type 2 combos in small kW</td></tr>
+          <tr><td><b>PTC thermistor relay</b></td><td>Actual winding temperature</td><td>Sensors embedded in windings — catches blocked ventilation that current can't see</td></tr>
+          <tr><td><b>Comprehensive motor protection relay</b></td><td>All of it + thermal model with memory, starts/hour</td><td>Large / critical machines, MV motors</td></tr>
+        </table>
+      </div>
+      <p class="body"><strong>Current is a proxy.</strong> The OL infers temperature from current — it cannot see a blocked fan, 50 °C ambient at the motor, or heat soak from a previous start (unless it models cooling). Thermistors measure the truth; the best schemes use both.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A conveyor motor trips its Class 10 overload every Monday morning cold start (~12 s acceleration, fully loaded belt). Production asks you to "just wind the dial up 20%". What's the correct fix and why is the dial wrong?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">The trip is a <b>class mismatch</b>, not a set-current problem: a 12 s heavy start exceeds Class 10's ~10 s allowance at start current. Winding the dial above FLC would make the relay blind to genuine running overloads for the rest of the week — it lies to the thermal model. Correct: keep the dial at FLC and fit a <b>Class 20</b> relay (or an electronic OL set to class 20), or reduce the start severity (unload the belt, star-delta/soft start if torque allows). Match the class to the start; match the dial to the motor.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 ============ -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 16 · Direction</span>
+    <h2 class="page-title">Reversing Starters &amp; Interlocking</h2>
+    <p class="page-sub">Swap any two phases and the rotating field reverses (A30). The engineering is in making sure both contactors can never close at once.</p>
+
+    <div class="card">
+      <div class="label">The circuit</div>
+      <p class="lead">A <span class="hl">reversing starter</span> uses two contactors on one motor: K1 connects L1-L2-L3 → T1-T2-T3 (forward); K2 connects with <span class="hl2">two phases swapped</span> (reverse). If both ever close together, L1 and L3 meet through a few centimetres of busbar: a <strong>bolted phase-to-phase short circuit</strong>. Interlocking is therefore not optional politeness — it is the design.</p>
+      <div class="eqn"><b>Three layers of interlock (use all three):</b>
+1  <span class="v2">Electrical:</span>  K2's NC aux (21-22) in series with K1's coil, and vice-versa
+2  <span class="v3">Mechanical:</span>  pivoted lever between the two contactors — physically cannot both close
+3  <b>Button:</b>      FWD pushbutton's NC element breaks the REV coil path (and vice-versa)</div>
+      <p class="body">Layer 1 fails if an aux contact welds; layer 2 covers that; layer 3 adds break-before-make at the human interface so pressing both buttons does nothing rather than something exciting. Direction change should pass through STOP (or a timer) — <strong>plugging</strong> (reversing at full speed) draws near locked-rotor current at ~2× slip frequency and is AC-4 duty that shreds contacts and shafts unless the machine is designed for it.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interlocks, drawn</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" font-weight="600">
+            <line x1="60" y1="40" x2="660" y2="40" stroke="#38bdf8" stroke-width="2.5"/>
+            <text x="50" y="44" fill="#94a3b8" font-size="10.5" text-anchor="end">L</text>
+            <line x1="60" y1="210" x2="660" y2="210" stroke="#64748b" stroke-width="2.5"/>
+            <text x="50" y="214" fill="#94a3b8" font-size="10.5" text-anchor="end">N</text>
+            <!-- FWD branch -->
+            <line x1="200" y1="40" x2="200" y2="62" stroke="#cbd5e1" stroke-width="2.5"/>
+            <rect x="172" y="62" width="56" height="28" rx="8" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+            <text x="200" y="81" fill="#86efac" text-anchor="middle" font-size="11">FWD</text>
+            <line x1="200" y1="90" x2="200" y2="108" stroke="#cbd5e1" stroke-width="2.5"/>
+            <rect x="166" y="108" width="68" height="26" rx="8" fill="none" stroke="#f87171" stroke-width="2.5"/>
+            <text x="200" y="126" fill="#fca5a5" text-anchor="middle" font-size="11">K2 21-22</text>
+            <line x1="200" y1="134" x2="200" y2="152" stroke="#cbd5e1" stroke-width="2.5"/>
+            <rect x="170" y="152" width="60" height="28" rx="8" fill="#232d3f" stroke="#f97316" stroke-width="2.5"/>
+            <text x="200" y="171" fill="#fdba74" text-anchor="middle" font-size="11">K1 FWD</text>
+            <line x1="200" y1="180" x2="200" y2="210" stroke="#cbd5e1" stroke-width="2.5"/>
+            <!-- REV branch -->
+            <line x1="500" y1="40" x2="500" y2="62" stroke="#cbd5e1" stroke-width="2.5"/>
+            <rect x="472" y="62" width="56" height="28" rx="8" fill="none" stroke="#c084fc" stroke-width="2.5"/>
+            <text x="500" y="81" fill="#e9d5ff" text-anchor="middle" font-size="11">REV</text>
+            <line x1="500" y1="90" x2="500" y2="108" stroke="#cbd5e1" stroke-width="2.5"/>
+            <rect x="466" y="108" width="68" height="26" rx="8" fill="none" stroke="#f87171" stroke-width="2.5"/>
+            <text x="500" y="126" fill="#fca5a5" text-anchor="middle" font-size="11">K1 21-22</text>
+            <line x1="500" y1="134" x2="500" y2="152" stroke="#cbd5e1" stroke-width="2.5"/>
+            <rect x="470" y="152" width="60" height="28" rx="8" fill="#232d3f" stroke="#f97316" stroke-width="2.5"/>
+            <text x="500" y="171" fill="#fdba74" text-anchor="middle" font-size="11">K2 REV</text>
+            <line x1="500" y1="180" x2="500" y2="210" stroke="#cbd5e1" stroke-width="2.5"/>
+            <!-- mechanical interlock -->
+            <line x1="230" y1="166" x2="470" y2="166" stroke="#fbbf24" stroke-width="3" stroke-dasharray="8 6"/>
+            <text x="350" y="158" fill="#fde68a" text-anchor="middle" font-size="11">⚙ mechanical interlock lever</text>
+            <text x="350" y="196" fill="#94a3b8" text-anchor="middle" font-size="10.5">each coil path runs through the OTHER contactor's NC contact</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Cross-wired NC auxiliaries + the mechanical lever: electrically forbidden AND physically impossible. (Seal-ins and STOP omitted for clarity — they wrap this exactly as in Page 3.)</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Where you meet it</div>
+      <div class="grid-3">
+        <div class="mini"><h4>Hoists &amp; cranes</h4><p>Up/down reversing with brakes and limit switches in the coil paths — limits are series stop elements.</p></div>
+        <div class="mini c-sky"><h4>Machine axes</h4><p>Traverse motions with end-of-travel NC limit switches wired to break that direction only — the other direction still works to back off.</p></div>
+        <div class="mini c-purp"><h4>Gates &amp; valves</h4><p>Open/close actuators; torque and position switches decide the stop. Same idiom, smaller frame.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A reversing starter has electrical interlocks only. K1's NC aux (used in K2's coil path) welds shut after years of jogging. Trace the failure: what single further event now causes a phase-to-phase short?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">The welded NC contact means K2's coil path is <b>permanently enabled</b> regardless of K1's state — the interlock is gone but nothing looks wrong. The next time an operator presses REV while FWD is running (or a PLC output glitches), K2 closes on top of K1 → L-L short through the swapped phases → busbar arc limited only by the upstream MCCB. This is why the <b>mechanical interlock</b> exists (it doesn't care about welded contacts), why mirror-contact feedback into a monitoring circuit matters, and why frequent-jog applications must be rated AC-4 so contacts don't weld in the first place.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 ============ -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 16 · The Classic Trick</span>
+    <h2 class="page-title">Star-Delta — Starting at One Third</h2>
+    <p class="page-sub">Reconnect the windings so each sees 58% voltage, and both line current and torque fall to exactly one third. Geometry does the work.</p>
+
+    <div class="card">
+      <div class="label">The idea &amp; the arithmetic</div>
+      <p class="lead">A motor wound for <span class="hl">Δ 400 V</span> has each winding designed for 400 V. Connect the same windings in <span class="hl2">star</span> and each sees only <span class="mono">400/√3 ≈ 230 V</span>. Start in star (gentle), then — once near speed — reconnect to delta (full performance). The result is the famous <span class="hl">⅓ rule</span>:</p>
+      <div class="eqn"><b>Delta (full voltage):</b>   I<span class="v3">phase,Δ</span> = U/Z      I<span class="v3">line,Δ</span> = √3·U/Z
+<b>Star (start):</b>          each winding sees U/√3
+                       I<span class="v2">phase,Y</span> = (U/√3)/Z = I<span class="v3">phase,Δ</span>/√3
+                       I<span class="v2">line,Y</span>  = I<span class="v2">phase,Y</span>          (star: line = phase)
+<b>Ratio:</b>  I<span class="v2">line,Y</span> / I<span class="v3">line,Δ</span> = (U/√3Z)/(√3U/Z) = <b>1/3</b>
+<b>Torque:</b> T ∝ V² → (1/√3)² = <b>1/3</b>   — current ÷3, torque ÷3, always together</div>
+      <p class="body">Six motor leads (U1V1W1, U2V2W2) come to the panel. Three contactors do the work: <strong>K1 main</strong> (line to U1V1W1), <strong>K3 star</strong> (shorts U2V2W2 together = star point), <strong>K2 delta</strong> (connects U2V2W2 to the lines = delta). A timer (or current sensor) fires the transition at 75–85% speed.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Sequence &amp; the transition problem</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" font-weight="600">
+            <rect x="20" y="30" width="200" height="130" rx="12" fill="#11161f" stroke="#38bdf8" stroke-width="2"/>
+            <text x="120" y="54" fill="#7dd3fc" text-anchor="middle">1 · START (star)</text>
+            <text x="120" y="76" fill="#cbd5e1" font-size="11" text-anchor="middle">K3 closes → then K1</text>
+            <text x="120" y="96" fill="#94a3b8" font-size="10.5" text-anchor="middle">line current ⅓ · torque ⅓</text>
+            <text x="120" y="116" fill="#94a3b8" font-size="10.5" text-anchor="middle">motor accelerates to ~80%</text>
+            <text x="120" y="140" fill="#7dd3fc" font-size="10.5" text-anchor="middle">timer running (5–15 s typical)</text>
+            <rect x="250" y="30" width="200" height="130" rx="12" fill="#11161f" stroke="#fbbf24" stroke-width="2"/>
+            <text x="350" y="54" fill="#fde68a" text-anchor="middle">2 · TRANSITION</text>
+            <text x="350" y="76" fill="#cbd5e1" font-size="11" text-anchor="middle">K3 opens — motor floats</text>
+            <text x="350" y="96" fill="#94a3b8" font-size="10.5" text-anchor="middle">30–50 ms dead time</text>
+            <text x="350" y="116" fill="#fca5a5" font-size="10.5" text-anchor="middle">open transition = current spike</text>
+            <text x="350" y="140" fill="#94a3b8" font-size="10.5" text-anchor="middle">K3–K2 interlocked (Page 5 style)</text>
+            <rect x="480" y="30" width="200" height="130" rx="12" fill="#11161f" stroke="#a3e635" stroke-width="2"/>
+            <text x="580" y="54" fill="#d9f99d" text-anchor="middle">3 · RUN (delta)</text>
+            <text x="580" y="76" fill="#cbd5e1" font-size="11" text-anchor="middle">K2 closes</text>
+            <text x="580" y="96" fill="#94a3b8" font-size="10.5" text-anchor="middle">full voltage per winding</text>
+            <text x="580" y="116" fill="#94a3b8" font-size="10.5" text-anchor="middle">full torque available</text>
+            <text x="580" y="140" fill="#94a3b8" font-size="10.5" text-anchor="middle">K1 + K2 carry I<tspan font-size="8" dy="2">phase</tspan><tspan dy="-2"> = 0.58 I</tspan><tspan font-size="8" dy="2">line</tspan></text>
+            <g stroke="#fdba74" stroke-width="2.5">
+              <line x1="220" y1="95" x2="246" y2="95"/>
+              <line x1="450" y1="95" x2="476" y2="95"/>
+            </g>
+            <text x="350" y="200" fill="#94a3b8" font-size="11" text-anchor="middle">⚠ if the load hasn't reached ~80% speed when the timer fires, the delta step draws near-DOL current anyway — the whole point is lost</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Open transition: cheap but the motor is briefly disconnected — its back-EMF drifts out of phase, and re-closing into delta produces a torque/current spike. Closed transition (Korndorfer-style resistors bridging the gap) buys smoothness for money.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive · does star-delta actually work for your load?</div>
+      <div class="demo">
+        <div class="demo-row"><span>Motor FLC</span><b><span id="d3flc">55</span> A</b></div>
+        <input type="range" id="d3flcR" min="10" max="200" step="5" value="55">
+        <div class="demo-row"><span>DOL locked-rotor multiple</span><b><span id="d3lr">7.0</span> ×</b></div>
+        <input type="range" id="d3lrR" min="5" max="8.5" step="0.5" value="7">
+        <div class="demo-row"><span>Load torque at start (% of motor rated torque)</span><b><span id="d3lt">30</span> %</b></div>
+        <input type="range" id="d3ltR" min="5" max="90" step="5" value="30">
+        <div class="demo-out" id="d3out"></div>
+      </div>
+      <p class="cap">Assumes locked-rotor torque ≈ 1.8× rated in delta → 0.6× in star. Fans (torque ∝ n²) start easily in star; loaded conveyors and crushers usually can't.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Sizing bonus &amp; the six-wire detail</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Contactors K1/K2 carry phase current</strong> = 0.58 × line current — so both are sized at ~58% FLC. K3 (star) carries only ~33% FLC and is smaller again. This is why star-delta panels are cheaper than their three contactors suggest.</span></li>
+        <li><span class="num">2</span><span><strong>OL relay position matters:</strong> in the phase loop (after K1, in series with windings) set it to 0.58 × FLC; in the line set it to FLC. Mixing these up by √3 is the classic commissioning error.</span></li>
+        <li><span class="num">3</span><span><strong>The motor must be Δ-rated for the line voltage</strong> — nameplate "400/690 V Δ/Y" on a 400 V network: yes. "230/400 Δ/Y": no — star IS its 400 V connection; there is no lower-voltage start available.</span></li>
+        <li><span class="num">4</span><span><strong>K3 and K2 must be interlocked</strong> both electrically and mechanically — closing the star bridge onto a live delta is a three-phase short through the star contactor.</span></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A 400 V star-delta starter accelerates a fan to 60% speed in star, then the 8 s timer fires the transition — and the lights dip almost as badly as a DOL start. The fitter doubles the star time to 16 s but nothing improves. What's actually wrong?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Star torque (⅓) is only just above the fan's torque curve, so the motor <b>plateaus</b> — it reaches its star-connection equilibrium speed (here ~60%) and simply sits there; more time changes nothing. At transition the slip is still huge, so delta re-connection draws close to locked-rotor current — the DOL-sized dip. Fixes: check the plateau (star current stops falling = plateau reached), and if the load can't be lightened (close the fan damper for the start!), move to a soft starter or VFD. Star-delta only works when ⅓ torque can genuinely reach ≥80% speed.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 7 ============ -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 16 · The Wider Family</span>
+    <h2 class="page-title">Autotransformer, Reactor &amp; the Reduced-Voltage Menu</h2>
+    <p class="page-sub">Between star-delta and the soft starter lies a century of clever compromises — and one beautiful square law.</p>
+
+    <div class="card">
+      <div class="label">Autotransformer starting — the x² machine</div>
+      <p class="lead">An <span class="hl">autotransformer starter</span> feeds the motor from taps (typically 50 / 65 / 80%). At tap fraction <span class="mono hl2">x</span>, the motor sees x·U and draws x·I<sub>LR</sub> — but the transformer steps <em>line</em> current down again by x. So the <strong>supply</strong> sees:</p>
+      <div class="eqn"><b>Motor current</b>  = x · I<span class="v3">LR</span>
+<b>Line current</b>   = x² · I<span class="v3">LR</span>        <b>Torque</b> = x² · T<span class="v3">LR</span>
+65% tap → line current and torque both = 0.42× DOL — <span class="v2">same ratio as torque: the autotransformer is "fair"</span></div>
+      <p class="body">Compare star-delta: fixed at 0.33, one step, needs six motor leads. The autotransformer gives <strong>choosable taps</strong>, works on any 3-lead motor, and delivers <em>more torque per line-amp</em> than any other reduced-voltage method (torque/line-current ratio = 1, like DOL). The <strong>Korndorfer connection</strong> makes the transition closed (star point opens first, part of the winding briefly acts as a series reactor, then full voltage) — no open-circuit spike. Price: a big, start-duty-rated transformer that must cool between attempts. Common on large pumps/fans and MV machines.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Primary resistance / reactor starting</div>
+      <p class="body">Series resistors or reactors drop voltage across themselves: motor voltage rises as the motor accelerates and current falls (a natural "ramp"). Line current falls only as <span class="mono">x</span> (not x²) and torque as x², so the torque-per-amp is poor — but the circuit is simple and smooth, and reactor starting is still used at medium voltage. Resistor banks additionally waste the dropped energy as heat and need duty-cycle ratings. Historically important; today mostly displaced by soft starters, which are the same idea executed with silicon and feedback.</p>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Method</th><th>Line current</th><th>Start torque</th><th>Transition</th><th>Notes</th></tr>
+          <tr><td><b>DOL</b></td><td>6–8× (100%)</td><td>100% LRT</td><td>—</td><td>Simplest; brutal; default under ~7.5 kW</td></tr>
+          <tr><td><b>Star-delta</b></td><td>33%</td><td>33%</td><td>Open (or closed +£)</td><td>6 leads; fixed ratio; transition spike risk</td></tr>
+          <tr><td><b>Autotransformer</b></td><td>x² (25–64%)</td><td>x² — best T per line-amp</td><td>Closed (Korndorfer)</td><td>Any motor; taps; big iron</td></tr>
+          <tr><td><b>Reactor / resistor</b></td><td>x (50–80%)</td><td>x²</td><td>Shorting contactor</td><td>Smooth; poor torque ratio; MV-friendly</td></tr>
+          <tr><td><b>Soft starter</b></td><td>set 2–4×</td><td>∝ V² continuously</td><td>None — continuous</td><td>Page 8: electronic, feedback, soft stop</td></tr>
+          <tr><td><b>VFD</b></td><td>≈ 1–1.5× FLC</td><td>up to 150–200% at 0 rpm</td><td>None</td><td>Page 9 / A08: changes frequency, escapes V² law</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Why the square law rules everything</div>
+      <p class="body">All fixed-frequency reduced-voltage methods obey <span class="hl">T ∝ V²</span>, because both stator flux and rotor current scale with V and torque is their product. The methods differ only in what the <em>supply</em> pays: star-delta and the autotransformer make the line current fall as fast as the torque (both re-arrange the same windings/turns), while series impedance makes the line pay x for a torque of x². That single insight — <strong>compare torque fraction to line-current fraction</strong> — ranks every starter on Page 7's table, and explains why the VFD (which holds V/f, hence flux, constant — A08) is the only device that breaks the law.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A 90 kW pump motor (LRC 6.5×, LRT 1.6× rated) must start with line current ≤ 2.8× FLC, and needs at least 0.55× rated torque to break the pump away. Star-delta or autotransformer — show the arithmetic.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Star-delta: line current 6.5/3 = 2.17× ✓ but torque 1.6/3 = 0.53× — <b>just below</b> the 0.55 requirement: marginal → fails the brief. Autotransformer 65% tap: line current 0.42 × 6.5 = 2.75× ✓ (under 2.8), torque 0.42 × 1.6 = <b>0.68×</b> ✓ comfortable. The 80% tap would give 0.64 × 6.5 = 4.2× (too much current); 50% gives 0.25 × 1.6 = 0.4× (too little torque). <b>Answer: autotransformer on the 65% tap</b> — exactly the "more torque per line-amp" advantage. (A soft starter with current limit 2.8× giving V = 2.8/6.5 = 0.43 → T = 0.43² × 1.6 = 0.30× would stall — Page 8's kickstart exists for this.)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 8 ============ -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 16 · Silicon</span>
+    <h2 class="page-title">Soft Starters — Phase Control with Feedback</h2>
+    <p class="page-sub">Six thyristors, a microcontroller, and the old V² law — but now the voltage is a continuous, closed-loop ramp.</p>
+
+    <div class="card">
+      <div class="label">Principle</div>
+      <p class="lead">A <span class="hl">soft starter</span> puts two anti-parallel <span class="hl2">SCRs (thyristors)</span> in each phase and delays their firing angle each half-cycle. More delay → less RMS voltage → less current and torque (still ∝ V²). As the motor accelerates, the controller advances the firing angle along a <strong>voltage ramp</strong> or — better — holds a <strong>current limit</strong> (typically 2.5–4× FLC) until the motor reaches speed. At full speed a <span class="hl3">bypass contactor</span> shorts the SCRs out, eliminating their ~1 W/A conduction loss and heat.</p>
+      <div class="eqn"><b>Firing delay α ↑</b> → V<span class="v3">RMS</span> ↓ → I = V/Z ↓ ,  T ∝ V² ↓↓
+<b>Ramp:</b> V from ~30% → 100% over t<span class="v2">ramp</span> (2–30 s, set)   <b>Current limit:</b> hold I ≤ I<span class="v2">set</span>, let V find itself
+<b>Kickstart:</b> brief 80–100% pulse (~0.5 s) to break static friction, then drop to ramp</div>
+      <p class="body">Chopped sinusoids are rich in harmonics <em>during the ramp</em> — brief and usually tolerable (unlike a VFD, there is no continuous distortion once bypassed). Notice what a soft starter is <em>not</em>: it cannot exceed line frequency, cannot deliver full torque at zero speed, and gives no speed control — it is a starting (and stopping) device only.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The waveform, drawn</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" font-weight="600">
+            <line x1="40" y1="110" x2="660" y2="110" stroke="#475569" stroke-width="1.5"/>
+            <!-- full sine reference -->
+            <path d="M 40 110 C 65 30 95 30 120 110 C 145 190 175 190 200 110" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="4 4"/>
+            <!-- chopped early (large alpha) -->
+            <path d="M 90 110 C 105 55 112 45 120 110 C 145 190 175 190 200 110" fill="none" stroke="#f97316" stroke-width="0"/>
+            <path d="M 90 110 L 90 62 C 100 45 112 60 120 110" fill="#f97316" opacity="0.35"/>
+            <path d="M 170 110 L 170 158 C 180 175 192 160 200 110" fill="#f97316" opacity="0.35"/>
+            <text x="120" y="205" fill="#fdba74" text-anchor="middle" font-size="11">early ramp: α large, thin slices</text>
+            <!-- mid -->
+            <path d="M 270 110 C 295 30 325 30 350 110 C 375 190 405 190 430 110" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="4 4"/>
+            <path d="M 295 110 L 295 45 C 310 30 335 45 350 110" fill="#f97316" opacity="0.45"/>
+            <path d="M 375 110 L 375 175 C 390 190 415 175 430 110" fill="#f97316" opacity="0.45"/>
+            <text x="350" y="205" fill="#fdba74" text-anchor="middle" font-size="11">mid ramp: α smaller, fatter slices</text>
+            <!-- full -->
+            <path d="M 500 110 C 525 30 555 30 580 110 C 605 190 635 190 660 110" fill="none" stroke="#a3e635" stroke-width="3"/>
+            <text x="580" y="205" fill="#d9f99d" text-anchor="middle" font-size="11">full speed: α→0, then bypass closes</text>
+            <text x="350" y="26" fill="#94a3b8" text-anchor="middle" font-size="11">each half-cycle the SCR fires later or earlier — the motor integrates the slices into torque</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Phase-angle control: the dashed sine is the supply; the filled slices are what the motor receives. RMS voltage is the control variable.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Features that earn their keep</div>
+      <div class="grid-2">
+        <div class="mini"><h4>Soft stop</h4><p>Ramp the voltage <em>down</em> — the cure for water hammer and check-valve slam in pump systems. Often the real reason a soft starter is bought.</p></div>
+        <div class="mini c-sky"><h4>Current-limit start</h4><p>Feedback holds line current at the set ceiling — the utility-friendly mode, and self-adjusting as load varies day to day.</p></div>
+        <div class="mini c-grn"><h4>Kickstart / breakaway</h4><p>A short full-torque pulse defeats stiction on crushers and loaded screws, then the ramp takes over.</p></div>
+        <div class="mini c-amb"><h4>Protection suite</h4><p>Electronic OL (selectable class), phase loss/reversal, underload, SCR overtemperature, starts-per-hour lockout — one box replaces several relays.</p></div>
+        <div class="mini c-purp"><h4>Inside-delta connection</h4><p>Wire the starter inside the delta loop (6 wires): it switches phase current (58%) → a smaller frame for big motors.</p></div>
+        <div class="mini c-red"><h4>Limits</h4><p>No speed control, no zero-speed torque, needs cooling before re-start, and SCRs fail short — the line contactor upstream remains the isolation device.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A soft starter on a loaded screw conveyor is set to voltage-ramp mode, 30% initial voltage, 20 s ramp. The motor hums for 6 seconds without turning, then the OL model trips. Explain, and name the two settings that fix it.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">At 30% voltage, torque = 0.3² = <b>9%</b> of locked-rotor torque — nowhere near the screw's breakaway friction. The motor sits at zero speed drawing (0.3 × LRC) ≈ 2× FLC, pure rotor heating, until the thermal model quits. Fixes: (1) <b>kickstart</b> — a 0.5 s pulse at ~90% voltage to break stiction; (2) raise the <b>initial voltage</b> (or switch to current-limit mode with a higher ceiling) so starting torque exceeds load torque from the first half-cycle. General rule: torque must beat the load at <em>every speed</em> from 0 to full, or the start plateaus and cooks (same physics as the star-delta fan on Page 6).</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 9 ============ -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 16 · The Modern Answer</span>
+    <h2 class="page-title">The VFD as a Starter — and Choosing Between Them All</h2>
+    <p class="page-sub">The drive doesn't reduce the voltage trick — it changes the question, feeding the motor a frequency where full torque needs only rated current.</p>
+
+    <div class="card">
+      <div class="label">Why the VFD escapes the V² law</div>
+      <p class="lead">Every fixed-frequency starter fights 50 Hz slip physics. A <span class="hl">VFD</span> (A08) instead starts the motor at a few Hz, keeping <span class="mono hl2">V/f — and therefore flux — constant</span>. At 2 Hz the rotor sees a small slip frequency, so rated torque appears at roughly <strong>rated current</strong>, not 7× it. The drive then ramps frequency up; the motor is never more than a few % slip from synchronism. Starting stops being an event and becomes a trajectory.</p>
+      <div class="eqn"><b>DOL @50 Hz:</b>  torque 1.8× costs current 7×      <span class="v2">torque per amp ≈ 0.26</span>
+<b>VFD @ low f:</b> torque 1.5–2× costs current 1.5–2×  <span class="v3">torque per amp ≈ 1 — the best possible</span></div>
+      <p class="body">Bonus: controlled deceleration (with braking resistor if needed), no transition events, starts-per-hour essentially unlimited (thermal, not mechanical, limits), plus permanent speed control and energy savings on variable-torque loads (fan laws — A47). Cost: price, continuous harmonics (mitigation in A08/A46), bearing-current and cable dV/dt care, and drive-side engineering.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The selection table — the page to bookmark</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Criterion</th><th>DOL</th><th>Star-delta</th><th>Soft starter</th><th>VFD</th></tr>
+          <tr><td><b>Line current at start</b></td><td>6–8× FLC</td><td>~2.2× (⅓ of DOL)</td><td>2.5–4× (set)</td><td><b>≈1× FLC</b></td></tr>
+          <tr><td><b>Start torque available</b></td><td>Full LRT (1.6–2.2×)</td><td>⅓ LRT</td><td>∝ V², settable</td><td><b>Up to ~2× at 0 rpm</b></td></tr>
+          <tr><td><b>Mechanical shock</b></td><td>Severe</td><td>Two jolts (start + transition)</td><td>Gentle ramp</td><td>Gentlest, fully shaped</td></tr>
+          <tr><td><b>Speed control</b></td><td>—</td><td>—</td><td>—</td><td><b>Yes — the point</b></td></tr>
+          <tr><td><b>Soft / controlled stop</b></td><td>Coast only</td><td>Coast only</td><td>Yes (pumps)</td><td>Yes, incl. braking</td></tr>
+          <tr><td><b>Harmonics</b></td><td>None</td><td>None</td><td>During ramp only</td><td>Continuous (mitigate)</td></tr>
+          <tr><td><b>Motor leads</b></td><td>3</td><td><b>6</b></td><td>3 (or 6 inside-Δ)</td><td>3 (screened — A46)</td></tr>
+          <tr><td><b>Relative cost</b></td><td>1</td><td>~2</td><td>~3–4</td><td>~5–8</td></tr>
+          <tr><td><b>Sweet spot</b></td><td>&lt;7.5 kW, stiff supply</td><td>Legacy pumps/fans, 6-lead motors</td><td>Pumps, fans, conveyors needing gentle start/stop</td><td>Anything needing speed control or hard current limits</td></tr>
+        </table>
+      </div>
+      <p class="body">Decision shortcut: <strong>need speed control? → VFD.</strong> Need gentle start/stop only? → soft starter. Six-lead motor already on site and the load is light at start? → star-delta earns its keep. Small motor, strong supply, simple machine? → DOL and spend the savings on a better overload relay.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">Same 30 kW fan, four quotes: DOL, star-delta, soft starter, VFD. The plant runs the fan at constant full speed 24/7 and the supply tolerates 3× inrush. Which quote wins on engineering (not habit), and when would the answer flip to VFD?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Constant full speed removes the VFD's energy argument (and its continuous harmonics/losses ~2–3% become pure cost). A fan's torque ∝ n² start is easy — star-delta's ⅓ torque suffices, and 2.2× line current meets the 3× limit; the <b>soft starter</b> also qualifies and adds settable limits with no transition spike, no six-lead cable, and soft stop — typically the engineering winner at this size unless budget forces star-delta. The answer flips to <b>VFD</b> the moment flow modulation appears (damper control wastes the fan laws: 80% flow ≈ 51% power — A47), or the supply limit tightens below ~2×, or starts become very frequent.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 10 ============ -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 16 · The Craft</span>
+    <h2 class="page-title">Control-Circuit Craft — Jog, Sequence, Interlock, E-Stop</h2>
+    <p class="page-sub">The power circuit is a catalogue choice; the control circuit is where your engineering shows.</p>
+
+    <div class="card">
+      <div class="label">Control supply choices</div>
+      <div class="grid-2">
+        <div class="mini c-sky"><h4>24 V DC (modern default)</h4><p>PELV-safe for people, PLC-native (A07), safety-device friendly (A35). Needs a PSU; watch voltage drop on long button runs (A46's 2L rule). DC coils = quiet, no inrush hum, but need DC-13-rated switching.</p></div>
+        <div class="mini c-amb"><h4>230/110 V AC (via control transformer)</h4><p>Drives big coils directly, tolerates long cable runs, no PSU to fail. 110 V "safety" tradition from machine-tool practice (IEC 60204-1 recommends control transformers, earthed one side, fused).</p></div>
+      </div>
+      <p class="body" style="margin-top:14px">Either way the rule from A46 holds: <strong>one earthed control common, fused at the source</strong>, so an earth fault blows a fuse rather than silently energising a coil around its stop contact.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The idiom library</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Idiom</th><th>Circuit</th><th>Rule that makes it safe</th></tr>
+          <tr><td><b>Jog / inch</b></td><td>JOG button drives the coil <em>directly, bypassing the seal-in</em> (via a jog/run selector or a jog relay)</td><td>The bypass must be impossible to leave engaged; contactor needs AC-4 rating for jog duty</td></tr>
+          <tr><td><b>Sequence start</b></td><td>K2's coil path runs through K1's NO aux (13-14): conveyor B cannot run unless A runs</td><td>Downstream starts first / upstream stops first — spillage logic; add off-delay for clearing time</td></tr>
+          <tr><td><b>Anti-cycling</b></td><td>On-delay timer or starts-counter blocks re-start for t seconds</td><td>Protects the rotor thermal budget (Page 1) and compressors against short-cycling</td></tr>
+          <tr><td><b>Two-hand start</b></td><td>Both buttons within 0.5 s, both released to re-arm (dedicated relay)</td><td>A35 territory — must use a certified two-hand module, not two plain NO contacts</td></tr>
+          <tr><td><b>Remote/local</b></td><td>Selector routes coil control to PLC output or local buttons</td><td>STOP and E-stop remain hard-wired in series in <em>both</em> modes — never "via the PLC only"</td></tr>
+          <tr><td><b>E-stop integration</b></td><td>E-stop chain breaks the control supply to all coil circuits (stop cat 0) or triggers controlled stop then power removal (cat 1)</td><td>Per risk assessment; monitored by safety relay with EDM reading mirror contacts (A35/A46)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Pilot devices — the human interface grammar</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Colours (IEC 60073):</strong> STOP = red, START = green (or black/white where red is reserved for emergency only), RESET = blue, abnormal = yellow. E-stop = red mushroom on yellow background, latching, twist/pull to release.</span></li>
+        <li><span class="num">2</span><span><strong>Contacts:</strong> stop functions use NC contacts (broken wire = stop — fail safe); start functions use NO (broken wire = can't start — fail safe again). This single convention is why control circuits survive their own faults.</span></li>
+        <li><span class="num">3</span><span><strong>Indicators:</strong> RUN lamp fed from a K1 aux (not from the button), FAULT from OL 97-98, plus lamp-test provision on anything an operator trusts.</span></li>
+        <li><span class="num">4</span><span><strong>Terminal discipline:</strong> every device numbered per the schematic (A46's wire-numbering craft) — a control circuit you can't trace at 3 a.m. is a control circuit that doesn't work at 3 a.m.</span></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A machine has local START/STOP and a PLC "remote run" output wired in parallel with the START button. Night shift reports the machine occasionally "starts itself" after a STOP. Diagnose the design error.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">The PLC output is a <b>maintained</b> (2-wire) signal in parallel with a momentary START: if the PLC output is still TRUE when the operator presses STOP, the coil re-energises the instant STOP is released — a self-start. Correct patterns: (1) the PLC output must be a <b>pulse</b> (one-shot) if used in parallel with a momentary button, or (2) route control through a proper local/remote selector so exactly one master exists at a time, and (3) feed the contactor status (13-14) back to a PLC input so its logic drops the run command on any stop. Hard-wired STOP must break the whole latch either way (Page 3's series rule).</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 11 ============ -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 / 16 · Specification</span>
+    <h2 class="page-title">Coordination &amp; Sizing the Starter Branch</h2>
+    <p class="page-sub">Three devices, three jobs, one tested team: the SCPD breaks faults, the contactor switches, the overload remembers.</p>
+
+    <div class="card">
+      <div class="label">Division of labour</div>
+      <p class="lead">A motor branch (A46) is <span class="hl">SCPD → contactor → overload → motor</span>. The <span class="hl2">SCPD</span> (fuses or MCCB) handles the currents that would destroy — short circuits and earth faults. The <span class="hl">contactor</span> makes and breaks operational currents. The <span class="hl3">overload</span> integrates the thermal story. No single device can do all three jobs well at motor scale; coordination is the contract between them.</p>
+      <div class="eqn"><b>Type 1 coordination (IEC 60947-4-1):</b> after a short circuit the starter must harm no one —
+   but contactor/OL may need replacement. <span class="v2">Cheap, downtime.</span>
+<b>Type 2:</b> after the same fault the starter must be fit for further use
+   (light contact welding separable by a screwdriver allowed). <span class="v3">Production-friendly.</span>
+Type 2 is proven ONLY by the manufacturer's TESTED combination tables — never by arithmetic.</div>
+      <p class="body">This is why panel builders pick fuse + contactor + OL <em>as a published trio</em>. An untested "equivalent" MCCB may let through enough I²t to weld the contactor solid — the fault is cleared, the machine is dead, and Type 2 was a fiction. Let-through energy, not rated amps, is the currency (A44's adiabatic idea again).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Sizing walk — 15 kW, 400 V, DOL</div>
+      <div class="eqn">FLC = P / (√3·U·cosφ·η) = 15 000 / (1.732 × 400 × 0.85 × 0.90) ≈ <b>28.3 A</b>
+Contactor: AC-3 ≥ 15 kW/400 V   → 32 A AC-3 frame
+Overload:  set 28 A (nameplate), Class 10 (normal start)
+SCPD:      aM fuse 40–50 A or motor-rated MCCB from the tested Type 2 table
+Cable:     ≥ 1.45 rule &amp; derating per A44/A46 — and it must survive the SCPD's let-through</div>
+      <p class="body">Two classic traps: sizing the SCPD to the cable instead of from the coordination table (it then trips on inrush, or worse, is oversized and never protects the contactor), and forgetting that <strong>star-delta panels size K1/K2 at 0.58 × FLC</strong> — their SCPD and OL positions shift accordingly (Page 6).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive · quick branch selector</div>
+      <div class="demo">
+        <div class="demo-row"><span>Motor (400 V, 3φ, cosφ 0.85, η 0.90)</span></div>
+        <div class="seg" id="d4seg">
+          <button data-kw="5.5">5.5 kW</button>
+          <button data-kw="11">11 kW</button>
+          <button data-kw="15" class="on">15 kW</button>
+          <button data-kw="22">22 kW</button>
+          <button data-kw="45">45 kW</button>
+        </div>
+        <div class="demo-row"><span>Starter type</span></div>
+        <div class="seg" id="d5seg">
+          <button data-t="dol" class="on">DOL</button>
+          <button data-t="yd">Star-delta</button>
+        </div>
+        <div class="demo-out" id="d4out"></div>
+      </div>
+      <p class="cap">Teaching estimates only — real selection comes from the manufacturer's coordination tables at your fault level (Icc from A46).</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">After a cable fault, a "Type 2 coordinated" starter is found with its contactor welded shut and its OL destroyed. The panel schedule shows the specified fuse was swapped for a same-amp-rating MCB during maintenance. Why did same amps ≠ same protection?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Type 2 was tested with the <b>fuse's let-through characteristics</b> — an aM fuse clips a big fault in a few ms with modest I²t and cut-off current. A same-rated MCB has a completely different let-through: at high prospective current its clearing I²t and peak can be several times the fuse's, exceeding what the contactor contacts and OL heaters were proven to survive. Coordination certifies a <em>combination</em>, not a current rating: change any member and the certificate is void. (Same logic as A46's tested-combination-only rule.)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 ============ -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 / 16 · Consolidate</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Final Quiz</h2>
+    <p class="page-sub">Eight ideas, six ways it breaks in real plants, five questions.</p>
+
+    <div class="card">
+      <div class="label">The eight ideas</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Standstill ≈ short circuit:</strong> 6–8× FLC until the rotor builds back-EMF. Every starter manages that first second.</span></li>
+        <li><span class="num">2</span><span><strong>The contactor separates worlds:</strong> a 3 W coil (A1-A2) commands kilowatts; ratings live in utilization categories, not the cover sticker.</span></li>
+        <li><span class="num">3</span><span><strong>Seal-in = memory:</strong> START ∥ K1:13-14, with every stop element in series — the 1-bit ancestor of PLC logic, and free restart protection via drop-out.</span></li>
+        <li><span class="num">4</span><span><strong>Overload = thermal model:</strong> dial at FLC, class matched to the start (10/20/30). It infers temperature; thermistors measure it.</span></li>
+        <li><span class="num">5</span><span><strong>Reversing = 2 phases swapped + 3 interlock layers:</strong> electrical, mechanical, button — because one welded contact is one event from a bolted short.</span></li>
+        <li><span class="num">6</span><span><strong>V² is the law:</strong> star-delta ÷3 both; autotransformer x² both; series impedance pays x for x² torque. Only frequency change (VFD) escapes.</span></li>
+        <li><span class="num">7</span><span><strong>Torque must beat load at every speed</strong> or the start plateaus and cooks — the star-delta fan and soft-started screw both fail this way.</span></li>
+        <li><span class="num">8</span><span><strong>Coordination is a tested trio:</strong> SCPD + contactor + OL prove Type 2 together; swap any member and the certificate is void.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">How starters fail in the field</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">⚡ Chattering contactor</div><p>Low control voltage, loose control wiring, or an undersized control transformer sagging under coil inrush — the armature buzzes in and out, machine-gunning the contacts until they weld or the coil burns. Measure coil voltage <em>during</em> pull-in, not at rest.</p></div>
+        <div class="fail"><div class="ft">🔥 Welded main contacts</div><p>Jogging on an AC-3 frame, or a fault beyond the tested combination. Motor won't stop from the button — only the upstream device. Mirror contacts + EDM (A35) exist to catch exactly this before the next cycle.</p></div>
+        <div class="fail"><div class="ft">🕳 Single-phasing</div><p>One blown fuse or corroded terminal: the motor runs on, growling, with ~√3× current in the remaining lines. Bimetal differential levers and electronic unbalance detection trip it; without them the winding cooks in minutes.</p></div>
+        <div class="fail"><div class="ft">🎛 The wound-up dial</div><p>OL set to 120% FLC "to stop nuisance trips" — the thermal model now lies, and next month's genuine jam takes the winding with it. Nuisance trips are data: wrong class, real overload, or unbalance.</p></div>
+        <div class="fail"><div class="ft">🌟 Star-delta transition arc</div><p>Open transition into a drifted back-EMF, or K3/K2 interlock failure: the spike erodes contacts each start until one day the star bridge closes onto live delta. Check transition timing and interlocks at commissioning, not after.</p></div>
+        <div class="fail"><div class="ft">🧲 Coil burnout</div><p>Wrong coil voltage (a 110 V coil on 230 V dies fast; 230 V coil on 110 V hums, draws inrush forever, dies slow), or an AC coil mechanically blocked from seating — inrush becomes continuous. Coils are consumables only when the application is wrong.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final quiz 1</div>
+      <p class="quiz-q">Why does a contactor dropping out on a voltage dip count as a safety <em>feature</em>, and which control scheme throws that feature away?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Drop-out opens the seal-in, so when power returns the machine <b>stays off</b> until a deliberate re-start — undervoltage protection and restart protection in one (IEC 60204-1 requirement where restart is hazardous). <b>2-wire (maintained) control</b> discards it: the held contact re-energises the coil the instant supply returns — acceptable for a remote pump, dangerous beside an operator.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final quiz 2</div>
+      <p class="quiz-q">Star-delta reduces current to ⅓ — why exactly ⅓ and not 1/√3?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Two √3 factors stack. In star each winding sees U/√3 → winding current falls by √3. And in star the line current <em>equals</em> the winding current, whereas in delta the line is √3× the winding current. So the line-to-line comparison picks up both factors: (1/√3) × (1/√3) = <b>1/3</b>. Torque follows voltage squared: (1/√3)² = 1/3 as well.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final quiz 3</div>
+      <p class="quiz-q">An OL relay's 95-96 contact and its 97-98 contact — where does each go and why?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">95-96 (NC) goes <b>in series with the contactor coil path</b> — it opens on trip and must sit where no parallel branch can bypass it. 97-98 (NO) closes on trip and feeds the <b>fault indication</b> — lamp, PLC input (A07), alarm. Signal and trip are separated so the indication circuit can never hold the motor on.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final quiz 4</div>
+      <p class="quiz-q">A soft starter is set to current-limit 3.0×. The motor's LRC is 6.8× and LRT 1.9×. Estimate the available breakaway torque. Will a conveyor needing 0.5× rated torque start?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Current limit 3.0× forces voltage down to V = 3.0/6.8 ≈ 0.44 pu → torque = 0.44² × 1.9 ≈ <b>0.37× rated</b>. The conveyor needs 0.5× → it <b>stalls</b> at the limit. Options: raise the limit (~3.9× gives 0.44... recompute: V=3.9/6.8=0.57, T=0.57²×1.9=0.62× ✓), use kickstart, or unload the belt. The V² tax is merciless — always check torque at the chosen current limit.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final quiz 5</div>
+      <p class="quiz-q">Name the three interlock layers of a reversing starter and the failure each one covers.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>Electrical</b> (cross-wired NC auxiliaries): covers normal operation — logic prevents both coils energising. <b>Mechanical</b> (pivoted lever): covers the electrical layer's failure — a welded aux or wiring error can't close both armatures. <b>Button</b> (NC element of each direction button breaks the other coil path): covers the human — pressing both gives break-before-make, nothing dramatic. Defence in depth, exactly as A35 prescribes.</span>
+      </div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory hook</div>
+      <p class="quote">"The coil commands, the contacts carry, the overload remembers — and every stop wires in series."</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 ============ -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 / 16 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade problems, solved in full.</p>
+
+    <div class="card">
+      <div class="label">WE 1 · Sizing a DOL branch</div>
+      <p class="body"><strong>A 30 kW, 400 V pump motor (cosφ 0.85, η 0.90) starts DOL, normal 4 s start. Specify FLC, contactor, overload and SCPD.</strong></p>
+      <div class="eqn">FLC = P/(√3·U·cosφ·η) = 30 000/(1.732 × 400 × 0.85 × 0.90)
+    = 30 000/530 ≈ <b>56.6 A</b>
+Contactor: AC-3 rating ≥ 30 kW / 400 V → next standard frame, e.g. <b>65 A AC-3</b>
+Overload:  dial = <b>56–57 A</b> (nameplate FLC), Class <b>10</b> (4 s start ≪ 10 s)
+SCPD:      aM fuse <b>63–80 A</b> or motor-duty MCCB — from the manufacturer's
+           Type 2 tested-combination table at the panel's fault level (A46: Icc)</div>
+      <p class="body"><em>Discussion:</em> every number traces to a source — FLC from the nameplate physics, the contactor from the AC-3 kW table (never AC-1), the class from the measured start, the SCPD from a tested trio. The only "free" choice is Type 1 vs Type 2, and that's a downtime decision, not an electrical one.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 2 · Star-delta arithmetic, end to end</div>
+      <p class="body"><strong>The same 30 kW motor (nameplate 400/690 V Δ/Y, LRC 7×, LRT 1.9×) is fitted with a star-delta starter for a lightly-loaded start (load torque 20% rated, roughly constant). Find the starting line current, starting torque margin, and the contactor/OL sizes.</strong></p>
+      <div class="eqn">DOL inrush would be 7 × 56.6 = 396 A
+Star start:   line current = 396/3 ≈ <b>132 A</b>  (2.33 × FLC)
+Star torque:  1.9/3 = <b>0.63× rated</b> vs load 0.20× → margin 3.2:1 ✓ accelerates
+Contactors:   K1 (main) &amp; K2 (delta) carry phase current = 0.58 × 56.6 ≈ <b>33 A</b> → 40 A AC-3
+              K3 (star) carries ≈ 0.33 × 56.6 ≈ 19 A → 25 A AC-3
+Overload:     in the phase loop (after K1) → set <b>0.58 × FLC ≈ 33 A</b></div>
+      <p class="body"><em>Discussion:</em> the 400/690 nameplate confirms the windings are Δ-rated for 400 V — star-delta is legal. The 0.58 factor appears twice (contactor size, OL setting); forgetting it in the OL position is the classic error that leaves a motor running 73% over-protected-against, i.e. unprotected.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 3 · Choosing a trip class from the curve law</div>
+      <p class="body"><strong>An 11 kW ID fan (FLC 21 A) accelerates in 14 s drawing an average 6.5× FLC. Will Class 10 ride through? Which class is right? (Use the I²t scaling t<sub>trip</sub> ≈ class × (7.2/x)².)</strong></p>
+      <div class="eqn">Class 10 at 6.5×:  t ≈ 10 × (7.2/6.5)² = 10 × 1.23 = <b>12.3 s</b> &lt; 14 s → trips ✗
+Class 20 at 6.5×:  t ≈ 20 × 1.23 = <b>24.5 s</b> &gt; 14 s, margin 1.75 ✓
+Class 30 at 6.5×:  t ≈ 36.9 s — legal but blunts protection unnecessarily</div>
+      <p class="body"><em>Discussion:</em> the (7.2/x)² scaling comes straight from the I²t thermal image — halve the current, quadruple the time. Class 20 with the dial at 21 A protects the motor <em>and</em> respects the start. Note the OL also enforces the motor's starts-per-hour budget: two consecutive 14 s hot starts may trip legitimately — that's the model working, not failing.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 4 · Autotransformer tap selection</div>
+      <p class="body"><strong>A 75 kW mill motor: LRC 6.0×, LRT 1.7×. The utility caps starting current at 3.0× FLC; the load needs ≥ 0.5× rated torque to break away. Choose a tap (50 / 65 / 80%).</strong></p>
+      <div class="eqn">Tap x:  line current = x²·6.0     torque = x²·1.7
+80%:  I = 0.64 × 6.0 = 3.84×  ✗ exceeds 3.0 cap
+65%:  I = 0.42 × 6.0 = <b>2.54×</b> ✓    T = 0.42 × 1.7 = <b>0.72×</b> ✓  (margin 1.4)
+50%:  I = 0.25 × 6.0 = 1.50× ✓    T = 0.25 × 1.7 = 0.43× ✗ below 0.5 → stalls
+<b>Answer: 65% tap.</b> Korndorfer transition keeps it closed — no spike at changeover.</div>
+      <p class="body"><em>Discussion:</em> notice the autotransformer's fairness — torque fraction equals line-current fraction (both x²). A star-delta here would give I = 2.0× ✓ but T = 0.57× — only a 1.13 margin over breakaway; workable but thin. The tap structure is exactly what star-delta lacks: a choice.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 ============ -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 / 16 · MSc Practice</span>
+    <h2 class="page-title">Problem Set</h2>
+    <p class="page-sub">Ten problems. Work each before revealing — the reveal is the marking scheme.</p>
+
+    <div class="card quiz">
+      <div class="label">Problem 1</div>
+      <p class="quiz-q">Estimate FLC for 7.5 kW / 400 V (cosφ 0.83, η 0.88), and pick the contactor AC-3 frame.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">FLC = 7500/(1.732×400×0.83×0.88) = 7500/506 ≈ <b>14.8 A</b>. Contactor: 18 A AC-3 frame (7.5 kW class). Sanity check: ≈2 A/kW rule gives 15 A ✓.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 2</div>
+      <p class="quiz-q">Draw (mentally or on paper) the DOL coil path and mark which elements are in series and which in parallel. Where does a door safety switch go?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">Series: STOP (NC) → OL 95-96 (NC) → coil. Parallel: START (NO) ∥ K1 13-14 (seal-in). The door switch is a <b>stop function → series</b>, upstream of the whole latch, using its NC (positively-opened) contact — via a safety relay if the risk assessment demands monitoring (A35).</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 3</div>
+      <p class="quiz-q">A star-delta starter's OL is mounted in the line (before K1) and dialled to 0.58×FLC by habit. What happens?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">In the line position the OL sees full line current = FLC, but it's set to 0.58×FLC → it trips at 58% of rated load: relentless <b>nuisance trips</b> around ~60% load. (The mirrored error — phase-loop OL dialled to full FLC — protects nothing until 173% overload.) Position and setting must be decided together: line → FLC; phase loop → 0.58×FLC.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 4</div>
+      <p class="quiz-q">Why does an AC contactor coil draw 6–10× its holding VA at the moment of energisation, and what does this do to control-transformer sizing?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">With the armature open the magnetic circuit has a large air gap → low inductance → high current; as it seats, inductance rises and current falls to holding level. The control transformer must supply the <b>largest simultaneous inrush</b> (e.g. star-delta transition energises K2 while K1 holds) without sagging below ~85% coil voltage, or contactors chatter — hence A46's inrush-based VA sizing, not steady-state sums.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 5</div>
+      <p class="quiz-q">A motor nameplate reads "230/400 V Δ/Y". Can you star-delta start it on a 400 V network?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>No.</b> On 400 V this motor must run in <b>star</b> (each winding rated 230 V = 400/√3). "Starting in star" is its normal connection — there is no reduced step available, and connecting it in delta on 400 V puts 400 V across 230 V windings (1.73× flux → saturation → smoke). Star-delta needs "400/690 Δ/Y" on a 400 V network.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 6</div>
+      <p class="quiz-q">A soft starter set to 3.5× current limit starts a machine fine in summer but stalls it on cold mornings. Physics?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">Cold gearbox oil multiplies breakaway and low-speed load torque (viscosity — A47's ν(T) sensitivity). Available torque at the limit is fixed (V = 3.5/LRC, T ∝ V²); the load curve rises above it → plateau-and-trip. Fixes: kickstart pulse, winter limit profile (many units have dual parameter sets), or address the oil (heater/synthetic). The starter isn't faulty — the load moved.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 7</div>
+      <p class="quiz-q">Rank DOL, star-delta, autotransformer (65%), reactor (65%) and soft start (3× limit) by starting torque per line-amp for the same motor.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">Torque/line-current ratio: <b>DOL = 1</b> (definition), <b>autotransformer = 1</b> (both x²), <b>star-delta = 1</b> (both ⅓) — these three are "fair". <b>Reactor = x</b> (0.65): pays x current for x² torque. <b>Soft start ≈ V</b> (=I/LRC ≈ 0.5 here): same physics as the reactor, continuously variable. So: DOL = auto = Y-Δ &gt; reactor &gt; soft-start — which is why autotransformers persist on torque-hungry weak-supply starts, and why soft starters need kickstart features.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 8</div>
+      <p class="quiz-q">Design intent: conveyor B may only run while conveyor A runs; both share one E-stop. Sketch the coil logic.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">E-stop chain feeds the control supply to <b>both</b> circuits (series master). KA (conveyor A): standard 3-wire latch. KB: its coil path runs through <b>KA's NO aux 13-14</b> in addition to its own STOP/START/seal-in — B can't start unless A is proven running, and A stopping drops B instantly. Add an off-delay on the KA aux if B must run on briefly to clear product. Start order: A then B; stop order: B then A (or all via E-stop).</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 9</div>
+      <p class="quiz-q">What is a mirror contact (IEC 60947-4-1 Annex F), and why can't an ordinary NC auxiliary do its job in a safety circuit?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">A mirror contact is an NC auxiliary with a <b>guaranteed mechanical relationship</b> to the main poles: it cannot be closed while any main contact is welded closed. An ordinary aux shares no such guarantee — its linkage can be closed while a welded main pole stays conducting, so a safety relay's feedback loop (EDM, A35/A46) would falsely report "contactor open". Mirror contacts make the feedback trustworthy; that's what the Annex F certification means.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 10</div>
+      <p class="quiz-q">A 5.5 kW machine jogs ~200 times per shift through a contactor sized "5.5 kW AC-3". Contacts last 6 weeks. Compute nothing — argue the fix.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">Jogging <b>breaks 6–8× current</b> every cycle — that's AC-4 duty, where this frame's rating might be only ~40% of its AC-3 value and its electrical-life curve is perhaps 10× shorter per operation. Fixes in preference order: (1) move jogging to a <b>VFD</b> (silicon doesn't arc), (2) select a contactor from the AC-4 kW column with the electrical-life curve matched to 200 ops/shift × life target, (3) reduce jog frequency by fixturing. Replacing like-for-like every 6 weeks is a subscription, not maintenance.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 15 ============ -->
+  <section class="page" id="p15">
+    <span class="page-tag">Page 15 / 16 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">Three derivations worth owning, the symbols, and the seven classic traps.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 · The star-delta ⅓, properly</div>
+      <div class="eqn">Let each winding have impedance Z at standstill, supply line voltage U.
+<b>Delta:</b>  winding voltage = U           → I<span class="v3">w,Δ</span> = U/Z
+        line current I<span class="v3">L,Δ</span> = √3·I<span class="v3">w,Δ</span> = √3·U/Z     (vector sum at each node)
+<b>Star:</b>   winding voltage = U/√3        → I<span class="v2">w,Y</span> = U/(√3·Z)
+        line current I<span class="v2">L,Y</span> = I<span class="v2">w,Y</span> = U/(√3·Z)         (line IS the winding)
+<b>Ratio:</b>  I<span class="v2">L,Y</span>/I<span class="v3">L,Δ</span> = [U/(√3Z)] / [√3U/Z] = 1/3
+<b>Torque:</b> air-gap torque ∝ Φ·I<span class="v3">rotor</span>, both ∝ V → T ∝ V² → T<span class="v2">Y</span>/T<span class="v3">Δ</span> = (1/√3)² = 1/3  ∎</div>
+      <p class="body">Exam habit: state <em>both</em> √3 factors explicitly (winding voltage ÷√3; line=winding in star vs line=√3×winding in delta). Most dropped marks hide in asserting "⅓" without separating them.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 · Why trip curves are inverse-square (the thermal image)</div>
+      <div class="eqn">Adiabatic heating of the OL element (and motor copper):  m·c·dθ/dt = I²·R
+For a trip at fixed temperature rise Δθ<span class="v3">trip</span> (ignoring cooling):
+   Δθ<span class="v3">trip</span> = I²·R·t/(m·c)  →  <b>I² · t = constant</b>
+So t<span class="v2">trip</span>(x) = t<span class="v2">trip</span>(7.2) · (7.2/x)²   — the scaling used in WE 3.
+Class definition: t<span class="v2">trip</span>(7.2×I<span class="v3">e</span>, from cold) ≤ class seconds (10/20/30),
+no trip within 2 h at 1.05×, trip within 2 h at 1.2× (IEC 60947-4-1).</div>
+      <p class="body">Near 1.05–1.2× the adiabatic assumption fails (cooling matters — that's why those limits are 2-hour statements, not I²t points). Electronic relays add a cooling time-constant and thermal memory: a hot start begins with the integrator already charged — the "trips on second start" behaviour is the model being honest.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 · Autotransformer x² line current</div>
+      <div class="eqn">Tap fraction x:  motor voltage V<span class="v3">m</span> = x·U  → motor current I<span class="v3">m</span> = x·I<span class="v3">LR</span>
+Ideal transformer power balance (magnetising neglected):
+   U·I<span class="v2">line</span> = V<span class="v3">m</span>·I<span class="v3">m</span> = (x·U)(x·I<span class="v3">LR</span>)  →  <b>I<span class="v2">line</span> = x²·I<span class="v3">LR</span></b>
+Torque T = x²·T<span class="v3">LR</span> (V² law)  →  T/I<span class="v2">line</span> = T<span class="v3">LR</span>/I<span class="v3">LR</span> — <b>same as DOL: "fair"</b>
+Series reactor for contrast: I<span class="v2">line</span> = I<span class="v3">m</span> = x·I<span class="v3">LR</span> (no transformer action) → T/I ratio = x.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol glossary</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Symbol</th><th>Meaning</th><th>Typical value</th></tr>
+          <tr><td class="mono">FLC / I<sub>e</sub></td><td>Full-load (rated operational) current</td><td>≈ 2 A per kW at 400 V</td></tr>
+          <tr><td class="mono">I<sub>LR</sub> (LRC)</td><td>Locked-rotor current</td><td>6–8 × FLC</td></tr>
+          <tr><td class="mono">T<sub>LR</sub> (LRT)</td><td>Locked-rotor torque</td><td>1.6–2.2 × rated</td></tr>
+          <tr><td class="mono">x</td><td>Voltage fraction (tap, ramp point)</td><td>0.5–0.8</td></tr>
+          <tr><td class="mono">AC-3 / AC-4</td><td>Utilization category (make/break duty)</td><td>motor start / jog-plug</td></tr>
+          <tr><td class="mono">95-96 / 97-98</td><td>OL trip (NC) / alarm (NO) contacts</td><td>coil path / indication</td></tr>
+          <tr><td class="mono">13-14, 21-22</td><td>Aux NO / NC contact numbering</td><td>seal-in / interlock</td></tr>
+          <tr><td class="mono">Class 10/20/30</td><td>Max trip time at 7.2×I<sub>e</sub> from cold</td><td>normal / heavy / very heavy start</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven exam &amp; field traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>AC-1 amps ≠ AC-3 amps.</strong> The big number on the contactor is the resistive rating; motors live in the AC-3 kW table, jogging in AC-4.</span></li>
+        <li><span class="num">2</span><span><strong>The 0.58 factor.</strong> Star-delta OLs and contactors in the phase loop see I/√3 — position and setting travel together.</span></li>
+        <li><span class="num">3</span><span><strong>Dial = FLC, class = start.</strong> Fix nuisance trips by changing class (or finding the real overload), never by winding the dial past nameplate.</span></li>
+        <li><span class="num">4</span><span><strong>2-wire control restarts.</strong> Any maintained signal (float, thermostat, PLC output held TRUE) restarts after an outage — a risk-assessment decision, not a convenience.</span></li>
+        <li><span class="num">5</span><span><strong>Same amps ≠ same let-through.</strong> Swapping the tested SCPD for "an equivalent" voids Type 2 coordination — the certificate belongs to the trio.</span></li>
+        <li><span class="num">6</span><span><strong>T ∝ V² has no exceptions at fixed frequency.</strong> Any current reduction you buy with voltage costs torque squared; check the load curve before choosing the starter.</span></li>
+        <li><span class="num">7</span><span><strong>"230/400 Δ/Y" cannot star-delta on 400 V.</strong> Check the nameplate delta voltage equals the line voltage — the six terminals alone prove nothing.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 16 ============ -->
+  <section class="page" id="p16">
+    <span class="page-tag">Page 16 / 16 · Study &amp; Practice</span>
+    <h2 class="page-title">Study Path &amp; Practice Ladder</h2>
+    <p class="page-sub">The canon, the bench, and an honest self-check.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Resource</th><th>What it gives you</th></tr>
+          <tr><td><b>IEC 60947-4-1</b></td><td>The law: contactors, OLs, utilization categories, trip classes, Type 1/2 coordination, mirror contacts</td></tr>
+          <tr><td><b>IEC 60204-1</b></td><td>Machine electrical safety: control circuits, stop categories, restart protection, colours (with IEC 60073)</td></tr>
+          <tr><td><b>Herman, <i>Industrial Motor Control</i></b></td><td>The classic teaching text — every circuit on these pages drawn large and slow</td></tr>
+          <tr><td><b>Schneider <i>Electrical Installation Guide</i></b> (free PDF)</td><td>Selection tables, coordination, starter chapters — the working engineer's companion</td></tr>
+          <tr><td><b>ABB / Eaton / Siemens coordination tables</b> (free online)</td><td>The actual Type 2 trios for your fault level — bookmark your brand's</td></tr>
+          <tr><td><b>Manufacturer soft-starter manuals</b> (ABB PSTX, Schneider ATS, Danfoss MCD)</td><td>Real parameter sets: ramp, limits, kickstart, inside-delta</td></tr>
+          <tr><td><b>A08 VFD · A46 Panel Wiring · A35 Cobot Safety</b></td><td>The neighbours: drive engineering, the panel this all lives in, the safety layer above it</td></tr>
+          <tr><td><b>CGTTI / NAITA electrician modules (Sri Lanka)</b></td><td>Hands-on starter wiring practice with local supply conventions</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder — eight exercises</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span>Draw the DOL power + control circuit from memory, terminal numbers included (A1-A2, 13-14, 95-96). Check against Page 3. Repeat until flawless.</span></li>
+        <li><span class="num">2</span><span>Bench-build the latch with a 24 V relay, two pushbuttons and an LED. Feel the seal-in work; break the "stop" wire and watch it fail safe.</span></li>
+        <li><span class="num">3</span><span>Measure a real contactor coil: resistance, pull-in voltage, drop-out voltage, inrush vs holding current. Compare with the datasheet VA figures.</span></li>
+        <li><span class="num">4</span><span>Wire a reversing pair with cross NC interlocks (+ mechanical lever if you have one). Try to defeat it; understand exactly why you can't.</span></li>
+        <li><span class="num">5</span><span>Mirror the DOL latch, jog and sequence idioms as PLC ladder (A07 / A45 tools) — note what stays hard-wired (E-stop, STOP) and why.</span></li>
+        <li><span class="num">6</span><span>Time a star-delta panel: star current decay, transition instant, delta surge (clamp meter + scope if available). Move the timer and observe the plateau rule.</span></li>
+        <li><span class="num">7</span><span>Commission a soft starter in the simulator/manual: set FLC, class, ramp, current limit, kickstart; predict the torque at the limit before pressing start.</span></li>
+        <li><span class="num">8</span><span>Audit one real panel: verify the SCPD-contactor-OL trio against the manufacturer's Type 2 table, OL dial vs nameplate, and the stop chain's series integrity.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment — can you…</div>
+      <div class="grid-2">
+        <div class="mini"><h4>Explain</h4><p>…why line current falls by exactly ⅓ in star, with both √3 factors, and why torque follows V²?</p></div>
+        <div class="mini c-sky"><h4>Design</h4><p>…a 3-wire control circuit with sequence interlock, jog, and correctly-placed stop elements — from a blank page?</p></div>
+        <div class="mini c-grn"><h4>Select</h4><p>…contactor, OL class/setting and SCPD for a given motor and start, from the right catalogue tables?</p></div>
+        <div class="mini c-amb"><h4>Diagnose</h4><p>…chatter, single-phasing, nuisance trips and welded contacts from symptoms alone, and name the fix that isn't "wind the dial up"?</p></div>
+      </div>
+    </div>
+
+    <div class="card memory" style="background: linear-gradient(135deg, #1a2230, #232d3f); border:1px solid var(--border);">
+      <div class="label" style="color:var(--accent-soft)">Where next</div>
+      <p class="body" style="color:var(--text-dim)">Speed control and the drive that breaks the V² law → <a href="A08_VFD_Deep_Dive.html" style="color:var(--accent-soft)">A08 VFD</a>. The panel this hardware lives in → <a href="A46_Control_Panel_Wiring_Deep_Dive.html" style="color:var(--accent-soft)">A46</a>. The logic that replaces the relays → <a href="A07_PLC_Deep_Dive.html" style="color:var(--accent-soft)">A07</a> / <a href="A45_PLC_Brands_Tools_Deep_Dive.html" style="color:var(--accent-soft)">A45</a>. The safety layer that supervises every coil → <a href="A35_Cobot_Safety_Deep_Dive.html" style="color:var(--accent-soft)">A35</a>.</p>
+    </div>
+  </section>
+
+  <div class="footer">
+    Micro Learning · Advanced Deep Dive A51 — Motor Starters &amp; Control Circuits<br>
+    ◆ Standalone module · related: <a href="A08_VFD_Deep_Dive.html" style="color:var(--accent-soft)">A08 VFD</a> · <a href="A46_Control_Panel_Wiring_Deep_Dive.html" style="color:var(--accent-soft)">A46 Panel Wiring</a> · <a href="A30_Three_Phase_Power_Deep_Dive.html" style="color:var(--accent-soft)">A30 Three-Phase</a> · <a href="A44_Domestic_Wiring_Deep_Dive.html" style="color:var(--accent-soft)">A44 Domestic Wiring</a> · <a href="A07_PLC_Deep_Dive.html" style="color:var(--accent-soft)">A07 PLC</a><br>
+    Keratoconus-friendly · dark · large type · iPad Pro 11 optimised
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // ---- D1: inrush reality check ----
+  var kwR=document.getElementById('d1kwR'), lrR=document.getElementById('d1lrR');
+  function d1(){
+    var kw=+kwR.value, m=+lrR.value;
+    document.getElementById('d1kw').textContent=kw;
+    document.getElementById('d1lr').textContent=m.toFixed(1);
+    var flc=kw*1000/(1.732*400*0.85*0.90);
+    var dol=flc*m, yd=dol/3, soft=flc*Math.min(m,3.5);
+    document.getElementById('d1out').innerHTML=
+      'FLC ≈ '+kw+' kW × 1000 / 530 = <b>'+flc.toFixed(1)+' A</b><br>'+
+      'DOL inrush = '+m.toFixed(1)+' × FLC = <b>'+dol.toFixed(0)+' A</b><br>'+
+      'star-delta start = DOL/3 = <b>'+yd.toFixed(0)+' A</b> · soft start @3.5× limit = <b>'+soft.toFixed(0)+' A</b><br>'+
+      'VFD start ≈ <b>'+flc.toFixed(0)+'–'+(1.5*flc).toFixed(0)+' A</b> with full torque available';
+  }
+  [kwR,lrR].forEach(function(r){r.addEventListener('input',d1);}); d1();
+
+  // ---- D2: trip class ride-through ----
+  var cls=10;
+  var stR=document.getElementById('d2stR'), seg2=document.getElementById('d2seg');
+  seg2.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    seg2.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); cls=+b.dataset.c; d2();
+  });
+  function d2(){
+    var st=+stR.value;
+    document.getElementById('d2st').textContent=st;
+    var allow=cls*Math.pow(7.2/6.5,2); // at a typical 6.5x start current
+    var v = st<=0.7*allow ? '<b style="color:#4ade80">RIDES THROUGH ✓</b> — healthy margin'
+          : st<=allow    ? '<b style="color:#fbbf24">MARGINAL ⚠</b> — a hot start or high ambient will trip it'
+          :                '<b style="color:#f87171">TRIPS ✗</b> — class too fast for this start';
+    document.getElementById('d2out').innerHTML=
+      'Class '+cls+' at ~6.5× start current allows ≈ '+cls+'×(7.2/6.5)² = <b>'+allow.toFixed(1)+' s</b><br>'+
+      'your start: <b>'+st+' s</b> → '+v+'<br>'+
+      (st>allow && cls<30 ? 'try Class '+(cls===10?20:30)+' — and keep the dial at FLC' :
+       st<=0.4*allow && cls>10 ? 'Class 10 may suffice — faster protection when it matters' :
+       'match the class to the start, the dial to the motor');
+  }
+  stR.addEventListener('input',d2); d2();
+
+  // ---- D3: star-delta feasibility ----
+  var flcR=document.getElementById('d3flcR'), lr3R=document.getElementById('d3lrR'), ltR=document.getElementById('d3ltR');
+  function d3(){
+    var flc=+flcR.value, m=+lr3R.value, lt=+ltR.value;
+    document.getElementById('d3flc').textContent=flc;
+    document.getElementById('d3lr').textContent=m.toFixed(1);
+    document.getElementById('d3lt').textContent=lt;
+    var dol=flc*m, yd=dol/3;
+    var starT=1.8/3*100; // % of rated torque, assuming LRT=1.8x in delta
+    var v = lt<=starT*0.8 ? '<b style="color:#4ade80">STARTS IN STAR ✓</b> — reaches transition speed'
+          : lt<=starT     ? '<b style="color:#fbbf24">MARGINAL ⚠</b> — may plateau below 80% speed; expect a spike at transition'
+          :                 '<b style="color:#f87171">STALLS IN STAR ✗</b> — plateau; delta step ≈ DOL. Use soft starter / VFD or unload';
+    document.getElementById('d3out').innerHTML=
+      'DOL: <b>'+dol.toFixed(0)+' A</b> → star-delta start: <b>'+yd.toFixed(0)+' A</b> (2.33× × FLC scale)<br>'+
+      'star torque ≈ 1.8×/3 = <b>'+starT.toFixed(0)+'%</b> of rated vs load <b>'+lt+'%</b><br>'+v;
+  }
+  [flcR,lr3R,ltR].forEach(function(r){r.addEventListener('input',d3);}); d3();
+
+  // ---- D4/D5: branch selector ----
+  var kw4=15, typ='dol';
+  var seg4=document.getElementById('d4seg'), seg5=document.getElementById('d5seg');
+  var frames=[9,12,18,25,32,40,50,65,80,95,115];
+  var fuses=[16,20,25,32,40,50,63,80,100,125,160];
+  function next(arr,v){ for(var i=0;i<arr.length;i++){ if(arr[i]>=v) return arr[i]; } return arr[arr.length-1]; }
+  seg4.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    seg4.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); kw4=+b.dataset.kw; d4();
+  });
+  seg5.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    seg5.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); typ=b.dataset.t; d4();
+  });
+  function d4(){
+    var flc=kw4*1000/(1.732*400*0.85*0.90);
+    var html='FLC = <b>'+flc.toFixed(1)+' A</b><br>';
+    if(typ==='dol'){
+      html+='contactor: <b>'+next(frames,flc)+' A AC-3</b> frame ('+kw4+' kW class)<br>'+
+            'overload: dial <b>'+flc.toFixed(0)+' A</b>, class per start · SCPD: aM fuse ≈ <b>'+next(fuses,flc*1.3)+' A</b> (from tested table)';
+    } else {
+      var ph=0.58*flc, st=0.33*flc;
+      html+='K1/K2 (phase current 0.58×): <b>'+ph.toFixed(1)+' A → '+next(frames,ph)+' A AC-3</b><br>'+
+            'K3 star (0.33×): <b>'+st.toFixed(1)+' A → '+next(frames,st)+' A AC-3</b><br>'+
+            'overload in phase loop: dial <b>'+ph.toFixed(0)+' A</b> · needs a 6-lead "400/690 Δ/Y" motor';
+    }
+    document.getElementById('d4out').innerHTML=html;
+  }
+  d4();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Battery Cells &amp; BMS — Automotive Engineering · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #4ade80;       /* cell green — the battery theme */
+    --accent-soft: #86efac;
+    --accent-2: #f97316;     /* HV orange, ties to A38 */
+    --accent-3: #38bdf8;     /* sky */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(74,222,128,0.13), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(249,115,22,0.06), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(74,222,128,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(74,222,128,0.15), rgba(249,115,22,0.05));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(74,222,128,0.16); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-3)!important; } .c-sky .big{color:var(--accent-3)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #4ade80, #15803d); color: #052e16; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(5,46,22,0.72); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(74,222,128,0.12); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:110px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Automotive Engineering · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🔋</span>Battery Cells &amp; BMS</h1>
+  <p class="hero-sub">Inside the lithium-ion cell: intercalation electrochemistry, the chemistry zoo, cell formats, the equivalent-circuit model, SoC estimation with Kalman filters, balancing, thermal runaway, degradation physics and the standards that keep packs safe — the cell-level companion to the EV powertrain module.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>No micro card yet — a full advanced module. Related:</span>
+    <a href="A38_EV_Powertrain_Deep_Dive.html">A38 EV Powertrain →</a>
+    <a href="A29_MOSFETs_Deep_Dive.html">A29 MOSFETs →</a>
+    <a href="A36_Embedded_RaspberryPi_Deep_Dive.html">A36 Embedded →</a>
+    <a href="A33_Industry_4_5_Deep_Dive.html">A33 Industry 4.0 →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · The Electrochemical Cell</a>
+    <a href="#p2">2 · Chemistry Zoo</a>
+    <a href="#p3">3 · Formats &amp; Pack Build</a>
+    <a href="#p4">4 · Electrical Model &amp; OCV</a>
+    <a href="#p5">5 · SoC / SoH Estimation</a>
+    <a href="#p6">6 · Balancing &amp; BMS</a>
+    <a href="#p7">7 · Thermal &amp; Runaway</a>
+    <a href="#p8">8 · Degradation</a>
+    <a href="#p9">9 · Testing &amp; Standards</a>
+    <a href="#p10">10 · Recap, Faults &amp; Quiz</a>
+  </div>
+
+  <!-- ===== PAGE 1 ===== -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 10</span>
+    <h2 class="page-title">A Chemical Spring You Can Wind 2,000 Times</h2>
+    <p class="page-sub">Every lithium-ion cell is the same machine: lithium ions rocking between two host crystals, electrons forced to take the long way round.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead">A <span class="hl">lithium-ion cell</span> stores energy by moving Li<sup>+</sup> ions between two <span class="hl2">intercalation electrodes</span> — a graphite anode and a metal-oxide cathode — through an ion-conducting, electron-blocking <span class="hl3">electrolyte and separator</span>. Because electrons cannot cross the separator, they must flow through the external circuit: that electron detour <strong>is</strong> your usable current.</p>
+      <p class="body">On charge, ions leave the cathode lattice and tuck between graphite layers (LiC<sub>6</sub>); on discharge they "rock" back — hence the name <strong>rocking-chair battery</strong>. Nothing is plated or dissolved in normal operation, which is why a good cell survives thousands of cycles: the crystals breathe (~10&nbsp;% volume swing for graphite) but stay intact. Degradation (page 8) is precisely the set of side reactions that break this clean picture.</p>
+      <p class="body">The cell voltage is thermodynamics, not design choice: it is the difference in lithium chemical potential between the two hosts, set by the Gibbs free energy of the overall reaction.</p>
+      <div class="eqn">E_cell = <b>−ΔG / (n·F)</b>      F = 96,485 C/mol (Faraday)
+overall (NMC example):  LiC6 + Ni-Mn-Co-O2  ⇌  C6 + Li(NMC)O2
+graphite ≈ 0.1 V vs Li/Li+   ·   NMC ≈ 3.8 V vs Li/Li+  →  <b>cell ≈ 3.6–3.7 V</b></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Inside the cell — the sandwich that does everything</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="an1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.35"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.08"/></linearGradient>
+          <linearGradient id="ca1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f97316" stop-opacity="0.35"/><stop offset="1" stop-color="#f97316" stop-opacity="0.08"/></linearGradient>
+          <linearGradient id="sep1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity="0.30"/><stop offset="1" stop-color="#4ade80" stop-opacity="0.06"/></linearGradient>
+        </defs>
+        <!-- collectors -->
+        <rect x="60" y="60" width="26" height="200" rx="4" fill="#b45309" opacity="0.85"/>
+        <text x="73" y="52" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="700">Cu foil</text>
+        <rect x="674" y="60" width="26" height="200" rx="4" fill="#94a3b8" opacity="0.8"/>
+        <text x="687" y="52" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">Al foil</text>
+        <!-- anode -->
+        <rect x="92" y="60" width="180" height="200" rx="8" fill="url(#an1)" stroke="#38bdf8" stroke-width="1.6"/>
+        <text x="182" y="90" text-anchor="middle" fill="#38bdf8" font-size="14" font-weight="800">GRAPHITE ANODE</text>
+        <text x="182" y="110" text-anchor="middle" fill="#94a3b8" font-size="11.5">layered carbon, LiC6</text>
+        <text x="182" y="128" text-anchor="middle" fill="#94a3b8" font-size="11.5">~0.1 V vs Li/Li+</text>
+        <!-- graphite layers -->
+        <g stroke="#38bdf8" stroke-width="2" opacity="0.55">
+          <line x1="112" y1="155" x2="252" y2="155"/><line x1="112" y1="180" x2="252" y2="180"/>
+          <line x1="112" y1="205" x2="252" y2="205"/><line x1="112" y1="230" x2="252" y2="230"/>
+        </g>
+        <g fill="#86efac"><circle cx="140" cy="167" r="5"/><circle cx="185" cy="192" r="5"/><circle cx="225" cy="167" r="5"/><circle cx="160" cy="217" r="5"/></g>
+        <!-- separator -->
+        <rect x="290" y="60" width="180" height="200" rx="8" fill="url(#sep1)" stroke="#4ade80" stroke-width="1.6" stroke-dasharray="6 4"/>
+        <text x="380" y="90" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800">SEPARATOR +</text>
+        <text x="380" y="108" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800">ELECTROLYTE</text>
+        <text x="380" y="128" text-anchor="middle" fill="#94a3b8" font-size="11.5">PE/PP film ~15 µm</text>
+        <text x="380" y="146" text-anchor="middle" fill="#94a3b8" font-size="11.5">LiPF6 in carbonates</text>
+        <text x="380" y="170" text-anchor="middle" fill="#86efac" font-size="12" font-weight="700">ions YES · electrons NO</text>
+        <!-- Li+ crossing -->
+        <g fill="#86efac">
+          <circle cx="330" cy="205" r="6"/><circle cx="380" cy="225" r="6"/><circle cx="430" cy="205" r="6"/>
+        </g>
+        <path d="M320 205 L445 205" stroke="#86efac" stroke-width="2" stroke-dasharray="4 4" opacity="0.6"/>
+        <text x="380" y="250" text-anchor="middle" fill="#86efac" font-size="11" font-weight="700">Li+ (discharge →)</text>
+        <!-- cathode -->
+        <rect x="488" y="60" width="180" height="200" rx="8" fill="url(#ca1)" stroke="#f97316" stroke-width="1.6"/>
+        <text x="578" y="90" text-anchor="middle" fill="#f97316" font-size="14" font-weight="800">OXIDE CATHODE</text>
+        <text x="578" y="110" text-anchor="middle" fill="#94a3b8" font-size="11.5">NMC / NCA / LFP</text>
+        <text x="578" y="128" text-anchor="middle" fill="#94a3b8" font-size="11.5">3.4–3.9 V vs Li/Li+</text>
+        <g fill="#fdba74"><circle cx="530" cy="170" r="5"/><circle cx="575" cy="195" r="5"/><circle cx="620" cy="170" r="5"/><circle cx="550" cy="225" r="5"/><circle cx="605" cy="225" r="5"/></g>
+        <!-- external circuit -->
+        <path d="M73 60 L73 24 L687 24 L687 60" stroke="#4ade80" stroke-width="3" fill="none"/>
+        <circle cx="380" cy="24" r="12" fill="#0b0f14" stroke="#4ade80" stroke-width="2.5"/>
+        <text x="380" y="29" text-anchor="middle" fill="#86efac" font-size="12" font-weight="800">e−</text>
+        <text x="380" y="8" text-anchor="middle" fill="#94a3b8" font-size="10.5">electrons take the long way — that is the load current</text>
+        <!-- footer labels -->
+        <text x="380" y="290" text-anchor="middle" fill="#64748b" font-size="11.5">discharge: Li+ anode → cathode inside · e− anode → cathode outside · charge reverses both</text>
+      </svg>
+      </div>
+      <p class="cap">One sandwich ~0.1 mm thick, wound or stacked dozens of times, is the whole cell. Every property — energy, power, life, safety — traces back to these five layers.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><h4>Nominal voltage</h4><div class="big">3.6 V</div><p>NMC/NCA cell. LFP sits at 3.2 V; a 12 V lead-acid needs 6 cells, an 800 V pack ~198 in series.</p></div>
+      <div class="mini c-sky"><h4>Cell energy density</h4><div class="big">250–300</div><p>Wh/kg for current NMC/NCA cylindrical cells; LFP ~160–210 Wh/kg but cheaper and safer.</p></div>
+      <div class="mini c-amb"><h4>Coulombic efficiency</h4><div class="big">&gt;99.9 %</div><p>Charge out ÷ charge in per cycle. The missing 0.1 % is side reactions — that is your ageing (page 8).</p></div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 2 ===== -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 10</span>
+    <h2 class="page-title">The Chemistry Zoo</h2>
+    <p class="page-sub">"Lithium-ion" is a family, not a chemistry. Cathode choice sets energy, cost, life and how the cell fails.</p>
+
+    <div class="card">
+      <div class="label">Why nickel, manganese, cobalt, iron?</div>
+      <p class="lead">Cathodes trade three things: <span class="hl">energy</span> (nickel-rich layered oxides hold the most lithium at the highest voltage), <span class="hl2">stability</span> (iron-phosphate's olivine lattice locks its oxygen in covalent bonds) and <span class="hl3">cost</span> (iron and manganese are cheap; cobalt and nickel are not).</p>
+      <p class="body"><strong>Rule of thumb:</strong> more nickel = more energy but touchier thermally; more iron/manganese = safer and cheaper but heavier per kWh. Industry moved from NMC111 to NMC811 (80&nbsp;% Ni) chasing range, while LFP took over standard-range cars once cell-to-pack construction (page 3) recovered its density penalty at pack level. On the anode side, blending <strong>5–10&nbsp;% silicon</strong> into graphite raises capacity (Si stores ~10× more Li per gram) at the price of a ~300&nbsp;% particle volume swing that must be managed.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Cathode families — the numbers that matter</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Chemistry</th><th>Nominal V</th><th>Cell Wh/kg</th><th>Cycle life</th><th>Thermal onset</th><th>Where it wins</th></tr>
+        <tr><td><b>NMC 811</b> <span class="mono">LiNi0.8Mn0.1Co0.1O2</span></td><td>3.6–3.7</td><td>250–300</td><td>1,000–2,000</td><td>~210 °C</td><td>Long-range EVs, premium packs</td></tr>
+        <tr><td><b>NCA</b> <span class="mono">LiNiCoAlO2</span></td><td>3.6</td><td>260–300</td><td>1,000–1,500</td><td>~180 °C</td><td>High-energy cylindrical (Tesla 2170)</td></tr>
+        <tr><td><b>LFP</b> <span class="mono">LiFePO4</span></td><td>3.2</td><td>160–210</td><td>3,000–6,000+</td><td>~270 °C, no O2 release</td><td>Standard-range EVs, storage, buses</td></tr>
+        <tr><td><b>LMFP</b> <span class="mono">LiMnxFe1-xPO4</span></td><td>3.6–3.8 avg</td><td>~200–240</td><td>2,000–4,000</td><td>olivine-safe</td><td>LFP safety + ~15–20 % more energy</td></tr>
+        <tr><td><b>LTO anode</b> <span class="mono">Li4Ti5O12</span></td><td>2.3 (vs LFP)</td><td>60–110</td><td>15,000–20,000</td><td>no SEI, no plating</td><td>Ultra-fast charge, -30 °C, 20-yr life</td></tr>
+        <tr><td><b>Na-ion</b></td><td>3.0–3.1</td><td>120–160</td><td>3,000+</td><td>very tolerant</td><td>Cheap storage; ships at 0 V; no Li at all</td></tr>
+        <tr><td><b>Solid-state</b> (sulfide/oxide)</td><td>3.8+ (Li-metal)</td><td>350–500 (target)</td><td>lab → pilot</td><td>no liquid to burn</td><td>The 2027–2030 prize: Li-metal anode</td></tr>
+      </table></div>
+      <p class="cap">Thermal onset = approximate temperature where the cathode starts feeding a runaway (page 7). LFP's covalent P-O bond keeps oxygen locked in — the single biggest reason it is the "safe" chemistry.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">NMC vs LFP — the trade at a glance</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+        <!-- axes pentagon-lite: 4-spoke radar -->
+        <g transform="translate(200,150)">
+          <g stroke="#334155" stroke-width="1.2" fill="none">
+            <polygon points="0,-105 105,0 0,105 -105,0"/>
+            <polygon points="0,-70 70,0 0,70 -70,0"/>
+            <polygon points="0,-35 35,0 0,35 -35,0"/>
+            <line x1="0" y1="-105" x2="0" y2="105"/><line x1="-105" y1="0" x2="105" y2="0"/>
+          </g>
+          <polygon points="0,-98 60,0 0,45 -55,0" fill="rgba(249,115,22,0.25)" stroke="#f97316" stroke-width="2.4"/>
+          <text x="0" y="-115" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">Energy Wh/kg</text>
+          <text x="118" y="4" text-anchor="start" fill="#e2e8f0" font-size="12" font-weight="700">Fast-charge</text>
+          <text x="0" y="126" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">Safety margin</text>
+          <text x="-118" y="4" text-anchor="end" fill="#e2e8f0" font-size="12" font-weight="700">Cycle life</text>
+          <text x="0" y="150" text-anchor="middle" fill="#f97316" font-size="13" font-weight="800">NMC 811</text>
+        </g>
+        <g transform="translate(560,150)">
+          <g stroke="#334155" stroke-width="1.2" fill="none">
+            <polygon points="0,-105 105,0 0,105 -105,0"/>
+            <polygon points="0,-70 70,0 0,70 -70,0"/>
+            <polygon points="0,-35 35,0 0,35 -35,0"/>
+            <line x1="0" y1="-105" x2="0" y2="105"/><line x1="-105" y1="0" x2="105" y2="0"/>
+          </g>
+          <polygon points="0,-62 75,0 0,98 -95,0" fill="rgba(74,222,128,0.22)" stroke="#4ade80" stroke-width="2.4"/>
+          <text x="0" y="-115" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">Energy Wh/kg</text>
+          <text x="118" y="4" text-anchor="start" fill="#e2e8f0" font-size="12" font-weight="700">Fast-charge</text>
+          <text x="0" y="126" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">Safety margin</text>
+          <text x="-118" y="4" text-anchor="end" fill="#e2e8f0" font-size="12" font-weight="700">Cycle life</text>
+          <text x="0" y="150" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">LFP</text>
+        </g>
+      </svg>
+      </div>
+      <p class="cap">Same cell, different priorities: NMC buys range; LFP buys life, safety and cost. LMFP and Na-ion are attempts to bend these polygons toward each other.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 3 ===== -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 10</span>
+    <h2 class="page-title">Formats &amp; Pack Construction</h2>
+    <p class="page-sub">The same sandwich, rolled or stacked three different ways — then multiplied into a 400–800 V pack.</p>
+
+    <div class="card">
+      <div class="label">Three formats, one electrode sandwich</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 310" xmlns="http://www.w3.org/2000/svg">
+        <!-- cylindrical -->
+        <g transform="translate(30,40)">
+          <circle cx="100" cy="110" r="92" fill="none" stroke="#4ade80" stroke-width="2"/>
+          <g fill="none" stroke-width="3">
+            <circle cx="100" cy="110" r="76" stroke="#38bdf8" opacity="0.8"/>
+            <circle cx="100" cy="110" r="60" stroke="#f97316" opacity="0.8"/>
+            <circle cx="100" cy="110" r="44" stroke="#38bdf8" opacity="0.8"/>
+            <circle cx="100" cy="110" r="28" stroke="#f97316" opacity="0.8"/>
+          </g>
+          <circle cx="100" cy="110" r="10" fill="#0b0f14" stroke="#64748b" stroke-width="2"/>
+          <text x="100" y="238" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800">CYLINDRICAL</text>
+          <text x="100" y="256" text-anchor="middle" fill="#94a3b8" font-size="11">jelly roll · 18650/21700/4680</text>
+          <text x="100" y="272" text-anchor="middle" fill="#94a3b8" font-size="11">steel can = built-in clamp</text>
+        </g>
+        <!-- prismatic -->
+        <g transform="translate(280,40)">
+          <rect x="20" y="30" width="160" height="160" rx="12" fill="rgba(56,189,248,0.08)" stroke="#38bdf8" stroke-width="2"/>
+          <g fill="none" stroke-width="3">
+            <rect x="38" y="52" width="124" height="116" rx="30" stroke="#f97316" opacity="0.8"/>
+            <rect x="54" y="68" width="92" height="84" rx="22" stroke="#38bdf8" opacity="0.8"/>
+            <rect x="70" y="84" width="60" height="52" rx="14" stroke="#f97316" opacity="0.8"/>
+          </g>
+          <rect x="55" y="14" width="26" height="16" rx="3" fill="#64748b"/>
+          <rect x="119" y="14" width="26" height="16" rx="3" fill="#b45309"/>
+          <text x="100" y="238" text-anchor="middle" fill="#38bdf8" font-size="14" font-weight="800">PRISMATIC</text>
+          <text x="100" y="256" text-anchor="middle" fill="#94a3b8" font-size="11">flattened roll or stack in Al can</text>
+          <text x="100" y="272" text-anchor="middle" fill="#94a3b8" font-size="11">BYD Blade, VW unified cell</text>
+        </g>
+        <!-- pouch -->
+        <g transform="translate(530,40)">
+          <path d="M30 40 L170 40 L178 190 L22 190 Z" fill="rgba(192,132,252,0.10)" stroke="#c084fc" stroke-width="2"/>
+          <g stroke-width="3" opacity="0.85">
+            <line x1="45" y1="70" x2="155" y2="70" stroke="#f97316"/>
+            <line x1="45" y1="92" x2="155" y2="92" stroke="#38bdf8"/>
+            <line x1="45" y1="114" x2="155" y2="114" stroke="#f97316"/>
+            <line x1="45" y1="136" x2="155" y2="136" stroke="#38bdf8"/>
+            <line x1="45" y1="158" x2="155" y2="158" stroke="#f97316"/>
+          </g>
+          <rect x="60" y="22" width="28" height="18" rx="3" fill="#64748b"/>
+          <rect x="112" y="22" width="28" height="18" rx="3" fill="#b45309"/>
+          <text x="100" y="238" text-anchor="middle" fill="#c084fc" font-size="14" font-weight="800">POUCH</text>
+          <text x="100" y="256" text-anchor="middle" fill="#94a3b8" font-size="11">stacked plates in laminate foil</text>
+          <text x="100" y="272" text-anchor="middle" fill="#94a3b8" font-size="11">lightest case, needs external clamp</text>
+        </g>
+      </svg>
+      </div>
+      <p class="cap">Roll it (cylindrical), flatten the roll or stack it in a can (prismatic), or stack it in foil (pouch). Format changes cooling paths, swelling control and how a vent behaves — not the chemistry.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Format trade-offs</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Format</th><th>Strengths</th><th>Weaknesses</th><th>Typical users</th></tr>
+        <tr><td><b>Cylindrical</b> 21700 / 4680</td><td>Cheap at volume, can = pressure vessel, predictable venting, tabless (4680) cuts internal resistance</td><td>Poor packing factor (~65 %), many joints, side cooling only</td><td>Tesla, Rivian, power tools</td></tr>
+        <tr><td><b>Prismatic</b></td><td>Best space use, easy bus-barring, base or side cooling, Blade doubles as structure</td><td>Heavier can, roll corners stress, vent design harder</td><td>BYD, CATL CTP, VW, Toyota</td></tr>
+        <tr><td><b>Pouch</b></td><td>Lightest packaging, lowest R per Ah, flexible shapes</td><td>Swelling needs clamping, tab tearing, no built-in vent</td><td>Hyundai/Kia, GM Ultium, drones</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Cell → module → pack, and why modules are disappearing</div>
+      <p class="body">Cells in <strong>series</strong> add voltage; in <strong>parallel</strong> add capacity. A classic 400 V pack is <span class="mono hl">96s</span> (96 × 3.7 ≈ 355 V nominal); an 800 V pack runs ~<span class="mono hl">190–200s</span>. Parallel groups (e.g. 96s4p) multiply Ah and let the pack survive one weak cell per group.</p>
+      <div class="eqn">E_pack = <b>N_series · N_parallel · V̄_cell · Q_cell</b>
+96s 4p · 3.7 V · 50 Ah  →  355 V · 200 Ah  ≈  <b>71 kWh</b></div>
+      <p class="body"><span class="hl2">Cell-to-pack (CTP)</span> deletes the module layer — cells bond straight into the enclosure — recovering 15–20&nbsp;% volume, which is exactly how LFP packs caught up with NMC modules. <span class="hl3">Cell-to-chassis (CTC)</span> goes further: the pack lid <em>is</em> the cabin floor and the cells carry body loads. The price is serviceability: a single bad cell now means glue, not bolts. The BMS (page 6) is what keeps 200 series cells behaving as one battery.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 4 ===== -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 10</span>
+    <h2 class="page-title">The Electrical Model &amp; the OCV Curve</h2>
+    <p class="page-sub">To a control engineer a cell is a voltage source with baggage: one resistor for the instant sag, RC pairs for the slow recovery.</p>
+
+    <div class="card">
+      <div class="label">Open-circuit voltage — the cell's fuel gauge (almost)</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="250" x2="720" y2="250" stroke="#475569" stroke-width="2"/>
+        <line x1="70" y1="250" x2="70" y2="30" stroke="#475569" stroke-width="2"/>
+        <text x="400" y="285" text-anchor="middle" fill="#94a3b8" font-size="13">State of Charge %</text>
+        <text x="30" y="140" fill="#94a3b8" font-size="13" transform="rotate(-90 30 140)">OCV (V)</text>
+        <g fill="#64748b" font-size="11">
+          <text x="70" y="266" text-anchor="middle">0</text><text x="232" y="266" text-anchor="middle">25</text>
+          <text x="395" y="266" text-anchor="middle">50</text><text x="557" y="266" text-anchor="middle">75</text>
+          <text x="720" y="266" text-anchor="middle">100</text>
+          <text x="58" y="60" text-anchor="end">4.2</text><text x="58" y="140" text-anchor="end">3.6</text><text x="58" y="225" text-anchor="end">3.0</text>
+        </g>
+        <!-- NMC sloped curve -->
+        <path d="M70 235 C 120 170, 200 150, 395 130 C 560 113, 650 85, 720 55" fill="none" stroke="#f97316" stroke-width="3.5"/>
+        <text x="600" y="70" fill="#f97316" font-size="13" font-weight="800">NMC — usable slope</text>
+        <!-- LFP flat curve -->
+        <path d="M70 240 C 100 185, 130 172, 180 170 L 610 165 C 660 163, 690 120, 720 75" fill="none" stroke="#4ade80" stroke-width="3.5"/>
+        <text x="330" y="150" fill="#4ade80" font-size="13" font-weight="800">LFP — flat plateau (3.2–3.3 V)</text>
+        <rect x="180" y="158" width="430" height="20" fill="rgba(248,113,113,0.12)" stroke="#f87171" stroke-width="1" stroke-dasharray="5 4"/>
+        <text x="395" y="205" text-anchor="middle" fill="#f87171" font-size="12" font-weight="700">30 mV over 60 % SoC — voltage can NOT tell you SoC here (page 5)</text>
+      </svg>
+      </div>
+      <p class="cap">OCV vs SoC after a long rest. NMC's slope makes voltage a decent gauge; LFP's plateau (plus a small charge/discharge hysteresis) makes it nearly useless mid-range.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Equivalent circuit — Thevenin with a memory</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 210" xmlns="http://www.w3.org/2000/svg">
+        <!-- OCV source -->
+        <circle cx="90" cy="105" r="30" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+        <text x="90" y="100" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="800">OCV</text>
+        <text x="90" y="116" text-anchor="middle" fill="#94a3b8" font-size="10">f(SoC,T)</text>
+        <line x1="90" y1="75" x2="90" y2="50" stroke="#cbd5e1" stroke-width="2.5"/>
+        <line x1="90" y1="135" x2="90" y2="170" stroke="#cbd5e1" stroke-width="2.5"/>
+        <line x1="90" y1="50" x2="200" y2="50" stroke="#cbd5e1" stroke-width="2.5"/>
+        <!-- R0 -->
+        <rect x="200" y="36" width="90" height="28" rx="6" fill="#232d3f" stroke="#f97316" stroke-width="2"/>
+        <text x="245" y="55" text-anchor="middle" fill="#f97316" font-size="13" font-weight="800">R0</text>
+        <text x="245" y="86" text-anchor="middle" fill="#94a3b8" font-size="10.5">ohmic: foils, welds,</text>
+        <text x="245" y="100" text-anchor="middle" fill="#94a3b8" font-size="10.5">electrolyte — instant sag</text>
+        <line x1="290" y1="50" x2="360" y2="50" stroke="#cbd5e1" stroke-width="2.5"/>
+        <!-- RC pair -->
+        <rect x="360" y="22" width="90" height="24" rx="6" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+        <text x="405" y="39" text-anchor="middle" fill="#38bdf8" font-size="12" font-weight="800">R1</text>
+        <g stroke="#38bdf8" stroke-width="2.5">
+          <line x1="385" y1="66" x2="385" y2="86"/><line x1="425" y1="66" x2="425" y2="86"/>
+          <line x1="368" y1="76" x2="402" y2="76"/><line x1="408" y1="76" x2="442" y2="76"/>
+        </g>
+        <text x="405" y="106" text-anchor="middle" fill="#38bdf8" font-size="12" font-weight="800">C1</text>
+        <line x1="360" y1="50" x2="360" y2="76" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="450" y1="50" x2="450" y2="76" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="450" y1="50" x2="560" y2="50" stroke="#cbd5e1" stroke-width="2.5"/>
+        <text x="405" y="130" text-anchor="middle" fill="#94a3b8" font-size="10.5">charge-transfer + diffusion</text>
+        <text x="405" y="144" text-anchor="middle" fill="#94a3b8" font-size="10.5">τ1 = R1·C1 ~ seconds–minutes</text>
+        <!-- terminals -->
+        <circle cx="560" cy="50" r="6" fill="#4ade80"/>
+        <circle cx="560" cy="170" r="6" fill="#4ade80"/>
+        <line x1="90" y1="170" x2="560" y2="170" stroke="#cbd5e1" stroke-width="2.5"/>
+        <text x="600" y="55" fill="#e2e8f0" font-size="13" font-weight="700">+ V_terminal</text>
+        <text x="600" y="175" fill="#e2e8f0" font-size="13" font-weight="700">−</text>
+        <text x="640" y="112" fill="#86efac" font-size="12" font-weight="700">what the BMS</text>
+        <text x="640" y="128" fill="#86efac" font-size="12" font-weight="700">actually sees</text>
+      </svg>
+      </div>
+      <div class="eqn">V_t = <b>OCV(SoC) − I·R0 − V_RC</b>        V_RC → I·R1·(1 − e^(−t/τ1))
+typical 50 Ah EV cell: R0 ≈ 1 mΩ · τ1 ≈ 30 s · heat = <span class="v2">I²·R0</span> per cell</div>
+      <p class="body">This 1-RC Thevenin model is what runs inside real BMS firmware: cheap enough for a microcontroller (see <a href="A36_Embedded_RaspberryPi_Deep_Dive.html" style="color:var(--accent-soft)">A36</a>), accurate to ~1–2&nbsp;% when its parameters track temperature and age. Electrochemical (Newman/DFN) models are for the lab; EIS spectroscopy (page 9) is how R0, R1, C1 get measured.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — sag &amp; heat under load (96s pack, 50 Ah NMC cells)</div>
+      <div class="demo">
+        <div class="demo-row"><span>Pack current (discharge)</span><b><span id="sgIVal">200</span> A (<span id="sgCVal">4.0</span>C)</b></div>
+        <input type="range" id="sgISlide" min="10" max="500" step="10" value="200">
+        <div class="demo-row"><span>Cell R0 (age &amp; temperature)</span><b><span id="sgRVal">1.0</span> mΩ</b></div>
+        <input type="range" id="sgRSlide" min="0.5" max="3" step="0.1" value="1">
+        <div class="demo-out" id="sgOut"></div>
+      </div>
+      <p class="cap">Note what doubling R0 (a cold morning, or an aged pack) does to both sag and heat — same physics as the MOSFET conduction loss in <a href="A29_MOSFETs_Deep_Dive.html" style="color:var(--accent-soft)">A29</a>.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 5 ===== -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 10</span>
+    <h2 class="page-title">SoC &amp; SoH — Estimating What You Cannot Measure</h2>
+    <p class="page-sub">There is no state-of-charge sensor. SoC is always an estimate, and the art is fusing two flawed witnesses.</p>
+
+    <div class="card">
+      <div class="label">The two witnesses</div>
+      <p class="lead"><span class="hl">Coulomb counting</span> integrates measured current — precise over minutes, but it drifts (sensor offset × time) and never knows where it started. <span class="hl2">OCV lookup</span> reads the fuel gauge from voltage — absolute, but only valid at rest and nearly blind on LFP's plateau (page 4). A <span class="hl3">Kalman filter</span> fuses both: predict with coulombs, correct with voltage.</p>
+      <div class="eqn">SoC(t) = SoC(0) − <b>(1/C_n) ∫ I dt</b>          (η ≈ 0.999 charge efficiency)
+drift: 0.1 % offset on a 1C sensor ≈ <span class="v2">2.4 % SoC error per day</span> — must be corrected</div>
+    </div>
+
+    <div class="card">
+      <div class="label">The Kalman loop every EV runs</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="karr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#86efac"/></marker></defs>
+        <rect x="40" y="40" width="200" height="76" rx="14" fill="rgba(56,189,248,0.10)" stroke="#38bdf8" stroke-width="2"/>
+        <text x="140" y="70" text-anchor="middle" fill="#38bdf8" font-size="14" font-weight="800">PREDICT</text>
+        <text x="140" y="90" text-anchor="middle" fill="#94a3b8" font-size="11.5">SoC ← SoC − I·Δt/C</text>
+        <text x="140" y="106" text-anchor="middle" fill="#94a3b8" font-size="11.5">uncertainty grows</text>
+        <rect x="520" y="40" width="200" height="76" rx="14" fill="rgba(74,222,128,0.10)" stroke="#4ade80" stroke-width="2"/>
+        <text x="620" y="70" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800">CORRECT</text>
+        <text x="620" y="90" text-anchor="middle" fill="#94a3b8" font-size="11.5">compare V_meas vs model V̂</text>
+        <text x="620" y="106" text-anchor="middle" fill="#94a3b8" font-size="11.5">nudge SoC by K·(V−V̂)</text>
+        <path d="M240 78 L515 78" stroke="#86efac" stroke-width="2.5" marker-end="url(#karr)"/>
+        <text x="378" y="66" text-anchor="middle" fill="#86efac" font-size="12" font-weight="700">every 10–100 ms</text>
+        <path d="M620 116 C 620 190, 140 190, 140 120" stroke="#86efac" stroke-width="2.5" fill="none" marker-end="url(#karr)"/>
+        <text x="380" y="200" text-anchor="middle" fill="#86efac" font-size="12" font-weight="700">posterior becomes next prior — forever</text>
+        <text x="380" y="232" text-anchor="middle" fill="#64748b" font-size="11.5">Kalman gain K weighs trust: quiet current sensor → trust coulombs; resting cell on a steep OCV slope → trust voltage</text>
+      </svg>
+      </div>
+      <p class="cap">On LFP, the correction step only "bites" near the curve's ends — one reason LFP cars ask you to charge to 100 % weekly: it re-anchors the estimator at a known point.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Estimation methods compared</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Method</th><th>Accuracy</th><th>Cost</th><th>Weakness</th></tr>
+        <tr><td><b>Coulomb counting</b></td><td>good short-term</td><td>shunt / Hall sensor</td><td>drifts; needs known start point</td></tr>
+        <tr><td><b>OCV lookup</b></td><td>excellent at rest</td><td>a table</td><td>needs hours of rest; flat on LFP</td></tr>
+        <tr><td><b>EKF / UKF fusion</b></td><td>1–3 % online</td><td>MCU + tuned model</td><td>diverges if model params age untracked</td></tr>
+        <tr><td><b>ML / data-driven</b></td><td>can beat EKF</td><td>data + validation burden</td><td>extrapolates badly outside training set</td></tr>
+      </table></div>
+      <p class="body"><strong>SoH</strong> (state of health) is two numbers, not one: <span class="hl">capacity fade</span> (today's Ah ÷ nameplate Ah) and <span class="hl2">resistance growth</span> (today's R0 ÷ fresh R0). A pack can hold 90&nbsp;% capacity yet feel weak because R0 doubled — power SoH and energy SoH age on different clocks. <strong>SoP</strong> (state of power) is the BMS's live answer to "how many kW may I draw for the next 10 s without breaching voltage, current or temperature limits?" — it is what actually limits your overtake and your regen (see <a href="A38_EV_Powertrain_Deep_Dive.html" style="color:var(--accent-soft)">A38</a>).</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 6 ===== -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 10</span>
+    <h2 class="page-title">Balancing &amp; the BMS Architecture</h2>
+    <p class="page-sub">Two hundred cells in series are a chain gang: the weakest cell sets the pace, and the BMS is the foreman.</p>
+
+    <div class="card">
+      <div class="label">Why cells drift apart</div>
+      <p class="lead">Manufacturing spread (±1&nbsp;% capacity), temperature gradients across the pack (hot cells self-discharge faster) and unequal ageing make series cells diverge. In series, <span class="hl2">the first cell to hit 4.2 V ends charging for everyone</span>, and the first to hit the low cutoff ends the trip — an unbalanced pack behaves like its worst cell twice over.</p>
+      <div class="eqn">usable pack capacity = <b>min(cell capacities) − imbalance</b>
+1 % imbalance on 71 kWh ≈ <span class="v2">0.7 kWh ≈ 4–5 km of range, lost every trip</span></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Passive vs active balancing</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 290" xmlns="http://www.w3.org/2000/svg">
+        <!-- passive -->
+        <g transform="translate(30,30)">
+          <text x="150" y="8" text-anchor="middle" fill="#f97316" font-size="14" font-weight="800">PASSIVE — bleed the rich</text>
+          <g>
+            <rect x="20" y="30" width="70" height="44" rx="8" fill="rgba(74,222,128,0.25)" stroke="#4ade80" stroke-width="2"/>
+            <text x="55" y="57" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">4.18 V</text>
+            <rect x="115" y="30" width="70" height="44" rx="8" fill="rgba(74,222,128,0.12)" stroke="#4ade80" stroke-width="2"/>
+            <text x="150" y="57" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">4.10 V</text>
+            <rect x="210" y="30" width="70" height="44" rx="8" fill="rgba(74,222,128,0.12)" stroke="#4ade80" stroke-width="2"/>
+            <text x="245" y="57" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">4.11 V</text>
+          </g>
+          <!-- bleed resistor on cell 1 -->
+          <rect x="34" y="96" width="42" height="20" rx="5" fill="#232d3f" stroke="#f87171" stroke-width="2"/>
+          <text x="55" y="110" text-anchor="middle" fill="#f87171" font-size="10.5" font-weight="700">R + FET</text>
+          <path d="M55 74 L55 96" stroke="#f87171" stroke-width="2"/>
+          <path d="M55 116 L55 136" stroke="#f87171" stroke-width="2"/>
+          <text x="55" y="152" text-anchor="middle" fill="#f87171" font-size="11" font-weight="700">heat 🔥</text>
+          <text x="150" y="185" text-anchor="middle" fill="#94a3b8" font-size="11.5">50–200 mA bleed · pennies per cell</text>
+          <text x="150" y="202" text-anchor="middle" fill="#94a3b8" font-size="11.5">energy thrown away as heat</text>
+          <text x="150" y="219" text-anchor="middle" fill="#94a3b8" font-size="11.5">runs near top-of-charge only</text>
+        </g>
+        <!-- active -->
+        <g transform="translate(420,30)">
+          <text x="150" y="8" text-anchor="middle" fill="#38bdf8" font-size="14" font-weight="800">ACTIVE — move the charge</text>
+          <g>
+            <rect x="20" y="30" width="70" height="44" rx="8" fill="rgba(74,222,128,0.25)" stroke="#4ade80" stroke-width="2"/>
+            <text x="55" y="57" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">high</text>
+            <rect x="115" y="30" width="70" height="44" rx="8" fill="rgba(74,222,128,0.10)" stroke="#4ade80" stroke-width="2"/>
+            <text x="150" y="57" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">low</text>
+            <rect x="210" y="30" width="70" height="44" rx="8" fill="rgba(74,222,128,0.16)" stroke="#4ade80" stroke-width="2"/>
+            <text x="245" y="57" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">mid</text>
+          </g>
+          <path d="M55 84 C 55 130, 150 130, 150 84" stroke="#38bdf8" stroke-width="3" fill="none"/>
+          <path d="M143 96 L150 84 L157 96" stroke="#38bdf8" stroke-width="3" fill="none"/>
+          <rect x="75" y="118" width="150" height="24" rx="7" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+          <text x="150" y="135" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="700">cap / inductor / flyback</text>
+          <text x="150" y="185" text-anchor="middle" fill="#94a3b8" font-size="11.5">shuttles 1–5 A rich → poor</text>
+          <text x="150" y="202" text-anchor="middle" fill="#94a3b8" font-size="11.5">~90 % of moved energy kept</text>
+          <text x="150" y="219" text-anchor="middle" fill="#94a3b8" font-size="11.5">cost + parts: 2nd-life &amp; storage packs</text>
+        </g>
+      </svg>
+      </div>
+      <p class="cap">Nearly every production EV uses passive balancing — imbalance is small if cells are well matched. Active balancing earns its cost where cells are mismatched by design: second-life storage (page 9).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">BMS architecture — the nervous system</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="barr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#86efac"/></marker></defs>
+        <!-- CSC chain -->
+        <g>
+          <rect x="30" y="40" width="130" height="60" rx="10" fill="rgba(74,222,128,0.10)" stroke="#4ade80" stroke-width="2"/>
+          <text x="95" y="65" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="800">CSC / AFE #1</text>
+          <text x="95" y="84" text-anchor="middle" fill="#94a3b8" font-size="10.5">12–18 cells: V, T, bleed</text>
+          <rect x="180" y="40" width="130" height="60" rx="10" fill="rgba(74,222,128,0.10)" stroke="#4ade80" stroke-width="2"/>
+          <text x="245" y="65" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="800">CSC / AFE #2</text>
+          <text x="245" y="84" text-anchor="middle" fill="#94a3b8" font-size="10.5">isolated daisy chain</text>
+          <rect x="330" y="40" width="130" height="60" rx="10" fill="rgba(74,222,128,0.10)" stroke="#4ade80" stroke-width="2" stroke-dasharray="6 4"/>
+          <text x="395" y="65" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="800">… #16</text>
+          <text x="395" y="84" text-anchor="middle" fill="#94a3b8" font-size="10.5">up to ~200 cells total</text>
+        </g>
+        <path d="M160 70 L180 70" stroke="#86efac" stroke-width="2.5"/>
+        <path d="M310 70 L330 70" stroke="#86efac" stroke-width="2.5"/>
+        <path d="M460 70 L520 70" stroke="#86efac" stroke-width="2.5" marker-end="url(#barr)"/>
+        <text x="490" y="58" text-anchor="middle" fill="#86efac" font-size="10.5">isoSPI /</text>
+        <text x="490" y="92" text-anchor="middle" fill="#86efac" font-size="10.5">CAN</text>
+        <!-- master -->
+        <rect x="520" y="30" width="210" height="80" rx="12" fill="rgba(56,189,248,0.10)" stroke="#38bdf8" stroke-width="2.2"/>
+        <text x="625" y="58" text-anchor="middle" fill="#38bdf8" font-size="13" font-weight="800">BMS MASTER (MCU)</text>
+        <text x="625" y="77" text-anchor="middle" fill="#94a3b8" font-size="10.5">SoC/SoH/SoP estimators · limits</text>
+        <text x="625" y="93" text-anchor="middle" fill="#94a3b8" font-size="10.5">ISO 26262 ASIL C/D logic</text>
+        <!-- actuators row -->
+        <g>
+          <rect x="60" y="160" width="150" height="56" rx="10" fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="2"/>
+          <text x="135" y="184" text-anchor="middle" fill="#f97316" font-size="12" font-weight="800">CONTACTORS</text>
+          <text x="135" y="202" text-anchor="middle" fill="#94a3b8" font-size="10.5">+ precharge resistor</text>
+          <rect x="240" y="160" width="150" height="56" rx="10" fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="2"/>
+          <text x="315" y="184" text-anchor="middle" fill="#f97316" font-size="12" font-weight="800">PACK SENSORS</text>
+          <text x="315" y="202" text-anchor="middle" fill="#94a3b8" font-size="10.5">current shunt · IMD · HVIL</text>
+          <rect x="420" y="160" width="150" height="56" rx="10" fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="2"/>
+          <text x="495" y="184" text-anchor="middle" fill="#f97316" font-size="12" font-weight="800">THERMAL</text>
+          <text x="495" y="202" text-anchor="middle" fill="#94a3b8" font-size="10.5">pump, chiller, heater</text>
+          <rect x="600" y="160" width="130" height="56" rx="10" fill="rgba(192,132,252,0.10)" stroke="#c084fc" stroke-width="2"/>
+          <text x="665" y="184" text-anchor="middle" fill="#c084fc" font-size="12" font-weight="800">VEHICLE CAN</text>
+          <text x="665" y="202" text-anchor="middle" fill="#94a3b8" font-size="10.5">SoP to VCU/inverter</text>
+        </g>
+        <path d="M580 110 L135 160" stroke="#64748b" stroke-width="1.8"/>
+        <path d="M600 110 L315 160" stroke="#64748b" stroke-width="1.8"/>
+        <path d="M640 110 L495 160" stroke="#64748b" stroke-width="1.8"/>
+        <path d="M665 110 L665 160" stroke="#64748b" stroke-width="1.8"/>
+      </svg>
+      </div>
+      <p class="cap">Cell-supervision circuits (AFE chips) measure each cell to ±1–2 mV and report up an isolated daisy chain. The master runs the estimators and owns the contactors — and must fail safe (open) on any doubt.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — how long does passive balancing take?</div>
+      <div class="demo">
+        <div class="demo-row"><span>Worst-cell imbalance</span><b><span id="blQVal">1000</span> mAh</b></div>
+        <input type="range" id="blQSlide" min="100" max="5000" step="100" value="1000">
+        <div class="demo-row"><span>Bleed current</span><b><span id="blIVal">150</span> mA</b></div>
+        <input type="range" id="blISlide" min="50" max="500" step="10" value="150">
+        <div class="demo-out" id="blOut"></div>
+      </div>
+      <p class="cap">Balancing only runs during the top of a charge session — a big imbalance can take many sessions to bleed off. This is why a deeply mismatched pack "heals" slowly, and why replacement cells must match SoC before installation.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 7 ===== -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 10</span>
+    <h2 class="page-title">Thermal Management &amp; Runaway</h2>
+    <p class="page-sub">A cell is happiest exactly where you are: 20–40 °C. Below, it plates lithium; above, chemistry starts feeding on itself.</p>
+
+    <div class="card">
+      <div class="label">Where the heat comes from</div>
+      <div class="eqn">Q̇_cell = <b>I²·R0</b>  +  I·T·(∂OCV/∂T)
+        <span class="v2">joule (always +)</span>   <span class="v3">entropic (± small)</span>
+350 kW fast charge on a 400 V pack: I ≈ 875 A → 100 kW-class pack, <b>tens of kW of heat</b></div>
+      <p class="body">Joule heat scales with <strong>I²</strong> — the entire thermal problem of fast charging in one exponent. It is also the argument for 800 V packs: same power at half the current means one quarter of the heat (see <a href="A38_EV_Powertrain_Deep_Dive.html" style="color:var(--accent-soft)">A38</a> page 3). Cold is the other enemy: below ~0 °C the graphite cannot absorb Li fast enough and metallic lithium <span class="hl2">plates</span> on its surface — capacity loss at best, a dendrite short at worst. Hence battery <strong>preconditioning</strong>: the car heats the pack on the way to the charger.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Cooling strategies</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Method</th><th>Capability</th><th>ΔT across pack</th><th>Used by</th></tr>
+        <tr><td><b>Passive air</b></td><td>~0.5C loads</td><td>poor</td><td>e-bikes, early Leaf (no active cooling)</td></tr>
+        <tr><td><b>Forced air</b></td><td>~1C</td><td>5–10 °C</td><td>hybrids, small packs</td></tr>
+        <tr><td><b>Liquid cold plate</b></td><td>2–4C fast charge</td><td>2–5 °C</td><td>nearly every modern EV</td></tr>
+        <tr><td><b>Immersion (dielectric)</b></td><td>highest, per-cell contact</td><td>&lt;2 °C</td><td>motorsport, some MW chargers</td></tr>
+        <tr><td><b>Refrigerant direct</b></td><td>high, compact</td><td>low</td><td>ties pack into heat-pump loop</td></tr>
+      </table></div>
+      <p class="body">Uniformity matters as much as capacity: a 10 °C gradient means one end of the pack ages roughly <strong>twice as fast</strong> as the other (Arrhenius, page 8) — and unequal ageing becomes imbalance (page 6).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Thermal runaway — the chain reaction</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="tr1" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#fbbf24" stop-opacity="0.7"/>
+            <stop offset="1" stop-color="#f87171" stop-opacity="0.9"/>
+          </linearGradient>
+        </defs>
+        <!-- temperature bar -->
+        <rect x="60" y="180" width="640" height="16" rx="8" fill="url(#tr1)"/>
+        <g fill="#e2e8f0" font-size="11.5" font-weight="700">
+          <text x="90" y="215" text-anchor="middle">80 °C</text>
+          <text x="270" y="215" text-anchor="middle">130 °C</text>
+          <text x="460" y="215" text-anchor="middle">~200 °C</text>
+          <text x="650" y="215" text-anchor="middle">&gt;600 °C</text>
+        </g>
+        <!-- stages -->
+        <g>
+          <rect x="40" y="30" width="150" height="120" rx="12" fill="rgba(251,191,36,0.10)" stroke="#fbbf24" stroke-width="2"/>
+          <text x="115" y="55" text-anchor="middle" fill="#fbbf24" font-size="12.5" font-weight="800">1 · SEI DECOMPOSES</text>
+          <text x="115" y="76" text-anchor="middle" fill="#94a3b8" font-size="10.5">protective film breaks,</text>
+          <text x="115" y="92" text-anchor="middle" fill="#94a3b8" font-size="10.5">anode reacts with</text>
+          <text x="115" y="108" text-anchor="middle" fill="#94a3b8" font-size="10.5">electrolyte — self-heating</text>
+          <text x="115" y="124" text-anchor="middle" fill="#94a3b8" font-size="10.5">begins (~°C/min)</text>
+          <rect x="220" y="30" width="150" height="120" rx="12" fill="rgba(251,146,60,0.10)" stroke="#fb923c" stroke-width="2"/>
+          <text x="295" y="55" text-anchor="middle" fill="#fb923c" font-size="12.5" font-weight="800">2 · SEPARATOR MELTS</text>
+          <text x="295" y="76" text-anchor="middle" fill="#94a3b8" font-size="10.5">PE/PP shuts down ~130 °C,</text>
+          <text x="295" y="92" text-anchor="middle" fill="#94a3b8" font-size="10.5">then collapses —</text>
+          <text x="295" y="108" text-anchor="middle" fill="#94a3b8" font-size="10.5">internal short dumps</text>
+          <text x="295" y="124" text-anchor="middle" fill="#94a3b8" font-size="10.5">the whole cell locally</text>
+          <rect x="400" y="30" width="150" height="120" rx="12" fill="rgba(248,113,113,0.10)" stroke="#f87171" stroke-width="2"/>
+          <text x="475" y="55" text-anchor="middle" fill="#f87171" font-size="12.5" font-weight="800">3 · CATHODE RELEASES O2</text>
+          <text x="475" y="76" text-anchor="middle" fill="#94a3b8" font-size="10.5">layered oxides decompose,</text>
+          <text x="475" y="92" text-anchor="middle" fill="#94a3b8" font-size="10.5">oxygen + solvent =</text>
+          <text x="475" y="108" text-anchor="middle" fill="#94a3b8" font-size="10.5">fuel + oxidiser inside</text>
+          <text x="475" y="124" text-anchor="middle" fill="#94a3b8" font-size="10.5">a sealed can</text>
+          <rect x="580" y="30" width="150" height="120" rx="12" fill="rgba(248,113,113,0.16)" stroke="#f87171" stroke-width="2.5"/>
+          <text x="655" y="55" text-anchor="middle" fill="#f87171" font-size="12.5" font-weight="800">4 · RUNAWAY</text>
+          <text x="655" y="76" text-anchor="middle" fill="#94a3b8" font-size="10.5">&gt;600 °C, vents flare,</text>
+          <text x="655" y="92" text-anchor="middle" fill="#94a3b8" font-size="10.5">heat drives neighbour</text>
+          <text x="655" y="108" text-anchor="middle" fill="#94a3b8" font-size="10.5">cells past stage 1 —</text>
+          <text x="655" y="124" text-anchor="middle" fill="#94a3b8" font-size="10.5">propagation</text>
+        </g>
+        <text x="380" y="245" text-anchor="middle" fill="#64748b" font-size="11.5">LFP skips most of stage 3 (no easy O2) — why it vents smoke where NMC vents fire</text>
+      </svg>
+      </div>
+      <p class="body"><strong>Propagation defence</strong> is pack design, not luck: aerogel or mica barriers between cells, vent channels that route 600 °C gas away from neighbours and out of the enclosure, a pyro-fuse to cut current, and regulation (UN GTR 20 / China GB 38031) demanding the occupants get a <span class="hl">5-minute warning</span> before any cabin hazard — new proposals push toward no-propagation designs.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 8 ===== -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 10</span>
+    <h2 class="page-title">Degradation — Why Batteries Age</h2>
+    <p class="page-sub">Every cycle spends a little of the 0.1 % coulombic inefficiency. Where it goes determines whether the pack fades gracefully or hits a knee.</p>
+
+    <div class="card">
+      <div class="label">The four horsemen of capacity fade</div>
+      <div class="grid-2">
+        <div class="mini"><h4>SEI growth</h4><p>The solid-electrolyte interphase keeps thickening, consuming Li inventory. Grows ~<b>√t</b> — fast when new, slowing forever. The dominant calendar-ageing term.</p></div>
+        <div class="mini c-sky"><h4>Lithium plating</h4><p>Metallic Li deposits on graphite when charging <b>cold or too fast</b>. Irreversible loss; dendrites can pierce the separator. The reason fast-charge maps are temperature-gated.</p></div>
+        <div class="mini c-amb"><h4>Particle cracking</h4><p>Repeated 10 % (graphite) to 300 % (silicon) volume swings crack particles, exposing fresh surface that grows fresh SEI — cycling-driven, worse at high DoD.</p></div>
+        <div class="mini c-purp"><h4>Transition-metal dissolution</h4><p>Mn/Ni ions dissolve at high voltage and high temperature, migrate and poison the anode SEI. Why storing at 100 % SoC in summer is the worst thing you can do.</p></div>
+      </div>
+      <div class="eqn">calendar fade ∝ <b>√t · e^(−Ea/RT)</b>  — roughly <span class="v2">doubles per +10 °C</span>, worse at high SoC
+cycle fade ∝ throughput · f(DoD, C-rate, T)</div>
+    </div>
+
+    <div class="card">
+      <div class="label">The knee — fade is not linear forever</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="220" x2="720" y2="220" stroke="#475569" stroke-width="2"/>
+        <line x1="70" y1="220" x2="70" y2="30" stroke="#475569" stroke-width="2"/>
+        <text x="400" y="255" text-anchor="middle" fill="#94a3b8" font-size="13">equivalent full cycles</text>
+        <text x="30" y="125" fill="#94a3b8" font-size="13" transform="rotate(-90 30 125)">capacity %</text>
+        <g fill="#64748b" font-size="11">
+          <text x="58" y="52" text-anchor="end">100</text><text x="58" y="118" text-anchor="end">80</text><text x="58" y="185" text-anchor="end">60</text>
+          <text x="220" y="236" text-anchor="middle">500</text><text x="400" y="236" text-anchor="middle">1000</text><text x="580" y="236" text-anchor="middle">1500</text>
+        </g>
+        <line x1="70" y1="113" x2="720" y2="113" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="7 5"/>
+        <text x="712" y="103" text-anchor="end" fill="#fbbf24" font-size="11.5" font-weight="700">80 % — EV end-of-first-life</text>
+        <!-- gentle curve -->
+        <path d="M70 48 C 220 62, 400 82, 560 105 C 610 113, 640 125, 660 150 C 675 170, 685 195, 692 215" fill="none" stroke="#4ade80" stroke-width="3.5"/>
+        <circle cx="640" cy="125" r="7" fill="#f87171"/>
+        <text x="640" y="95" text-anchor="middle" fill="#f87171" font-size="12.5" font-weight="800">the knee</text>
+        <text x="640" y="110" text-anchor="middle" fill="#f87171" font-size="10.5">plating + dry-out take over</text>
+        <text x="300" y="60" fill="#86efac" font-size="12" font-weight="700">gentle √t + linear wear — predictable</text>
+        <text x="380" y="200" fill="#64748b" font-size="11.5">operate here: retire or repurpose BEFORE the knee (page 9)</text>
+      </svg>
+      </div>
+      <p class="cap">Fleet telemetry shows modern EV packs losing ~1.8 %/year on average — most packs will outlive the car. The knee exists, but well-managed packs are retired or repurposed before reaching it.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — cycle life vs depth of discharge (empirical model)</div>
+      <div class="demo">
+        <div class="demo-row"><span>Daily depth of discharge</span><b><span id="dgDVal">80</span> %</b></div>
+        <input type="range" id="dgDSlide" min="10" max="100" step="5" value="80">
+        <div class="demo-row"><span>Chemistry</span><b><span id="dgCName">NMC</span></b></div>
+        <div class="seg">
+          <button id="dgNmc" class="on">NMC (1,500 @ 80 %)</button>
+          <button id="dgLfp">LFP (4,000 @ 80 %)</button>
+        </div>
+        <div class="demo-out" id="dgOut"></div>
+      </div>
+      <p class="cap">Model: N = N_ref · (80/DoD)^1.6 — illustrative, not a datasheet. The lesson is the shape: shallow cycling multiplies life, and total energy throughput grows even as per-cycle energy shrinks. This is why fleet buffers hide the top and bottom few percent.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">What the owner (and the fleet engineer) can control</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Park in the middle.</strong> Storage stress is highest at 100 % SoC and high temperature — long-term parking at 30–60 % is the single cheapest life extension.</span></li>
+        <li><span class="num">2</span><span><strong>Fast charge warm, gently cold.</strong> DC fast charging below ~10 °C without preconditioning invites plating; the car's charge map protects you if you let it.</span></li>
+        <li><span class="num">3</span><span><strong>Shallow beats deep.</strong> Two 40 % cycles age the pack less than one 80 % cycle — plug in nightly, cap at 80 % unless the trip needs more (LFP: 100 % weekly to re-anchor SoC).</span></li>
+        <li><span class="num">4</span><span><strong>Heat is compound interest.</strong> Every sustained +10 °C roughly doubles calendar fade — shade, garage, and a working coolant loop pay for themselves.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 9 ===== -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 10</span>
+    <h2 class="page-title">Testing, Standards &amp; the Second Life</h2>
+    <p class="page-sub">A cell's paperwork is as engineered as its chemistry — and its retirement plan is now a legal requirement.</p>
+
+    <div class="card">
+      <div class="label">How cells and packs are characterised</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Test</th><th>What it measures</th><th>How</th></tr>
+        <tr><td><b>Capacity test</b></td><td>SoH-energy</td><td>full CC-CV charge, C/3 discharge, count Ah at 25 °C</td></tr>
+        <tr><td><b>HPPC pulse</b></td><td>R0, R1C1, SoP map</td><td>10 s discharge / 10 s charge pulses at SoC steps</td></tr>
+        <tr><td><b>EIS spectroscopy</b></td><td>impedance vs frequency</td><td>mHz–kHz sine sweep; separates ohmic / charge-transfer / diffusion</td></tr>
+        <tr><td><b>Calorimetry (ARC)</b></td><td>runaway onset &amp; energy</td><td>adiabatic self-heating until trigger</td></tr>
+        <tr><td><b>Nail / crush / overcharge</b></td><td>abuse response</td><td>regulatory abuse matrix, filmed and instrumented</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Cell-level last lines of defence (inside an 18650/21700)</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 210" xmlns="http://www.w3.org/2000/svg">
+        <!-- cell body -->
+        <rect x="120" y="70" width="520" height="90" rx="14" fill="rgba(74,222,128,0.08)" stroke="#4ade80" stroke-width="2.2"/>
+        <text x="380" y="120" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800">JELLY ROLL</text>
+        <text x="380" y="140" text-anchor="middle" fill="#94a3b8" font-size="11">steel can = pressure vessel</text>
+        <!-- cap assembly -->
+        <rect x="640" y="60" width="60" height="110" rx="10" fill="rgba(249,115,22,0.12)" stroke="#f97316" stroke-width="2.2"/>
+        <text x="670" y="50" text-anchor="middle" fill="#f97316" font-size="12" font-weight="800">CAP</text>
+        <g font-size="10.5" fill="#e2e8f0">
+          <text x="670" y="88" text-anchor="middle">vent disc</text>
+          <text x="670" y="112" text-anchor="middle">CID</text>
+          <text x="670" y="136" text-anchor="middle">PTC ring</text>
+        </g>
+        <g font-size="10.5" fill="#94a3b8">
+          <text x="250" y="40" text-anchor="middle">1 · PTC: resistance jumps on overcurrent heat</text>
+          <text x="250" y="188" text-anchor="middle">2 · CID: internal pressure snaps the circuit open</text>
+          <text x="530" y="40" text-anchor="middle">3 · vent disc: bursts at set pressure, releases gas</text>
+          <text x="530" y="188" text-anchor="middle">4 · fusible link in tab: melts on hard short</text>
+        </g>
+        <path d="M300 45 L640 84" stroke="#64748b" stroke-width="1.3"/>
+        <path d="M330 182 L640 112" stroke="#64748b" stroke-width="1.3"/>
+        <path d="M600 45 L655 78" stroke="#64748b" stroke-width="1.3"/>
+      </svg>
+      </div>
+      <p class="cap">Four passive devices that act after the BMS has failed — defence in depth, same philosophy as functional safety layers in A35.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The standards map</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Standard</th><th>Scope</th></tr>
+        <tr><td><b>UN 38.3</b></td><td>transport: altitude, vibration, shock, external short — no cell ships without it</td></tr>
+        <tr><td><b>IEC 62660 / ISO 12405</b></td><td>EV cell &amp; pack performance and abuse testing</td></tr>
+        <tr><td><b>ISO 6469 / UNECE R100</b></td><td>EV electrical safety; R100 rev. adds thermal-propagation requirements</td></tr>
+        <tr><td><b>GB 38031 (China)</b></td><td>first law to mandate the 5-min warning before cabin hazard; 2026 rev. targets no fire/no explosion</td></tr>
+        <tr><td><b>UL 2580 / IEC 62619</b></td><td>pack safety for EV / industrial &amp; stationary storage</td></tr>
+        <tr><td><b>EU Battery Regulation 2023/1542</b></td><td>carbon footprint declaration, recycled-content minimums, and a digital <b>battery passport</b> (2027) — an AAS-style twin (see A33)</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Second life &amp; recycling — the retirement plan</div>
+      <p class="body">An EV pack retired at 70–80&nbsp;% SoH is a poor traction battery but a fine <span class="hl">stationary storage</span> asset: grid buffering tolerates lower energy density, gentler C-rates and the active balancing that mismatched, aged cells need (page 6). After second life, <span class="hl2">recycling</span> closes the loop three ways: <strong>pyrometallurgy</strong> (smelt; robust but loses lithium to slag), <strong>hydrometallurgy</strong> (leach and precipitate; recovers Li, Ni, Co at &gt;90&nbsp;%) and <strong>direct recycling</strong> (rejuvenate cathode crystals intact — highest value, hardest to industrialise). EU rules make recovery rates and recycled content mandatory, which is quietly redesigning cells for <span class="hl3">disassembly</span> — glue versus bolts becomes a regulatory question, not just a service one.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 10 ===== -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 10</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Quiz</h2>
+    <p class="page-sub">The eight ideas worth keeping, the six ways packs die, and a self-test.</p>
+
+    <div class="card">
+      <div class="label">Eight ideas to keep</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Rocking chair:</strong> ions shuttle between intact host crystals; voltage is thermodynamics (E = −ΔG/nF), and everything that breaks the clean shuttle is ageing.</span></li>
+        <li><span class="num">2</span><span><strong>Chemistry is a trade:</strong> nickel buys energy, iron-phosphate buys safety and cycles, LTO buys speed and lifetime, sodium buys cost.</span></li>
+        <li><span class="num">3</span><span><strong>Format ≠ chemistry:</strong> cylindrical/prismatic/pouch change cooling, swelling and venting; CTP/CTC trade serviceability for 15–20 % more pack energy.</span></li>
+        <li><span class="num">4</span><span><strong>The BMS sees V_t = OCV − I·R0 − V_RC:</strong> one resistor and an RC pair explain sag, recovery and heat.</span></li>
+        <li><span class="num">5</span><span><strong>SoC is an estimate:</strong> coulombs drift, voltage lies on LFP plateaus — Kalman fusion of both is the industry answer.</span></li>
+        <li><span class="num">6</span><span><strong>Series = chain gang:</strong> the weakest cell sets pack capacity; balancing (usually passive) keeps 200 cells honest.</span></li>
+        <li><span class="num">7</span><span><strong>20–40 °C or consequences:</strong> cold plates lithium, heat doubles fade per +10 °C, and runaway is a four-stage chain you design against, not hope against.</span></li>
+        <li><span class="num">8</span><span><strong>Age before the knee:</strong> √t SEI + throughput wear is predictable; retire to second life before plating and dry-out bend the curve.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Six failure modes every engineer should know</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">🔥 Thermal runaway</div><p>Internal short, overcharge or external heat starts the SEI→separator→O2 cascade. Defence: chemistry choice (LFP), barriers, venting paths, pyro-fuse, 5-min occupant warning.</p></div>
+        <div class="fail"><div class="ft">❄️ Lithium plating</div><p>Fast or cold charging deposits metal on graphite — permanent capacity loss, possible dendrite short weeks later. Defence: temperature-gated charge maps, preconditioning.</p></div>
+        <div class="fail"><div class="ft">⚖️ Imbalance → over-discharge</div><p>A weak cell reaches 0 V while the pack still shows charge; copper dissolves, later shorting the cell. Defence: per-cell monitoring, balancing, conservative low cutoffs.</p></div>
+        <div class="fail"><div class="ft">📈 Impedance growth</div><p>SEI thickening and contact loss double R0; the pack meets voltage limits early and feels gutless though capacity looks fine. Watch power-SoH, not just Ah.</p></div>
+        <div class="fail"><div class="ft">🧭 Sensor / estimator drift</div><p>A biased current shunt or an unre-anchored LFP estimator walks SoC away from truth — sudden 10 % jumps or a car that "dies at 15 %". Defence: OCV re-anchoring, redundancy.</p></div>
+        <div class="fail"><div class="ft">🔩 Mechanical abuse</div><p>Crush, penetration, or vibration-fatigued busbars short cells externally. Defence: crash structure, UN 38.3 vibration proof, HVIL interlocks and pyro disconnect (A38).</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check 1</div>
+      <p class="quiz-q">Why can't the separator conduct electrons, and why is that the whole point?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">If electrons could cross inside, the cell would discharge internally (a short). Blocking them forces electrons through the external circuit — that detour is the usable current. Ions still cross to keep charge balanced.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check 2</div>
+      <p class="quiz-q">Your fleet's LFP vans show SoC jumping 8 % after sitting overnight. Broken BMS?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">No — working as designed. LFP's OCV is nearly flat mid-range, so the Kalman correction can barely act while driving. After a rest near the curve ends, the estimator re-anchors on OCV and snaps to the better estimate. Weekly 100 % charges reduce the jumps.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check 3</div>
+      <p class="quiz-q">A 96s pack of 50 Ah cells has one parallel group at 47 Ah. What is the pack's usable capacity?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">About 47 Ah. In series, the weakest group hits both charge and discharge limits first — the other 95 groups' extra 3 Ah is inaccessible. The chain gang rule: min(capacities), minus any residual imbalance.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check 4</div>
+      <p class="quiz-q">Why does an 800 V architecture make 350 kW charging thermally feasible?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">Heat is I²R. Same power at double voltage means half the current and one quarter of the joule heat in cells, busbars, connectors and cable — the difference between a liquid-cooled cable you can lift and one you cannot.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check 5</div>
+      <p class="quiz-q">Charging at −5 °C without preconditioning: what happens and when do you find out?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">Graphite can't intercalate Li fast enough, so metallic lithium plates on the anode. You find out later: permanent capacity loss immediately, and possibly a dendrite-induced internal short days or weeks afterwards. This delayed failure is why charge maps are temperature-gated.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check 6</div>
+      <p class="quiz-q">Capacity SoH is 92 % but drivers complain the car is slow and regen is weak. Explain.</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">Resistance SoH has degraded faster than capacity SoH. Doubled R0 means the pack hits voltage limits at half the current, so SoP (state of power) collapses for both discharge and regen. Energy and power age on different clocks — track both.</span></div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"Volts say where you are, coulombs say how far you've walked — a good BMS trusts neither alone."</p>
+    </div>
+  </section>
+
+    <div class="footer">
+      <p>🔋 Advanced Deep Dive · Battery Cells &amp; BMS — Automotive Engineering</p>
+      <p>Related: <a href="A38_EV_Powertrain_Deep_Dive.html" style="color:var(--accent-soft)">A38 EV Powertrain</a> · <a href="A29_MOSFETs_Deep_Dive.html" style="color:var(--accent-soft)">A29 MOSFETs</a> · <a href="A36_Embedded_RaspberryPi_Deep_Dive.html" style="color:var(--accent-soft)">A36 Embedded</a> · <a href="A33_Industry_4_5_Deep_Dive.html" style="color:var(--accent-soft)">A33 Industry 4.0</a> · <a href="index.html" style="color:var(--accent-soft)">Advanced Library</a></p>
+    </div>
+
+</div>
+
+<script>
+(function(){
+  // --- P4: sag & heat ---
+  var si = document.getElementById('sgISlide'), sr = document.getElementById('sgRSlide');
+  function updSg(){
+    var I = +si.value, r = +sr.value;
+    document.getElementById('sgIVal').textContent = I;
+    document.getElementById('sgCVal').textContent = (I/50).toFixed(1);
+    document.getElementById('sgRVal').textContent = r.toFixed(1);
+    var rPack = 96 * r / 1000;              // ohms
+    var ocv = 96 * 3.7;                      // V nominal
+    var sag = I * rPack;
+    var vt = ocv - sag;
+    var heat = I * I * rPack / 1000;         // kW
+    var perCell = I * I * (r/1000);          // W
+    document.getElementById('sgOut').innerHTML =
+      'pack R = 96 × ' + r.toFixed(1) + ' mΩ = <b>' + (rPack*1000).toFixed(0) + ' mΩ</b><br>' +
+      'sag = ' + I + ' × ' + (rPack*1000).toFixed(0) + ' mΩ = <b>' + sag.toFixed(1) + ' V</b> → terminal ' + ocv.toFixed(0) + ' − ' + sag.toFixed(1) + ' = <b>' + vt.toFixed(0) + ' V</b><br>' +
+      'joule heat = I²R = <b>' + heat.toFixed(2) + ' kW</b> pack (' + perCell.toFixed(1) + ' W per cell) — the cooling plate\'s job';
+  }
+  [si,sr].forEach(function(el){ el.addEventListener('input', updSg); });
+  updSg();
+
+  // --- P6: balance time ---
+  var bq = document.getElementById('blQSlide'), bi = document.getElementById('blISlide');
+  function updBl(){
+    var q = +bq.value, i = +bi.value;
+    document.getElementById('blQVal').textContent = q;
+    document.getElementById('blIVal').textContent = i;
+    var hours = q / i;
+    var sessions = hours / 1.5;
+    document.getElementById('blOut').innerHTML =
+      't = ΔQ / I_bleed = ' + q + ' mAh / ' + i + ' mA = <b>' + hours.toFixed(1) + ' h</b> of active bleeding<br>' +
+      'at ~1.5 h of top-of-charge balancing per session ≈ <b>' + Math.ceil(sessions) + ' charge sessions</b><br>' +
+      'bleed heat: ' + (4.1*i/1000).toFixed(2) + ' W per balancing cell — why bleed currents stay small';
+  }
+  [bq,bi].forEach(function(el){ el.addEventListener('input', updBl); });
+  updBl();
+
+  // --- P8: cycle life vs DoD ---
+  var dd = document.getElementById('dgDSlide');
+  var chemRef = 1500, chemName = 'NMC';
+  var bN = document.getElementById('dgNmc'), bL = document.getElementById('dgLfp');
+  function updDg(){
+    var dod = +dd.value;
+    document.getElementById('dgDVal').textContent = dod;
+    document.getElementById('dgCName').textContent = chemName;
+    var n = chemRef * Math.pow(80/dod, 1.6);
+    var pack = 71; // kWh
+    var throughput = n * (dod/100) * pack / 1000; // MWh
+    var years = n / 300; // ~300 cycles/yr daily driver
+    document.getElementById('dgOut').innerHTML =
+      'N = ' + chemRef + ' × (80/' + dod + ')^1.6 = <b>' + Math.round(n).toLocaleString() + ' cycles</b><br>' +
+      'energy throughput ≈ N × DoD × 71 kWh = <b>' + throughput.toFixed(0) + ' MWh</b> lifetime<br>' +
+      'at ~300 cycles/year ≈ <b>' + years.toFixed(1) + ' years</b> to 80 % — shallow cycling multiplies life';
+  }
+  bN.addEventListener('click', function(){ chemRef = 1500; chemName = 'NMC'; bN.classList.add('on'); bL.classList.remove('on'); updDg(); });
+  bL.addEventListener('click', function(){ chemRef = 4000; chemName = 'LFP'; bL.classList.add('on'); bN.classList.remove('on'); updDg(); });
+  dd.addEventListener('input', updDg);
+  updDg();
+
+  // --- quizzes ---
+  document.querySelectorAll('.quiz-answer').forEach(function(q){
+    q.addEventListener('click', function(){ q.classList.add('revealed'); });
+  });
+})();
+</script>
+</body>
+</html>

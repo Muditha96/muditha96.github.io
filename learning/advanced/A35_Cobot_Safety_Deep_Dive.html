@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Cobot Safety · ISO 10218 &amp; ISO/TS 15066 · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #fb7185;       /* rose — the safety theme */
+    --accent-soft: #fda4af;
+    --accent-2: #38bdf8;     /* sky */
+    --accent-3: #c084fc;     /* purple */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(251,113,133,0.15), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(56,189,248,0.08), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(251,113,133,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(251,113,133,0.16), rgba(56,189,248,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(251,113,133,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-2)!important; } .c-sky .big{color:var(--accent-2)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #fb7185, #e11d48); color: #2d0710; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(45,7,16,0.75); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(251,113,133,0.12); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Robot Safety Engineering · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🛡️</span>Cobot Safety — ISO 10218 &amp; ISO/TS 15066</h1>
+  <p class="hero-sub">How humans and robots legally share a workspace: the standards architecture, the four collaborative methods, the separation-distance and biomechanical-limit math, functional safety (PL/Category), and how to validate a real collaborative application on the shop floor.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>No micro card yet — a full advanced module. Related:</span>
+    <a href="A15_Robotics_ROS2_Deep_Dive.html">A15 Robotics →</a>
+    <a href="A17_End_Effectors_Deep_Dive.html">A17 End-Effectors →</a>
+    <a href="A33_Industry_4_5_Deep_Dive.html">A33 Industry 5.0 →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · What Is Collaborative?</a>
+    <a href="#p2">2 · Standards Map</a>
+    <a href="#p3">3 · Four Collab Methods</a>
+    <a href="#p4">4 · Risk Assessment</a>
+    <a href="#p5">5 · SSM Math</a>
+    <a href="#p6">6 · PFL Biomechanics</a>
+    <a href="#p7">7 · Functional Safety</a>
+    <a href="#p8">8 · Safeguarding Tech</a>
+    <a href="#p9">9 · Application &amp; Validation</a>
+    <a href="#p10">10 · Recap, Faults &amp; Quiz</a>
+  </div>
+
+  <!-- ===== PAGE 1 ===== -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 10</span>
+    <h2 class="page-title">There Is No Such Thing as a "Safe Cobot"</h2>
+    <p class="page-sub">Safety is a property of the APPLICATION — robot + tool + workpiece + task + layout — never of the robot arm alone.</p>
+
+    <div class="card">
+      <div class="label">Definition (ISO 10218)</div>
+      <p class="lead">A <span class="hl">collaborative application</span> is one where an operator and a robot system can occupy the <span class="hl2">same workspace at the same time</span>, protected not by a fence but by a combination of safety-rated functions, separation monitoring, and biomechanical force limits.</p>
+      <p class="body">The 2025 revision of ISO 10218 deliberately dropped the term "collaborative robot". A power-and-force-limited arm carrying a <strong>knife-edged gripper</strong> or a hot, sharp workpiece is a dangerous machine. Conversely, a big industrial robot running <strong>speed &amp; separation monitoring</strong> with laser scanners can be part of a perfectly collaborative application. The arm supplies safety <em>functions</em>; the integrator's risk assessment turns them into a safe <em>application</em>.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Caged cell vs collaborative application</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#38bdf8" stop-opacity="0.25"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.03"/>
+          </linearGradient>
+          <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fb7185" stop-opacity="0.28"/><stop offset="1" stop-color="#fb7185" stop-opacity="0.04"/>
+          </linearGradient>
+        </defs>
+        <!-- left: caged -->
+        <rect x="30" y="40" width="330" height="220" rx="14" fill="url(#g1)" stroke="#38bdf8" stroke-width="2"/>
+        <text x="195" y="30" fill="#38bdf8" font-size="14" font-weight="800" text-anchor="middle" font-family="monospace">TRADITIONAL CELL</text>
+        <g stroke="#60a5fa" stroke-width="2.5">
+          <line x1="60" y1="70" x2="60" y2="230"/><line x1="100" y1="70" x2="100" y2="230"/>
+          <line x1="140" y1="70" x2="140" y2="230"/><line x1="180" y1="70" x2="180" y2="230"/>
+          <line x1="50" y1="70" x2="190" y2="70"/><line x1="50" y1="230" x2="190" y2="230"/>
+        </g>
+        <text x="120" y="255" fill="#94a3b8" font-size="12" text-anchor="middle">fence + interlocked gate</text>
+        <g transform="translate(255,160)">
+          <rect x="-16" y="30" width="32" height="14" rx="4" fill="#334155"/>
+          <line x1="0" y1="30" x2="-24" y2="-10" stroke="#93c5fd" stroke-width="9" stroke-linecap="round"/>
+          <line x1="-24" y1="-10" x2="18" y2="-42" stroke="#93c5fd" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="18" cy="-42" r="7" fill="#f1f5f9"/>
+        </g>
+        <text x="255" y="240" fill="#94a3b8" font-size="12" text-anchor="middle">full speed · human excluded</text>
+        <!-- right: collaborative -->
+        <rect x="400" y="40" width="330" height="220" rx="14" fill="url(#g2)" stroke="#fb7185" stroke-width="2"/>
+        <text x="565" y="30" fill="#fda4af" font-size="14" font-weight="800" text-anchor="middle" font-family="monospace">COLLABORATIVE APPLICATION</text>
+        <circle cx="565" cy="170" r="95" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="7 6"/>
+        <g transform="translate(505,160)">
+          <rect x="-16" y="30" width="32" height="14" rx="4" fill="#334155"/>
+          <line x1="0" y1="30" x2="-20" y2="-12" stroke="#fda4af" stroke-width="9" stroke-linecap="round"/>
+          <line x1="-20" y1="-12" x2="20" y2="-40" stroke="#fda4af" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="20" cy="-40" r="7" fill="#f1f5f9"/>
+        </g>
+        <g transform="translate(645,150)">
+          <circle cx="0" cy="-28" r="12" fill="#4ade80"/>
+          <line x1="0" y1="-16" x2="0" y2="30" stroke="#4ade80" stroke-width="8" stroke-linecap="round"/>
+          <line x1="0" y1="-4" x2="-22" y2="16" stroke="#4ade80" stroke-width="6" stroke-linecap="round"/>
+          <line x1="0" y1="-4" x2="22" y2="16" stroke="#4ade80" stroke-width="6" stroke-linecap="round"/>
+          <line x1="0" y1="30" x2="-12" y2="62" stroke="#4ade80" stroke-width="6" stroke-linecap="round"/>
+          <line x1="0" y1="30" x2="12" y2="62" stroke="#4ade80" stroke-width="6" stroke-linecap="round"/>
+        </g>
+        <text x="565" y="240" fill="#94a3b8" font-size="12" text-anchor="middle">monitored speed · limited force · shared space</text>
+      </svg>
+      </div>
+      <p class="cap">Left: risk removed by exclusion. Right: risk controlled by safety-rated monitoring — the fence is replaced by mathematics and certified electronics.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-sky"><h4>1996 · First cobot</h4><p>Colgate &amp; Peshkin patent the "cobot" — a passive, human-guided device at Northwestern University.</p></div>
+      <div class="mini c-purp"><h4>2011 · ISO 10218</h4><p>First robot-safety standard with collaborative clauses; TS 15066 (2016) adds the force/pressure data.</p></div>
+      <div class="mini"><h4>2025 · ISO 10218 rev.</h4><p>TS 15066 content absorbed into ISO 10218-2 annexes; "collaborative application" replaces "collaborative robot"; cybersecurity added.</p></div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 2 ===== -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 10</span>
+    <h2 class="page-title">The Standards Map: A, B and C</h2>
+    <p class="page-sub">Machinery safety is a pyramid — generic principles at the top, robot-specific rules at the bottom.</p>
+
+    <div class="card">
+      <div class="label">Type A / B / C hierarchy</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="pyr" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fb7185" stop-opacity="0.5"/><stop offset="1" stop-color="#fb7185" stop-opacity="0.1"/>
+          </linearGradient>
+        </defs>
+        <polygon points="380,20 560,110 200,110" fill="#38bdf8" fill-opacity="0.25" stroke="#38bdf8" stroke-width="2"/>
+        <text x="380" y="75" fill="#7dd3fc" font-size="15" font-weight="800" text-anchor="middle">TYPE A</text>
+        <text x="380" y="95" fill="#cbd5e1" font-size="12" text-anchor="middle" font-family="monospace">ISO 12100 risk assessment</text>
+        <polygon points="200,120 560,120 640,210 120,210" fill="#c084fc" fill-opacity="0.22" stroke="#c084fc" stroke-width="2"/>
+        <text x="380" y="155" fill="#d8b4fe" font-size="15" font-weight="800" text-anchor="middle">TYPE B</text>
+        <text x="380" y="178" fill="#cbd5e1" font-size="12" text-anchor="middle" font-family="monospace">ISO 13849-1 (PL) · IEC 62061 (SIL) · ISO 13855 (distances) · IEC 60204-1 (electrical)</text>
+        <polygon points="120,220 640,220 700,310 60,310" fill="url(#pyr)" stroke="#fb7185" stroke-width="2.5"/>
+        <text x="380" y="255" fill="#fda4af" font-size="15" font-weight="800" text-anchor="middle">TYPE C — ROBOTS</text>
+        <text x="380" y="280" fill="#cbd5e1" font-size="12" text-anchor="middle" font-family="monospace">ISO 10218-1 (the robot) · ISO 10218-2 (system &amp; integration, incl. collaborative annexes)</text>
+        <text x="380" y="300" fill="#94a3b8" font-size="11" text-anchor="middle">ISO/TS 15066:2016 → merged into 10218-2:2025</text>
+      </svg>
+      </div>
+      <p class="cap">A Type-C standard overrides the generic ones for its machine class — for robots, 10218 is the law of the land (harmonised under the EU Machinery Regulation 2023/1230).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Who is responsible for what</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Document</th><th>Scope</th><th>Who must comply</th><th>Key content</th></tr>
+        <tr><td class="mono"><b>ISO 10218-1</b></td><td>The robot arm + controller</td><td>Robot <b>manufacturer</b></td><td>Safety-rated functions: monitored stop, speed/space limiting, force limiting, stop categories</td></tr>
+        <tr><td class="mono"><b>ISO 10218-2</b></td><td>Robot <b>system / cell / application</b></td><td><b>Integrator</b> (often = end user)</td><td>Layout, safeguarding, collaborative methods, verification &amp; validation</td></tr>
+        <tr><td class="mono"><b>ISO/TS 15066</b></td><td>Collaborative operation detail</td><td>Integrator</td><td>SSM formula + PFL body model (force/pressure limits per body region)</td></tr>
+        <tr><td class="mono"><b>ISO 12100</b></td><td>Any machine</td><td>Everyone</td><td>Risk assessment &amp; 3-step risk reduction method</td></tr>
+        <tr><td class="mono"><b>ISO 13849-1</b></td><td>Safety control systems</td><td>Designer of safety functions</td><td>Performance Level PL a–e, Categories B–4, MTTFd, DC, CCF</td></tr>
+        <tr><td class="mono"><b>ISO 13855</b></td><td>Safeguard positioning</td><td>Integrator</td><td>S = K·T + C minimum-distance formula for curtains/scanners</td></tr>
+      </table></div>
+      <p class="body">The single most misunderstood point in industry: <span class="hl">buying a certified PFL arm does not make your cell compliant</span>. ISO 10218-2 compliance — the integrator's risk assessment and validation of the whole application — is what the CE mark on the cell actually claims.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-sky"><h4>Stop cat. 0</h4><p>IEC 60204-1: immediate power removal — uncontrolled coast/brake stop.</p></div>
+      <div class="mini c-amb"><h4>Stop cat. 1</h4><p>Controlled deceleration, then power removal — the usual robot protective stop.</p></div>
+      <div class="mini c-grn"><h4>Stop cat. 2</h4><p>Controlled stop, drives stay energised &amp; monitored — enables fast restart (SOS).</p></div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 3 ===== -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 10</span>
+    <h2 class="page-title">The Four Collaborative Methods</h2>
+    <p class="page-sub">ISO 10218-2 / TS 15066 define exactly four ways a human and a robot may share space. Real cells usually combine two or more.</p>
+
+    <div class="card">
+      <div class="label">Method overview</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg">
+        <g font-family="monospace">
+          <rect x="20" y="20" width="350" height="150" rx="14" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+          <text x="195" y="48" fill="#7dd3fc" font-size="14" font-weight="800" text-anchor="middle">1 · SAFETY-RATED MONITORED STOP</text>
+          <circle cx="120" cy="110" r="30" fill="none" stroke="#38bdf8" stroke-width="3"/>
+          <rect x="108" y="96" width="8" height="28" rx="2" fill="#7dd3fc"/><rect x="122" y="96" width="8" height="28" rx="2" fill="#7dd3fc"/>
+          <text x="250" y="100" fill="#cbd5e1" font-size="12" text-anchor="middle">robot HOLDS (cat-2 stop)</text>
+          <text x="250" y="120" fill="#94a3b8" font-size="11" text-anchor="middle">while human is in the CWS;</text>
+          <text x="250" y="140" fill="#94a3b8" font-size="11" text-anchor="middle">auto-resume when clear</text>
+          <rect x="390" y="20" width="350" height="150" rx="14" fill="#232d3f" stroke="#c084fc" stroke-width="2"/>
+          <text x="565" y="48" fill="#d8b4fe" font-size="14" font-weight="800" text-anchor="middle">2 · HAND GUIDING</text>
+          <circle cx="480" cy="100" r="13" fill="#d8b4fe"/>
+          <line x1="480" y1="113" x2="480" y2="148" stroke="#d8b4fe" stroke-width="6" stroke-linecap="round"/>
+          <line x1="480" y1="124" x2="514" y2="110" stroke="#d8b4fe" stroke-width="5" stroke-linecap="round"/>
+          <rect x="514" y="100" width="36" height="16" rx="5" fill="#94a3b8"/>
+          <text x="640" y="100" fill="#cbd5e1" font-size="12" text-anchor="middle">operator moves the robot</text>
+          <text x="640" y="120" fill="#94a3b8" font-size="11" text-anchor="middle">via 3-position enabling device</text>
+          <text x="640" y="140" fill="#94a3b8" font-size="11" text-anchor="middle">+ safe speed limit (SLS)</text>
+          <rect x="20" y="190" width="350" height="150" rx="14" fill="#232d3f" stroke="#fbbf24" stroke-width="2"/>
+          <text x="195" y="218" fill="#fde68a" font-size="14" font-weight="800" text-anchor="middle">3 · SPEED &amp; SEPARATION (SSM)</text>
+          <circle cx="95" cy="280" r="34" fill="none" stroke="#f87171" stroke-width="2" stroke-dasharray="5 4"/>
+          <circle cx="95" cy="280" r="52" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="5 4"/>
+          <circle cx="95" cy="280" r="13" fill="#fbbf24"/>
+          <text x="255" y="265" fill="#cbd5e1" font-size="12" text-anchor="middle">robot slows as human nears,</text>
+          <text x="255" y="285" fill="#94a3b8" font-size="11" text-anchor="middle">protective stop if S &lt; Sp —</text>
+          <text x="255" y="305" fill="#94a3b8" font-size="11" text-anchor="middle">distance kept by scanners/vision</text>
+          <rect x="390" y="190" width="350" height="150" rx="14" fill="#232d3f" stroke="#fb7185" stroke-width="2"/>
+          <text x="565" y="218" fill="#fda4af" font-size="14" font-weight="800" text-anchor="middle">4 · POWER &amp; FORCE LIMITING (PFL)</text>
+          <path d="M 470 295 q 30 -48 60 0" stroke="#fda4af" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <circle cx="530" cy="295" r="9" fill="#f1f5f9"/>
+          <path d="M 548 287 l 14 8 l -14 8" fill="none" stroke="#4ade80" stroke-width="3"/>
+          <text x="655" y="265" fill="#cbd5e1" font-size="12" text-anchor="middle">contact IS allowed but</text>
+          <text x="655" y="285" fill="#94a3b8" font-size="11" text-anchor="middle">force &amp; pressure kept below</text>
+          <text x="655" y="305" fill="#94a3b8" font-size="11" text-anchor="middle">biomechanical pain limits</text>
+        </g>
+      </svg>
+      </div>
+      <p class="cap">Methods 1–3 prevent contact; method 4 makes contact tolerable. CWS = collaborative workspace.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Choosing a method</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Method</th><th>Contact?</th><th>Typical robot</th><th>Throughput cost</th><th>Best for</th></tr>
+        <tr><td><b>Monitored stop</b></td><td>No (robot frozen)</td><td>Any, incl. big 6-axis</td><td>High if human enters often</td><td>Occasional load/unload, inspection visits</td></tr>
+        <tr><td><b>Hand guiding</b></td><td>Intentional only</td><td>Any with HG device</td><td>n/a (teaching / lift-assist)</td><td>Teaching paths, heavy-part placement</td></tr>
+        <tr><td><b>SSM</b></td><td>No (distance kept)</td><td>Standard industrial + scanners</td><td>Medium — speed scales with distance</td><td>Big robots, fenceless cells, AMR handover</td></tr>
+        <tr><td><b>PFL</b></td><td>Yes, limited</td><td>Force-limited arm (UR, iiwa, TM…)</td><td>Speed capped ~250–1500 mm/s</td><td>Small parts, assembly beside humans</td></tr>
+      </table></div>
+      <p class="body">Rule of thumb: <span class="hl2">SSM buys speed at the price of floor space</span> (bigger zones), <span class="hl">PFL buys closeness at the price of speed</span>. Many cells run PFL <em>and</em> SSM: full speed when nobody is near, PFL-limited when a human is adjacent, monitored stop during hand-over.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 4 ===== -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 10</span>
+    <h2 class="page-title">Risk Assessment: The Legal Engine</h2>
+    <p class="page-sub">Every safeguard decision must trace back to an ISO 12100 risk assessment — task by task, hazard by hazard.</p>
+
+    <div class="card">
+      <div class="label">The ISO 12100 loop</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+        <g font-family="monospace" font-size="12">
+          <rect x="20" y="90" width="130" height="70" rx="12" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+          <text x="85" y="118" fill="#7dd3fc" text-anchor="middle" font-weight="800">LIMITS</text>
+          <text x="85" y="138" fill="#94a3b8" text-anchor="middle" font-size="10">use · space · time</text>
+          <rect x="175" y="90" width="130" height="70" rx="12" fill="#232d3f" stroke="#c084fc" stroke-width="2"/>
+          <text x="240" y="112" fill="#d8b4fe" text-anchor="middle" font-weight="800">HAZARD ID</text>
+          <text x="240" y="132" fill="#94a3b8" text-anchor="middle" font-size="10">task-based: every</text>
+          <text x="240" y="146" fill="#94a3b8" text-anchor="middle" font-size="10">task × every hazard</text>
+          <rect x="330" y="90" width="130" height="70" rx="12" fill="#232d3f" stroke="#fbbf24" stroke-width="2"/>
+          <text x="395" y="112" fill="#fde68a" text-anchor="middle" font-weight="800">ESTIMATE</text>
+          <text x="395" y="132" fill="#94a3b8" text-anchor="middle" font-size="10">severity × exposure</text>
+          <text x="395" y="146" fill="#94a3b8" text-anchor="middle" font-size="10">× avoidability</text>
+          <rect x="485" y="90" width="130" height="70" rx="12" fill="#232d3f" stroke="#fb7185" stroke-width="2"/>
+          <text x="550" y="112" fill="#fda4af" text-anchor="middle" font-weight="800">EVALUATE</text>
+          <text x="550" y="132" fill="#94a3b8" text-anchor="middle" font-size="10">risk acceptable?</text>
+          <text x="550" y="146" fill="#94a3b8" text-anchor="middle" font-size="10">→ PLr per function</text>
+          <rect x="640" y="90" width="100" height="70" rx="12" fill="rgba(74,222,128,0.12)" stroke="#4ade80" stroke-width="2"/>
+          <text x="690" y="118" fill="#86efac" text-anchor="middle" font-weight="800">REDUCE</text>
+          <text x="690" y="138" fill="#94a3b8" text-anchor="middle" font-size="10">3-step method</text>
+          <g stroke="#64748b" stroke-width="2" fill="none">
+            <line x1="150" y1="125" x2="175" y2="125"/><line x1="305" y1="125" x2="330" y2="125"/>
+            <line x1="460" y1="125" x2="485" y2="125"/><line x1="615" y1="125" x2="640" y2="125"/>
+          </g>
+          <path d="M 690 160 L 690 210 L 85 210 L 85 160" stroke="#f87171" stroke-width="2" fill="none" stroke-dasharray="6 5"/>
+          <text x="390" y="230" fill="#fca5a5" text-anchor="middle" font-size="11">iterate until residual risk is acceptable — document everything</text>
+          <text x="380" y="50" fill="#cbd5e1" text-anchor="middle" font-size="13">3-step reduction: ① inherently safe design → ② safeguarding &amp; complementary measures → ③ information for use</text>
+        </g>
+      </svg>
+      </div>
+      <p class="cap">Order matters: you may not "fix it with a warning label" (step 3) if a design change (step 1) is feasible.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Robot-specific hazards to hunt for</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Crushing &amp; trapping</strong> — between arm and fixture, wall, or the part itself. Head/neck contact must be excluded by design, not just by limits: <span class="hl">quasi-static (clamping) contact with the skull is not permitted at all</span>.</div></li>
+        <li><span class="num">2</span><div><strong>Tool &amp; workpiece hazards</strong> — sharp edges, hot surfaces, ejected chips, laser/UV. A PFL arm holding a screwdriver bit is a <em>stabbing</em> hazard the arm's force limit does not fix.</div></li>
+        <li><span class="num">3</span><div><strong>Unexpected motion</strong> — auto-restart after protective stop, program resume, drift on brake release, singularity speed spikes near joint limits (see A15).</div></li>
+        <li><span class="num">4</span><div><strong>Systematic &amp; cyber</strong> — wrong safety configuration loaded, unverified parameter change, network attack altering safety zones (new in 10218:2025).</div></li>
+      </ul>
+      <p class="body">Output of the assessment: a list of <span class="hl2">safety functions</span> (e.g. "SLS 250 mm/s when scanner zone 2 occupied") each with a <span class="hl">required Performance Level PLr</span> — typically <strong>PL d, Category 3</strong> for cobot protective functions.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 5 ===== -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 10</span>
+    <h2 class="page-title">SSM: The Separation-Distance Math</h2>
+    <p class="page-sub">Speed &amp; separation monitoring is a live inequality: actual distance must always exceed the protective separation distance Sp.</p>
+
+    <div class="card">
+      <div class="label">The TS 15066 formula (from ISO 13855)</div>
+      <p class="lead">The robot must be able to stop <span class="hl">before the human can reach it</span> — Sp adds up everything that happens during detection and braking.</p>
+      <div class="eqn"><b>Sp(t0)</b> = Sh + Sr + Ss + C + Zd + Zr
+
+  Sh = <b>vH·(Tr + Ts)</b>   human travel while system reacts &amp; robot stops
+  Sr = <span class="v2">vR·Tr</span>          robot travel during reaction time
+  Ss = <span class="v2">vS·Ts</span>          robot travel during stopping
+  C  = intrusion distance (reach-through allowance, ISO 13855)
+  Zd, Zr = sensor &amp; robot position uncertainty
+
+  vH = 1600 mm/s walking (2000 mm/s if approach ≤ 500 mm)
+  Tr = detection + processing time · Ts = robot stopping time</div>
+      <p class="body">Everything is worst-case: maximum human speed, maximum robot speed toward the human, longest stopping time at full payload and extension (from the robot's stopping-performance data in the manual, per ISO 10218-1 Annex).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Zone picture</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg">
+        <rect x="30" y="40" width="700" height="150" rx="12" fill="#11161f" stroke="#334155"/>
+        <circle cx="600" cy="115" r="130" fill="rgba(248,113,113,0.10)" stroke="#f87171" stroke-width="2" stroke-dasharray="6 5"/>
+        <circle cx="600" cy="115" r="210" fill="rgba(251,191,36,0.07)" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6 5"/>
+        <g transform="translate(600,115)">
+          <rect x="-18" y="34" width="36" height="14" rx="4" fill="#334155"/>
+          <line x1="0" y1="34" x2="-24" y2="-8" stroke="#fda4af" stroke-width="9" stroke-linecap="round"/>
+          <line x1="-24" y1="-8" x2="16" y2="-38" stroke="#fda4af" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="16" cy="-38" r="7" fill="#f1f5f9"/>
+        </g>
+        <g transform="translate(120,105)">
+          <circle cx="0" cy="-26" r="11" fill="#4ade80"/>
+          <line x1="0" y1="-15" x2="0" y2="26" stroke="#4ade80" stroke-width="7" stroke-linecap="round"/>
+          <line x1="0" y1="-4" x2="-18" y2="14" stroke="#4ade80" stroke-width="5" stroke-linecap="round"/>
+          <line x1="0" y1="-4" x2="18" y2="14" stroke="#4ade80" stroke-width="5" stroke-linecap="round"/>
+          <line x1="0" y1="26" x2="-10" y2="55" stroke="#4ade80" stroke-width="5" stroke-linecap="round"/>
+          <line x1="0" y1="26" x2="10" y2="55" stroke="#4ade80" stroke-width="5" stroke-linecap="round"/>
+        </g>
+        <line x1="150" y1="115" x2="465" y2="115" stroke="#f1f5f9" stroke-width="2" stroke-dasharray="4 4"/>
+        <text x="305" y="105" fill="#f1f5f9" font-size="13" text-anchor="middle" font-family="monospace">actual distance S</text>
+        <text x="480" y="220" fill="#fbbf24" font-size="12" font-family="monospace">SLOW zone (SLS)</text>
+        <text x="640" y="220" fill="#f87171" font-size="12" font-family="monospace">STOP zone (S &lt; Sp)</text>
+        <text x="120" y="215" fill="#86efac" font-size="12" font-family="monospace" text-anchor="middle">full speed</text>
+      </svg>
+      </div>
+      <p class="cap">Dynamic SSM: the controller recomputes Sp continuously from live robot speed — the zones "breathe" with the motion.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">🧮 Interactive — protective separation distance</div>
+      <div class="demo">
+        <div class="demo-row"><span>Robot speed toward human vR</span><b id="d1av">1000 mm/s</b></div>
+        <input type="range" id="d1a" min="0" max="2500" step="50" value="1000">
+        <div class="demo-row"><span>Sensor reaction time Tr</span><b id="d1bv">0.20 s</b></div>
+        <input type="range" id="d1b" min="0.05" max="0.60" step="0.01" value="0.20">
+        <div class="demo-row"><span>Robot stopping time Ts</span><b id="d1cv">0.40 s</b></div>
+        <input type="range" id="d1c" min="0.10" max="1.20" step="0.05" value="0.40">
+        <div class="demo-row"><span>Intrusion + uncertainty C+Z</span><b id="d1dv">200 mm</b></div>
+        <input type="range" id="d1d" min="0" max="500" step="25" value="200">
+        <div class="demo-out" id="d1out"></div>
+      </div>
+      <p class="cap">vH fixed at 1600 mm/s; during stopping the robot is assumed to decelerate (Ss ≈ vR·Ts/2). Watch how stopping time dominates.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 6 ===== -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 10</span>
+    <h2 class="page-title">PFL: Biomechanics of Allowed Contact</h2>
+    <p class="page-sub">Power &amp; force limiting turns "how hard may a robot hit a person?" into published engineering numbers.</p>
+
+    <div class="card">
+      <div class="label">Two contact types</div>
+      <div class="grid-2">
+        <div class="mini c-amb"><h4>⚡ Transient contact</h4><p>Free impact — the body part can recoil (&lt; 0.5 s contact). Limits are <b>2×</b> the quasi-static values because energy is shared with the moving body part.</p></div>
+        <div class="mini c-red"><h4>🗜️ Quasi-static contact</h4><p>Clamping — body part trapped between robot and a fixed surface. Full force persists; the stricter base limits apply. <b>Never permitted for skull, face, throat.</b></p></div>
+      </div>
+      <p class="body">The TS 15066 body model divides the body into <span class="hl">regions, each with a maximum force, a maximum pressure, a spring constant k and an effective mass mH</span>. Pressure often governs before force does — a blunt, padded contact surface is the cheapest compliance tool there is.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Key body-region limits (TS 15066 Annex A — quasi-static)</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Body region</th><th>Max force (N)</th><th>Max pressure (N/cm²)</th><th>Spring k (N/mm)</th><th>Eff. mass mH (kg)</th></tr>
+        <tr><td><b>Skull / forehead</b></td><td class="mono">130 ⚠ no clamping</td><td class="mono">130</td><td class="mono">150</td><td class="mono">4.4</td></tr>
+        <tr><td><b>Face</b></td><td class="mono">65 ⚠ no clamping</td><td class="mono">65</td><td class="mono">75</td><td class="mono">4.4</td></tr>
+        <tr><td><b>Chest</b></td><td class="mono">140</td><td class="mono">120</td><td class="mono">25</td><td class="mono">40</td></tr>
+        <tr><td><b>Abdomen</b></td><td class="mono">110</td><td class="mono">140</td><td class="mono">10</td><td class="mono">40</td></tr>
+        <tr><td><b>Back / shoulders</b></td><td class="mono">210</td><td class="mono">210</td><td class="mono">35</td><td class="mono">40</td></tr>
+        <tr><td><b>Hand / finger</b></td><td class="mono">140</td><td class="mono">180–300</td><td class="mono">75</td><td class="mono">0.6</td></tr>
+        <tr><td><b>Upper arm</b></td><td class="mono">150</td><td class="mono">190</td><td class="mono">30</td><td class="mono">3</td></tr>
+        <tr><td><b>Thigh / knee</b></td><td class="mono">220</td><td class="mono">250</td><td class="mono">50</td><td class="mono">75</td></tr>
+        <tr><td><b>Lower leg</b></td><td class="mono">130</td><td class="mono">160</td><td class="mono">60</td><td class="mono">75</td></tr>
+      </table></div>
+      <p class="cap">Transient limits = 2× these forces/pressures. Values are onset-of-pain thresholds from Univ. Mainz studies — not injury thresholds.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">From force limit to speed limit</div>
+      <p class="lead">Model the impact as a spring: contact force depends on the <span class="hl">relative speed</span> and the <span class="hl2">reduced mass</span> of the two colliding bodies.</p>
+      <div class="eqn">reduced mass:  <b>μ</b> = (1/mH + 1/mR)⁻¹      mR ≈ M/2 + mL
+energy → force: E = F²/(2k)  and  E = ½·μ·v²
+<b>v_max = F_max / √(μ·k)</b>   ← the speed the safety system must enforce</div>
+      <p class="body">mR is the <strong>effective moving mass</strong>: roughly half the arm's moving link mass M plus the full payload mL. This is why PFL arms feel "slow" — for a hand contact (k = 75 N/mm, transient F = 280 N) a 20 kg-effective robot must stay below ≈ 1 m/s.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">🧮 Interactive — PFL speed limit for hand contact</div>
+      <div class="demo">
+        <div class="demo-row"><span>Robot moving link mass M</span><b id="d2av">20 kg</b></div>
+        <input type="range" id="d2a" min="4" max="60" step="1" value="20">
+        <div class="demo-row"><span>Payload + tool mL</span><b id="d2bv">3 kg</b></div>
+        <input type="range" id="d2b" min="0" max="16" step="0.5" value="3">
+        <div class="demo-row"><span>Contact type</span><b id="d2cv">transient (280 N)</b></div>
+        <input type="range" id="d2c" min="0" max="1" step="1" value="1">
+        <div class="demo-out" id="d2out"></div>
+      </div>
+      <p class="cap">Hand/finger region: k = 75 N/mm, mH = 0.6 kg. Slider 3: left = quasi-static 140 N, right = transient 280 N.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 7 ===== -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 10</span>
+    <h2 class="page-title">Functional Safety: PL, Categories &amp; Safe Motion</h2>
+    <p class="page-sub">A safety function is only as good as the electronics executing it — ISO 13849-1 quantifies how much you can trust it.</p>
+
+    <div class="card">
+      <div class="label">Performance Level (PL) in one box</div>
+      <div class="eqn">PLr from risk graph:  S (severity) × F (frequency) × P (possibility of avoidance)
+S1/S2 · F1/F2 · P1/P2  →  PLr = a … e
+
+PL ↔ probability of dangerous failure per hour (PFHd):
+  <b>PL c</b>: 10⁻⁶ … 3·10⁻⁶    <b>PL d</b>: 10⁻⁷ … 10⁻⁶    <b>PL e</b>: 10⁻⁸ … 10⁻⁷
+
+PL achieved = f(<span class="v2">Category</span>, <span class="v2">MTTFd</span>, <span class="v2">DCavg</span>, <span class="v2">CCF</span>)</div>
+      <p class="body"><span class="hl">Category 3</span> means: single-fault tolerant — two channels, a single fault does not lose the safety function and is detected where practicable. The standard cobot recipe is <strong>PL d, Cat 3</strong>: dual-channel joint torque/position sensing, cross-checked by a safety controller.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Dual-channel architecture (Cat 3)</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg">
+        <g font-family="monospace" font-size="12">
+          <rect x="30" y="80" width="120" height="60" rx="10" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+          <text x="90" y="105" fill="#7dd3fc" text-anchor="middle" font-weight="800">INPUT</text>
+          <text x="90" y="125" fill="#94a3b8" text-anchor="middle" font-size="10">scanner · e-stop</text>
+          <rect x="220" y="30" width="150" height="55" rx="10" fill="#232d3f" stroke="#fb7185" stroke-width="2"/>
+          <text x="295" y="53" fill="#fda4af" text-anchor="middle" font-weight="800">LOGIC ch. A</text>
+          <text x="295" y="72" fill="#94a3b8" text-anchor="middle" font-size="10">safety PLC / µC A</text>
+          <rect x="220" y="135" width="150" height="55" rx="10" fill="#232d3f" stroke="#fb7185" stroke-width="2"/>
+          <text x="295" y="158" fill="#fda4af" text-anchor="middle" font-weight="800">LOGIC ch. B</text>
+          <text x="295" y="177" fill="#94a3b8" text-anchor="middle" font-size="10">diverse µC B</text>
+          <line x1="295" y1="85" x2="295" y2="135" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 4"/>
+          <text x="310" y="115" fill="#fde68a" font-size="10">cross-check</text>
+          <rect x="440" y="80" width="140" height="60" rx="10" fill="#232d3f" stroke="#4ade80" stroke-width="2"/>
+          <text x="510" y="105" fill="#86efac" text-anchor="middle" font-weight="800">OUTPUT</text>
+          <text x="510" y="125" fill="#94a3b8" text-anchor="middle" font-size="10">2× contactor / STO</text>
+          <rect x="630" y="80" width="110" height="60" rx="10" fill="#232d3f" stroke="#c084fc" stroke-width="2"/>
+          <text x="685" y="105" fill="#d8b4fe" text-anchor="middle" font-weight="800">DRIVES</text>
+          <text x="685" y="125" fill="#94a3b8" text-anchor="middle" font-size="10">torque removed</text>
+          <g stroke="#64748b" stroke-width="2" fill="none">
+            <path d="M 150 100 L 220 57"/><path d="M 150 120 L 220 163"/>
+            <path d="M 370 57 L 440 100"/><path d="M 370 163 L 440 120"/>
+            <line x1="580" y1="110" x2="630" y2="110"/>
+          </g>
+          <text x="380" y="212" fill="#94a3b8" text-anchor="middle" font-size="11">Category 3: two channels + monitoring — one fault ≠ loss of the safety function</text>
+        </g>
+      </svg>
+      </div>
+      <p class="cap">MTTFd (component reliability), DC (diagnostic coverage) and CCF (common-cause failure score ≥ 65) decide whether this architecture actually reaches PL d.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Safe-motion functions (IEC 61800-5-2)</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Function</th><th>Name</th><th>What it guarantees</th></tr>
+        <tr><td class="mono"><b>STO</b></td><td>Safe Torque Off</td><td>No torque can be generated — hardware path, basis of every e-stop</td></tr>
+        <tr><td class="mono"><b>SS1</b></td><td>Safe Stop 1</td><td>Monitored deceleration → then STO (stop cat. 1)</td></tr>
+        <tr><td class="mono"><b>SS2 / SOS</b></td><td>Safe Stop 2 / Operating Stop</td><td>Controlled stop, drives energised, standstill monitored (stop cat. 2) — enables monitored-stop collaboration</td></tr>
+        <tr><td class="mono"><b>SLS</b></td><td>Safely-Limited Speed</td><td>TCP/joint speed never exceeds set value — backbone of SSM &amp; hand guiding</td></tr>
+        <tr><td class="mono"><b>SLP / SLT</b></td><td>Safely-Limited Position / Torque</td><td>Safety-rated soft axis &amp; space limits / torque ceiling for PFL</td></tr>
+        <tr><td class="mono"><b>SDI / SBC</b></td><td>Safe Direction / Brake Control</td><td>Motion only in safe direction / brake proven before release</td></tr>
+      </table></div>
+      <p class="body">These certified drive functions are the <span class="hl2">building blocks</span>; the four collaborative methods of page 3 are <span class="hl">compositions</span> of them (SSM = SLS + SLP + protective stop; PFL = SLT + SLS…).</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 8 ===== -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 10</span>
+    <h2 class="page-title">Safeguarding Technology</h2>
+    <p class="page-sub">The sensors that hold the human-robot boundary — and the ISO 13855 rules for where they must be mounted.</p>
+
+    <div class="card">
+      <div class="label">The safeguard toolbox</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Device</th><th>Detects</th><th>Typical PL</th><th>Notes</th></tr>
+        <tr><td><b>Safety laser scanner</b></td><td>2D presence in zones</td><td class="mono">PL d</td><td>Programmable warning + protective fields; the SSM workhorse. Mind dust/steam false trips.</td></tr>
+        <tr><td><b>Light curtain (AOPD)</b></td><td>Beam interruption</td><td class="mono">PL e capable</td><td>Resolution d: 14 mm finger, 30 mm hand. C = 8·(d − 14) mm reach-through allowance</td></tr>
+        <tr><td><b>Pressure-sensitive mat</b></td><td>Standing location</td><td class="mono">PL d</td><td>Simple zone gating; C = 1200 mm stepping allowance when horizontal</td></tr>
+        <tr><td><b>Safety-rated 3D vision</b></td><td>Volumetric intrusion</td><td class="mono">PL d (emerging)</td><td>True dynamic SSM around the whole arm; certified systems still rare</td></tr>
+        <tr><td><b>Interlocked guard + lock</b></td><td>Door open</td><td class="mono">PL e</td><td>ISO 14119 — coded magnets/RFID against defeat; guard locking until standstill</td></tr>
+        <tr><td><b>3-position enabling device</b></td><td>Operator grip</td><td class="mono">PL d</td><td>Middle position = run; release OR panic-squeeze = stop. Mandatory for hand guiding &amp; teach</td></tr>
+        <tr><td><b>E-stop</b></td><td>Manual command</td><td class="mono">per PLr</td><td>ISO 13850 — complementary measure, never the primary safeguard</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Mounting math — ISO 13855</div>
+      <div class="eqn"><b>S = K·T + C</b>
+  S = min. distance safeguard → hazard zone
+  K = 2000 mm/s (approach ≤ 500 mm) else 1600 mm/s
+  T = total stop time (sensor + logic + robot)
+  C = 8·(d − 14) for vertical curtains (d = resolution, mm)
+
+Example: 30 mm curtain, T = 0.55 s →
+  S = 1600·0.55 + 8·(30−14) = 880 + 128 = <b>1008 mm</b></div>
+      <p class="body">The same K·T logic drives the SSM formula on page 5 — ISO 13855 is the parent. <span class="hl">Reach-over</span> and <span class="hl2">reach-under</span> paths need their own C values from the standard's tables; forgetting a crawl-under gap is a classic audit finding.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-amb"><h4>Muting</h4><p>Temporary, automatic suspension of a safeguard while a pallet (not a person) passes — needs ≥ 2 independent muting sensors.</p></div>
+      <div class="mini c-sky"><h4>Blanking</h4><p>Fixed/floating dead zones in a light curtain for material feed — resolution worsens; recalculate C.</p></div>
+      <div class="mini c-red"><h4>Defeat prevention</h4><p>ISO 14119: mount switches out of reach, use coded actuators — 46% of accidents involve defeated guards.</p></div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 9 ===== -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 10</span>
+    <h2 class="page-title">Application Engineering &amp; Validation</h2>
+    <p class="page-sub">Design the tool, cap the energy, then PROVE the numbers with a force-pressure measurement device.</p>
+
+    <div class="card">
+      <div class="label">Design levers before you touch the robot menu</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Blunt everything.</strong> Edge radii ≥ 2 mm on tool &amp; fixtures, padding on contact-likely surfaces — pressure limits are usually hit long before force limits.</div></li>
+        <li><span class="num">2</span><div><strong>Kill clamping geometry.</strong> Keep ≥ 500 mm clearance or ≤ 120 mm gaps (no body part fits); route motions so the arm never closes on a fixed edge at head height.</div></li>
+        <li><span class="num">3</span><div><strong>Exclude head &amp; neck by layout</strong> — workpiece presentation below shoulder height, approach vectors away from the face. Skull contact cannot be "limited", only prevented.</div></li>
+        <li><span class="num">4</span><div><strong>Reduce effective mass</strong> — lighter tools and slower approach segments only where humans can be; full speed elsewhere via safety zones (SLP).</div></li>
+        <li><span class="num">5</span><div><strong>Plan the restart.</strong> Protective stop → restart only from outside the zone, deliberate reset action, no auto-restart with a person still inside (ISO 10218-2 reset rules).</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Validation — measuring what you claimed</div>
+      <p class="lead">PFL limits are validated with a <span class="hl">biofidelic force-pressure measurement device</span>: a spring + damper gauge matching the body region's k, faced with pressure-mapping film.</p>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 210" xmlns="http://www.w3.org/2000/svg">
+        <g font-family="monospace" font-size="12">
+          <path d="M 80 160 q 40 -70 90 -20" stroke="#fda4af" stroke-width="10" fill="none" stroke-linecap="round"/>
+          <rect x="168" y="128" width="26" height="26" rx="5" fill="#f1f5f9"/>
+          <text x="120" y="190" fill="#94a3b8" text-anchor="middle">robot at test speed</text>
+          <path d="M 205 141 l 30 0" stroke="#fbbf24" stroke-width="3" marker-end="url(#arv)"/>
+          <defs><marker id="arv" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#fbbf24"/></marker></defs>
+          <rect x="250" y="110" width="30" height="62" rx="6" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+          <text x="265" y="100" fill="#7dd3fc" text-anchor="middle" font-size="10">film</text>
+          <g stroke="#4ade80" stroke-width="3" fill="none">
+            <path d="M 285 141 l 12 0 l 5 -10 l 8 20 l 8 -20 l 8 20 l 5 -10 l 12 0"/>
+          </g>
+          <text x="330" y="185" fill="#86efac" text-anchor="middle" font-size="10">spring k (body region)</text>
+          <rect x="345" y="120" width="45" height="42" rx="6" fill="#232d3f" stroke="#c084fc" stroke-width="2"/>
+          <text x="367" y="145" fill="#d8b4fe" text-anchor="middle" font-size="10">damper</text>
+          <rect x="395" y="95" width="18" height="92" rx="4" fill="#334155"/>
+          <rect x="440" y="40" width="290" height="150" rx="12" fill="#11161f" stroke="#334155"/>
+          <text x="585" y="65" fill="#f1f5f9" text-anchor="middle" font-weight="800" font-size="13">FORCE vs TIME</text>
+          <polyline points="465,170 500,168 515,80 535,120 560,140 600,148 660,150 710,150" fill="none" stroke="#fb7185" stroke-width="3"/>
+          <line x1="465" y1="96" x2="710" y2="96" stroke="#fbbf24" stroke-width="2" stroke-dasharray="5 4"/>
+          <text x="695" y="88" fill="#fde68a" font-size="10" text-anchor="end">transient limit</text>
+          <line x1="465" y1="132" x2="710" y2="132" stroke="#f87171" stroke-width="2" stroke-dasharray="5 4"/>
+          <text x="695" y="126" fill="#fca5a5" font-size="10" text-anchor="end">quasi-static limit</text>
+          <text x="585" y="182" fill="#94a3b8" font-size="10" text-anchor="middle">peak ≤ transient · settled ≤ quasi-static</text>
+        </g>
+      </svg>
+      </div>
+      <p class="cap">Measure at the worst-case points found in the risk assessment — highest speed, stiffest backing, smallest contact area — and file the traces in the technical documentation.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Paper trail to CE / UKCA</div>
+      <p class="body">The integrator compiles the <strong>technical file</strong>: risk assessment, safety-function list with PLr vs PL-achieved (SISTEMA calculation), scanner field drawings with 13855 math, PFL measurement reports, functional test protocol for <em>every</em> safety function, operator instructions and training records. Then a Declaration of Conformity under the <span class="hl2">Machinery Regulation (EU) 2023/1230</span> (fully applying from Jan 2027, replacing the 2006/42/EC Directive) — and the cell, not the arm, gets its CE mark. <span class="hl">Any later change to speed, tool, payload or layout reopens the assessment.</span></p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 10 ===== -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 10</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Quiz</h2>
+    <p class="page-sub">The whole module in one card — then the ways real collaborative cells go wrong.</p>
+
+    <div class="card">
+      <div class="label">60-second recap</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Safety = application,</strong> not robot. ISO 10218-1 certifies the arm, 10218-2 + your risk assessment certify the cell.</div></li>
+        <li><span class="num">2</span><div><strong>Four methods:</strong> monitored stop, hand guiding, SSM (keep distance ≥ Sp = vH·(Tr+Ts) + robot travel + C + Z) and PFL (keep contact below body-region force/pressure limits).</div></li>
+        <li><span class="num">3</span><div><strong>PFL math:</strong> v_max = F_max/√(μ·k), with μ the reduced mass — blunt tools and low effective mass buy you speed.</div></li>
+        <li><span class="num">4</span><div><strong>Functional safety:</strong> cobot protective functions are typically PL d Cat 3, built from certified drive functions (STO, SS1/SS2, SLS, SLP, SLT).</div></li>
+        <li><span class="num">5</span><div><strong>Validate:</strong> 13855 mounting math, force-pressure measurements, functional test of every safety function — documented in the technical file.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">⚠️ How collaborative cells fail audits (and hurt people)</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">🔪 "Safe robot, deadly tool"</div><p>Certified PFL arm fitted with sharp gripper/workpiece — pressure limits blown by tiny contact area. Fix: blunt edges, padding, recalculate pressure, not just force.</p></div>
+        <div class="fail"><div class="ft">📏 Stopping data ignored</div><p>Sp computed with marketing speed instead of measured stopping time at full payload/extension. Fix: use the 10218-1 stopping-performance tables, verify with test stops.</p></div>
+        <div class="fail"><div class="ft">🗜️ Clamping point missed</div><p>Arm can pin a hand between tool and fixture — quasi-static limits apply, not transient; head-height clamping is outright forbidden. Fix: layout clearances ≥ 500 mm or gaps ≤ 120 mm.</p></div>
+        <div class="fail"><div class="ft">🔁 Auto-restart trap</div><p>Robot resumes the instant the scanner clears while the operator is still leaning in from an unmonitored side. Fix: full-coverage zoning + manual reset located with view of the cell.</p></div>
+        <div class="fail"><div class="ft">🧾 Paper PL</div><p>"PL d" claimed but e-stop wired through a standard PLC output, no cross-monitoring, CCF ignored. Fix: SISTEMA calc per function, dual-channel wiring, proof-test schedule.</p></div>
+        <div class="fail"><div class="ft">🛠️ Change without reassessment</div><p>Heavier gripper or +30% speed tweak after commissioning silently invalidates PFL measurements and Sp. Fix: management-of-change gate on any safety-relevant parameter.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check 1</div>
+      <p class="quiz-q">Why did ISO 10218:2025 drop the term "collaborative robot"?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">Because safety is a property of the whole APPLICATION — robot + tool + workpiece + layout + task. A force-limited arm with a sharp tool is dangerous; a big robot with proper SSM can be collaborative. Only the application, after risk assessment, can be called safe.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check 2</div>
+      <p class="quiz-q">An SSM cell has Tr = 0.2 s, Ts = 0.5 s, robot approaching at 1500 mm/s. Roughly what does the human contribute to Sp?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">Sh = vH·(Tr+Ts) = 1600 × 0.7 = 1120 mm — before adding any robot travel or C. The human term usually dominates: reaction and stopping time are the levers that shrink zones, not sensor range.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check 3</div>
+      <p class="quiz-q">Quasi-static vs transient contact — which limits are higher and why?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">Transient limits are 2× higher. In free impact the body part recoils and shares the energy over a short (&lt;0.5 s) event; in clamping the force persists and the body cannot escape — so clamping gets the stricter base values, and for skull/face/throat it is not permitted at all.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check 4</div>
+      <p class="quiz-q">What does "PL d, Category 3" promise about a cobot's protective stop?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">Probability of dangerous failure between 10⁻⁷ and 10⁻⁶ per hour, achieved with a single-fault-tolerant dual-channel architecture: one fault does not lose the stop function and is detected where practicable (cross-monitored channels, adequate MTTFd, DC and CCF score).</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check 5</div>
+      <p class="quiz-q">Doubling a PFL robot's effective mass does what to its allowed speed (same body region)?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">v_max = F/√(μk). For mR ≫ mH the reduced mass μ ≈ mH (hand: 0.6 kg), so doubling robot mass barely changes hand-contact speed — but for heavy body regions (chest, mH = 40 kg) μ grows strongly with mR and v_max falls roughly with 1/√μ. Where you hit matters as much as how heavy you are.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check 6</div>
+      <p class="quiz-q">A 30 mm-resolution light curtain guards a press-brake robot with total stop time 0.4 s. Minimum mounting distance?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">S = K·T + C = 1600 × 0.4 + 8·(30−14) = 640 + 128 = 768 mm from the nearest hazard point (plus checking reach-over/under paths separately).</span></div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"The cobot isn't safe.<br>The APPLICATION is —<br>prove it: distance or force."</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Where to go next</div>
+      <p class="body">Kinematics and singularities behind those speed spikes → <a href="A15_Robotics_ROS2_Deep_Dive.html" style="color:var(--accent-soft)">A15 Robotics &amp; ROS 2</a>. Grip forces and tool design → <a href="A17_End_Effectors_Deep_Dive.html" style="color:var(--accent-soft)">A17 End-Effectors</a>. The Industry 5.0 human-centric context → <a href="A33_Industry_4_5_Deep_Dive.html" style="color:var(--accent-soft)">A33 Industry 4.0 &amp; 5.0</a>.</p>
+    </div>
+  </section>
+
+  <div class="footer">
+    ⚙️ Advanced Micro-Learning · Cobot Safety — ISO 10218 &amp; ISO/TS 15066 · Deep Dive A35<br>
+    Standards: ISO 10218-1/-2:2025 · ISO/TS 15066:2016 · ISO 12100 · ISO 13849-1 · ISO 13855 · IEC 61800-5-2 · ISO 14119 — always verify against the current published editions.
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // Demo 1 — SSM protective separation distance
+  var a=document.getElementById('d1a'), b=document.getElementById('d1b'), c=document.getElementById('d1c'), d=document.getElementById('d1d');
+  var av=document.getElementById('d1av'), bv=document.getElementById('d1bv'), cv=document.getElementById('d1cv'), dv=document.getElementById('d1dv');
+  var out=document.getElementById('d1out');
+  function u1(){
+    var vr=+a.value, tr=+b.value, ts=+c.value, cz=+d.value, vh=1600;
+    var sh=vh*(tr+ts), sr=vr*tr, ss=vr*ts/2;
+    var sp=sh+sr+ss+cz;
+    av.textContent=vr+' mm/s'; bv.textContent=tr.toFixed(2)+' s'; cv.textContent=ts.toFixed(2)+' s'; dv.textContent=cz+' mm';
+    out.innerHTML='Sh (human) = 1600·'+(tr+ts).toFixed(2)+' = <b>'+sh.toFixed(0)+' mm</b><br>'+
+      'Sr + Ss (robot) = '+sr.toFixed(0)+' + '+ss.toFixed(0)+' = <b>'+(sr+ss).toFixed(0)+' mm</b><br>'+
+      'C + Z = <b>'+cz+' mm</b><br>'+
+      '<span style="color:#fbbf24">Sp = '+(sp/1000).toFixed(2)+' m</span> — scanner protective field radius'+
+      (sp>2500?'<br><span style="color:#f87171">→ huge zone: cut Ts (lighter payload, SS1 tuning) before buying floor space</span>':'');
+  }
+  [a,b,c,d].forEach(function(x){x.addEventListener('input',u1);}); u1();
+
+  // Demo 2 — PFL hand-contact speed limit
+  var m=document.getElementById('d2a'), l=document.getElementById('d2b'), t=document.getElementById('d2c');
+  var mv=document.getElementById('d2av'), lv=document.getElementById('d2bv'), tv=document.getElementById('d2cv');
+  var out2=document.getElementById('d2out');
+  function u2(){
+    var M=+m.value, mL=+l.value, trans=+t.value;
+    var mH=0.6, k=75000;              // N/m (75 N/mm), hand/finger
+    var F=trans?280:140;
+    var mR=M/2+mL;
+    var mu=1/(1/mH+1/mR);
+    var vmax=F/Math.sqrt(mu*k);       // m/s
+    mv.textContent=M+' kg'; lv.textContent=mL.toFixed(1)+' kg';
+    tv.textContent=trans?'transient (280 N)':'quasi-static (140 N)';
+    out2.innerHTML='effective robot mass mR = M/2 + mL = <b>'+mR.toFixed(1)+' kg</b><br>'+
+      'reduced mass μ = (1/0.6 + 1/'+mR.toFixed(1)+')⁻¹ = <b>'+mu.toFixed(3)+' kg</b><br>'+
+      '<span style="color:#fbbf24">v_max = '+F+' / √(μ·75000) = '+(vmax*1000).toFixed(0)+' mm/s</span>'+
+      (vmax<0.25?'<br><span style="color:#f87171">→ painfully slow: reduce mass or pad the tool (raise area, lower pressure)</span>':'');
+  }
+  [m,l,t].forEach(function(x){x.addEventListener('input',u2);}); u2();
+
+  // Quiz reveal
+  document.querySelectorAll('.quiz-answer').forEach(function(q){
+    q.addEventListener('click', function(){ q.classList.add('revealed'); });
+  });
+})();
+</script>
+</body>
+</html>

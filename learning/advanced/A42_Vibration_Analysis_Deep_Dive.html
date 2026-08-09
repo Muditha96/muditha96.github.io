@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Vibration Analysis &amp; Diagnostics · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #facc15;       /* signal yellow */
+    --accent-soft: #fde68a;
+    --accent-2: #38bdf8;     /* spectrum sky */
+    --accent-3: #f472b6;     /* fault pink */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(250,204,21,0.12), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(56,189,248,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(250,204,21,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(250,204,21,0.14), rgba(56,189,248,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(250,204,21,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-2)!important; } .c-sky .big{color:var(--accent-2)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #facc15, #ca8a04); color: #241a02; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(36,26,2,0.75); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(250,204,21,0.10); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:110px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Thermal Imaging &amp; Condition Monitoring · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">📈</span>Vibration Analysis &amp; Diagnostics</h1>
+  <p class="hero-sub">Every rotating machine writes its health into vibration long before it fails. This module teaches you to read that signal: the maths of displacement, velocity and acceleration, FFT setup that actually resolves faults, the classic spectrum signatures, bearing defect frequencies, envelope analysis, ISO 20816 severity, and the balancing &amp; alignment work that fixes what you find.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>No micro card yet — a full advanced module. Related:</span>
+    <a href="A19_Bearings_Deep_Dive.html">A19 Bearings →</a>
+    <a href="A41_Thermal_Imaging_Deep_Dive.html">A41 Thermal Imaging →</a>
+    <a href="A23_TPM_Deep_Dive.html">A23 TPM →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · Why Vibration?</a>
+    <a href="#p2">2 · The Maths of Motion</a>
+    <a href="#p3">3 · Sensors &amp; Mounting</a>
+    <a href="#p4">4 · FFT &amp; Setup</a>
+    <a href="#p5">5 · Signatures I</a>
+    <a href="#p6">6 · Signatures II · Bearings</a>
+    <a href="#p7">7 · Envelope &amp; Advanced</a>
+    <a href="#p8">8 · ISO Severity</a>
+    <a href="#p9">9 · Balancing &amp; Alignment</a>
+    <a href="#p10">10 · Recap &amp; Quiz</a>
+    <a href="#p11">11 · Worked Examples</a>
+    <a href="#p12">12 · Problem Set</a>
+    <a href="#p13">13 · Derivations &amp; Traps</a>
+    <a href="#p14">14 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ============ PAGE 1 ============ -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 14 · Foundations</span>
+    <h2 class="page-title">Why Vibration Is the Earliest Warning</h2>
+    <p class="page-sub">On the P-F curve, vibration speaks first — months before heat, noise or smoke.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead">Vibration analysis is the measurement and interpretation of a machine's oscillatory motion to detect, diagnose and trend developing faults — <span class="hl">which fault</span>, <span class="hl2">how severe</span>, and <span class="hl3">how fast it is progressing</span>.</p>
+      <p class="body">Every rotating element — shaft, rotor, bearing, gear, impeller — generates forces at frequencies fixed by its geometry and speed. A fault changes those forces in a characteristic way. Because <strong>frequency identifies the source</strong> and <strong>amplitude scales with severity</strong>, a vibration spectrum is a fingerprint: unbalance cannot masquerade as a bearing defect, and a gear problem cannot hide at shaft speed.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The P-F Curve — where vibration sits</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="pf" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#4ade80"/><stop offset="0.55" stop-color="#facc15"/><stop offset="1" stop-color="#f87171"/>
+            </linearGradient>
+          </defs>
+          <line x1="50" y1="250" x2="670" y2="250" stroke="#334155" stroke-width="2"/>
+          <line x1="50" y1="30" x2="50" y2="250" stroke="#334155" stroke-width="2"/>
+          <text x="360" y="285" fill="#94a3b8" font-size="14" text-anchor="middle">time →</text>
+          <text x="26" y="140" fill="#94a3b8" font-size="14" transform="rotate(-90 26 140)" text-anchor="middle">condition</text>
+          <path d="M 60 60 Q 300 70 430 120 Q 560 175 640 245" fill="none" stroke="url(#pf)" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="330" cy="88" r="7" fill="#facc15"/>
+          <text x="330" y="66" fill="#fde68a" font-size="13" font-weight="700" text-anchor="middle">P · vibration detects</text>
+          <circle cx="455" cy="132" r="6" fill="#fb923c"/>
+          <text x="463" y="118" fill="#fb923c" font-size="12" text-anchor="middle">oil debris</text>
+          <circle cx="520" cy="160" r="6" fill="#f472b6"/>
+          <text x="528" y="147" fill="#f9a8d4" font-size="12" text-anchor="middle">heat (A41)</text>
+          <circle cx="575" cy="192" r="6" fill="#f87171"/>
+          <text x="583" y="179" fill="#fca5a5" font-size="12" text-anchor="middle">audible</text>
+          <circle cx="640" cy="245" r="8" fill="#f87171"/>
+          <text x="628" y="235" fill="#f87171" font-size="13" font-weight="700" text-anchor="end">F · functional failure</text>
+          <line x1="330" y1="95" x2="330" y2="250" stroke="#facc15" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.5"/>
+          <line x1="640" y1="245" x2="640" y2="250" stroke="#f87171" stroke-width="1.5" opacity="0.6"/>
+          <path d="M 335 240 H 630" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrpf)"/>
+          <defs><marker id="arrpf" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#94a3b8"/></marker></defs>
+          <text x="480" y="230" fill="#e2e8f0" font-size="13" font-weight="600" text-anchor="middle">P-F interval = planning time</text>
+        </svg>
+        <div class="cap">The P-F curve: a bearing defect is measurable in vibration (P) months before failure (F). Each later symptom shortens your planning window — vibration buys the longest lead time of any CM technology.</div>
+      </div>
+      <p class="body">This is why vibration is the <strong>backbone of predictive maintenance</strong> (→ <a href="A23_TPM_Deep_Dive.html" style="color:var(--accent-soft)">A23 TPM</a>): the point P where a fault first becomes detectable arrives earliest in the vibration spectrum. Thermal imaging (→ <a href="A41_Thermal_Imaging_Deep_Dive.html" style="color:var(--accent-soft)">A41</a>) and oil analysis confirm and refine; vibration finds.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-sky"><div class="big">Hz</div><h4>Frequency = source</h4><p>Which component is generating the force — geometry &amp; speed fix it.</p></div>
+      <div class="mini"><div class="big">mm/s</div><h4>Amplitude = severity</h4><p>How much energy the fault is putting into the structure.</p></div>
+      <div class="mini c-pink"><div class="big">trend</div><h4>Rate = urgency</h4><p>How fast amplitude grows tells you when to act.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 ============ -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 14 · Physics</span>
+    <h2 class="page-title">Displacement, Velocity, Acceleration</h2>
+    <p class="page-sub">One motion, three views — and the frequency decides which one you should measure.</p>
+
+    <div class="card">
+      <div class="label">The core relations</div>
+      <p class="lead">For sinusoidal motion at frequency <span class="hl">f</span>, the three amplitudes are locked together by <span class="hl">ω = 2πf</span>: each differentiation multiplies by ω and advances phase by 90°.</p>
+      <div class="eqn">x(t) = <b>X</b> sin(ωt)              displacement  [µm]
+v(t) = <b>ωX</b> cos(ωt)             velocity      [mm/s]   (leads x by 90°)
+a(t) = <b>−ω²X</b> sin(ωt)           acceleration  [m/s² or g]  (leads x by 180°)
+
+peak relations:  V = ωX    A = ωV = ω²X      with ω = 2πf</div>
+      <p class="body">The ω² term is the whole story: at <strong>low frequency</strong>, displacement is large but acceleration tiny; at <strong>high frequency</strong>, a microscopic displacement produces violent acceleration. A 100&nbsp;µm wobble at 10&nbsp;Hz is only 0.4&nbsp;g — but 1&nbsp;µm at 5&nbsp;kHz is ~100&nbsp;g. That is why bearing defects (high f) live in acceleration and shaft problems (low f) in displacement or velocity.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Which parameter for which band</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+          <line x1="50" y1="220" x2="670" y2="220" stroke="#334155" stroke-width="2"/>
+          <text x="360" y="250" fill="#94a3b8" font-size="13" text-anchor="middle">frequency (log) →</text>
+          <path d="M 60 60 L 300 200" stroke="#60a5fa" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <text x="95" y="52" fill="#60a5fa" font-size="13" font-weight="700">displacement (∝1/ω²)</text>
+          <path d="M 60 150 Q 340 100 660 150" stroke="#facc15" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <text x="330" y="92" fill="#fde68a" font-size="13" font-weight="700" text-anchor="middle">velocity — flat over machine band</text>
+          <path d="M 400 200 L 660 55" stroke="#f472b6" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <text x="612" y="46" fill="#f9a8d4" font-size="13" font-weight="700" text-anchor="middle">acceleration (∝ω²)</text>
+          <rect x="60" y="222" width="130" height="16" rx="3" fill="#60a5fa" opacity="0.35"/>
+          <text x="125" y="234" fill="#dbeafe" font-size="10.5" text-anchor="middle">&lt;10 Hz · shafts, structures</text>
+          <rect x="195" y="222" width="230" height="16" rx="3" fill="#facc15" opacity="0.35"/>
+          <text x="310" y="234" fill="#fef9c3" font-size="10.5" text-anchor="middle">10–1000 Hz · unbalance, misalignment, looseness</text>
+          <rect x="430" y="222" width="235" height="16" rx="3" fill="#f472b6" opacity="0.35"/>
+          <text x="547" y="234" fill="#fce7f3" font-size="10.5" text-anchor="middle">&gt;1 kHz · bearings, gears</text>
+        </svg>
+        <div class="cap">Parameter selection by band. Velocity is the general-purpose severity parameter because typical machine faults (10–1000 Hz) produce roughly constant velocity for equal damage energy — which is why ISO 20816 limits are in mm/s RMS.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Amplitude descriptors</div>
+      <div class="eqn">RMS   = 0.707 × peak      (sine only!)
+peak-to-peak = 2 × peak   (used for displacement / prox probes)
+<b>crest factor CF = peak / RMS</b>   — sine: 1.414 · impacting bearing: 3…&gt;5</div>
+      <p class="body"><strong>RMS</strong> measures energy content and is the ISO severity descriptor. <strong>Peak</strong> responds to short impacts that barely move RMS — so a rising <span class="hl">crest factor</span> with steady RMS is a classic early-bearing-damage flag: impacts have begun, but the energy is still small. When RMS finally rises and CF falls back, damage has spread — the spikes have merged into broadband roughness.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-blue"><div class="big">µm p-p</div><h4>Displacement</h4><p>Low-f shaft motion; journal bearings; proximity probes.</p></div>
+      <div class="mini"><div class="big">mm/s RMS</div><h4>Velocity</h4><p>General machine health 10–1000 Hz. ISO 20816 currency.</p></div>
+      <div class="mini c-pink"><div class="big">g</div><h4>Acceleration</h4><p>Bearings, gear mesh, blade pass — everything above ~1 kHz.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 ============ -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 14 · Measurement</span>
+    <h2 class="page-title">Sensors &amp; Mounting</h2>
+    <p class="page-sub">The best analyser cannot fix a bad measurement point — mounting sets your usable bandwidth.</p>
+
+    <div class="card">
+      <div class="label">The workhorse: piezoelectric accelerometer</div>
+      <p class="lead">A seismic mass on a piezoelectric crystal: acceleration → force (F = ma) → charge. <span class="hl">IEPE / ICP</span> types integrate a charge amplifier and run on a 2–20&nbsp;mA constant-current supply over the same coax that carries the signal.</p>
+      <p class="body">Typical general-purpose spec: 100&nbsp;mV/g sensitivity, ±80&nbsp;g range, 0.5&nbsp;Hz–10&nbsp;kHz (±3&nbsp;dB), mounted resonance ~25&nbsp;kHz. Below its resonance the response is flat; the usable band is roughly <strong>⅓ of the mounted resonance frequency</strong>. Sensor choice trades sensitivity against bandwidth: 500&nbsp;mV/g seismic units for low-speed machines, 10&nbsp;mV/g for gearboxes with high-g content.</p>
+      <div class="eqn">sensor family:
+<b>accelerometer</b> (IEPE)   casing vibration — 95% of CM work
+<b>velocity sensor</b>        self-generating coil-magnet; rugged, 10–1500 Hz, no power
+<b>proximity probe</b>        eddy-current, non-contact <span class="v2">shaft relative</span> displacement —
+                       journal-bearing turbomachines (API 670)</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Mounting — the hidden filter</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+          <rect x="40" y="180" width="620" height="30" rx="4" fill="#2b3650"/>
+          <text x="350" y="201" fill="#94a3b8" font-size="12" text-anchor="middle">machine surface</text>
+          <g>
+            <rect x="70" y="130" width="70" height="50" rx="6" fill="#facc15" opacity="0.85"/>
+            <rect x="97" y="112" width="16" height="18" fill="#fde68a"/>
+            <text x="105" y="105" fill="#fde68a" font-size="12" font-weight="700" text-anchor="middle">stud</text>
+            <text x="105" y="228" fill="#4ade80" font-size="12" font-weight="700" text-anchor="middle">~⅓·25 kHz? No — sets ~10+ kHz usable</text>
+          </g>
+          <g>
+            <rect x="250" y="130" width="70" height="50" rx="6" fill="#38bdf8" opacity="0.8"/>
+            <rect x="250" y="172" width="70" height="8" fill="#0ea5e9"/>
+            <text x="285" y="105" fill="#7dd3fc" font-size="12" font-weight="700" text-anchor="middle">adhesive pad</text>
+            <text x="285" y="228" fill="#7dd3fc" font-size="12" text-anchor="middle">~6–8 kHz</text>
+          </g>
+          <g>
+            <rect x="430" y="130" width="70" height="50" rx="6" fill="#c084fc" opacity="0.8"/>
+            <ellipse cx="465" cy="180" rx="40" ry="9" fill="#a855f7" opacity="0.7"/>
+            <text x="465" y="105" fill="#d8b4fe" font-size="12" font-weight="700" text-anchor="middle">2-pole magnet</text>
+            <text x="465" y="228" fill="#d8b4fe" font-size="12" text-anchor="middle">~2–5 kHz</text>
+          </g>
+          <g>
+            <rect x="590" y="130" width="40" height="50" rx="6" fill="#f87171" opacity="0.8"/>
+            <rect x="602" y="60" width="16" height="70" rx="6" fill="#f87171" opacity="0.5"/>
+            <text x="610" y="50" fill="#fca5a5" font-size="12" font-weight="700" text-anchor="middle">stinger</text>
+            <text x="612" y="228" fill="#fca5a5" font-size="12" text-anchor="middle">~0.5–1 kHz</text>
+          </g>
+        </svg>
+        <div class="cap">Mounting resonance falls as coupling stiffness drops: stud &gt; adhesive &gt; magnet &gt; hand-held probe. Above ~⅓ of the mounting resonance, amplitude readings are unreliable — a hand-held stinger cannot see bearing frequencies.</div>
+      </div>
+      <p class="body"><strong>Rules that survive the plant floor:</strong> same point, same direction, every survey (mark it with a paint dot or install pads); measure <span class="hl">horizontal, vertical and axial</span> at each bearing; load the machine consistently; flat, clean, bare-metal contact; never trust a magnet mount above ~2&nbsp;kHz on rough paint.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">H·V·A</div><h4>3 directions</h4><p>Horizontal = unbalance, vertical = looseness/structure, axial = misalignment &amp; thrust.</p></div>
+      <div class="mini c-sky"><div class="big">⅓ f<sub>m</sub></div><h4>Usable band</h4><p>Stay below one-third of the mounted resonance for flat response.</p></div>
+      <div class="mini c-purp"><div class="big">API 670</div><h4>Turbomachinery</h4><p>Journal-bearing machines need shaft-relative prox probes — casing g&#39;s miss oil-film problems.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 ============ -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 14 · Signal Processing</span>
+    <h2 class="page-title">The FFT &amp; Analyser Setup</h2>
+    <p class="page-sub">The FFT turns time waveform into spectrum — but only a correct setup makes the spectrum honest.</p>
+
+    <div class="card">
+      <div class="label">Time domain → frequency domain</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+          <rect x="30" y="30" width="280" height="200" rx="12" fill="#11161f" stroke="#334155"/>
+          <text x="170" y="52" fill="#94a3b8" font-size="12" text-anchor="middle">TIME WAVEFORM — everything mixed</text>
+          <path d="M 45 140 Q 60 80 75 140 Q 90 200 105 140 Q 112 105 120 128 Q 128 152 137 128 Q 145 105 153 140 Q 168 200 183 140 Q 198 80 213 140 Q 221 165 228 148 Q 236 130 244 152 Q 252 172 260 148 Q 275 95 295 140"
+                fill="none" stroke="#facc15" stroke-width="2.5"/>
+          <path d="M 355 128 L 385 128" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrf)"/>
+          <defs><marker id="arrf" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#38bdf8"/></marker></defs>
+          <text x="370" y="115" fill="#7dd3fc" font-size="13" font-weight="800" text-anchor="middle">FFT</text>
+          <rect x="400" y="30" width="280" height="200" rx="12" fill="#11161f" stroke="#334155"/>
+          <text x="540" y="52" fill="#94a3b8" font-size="12" text-anchor="middle">SPECTRUM — sources separated</text>
+          <line x1="420" y1="210" x2="665" y2="210" stroke="#334155" stroke-width="2"/>
+          <rect x="440" y="90" width="9" height="120" rx="2" fill="#facc15"/>
+          <text x="444" y="82" fill="#fde68a" font-size="11" text-anchor="middle">1×</text>
+          <rect x="475" y="150" width="9" height="60" rx="2" fill="#facc15" opacity="0.8"/>
+          <text x="479" y="142" fill="#fde68a" font-size="11" text-anchor="middle">2×</text>
+          <rect x="510" y="185" width="9" height="25" rx="2" fill="#facc15" opacity="0.6"/>
+          <rect x="566" y="160" width="7" height="50" rx="2" fill="#f472b6"/>
+          <text x="569" y="152" fill="#f9a8d4" font-size="11" text-anchor="middle">BPFO</text>
+          <rect x="612" y="130" width="7" height="80" rx="2" fill="#38bdf8"/>
+          <text x="615" y="122" fill="#7dd3fc" font-size="11" text-anchor="middle">GMF</text>
+        </svg>
+        <div class="cap">One accelerometer signal contains every source at once. The FFT separates them by frequency so each component can be identified and trended individually.</div>
+      </div>
+      <div class="eqn"><b>Δf = Fmax / LOR</b>          bin width = resolution
+<b>T  = LOR / Fmax</b>          time to acquire ONE average
+N_samples = 2.56 × LOR     (analysers sample at 2.56×Fmax for anti-alias margin)</div>
+    </div>
+
+    <div class="card">
+      <div class="label">The setup decisions that matter</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Fmax — set by what you must see.</strong> Rule of thumb: ≥ 3.25× the highest fault frequency of interest (gear mesh + sidebands, or ~50× shaft speed for bearing work).</div></li>
+        <li><span class="num">2</span><div><strong>LOR — set by what you must separate.</strong> To split two peaks Δ apart you need Δf ≤ Δ/2, ideally Δ/4. Sidebands at ±1× around GMF on a slow shaft demand high LOR.</div></li>
+        <li><span class="num">3</span><div><strong>Window: Hanning</strong> for routine CM (amplitude error ≤ ~16%, corrected by the analyser); flat-top for calibration accuracy; uniform only for true transients/bump tests.</div></li>
+        <li><span class="num">4</span><div><strong>Averaging: 4–8 linear averages</strong> stabilises the spectrum against random content; overlap 50% cuts acquisition time.</div></li>
+        <li><span class="num">5</span><div><strong>Anti-aliasing is non-negotiable</strong> — the analyser low-pass filters above Fmax before sampling (Nyquist: f_s &gt; 2·f_max). Aliased peaks appear at false frequencies and cannot be diagnosed.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">🧪 Interactive — FFT setup calculator</div>
+      <div class="demo">
+        <div class="demo-row"><span>Fmax</span><b><span id="fmaxV">1000</span> Hz</b></div>
+        <input type="range" id="fmaxR" min="200" max="10000" step="200" value="1000">
+        <div class="demo-row"><span>Lines of resolution (LOR)</span><b><span id="lorV">1600</span></b></div>
+        <input type="range" id="lorR" min="400" max="12800" step="400" value="1600">
+        <div class="demo-row"><span>Averages (50% overlap)</span><b><span id="avgV">4</span></b></div>
+        <input type="range" id="avgR" min="1" max="16" step="1" value="4">
+        <div class="demo-out" id="fftOut"></div>
+      </div>
+      <p class="body">Feel the trade: doubling LOR halves Δf but doubles acquisition time. On a route with 300 points, 10&nbsp;s per point is 50 minutes of walking time — resolution is never free.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 ============ -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 14 · Diagnosis</span>
+    <h2 class="page-title">Fault Signatures I — The Synchronous Family</h2>
+    <p class="page-sub">Faults tied to shaft speed: unbalance, misalignment, looseness, bent shaft, resonance.</p>
+
+    <div class="card">
+      <div class="label">Reading a spectrum in orders</div>
+      <p class="lead">Analysts think in <span class="hl">orders</span> — multiples of running speed (1× = shaft frequency). Synchronous faults sit exactly on integer orders; bearing and gear faults do not. Normalising to orders makes the pattern speed-independent.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 430" xmlns="http://www.w3.org/2000/svg">
+          <!-- unbalance -->
+          <g>
+            <rect x="30" y="20" width="310" height="180" rx="12" fill="#11161f" stroke="#334155"/>
+            <text x="185" y="42" fill="#fde68a" font-size="13" font-weight="700" text-anchor="middle">UNBALANCE — dominant 1×, radial</text>
+            <line x1="50" y1="175" x2="320" y2="175" stroke="#334155" stroke-width="2"/>
+            <rect x="85" y="60" width="10" height="115" rx="2" fill="#facc15"/>
+            <text x="90" y="56" fill="#fde68a" font-size="11" text-anchor="middle">1×</text>
+            <rect x="150" y="158" width="10" height="17" rx="2" fill="#facc15" opacity="0.5"/>
+            <rect x="215" y="164" width="10" height="11" rx="2" fill="#facc15" opacity="0.4"/>
+            <text x="185" y="193" fill="#64748b" font-size="10.5" text-anchor="middle">clean 1×, low harmonics · smooth sinusoidal waveform</text>
+          </g>
+          <!-- misalignment -->
+          <g>
+            <rect x="360" y="20" width="310" height="180" rx="12" fill="#11161f" stroke="#334155"/>
+            <text x="515" y="42" fill="#7dd3fc" font-size="13" font-weight="700" text-anchor="middle">MISALIGNMENT — strong 2×, high axial</text>
+            <line x1="380" y1="175" x2="650" y2="175" stroke="#334155" stroke-width="2"/>
+            <rect x="415" y="105" width="10" height="70" rx="2" fill="#38bdf8"/>
+            <text x="420" y="100" fill="#7dd3fc" font-size="11" text-anchor="middle">1×</text>
+            <rect x="480" y="70" width="10" height="105" rx="2" fill="#38bdf8"/>
+            <text x="485" y="64" fill="#7dd3fc" font-size="11" text-anchor="middle">2×</text>
+            <rect x="545" y="140" width="10" height="35" rx="2" fill="#38bdf8" opacity="0.7"/>
+            <text x="550" y="134" fill="#7dd3fc" font-size="11" text-anchor="middle">3×</text>
+            <text x="515" y="193" fill="#64748b" font-size="10.5" text-anchor="middle">2× ≥ 50% of 1× + axial ≥ 50% of radial ⇒ suspect coupling</text>
+          </g>
+          <!-- looseness -->
+          <g>
+            <rect x="30" y="225" width="310" height="180" rx="12" fill="#11161f" stroke="#334155"/>
+            <text x="185" y="247" fill="#d8b4fe" font-size="13" font-weight="700" text-anchor="middle">LOOSENESS — harmonic forest</text>
+            <line x1="50" y1="380" x2="320" y2="380" stroke="#334155" stroke-width="2"/>
+            <rect x="70" y="290" width="9" height="90" fill="#c084fc"/>
+            <rect x="102" y="305" width="9" height="75" fill="#c084fc" opacity="0.9"/>
+            <rect x="134" y="320" width="9" height="60" fill="#c084fc" opacity="0.85"/>
+            <rect x="166" y="318" width="9" height="62" fill="#c084fc" opacity="0.8"/>
+            <rect x="198" y="335" width="9" height="45" fill="#c084fc" opacity="0.75"/>
+            <rect x="230" y="345" width="9" height="35" fill="#c084fc" opacity="0.7"/>
+            <rect x="262" y="352" width="9" height="28" fill="#c084fc" opacity="0.65"/>
+            <rect x="86" y="352" width="7" height="28" fill="#f472b6" opacity="0.8"/>
+            <text x="90" y="347" fill="#f9a8d4" font-size="10" text-anchor="middle">½×</text>
+            <text x="185" y="398" fill="#64748b" font-size="10.5" text-anchor="middle">many 1× harmonics, sometimes ½× orders · clipped waveform</text>
+          </g>
+          <!-- resonance -->
+          <g>
+            <rect x="360" y="225" width="310" height="180" rx="12" fill="#11161f" stroke="#334155"/>
+            <text x="515" y="247" fill="#fca5a5" font-size="13" font-weight="700" text-anchor="middle">RESONANCE — the amplifier</text>
+            <line x1="380" y1="380" x2="650" y2="380" stroke="#334155" stroke-width="2"/>
+            <path d="M 390 372 Q 470 368 500 330 Q 515 260 530 330 Q 560 368 640 372" fill="none" stroke="#f87171" stroke-width="3"/>
+            <rect x="510" y="285" width="10" height="95" rx="2" fill="#facc15" opacity="0.9"/>
+            <text x="515" y="278" fill="#fde68a" font-size="11" text-anchor="middle">1× on f_n!</text>
+            <text x="515" y="398" fill="#64748b" font-size="10.5" text-anchor="middle">any force near f_n is amplified ×Q · phase shifts 180° through it</text>
+          </g>
+        </svg>
+        <div class="cap">The four classic synchronous signatures. Confirm with direction (radial vs axial), phase, and the time waveform — never from one peak alone.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Discriminators the exam loves</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Fault</th><th>Spectrum</th><th>Direction</th><th>Phase clue</th></tr>
+        <tr><td><b>Unbalance</b></td><td>Dominant 1×, low harmonics</td><td>Radial (H≈V on rigid mounts)</td><td>Stable 1× phase; H–V ≈ 90°</td></tr>
+        <tr><td><b>Angular misalignment</b></td><td>1× + strong 2×</td><td><b>Axial</b> high</td><td>180° across coupling (axial)</td></tr>
+        <tr><td><b>Parallel misalignment</b></td><td>2× dominant radial</td><td>Radial</td><td>180° across coupling (radial)</td></tr>
+        <tr><td><b>Bent shaft</b></td><td>1× (+2× if bend at coupling)</td><td>High <b>axial 1×</b></td><td>180° axial across the bearing</td></tr>
+        <tr><td><b>Structural looseness</b></td><td>1× harmonics series</td><td>Vertical &gt; horizontal</td><td>Erratic; differs across joint</td></tr>
+        <tr><td><b>Rotating looseness</b></td><td>½× &amp; 1× harmonic forest</td><td>Radial</td><td>Unstable phase</td></tr>
+        <tr><td><b>Resonance</b></td><td>One order amplified; broad skirt</td><td>One direction only</td><td>90° at f_n, 180° through</td></tr>
+      </table></div>
+      <p class="body"><strong>Resonance test:</strong> a bump test (uniform window, peak-hold) reveals f_n with the machine off; a coast-down shows the 1× peak swelling as it sweeps through f_n. Fix by shifting stiffness/mass (move f_n) or slowing the exciter — not by balancing harder. Separation margin: keep forcing frequencies ≥ 15–20% away from f_n.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 ============ -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 14 · Diagnosis</span>
+    <h2 class="page-title">Fault Signatures II — Bearings, Gears, Motors</h2>
+    <p class="page-sub">Non-synchronous frequencies: the geometry-locked tones that name the failing part.</p>
+
+    <div class="card">
+      <div class="label">Rolling-bearing defect frequencies</div>
+      <p class="lead">Each defect location generates a tone fixed by bearing geometry — <span class="hl">n</span> rolling elements, ball diameter <span class="hl">B<sub>d</sub></span>, pitch diameter <span class="hl">P<sub>d</sub></span>, contact angle <span class="hl">θ</span>, shaft speed <span class="hl">f<sub>r</sub></span> (→ <a href="A19_Bearings_Deep_Dive.html" style="color:var(--accent-soft)">A19 Bearings</a>).</p>
+      <div class="eqn">FTF  = (f<b>r</b>/2)·(1 − (B<b>d</b>/P<b>d</b>)cosθ)          cage        ≈ 0.38–0.45×
+BPFO = (n·f<b>r</b>/2)·(1 − (B<b>d</b>/P<b>d</b>)cosθ)        outer race  ≈ 0.4×n
+BPFI = (n·f<b>r</b>/2)·(1 + (B<b>d</b>/P<b>d</b>)cosθ)        inner race  ≈ 0.6×n
+BSF  = (f<b>r</b>·P<b>d</b>/2B<b>d</b>)·(1 − (B<b>d</b>/P<b>d</b>)²cos²θ)   ball spin (×2 = ball defect)</div>
+      <p class="body">Key tell: these are <strong>never integer orders</strong> (e.g. 3.58×, 5.42×). BPFI tones carry <span class="hl2">1× sidebands</span> (the defect rides in and out of the load zone each rev); ball defects carry FTF sidebands. Integer-order peaks are the shaft's family; non-integer peaks with sidebands are the bearing's.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">🧪 Interactive — bearing frequency calculator</div>
+      <div class="demo">
+        <div class="demo-row"><span>Shaft speed</span><b><span id="rpmV">1780</span> rpm</b></div>
+        <input type="range" id="rpmR" min="300" max="3600" step="10" value="1780">
+        <div class="demo-row"><span>Rolling elements n</span><b><span id="nbV">9</span></b></div>
+        <input type="range" id="nbR" min="6" max="20" step="1" value="9">
+        <div class="demo-row"><span>Bd / Pd ratio</span><b><span id="bpV">0.20</span></b></div>
+        <input type="range" id="bpR" min="0.12" max="0.30" step="0.01" value="0.20">
+        <div class="demo-out" id="brgOut"></div>
+      </div>
+      <p class="body">Defaults ≈ a 6205 at 1780&nbsp;rpm. Note BPFO + BPFI = n × f<sub>r</sub> — a useful sanity check on any calculated pair.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The four stages of bearing failure</div>
+      <div class="grid-2">
+        <div class="mini c-grn"><div class="big">1</div><h4>Ultrasonic only</h4><p>&gt;20 kHz content (spike energy, HFD). No spectral tones yet. Months of life left.</p></div>
+        <div class="mini c-sky"><div class="big">2</div><h4>Resonance ringing</h4><p>Impacts excite bearing natural frequencies (1–5 kHz). Envelope spectrum shows defect tone.</p></div>
+        <div class="mini c-amb"><div class="big">3</div><h4>Defect tones visible</h4><p>BPFO/BPFI + harmonics + sidebands appear in the normal velocity spectrum. Plan replacement.</p></div>
+        <div class="mini c-red"><div class="big">4</div><h4>Broadband collapse</h4><p>Tones smear into a raised noise floor, 1× rises (clearance), crest factor drops. Replace now.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Gears &amp; induction motors</div>
+      <div class="eqn"><b>GMF = N_teeth × f_shaft</b>      gear mesh frequency
+sidebands at GMF ± f_shaft: which shaft&#39;s spacing names the bad gear
+<b>motors:</b> stator/eccentricity → 2×LF (100/120 Hz) · broken rotor bars →
+1× ± 2s·LF sidebands (s = slip) · loose bars → RBPF ± 2×LF</div>
+      <p class="body"><strong>Gear rule:</strong> a healthy mesh shows GMF with small symmetric sidebands. A cracked or worn tooth modulates the mesh once per rev of <em>its own shaft</em> — sideband spacing identifies the culprit, and a growing sideband family (not GMF height alone) signals deterioration. <strong>Motor rule:</strong> electrical peaks vanish the instant power is cut — the coast-down test separates electrical from mechanical in one second.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 7 ============ -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 14 · Advanced Methods</span>
+    <h2 class="page-title">Envelope Analysis &amp; the Advanced Toolbox</h2>
+    <p class="page-sub">Early bearing impacts are too weak for the normal spectrum — demodulation makes them shout.</p>
+
+    <div class="card">
+      <div class="label">Why the normal spectrum misses early defects</div>
+      <p class="lead">A stage-2 defect impact lasts microseconds and carries little energy at BPFO itself. But each impact <span class="hl">rings the bearing&#39;s natural frequencies</span> (1–5 kHz) like a bell struck repeatedly. The information is in the <em>repetition rate</em> of the ringing, not its amplitude.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+          <rect x="30" y="20" width="640" height="120" rx="12" fill="#11161f" stroke="#334155"/>
+          <text x="350" y="40" fill="#94a3b8" font-size="12" text-anchor="middle">1 · raw signal: repeated ring-downs at repetition rate = BPFO</text>
+          <g stroke="#38bdf8" stroke-width="1.6" fill="none">
+            <path d="M 60 90 l 4 -38 l 5 60 l 5 -44 l 5 32 l 5 -22 l 5 15 l 5 -10 l 5 7 l 5 -4 l 6 3 l 8 -1"/>
+            <path d="M 200 90 l 4 -38 l 5 60 l 5 -44 l 5 32 l 5 -22 l 5 15 l 5 -10 l 5 7 l 5 -4 l 6 3 l 8 -1"/>
+            <path d="M 340 90 l 4 -38 l 5 60 l 5 -44 l 5 32 l 5 -22 l 5 15 l 5 -10 l 5 7 l 5 -4 l 6 3 l 8 -1"/>
+            <path d="M 480 90 l 4 -38 l 5 60 l 5 -44 l 5 32 l 5 -22 l 5 15 l 5 -10 l 5 7 l 5 -4 l 6 3 l 8 -1"/>
+          </g>
+          <path d="M 64 46 H 204" stroke="#facc15" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <text x="134" y="60" fill="#fde68a" font-size="11" text-anchor="middle">T = 1/BPFO</text>
+          <text x="350" y="170" fill="#7dd3fc" font-size="13" font-weight="700" text-anchor="middle">2 · band-pass around resonance → 3 · rectify → 4 · low-pass = envelope → 5 · FFT the envelope</text>
+          <rect x="30" y="185" width="640" height="100" rx="12" fill="#11161f" stroke="#334155"/>
+          <text x="350" y="205" fill="#94a3b8" font-size="12" text-anchor="middle">envelope spectrum: clean BPFO + harmonics — the defect, unmasked</text>
+          <line x1="60" y1="270" x2="650" y2="270" stroke="#334155" stroke-width="2"/>
+          <rect x="150" y="220" width="9" height="50" fill="#facc15"/>
+          <text x="154" y="215" fill="#fde68a" font-size="11" text-anchor="middle">BPFO</text>
+          <rect x="285" y="235" width="9" height="35" fill="#facc15" opacity="0.8"/>
+          <text x="289" y="230" fill="#fde68a" font-size="11" text-anchor="middle">2·BPFO</text>
+          <rect x="420" y="247" width="9" height="23" fill="#facc15" opacity="0.65"/>
+          <text x="424" y="242" fill="#fde68a" font-size="11" text-anchor="middle">3·BPFO</text>
+          <rect x="555" y="255" width="9" height="15" fill="#facc15" opacity="0.5"/>
+        </svg>
+        <div class="cap">Envelope (demodulation) analysis: band-pass at the ringing band, detect the envelope, FFT it. Commercial flavours: PeakVue (Emerson), gSE/Spike Energy (Bently/GE), SPM HD — same physics, different packaging.</div>
+      </div>
+      <p class="body"><strong>Order of appearance:</strong> a fault shows in the envelope spectrum (stage 2) long before the velocity spectrum (stage 3). Trending both gives you the full arc: envelope finds it, velocity times the repair.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The rest of the toolbox</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Tool</th><th>What it does</th><th>Use when</th></tr>
+        <tr><td><b>Time waveform</b></td><td>Raw motion vs time; impacts, clipping, beats visible</td><td>Always — gears &amp; bearings especially; "the spectrum summarises, the waveform testifies"</td></tr>
+        <tr><td><b>Phase analysis</b></td><td>Relative timing of 1× between points (strobe/tach/2-ch)</td><td>Unbalance vs misalignment vs bent shaft vs resonance</td></tr>
+        <tr><td><b>ODS</b></td><td>Operating deflection shape — animate the structure&#39;s motion</td><td>Structural looseness, soft foot, resonance paths</td></tr>
+        <tr><td><b>Bump / modal test</b></td><td>Find natural frequencies with machine stopped</td><td>Resonance confirmation, foundation problems</td></tr>
+        <tr><td><b>Order tracking</b></td><td>Sample locked to a tach — clean spectra at varying speed</td><td>VFD-driven machines (→ <a href="A08_VFD_Deep_Dive.html" style="color:var(--accent-soft)">A08</a>), run-up/coast-down</td></tr>
+        <tr><td><b>Cepstrum</b></td><td>Spectrum of the log-spectrum; collects sideband families</td><td>Gearbox diagnosis with dense sidebands</td></tr>
+      </table></div>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-sky"><div class="big">2-ch</div><h4>Cross-channel phase</h4><p>Two sensors + one analyser replaces a strobe: phase difference across a coupling in one shot.</p></div>
+      <div class="mini"><div class="big">beats</div><h4>Waveform tell</h4><p>Two close frequencies (e.g. 2× vs 2×LF on a 2-pole motor) beat slowly — visible only in the waveform.</p></div>
+      <div class="mini c-pink"><div class="big">kurtosis</div><h4>Impact statistics</h4><p>4th statistical moment; &gt;3.5 flags impacting even before crest factor moves.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 8 ============ -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 14 · Standards</span>
+    <h2 class="page-title">How Bad Is Bad? — ISO 20816 Severity</h2>
+    <p class="page-sub">Broadband velocity zones give the first answer; your own baselines give the real one.</p>
+
+    <div class="card">
+      <div class="label">ISO 20816 (ex-10816) zone logic</div>
+      <p class="lead">Measure <span class="hl">broadband velocity, mm/s RMS, 10–1000 Hz</span> on non-rotating parts (bearing housings). Compare to zone boundaries set by machine group and mounting stiffness.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>Zone</th><th>Meaning</th><th>Group 1 · large &gt;300 kW<br>(rigid / flexible)</th><th>Group 2 · 15–300 kW<br>(rigid / flexible)</th></tr>
+        <tr><td><b style="color:#4ade80">A</b></td><td>New-machine quality</td><td class="mono">≤ 2.3 / ≤ 3.5</td><td class="mono">≤ 1.4 / ≤ 2.3</td></tr>
+        <tr><td><b style="color:#facc15">B</b></td><td>Unrestricted long-term operation</td><td class="mono">≤ 4.5 / ≤ 7.1</td><td class="mono">≤ 2.8 / ≤ 4.5</td></tr>
+        <tr><td><b style="color:#fb923c">C</b></td><td>Restricted operation — plan action</td><td class="mono">≤ 7.1 / ≤ 11.0</td><td class="mono">≤ 4.5 / ≤ 7.1</td></tr>
+        <tr><td><b style="color:#f87171">D</b></td><td>Damage risk — act</td><td class="mono">&gt; 7.1 / &gt; 11.0</td><td class="mono">&gt; 4.5 / &gt; 7.1</td></tr>
+      </table></div>
+      <p class="body">"Flexible" mounting means the support&#39;s natural frequency is well below running speed (e.g. springs/isolators); "rigid" means well above. The same 5&nbsp;mm/s that is acceptable on a flexibly-mounted 500&nbsp;kW fan is zone C on a rigid 22&nbsp;kW pump. <strong>Special parts of the standard</strong> cover turbines (20816-2), coupled industrial machines (-3), gas turbines (-4), hydro (-5), reciprocating (-8), gears (-9).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">🧪 Interactive — severity zone checker</div>
+      <div class="demo">
+        <div class="seg" id="grpSeg">
+          <button class="on" data-g="0">Group 1 rigid</button>
+          <button data-g="1">Group 1 flexible</button>
+          <button data-g="2">Group 2 rigid</button>
+          <button data-g="3">Group 2 flexible</button>
+        </div>
+        <div class="demo-row"><span>Measured broadband velocity</span><b><span id="velV">3.2</span> mm/s RMS</b></div>
+        <input type="range" id="velR" min="0.2" max="16" step="0.1" value="3.2">
+        <div class="demo-out" id="sevOut"></div>
+      </div>
+      <p class="body">Zone boundaries are <strong>screening levels</strong>, not diagnostics: a machine can pass broadband while a bearing tone doubles every month underneath. That is why spectra + trending beat a single number.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Alarms that actually work</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Baseline every point when healthy.</strong> Alert = baseline + 6 dB (×2), fault = baseline + 12 dB (×4) is a robust starting scheme — tighter than generic ISO zones.</div></li>
+        <li><span class="num">2</span><div><strong>Band alarms:</strong> split the spectrum into fault bands (1×, 2×, bearing band, GMF band) and alarm each — catches a rising bearing tone hidden under a healthy 1×.</div></li>
+        <li><span class="num">3</span><div><strong>Statistical alarms:</strong> mean + 2σ…3σ over the point&#39;s own history beats any handbook value once you have ~10 surveys.</div></li>
+        <li><span class="num">4</span><div><strong>Trend on log time.</strong> Bearing degradation accelerates; a straight line on log-amplitude vs time extrapolates surprisingly well to stage 4.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 9 ============ -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 14 · Correction</span>
+    <h2 class="page-title">Fixing It — Balancing &amp; Alignment</h2>
+    <p class="page-sub">Diagnosis earns its keep only when the correction is precise: ISO 21940 grades and laser alignment.</p>
+
+    <div class="card">
+      <div class="label">Field balancing &amp; ISO 21940-11 grades</div>
+      <p class="lead">Unbalance U = m·e (g·mm): a mass m offset e from the rotation axis. The permissible residual scales <span class="hl">inversely with speed</span> — the G-number is the constant.</p>
+      <div class="eqn"><b>G = e_per × ω</b>  [mm/s]     ⇒   e_per = G / ω = <b>9549 × G / N</b>  [µm, N in rpm... careful: e_per(µm) = 9549·G/N with G in mm/s]
+U_per = m_rotor × e_per        permissible residual unbalance
+
+grades: G0.4 precision spindles · <b>G1</b> grinding · <b>G2.5</b> pumps, fans, motors ·
+        G6.3 general machinery · G16 drive shafts · G40 car wheels</div>
+      <p class="body"><strong>Single-plane vector method:</strong> measure original 1× vector O (amplitude∠phase); add trial mass m<sub>t</sub>, measure new vector T. The effect vector is T−O, so the correction mass is <span class="hl">m<sub>c</sub> = m<sub>t</sub>·|O|/|T−O|</span>, placed at the angle that rotates (T−O) to oppose O. Rotors longer than ~½ their diameter, or running above ~70% of first critical, need two-plane or modal balancing.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Shaft alignment — the geometry</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+          <rect x="40" y="95" width="200 " height="34" rx="6" fill="#2b3650" stroke="#334155"/>
+          <text x="140" y="88" fill="#94a3b8" font-size="12" text-anchor="middle">motor shaft</text>
+          <rect x="460" y="80" width="200" height="34" rx="6" fill="#2b3650" stroke="#334155"/>
+          <text x="560" y="73" fill="#94a3b8" font-size="12" text-anchor="middle">pump shaft (offset + angle)</text>
+          <line x1="40" y1="112" x2="350 " y2="112" stroke="#facc15" stroke-width="2.5" stroke-dasharray="7 5"/>
+          <line x1="350" y1="112" x2="660" y2="83" stroke="#f472b6" stroke-width="2.5" stroke-dasharray="7 5"/>
+          <path d="M 350 112 L 300 112 A 50 50 0 0 1 348 100" fill="none" stroke="#38bdf8" stroke-width="2"/>
+          <text x="308" y="98" fill="#7dd3fc" font-size="12" font-weight="700">angularity (mrad)</text>
+          <line x1="250" y1="112" x2="250" y2="97" stroke="#4ade80" stroke-width="3"/>
+          <text x="250" y="150" fill="#4ade80" font-size="12" font-weight="700" text-anchor="middle">offset (mm)</text>
+          <rect x="255" y="95" width="40" height="34" rx="4" fill="#facc15" opacity="0.25" stroke="#facc15"/>
+          <text x="275" y="163" fill="#fde68a" font-size="11" text-anchor="middle">coupling</text>
+          <text x="350" y="215" fill="#94a3b8" font-size="12.5" text-anchor="middle">tolerance tightens with speed: at 1800 rpm ≈ 0.08 mm offset · 0.07 mm/100 mm angularity; at 3600 rpm roughly half that</text>
+        </svg>
+        <div class="cap">Misalignment = offset + angularity, each in two planes (H &amp; V). Laser systems measure both directly and compute foot corrections; dial methods (rim-face, reverse-dial) remain the fallback.</div>
+      </div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Kill soft foot first.</strong> A frame that rocks &gt;0.05 mm on one foot makes alignment unrepeatable and adds 2× vibration on its own.</div></li>
+        <li><span class="num">2</span><div><strong>Align at operating temperature</strong> or apply thermal-growth targets — a hot pump grows hundreds of µm vertically.</div></li>
+        <li><span class="num">3</span><div><strong>Flexible couplings tolerate misalignment; machines do not.</strong> The coupling survives — the bearings and seals either side absorb the preload.</div></li>
+        <li><span class="num">4</span><div><strong>Verify after:</strong> post-repair spectrum should show 2× and axial 1× collapse. The before/after pair is the proof your CM programme sells itself with.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 10 ============ -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 14 · Consolidate</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Quiz</h2>
+    <p class="page-sub">The measurement can fail as easily as the machine — know both failure catalogues.</p>
+
+    <div class="card">
+      <div class="label">Eight ideas that carry the module</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Frequency names the fault, amplitude sizes it, trend times it.</strong></div></li>
+        <li><span class="num">2</span><div><strong>V = ωX, A = ω²X</strong> — displacement low-f, velocity mid-band severity, acceleration high-f.</div></li>
+        <li><span class="num">3</span><div><strong>Δf = Fmax/LOR and T = LOR/Fmax</strong> — resolution costs time.</div></li>
+        <li><span class="num">4</span><div><strong>1× unbalance · 2×+axial misalignment · harmonic forest looseness</strong> — the synchronous triad.</div></li>
+        <li><span class="num">5</span><div><strong>Bearing tones are non-integer orders with sidebands;</strong> BPFO+BPFI = n·f<sub>r</sub>.</div></li>
+        <li><span class="num">6</span><div><strong>Envelope analysis demodulates resonance ringing</strong> — finds bearings a stage earlier than the velocity spectrum.</div></li>
+        <li><span class="num">7</span><div><strong>ISO 20816 zones screen; baselines + band alarms diagnose.</strong></div></li>
+        <li><span class="num">8</span><div><strong>e_per = G/ω</strong> — balance quality tightens as speed rises; alignment tolerance too.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Six ways the measurement lies</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">⚠️ Ski-slope spectrum</div><p>Huge low-f ramp from sensor overload, thermal transient, or cable strain — integration noise, not machine motion. Re-take with settled sensor.</p></div>
+        <div class="fail"><div class="ft">⚠️ Wrong Fmax</div><p>Fmax at 20× on a gearbox misses GMF; Fmax at 200× buries 1× resolution. One setup per machine class, saved in the route.</p></div>
+        <div class="fail"><div class="ft">⚠️ Loose magnet / paint</div><p>Mounting resonance drops into the analysis band — false peaks around 1–2 kHz, and every bearing band reads high.</p></div>
+        <div class="fail"><div class="ft">⚠️ Clipped sensor</div><p>Impacts beyond sensor range fold energy across the whole spectrum (harmonic smear). Check the time waveform for flat tops.</p></div>
+        <div class="fail"><div class="ft">⚠️ Different point each survey</div><p>Trend becomes noise: 20 mm of position shift can double or halve a reading. Mark points; use installed pads.</p></div>
+        <div class="fail"><div class="ft">⚠️ Overall-only alarming</div><p>Broadband RMS hides a bearing tone growing 4× under a dominant 1×. Band alarms or envelope trending are mandatory for bearings.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 1</div>
+      <p class="quiz-q">A pump shows 6 mm/s at exactly 2× running speed, with axial vibration 70% of radial. Most likely fault?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Misalignment</strong> — dominant 2× plus high axial is the classic coupling-misalignment signature. Confirm with 180° phase change across the coupling, then laser-align (after checking soft foot).</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 2</div>
+      <p class="quiz-q">Why does an inner-race defect (BPFI) show 1× sidebands while an outer-race defect (BPFO) usually does not?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">The inner race <strong>rotates with the shaft</strong>, so its defect passes in and out of the load zone once per revolution — amplitude-modulating the BPFI tone at 1× and creating BPFI ± 1× sidebands. The outer race is stationary; its defect sits at constant load, so the tone is unmodulated.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 3</div>
+      <p class="quiz-q">You need to resolve sidebands spaced 4.8 Hz apart around a 1.2 kHz gear-mesh peak. Propose Fmax and LOR.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Need Δf ≤ 4.8/2 = 2.4 Hz (better ≤ 1.2). With Fmax = 2000 Hz (covers GMF + sidebands with margin): LOR = 2000/1.2 ≈ 1600 lines → Δf = 1.25 Hz, T = 0.8 s per average. 3200 lines would give Δf = 0.625 Hz if the sidebands crowd.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 4</div>
+      <p class="quiz-q">A reading's crest factor rose from 1.5 to 4.5 over three months but velocity RMS barely moved. What stage is this, and what tool confirms it?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Early (stage 2) bearing damage: sharp low-energy impacts raise peak but not RMS. Confirm with <strong>envelope/demodulation spectrum</strong> — a clean BPFO/BPFI tone with harmonics identifies the defective race while months of planning time remain.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 5</div>
+      <p class="quiz-q">A 2-pole motor's vibration at ~100 Hz disappears the instant the breaker opens. Mechanical or electrical? Why?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Electrical</strong> — magnetically-induced vibration (2×LF from stator/eccentricity forces) vanishes when the field collapses; mechanical vibration decays gradually with speed during coast-down. The power-cut test is the one-second discriminator.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 6</div>
+      <p class="quiz-q">Compute e_per for a G2.5 rotor at 3000 rpm, and U_per if the rotor weighs 100 kg.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">ω = 2π·50 = 314 rad/s → e_per = G/ω = 2500 (µm·rad/s)/314 ≈ <strong>7.96 µm</strong>. U_per = m·e = 100 kg × 7.96 µm ≈ <strong>796 g·mm</strong> (i.e. 7.96 g at 100 mm radius). Note how G2.5 at 3000 rpm is 8 µm, but at 300 rpm would be 80 µm — speed sets the target.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 11 ============ -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 / 14 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade numericals, solved step by step.</p>
+
+    <div class="card">
+      <div class="label">Worked Example 1 — Bearing defect frequencies (6205, 1780 rpm)</div>
+      <p class="body"><strong>Given:</strong> deep-groove bearing, n = 9 balls, B<sub>d</sub> = 7.94 mm, P<sub>d</sub> = 39.04 mm, θ = 0°, shaft 1780 rpm. Find all four defect frequencies in Hz and orders.</p>
+      <div class="eqn">f_r = 1780/60 = <b>29.67 Hz</b>        B_d/P_d = 7.94/39.04 = 0.2034 (cosθ = 1)
+
+FTF  = (29.67/2)(1 − 0.2034) = 14.83 × 0.7966          = <b>11.82 Hz</b>  (0.40×)
+BPFO = 9 × 11.82                                        = <b>106.4 Hz</b>  (3.59×)
+BPFI = (9 × 29.67/2)(1 + 0.2034) = 133.5 × 1.2034      = <b>160.6 Hz</b>  (5.41×)
+BSF  = 29.67 × (39.04/15.88) × (1 − 0.2034²)
+     = 29.67 × 2.458 × 0.9586                           = <b>69.9 Hz</b>   (2.36×)
+
+check: BPFO + BPFI = 106.4 + 160.6 = 267.0 = 9 × 29.67 ✓</div>
+      <p class="body"><em>Discussion:</em> all four are non-integer orders — the analyst&#39;s tell. In a real spectrum expect BPFO harmonics (2·BPFO, 3·BPFO) for an outer-race spall, and BPFI ± 29.67 Hz sidebands for an inner-race defect. A ball defect appears at 2·BSF (the flaw strikes both races per spin) with FTF sidebands.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 2 — FFT setup for broken rotor bars</div>
+      <p class="body"><strong>Given:</strong> 4-pole motor on 50 Hz mains, nameplate 1480 rpm, running near full load at 1480 rpm. Choose Fmax and LOR to resolve rotor-bar sidebands, and estimate acquisition time with 4 linear averages at 50% overlap.</p>
+      <div class="eqn">n_s = 120·50/4 = 1500 rpm     slip s = (1500 − 1480)/1500 = <b>0.0133</b>
+sideband spacing = 2s·LF = 2 × 0.0133 × 50 = <b>1.33 Hz</b>  around 1× = 24.67 Hz
+
+need Δf ≤ 1.33/4 ≈ 0.33 Hz  (want ~4 bins between peaks)
+choose Fmax = 100 Hz, LOR = 800  →  Δf = 100/800 = <b>0.125 Hz</b> ✓
+T_one = LOR/Fmax = 800/100 = <b>8 s</b>
+4 averages @ 50% overlap: T ≈ 8 + 3×4 = <b>20 s</b></div>
+      <p class="body"><em>Discussion:</em> this is why rotor-bar tests use a dedicated low-Fmax, high-resolution measurement — a routine 1 kHz / 1600-line spectrum has Δf = 0.625 Hz and smears the 1.33 Hz sidebands into the 1× skirt. Severity guide: sidebands within 45–50 dB of 1× are normal; −35 dB warrants trending; −25 dB or better means cracked/broken bars.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 3 — ISO 20816 severity call</div>
+      <p class="body"><strong>Given:</strong> 45 kW end-suction pump, rigidly mounted on a grouted baseplate, drive-end bearing reads 4.1 mm/s RMS broadband (10–1000 Hz); six months ago it read 2.0 mm/s. Classify and recommend.</p>
+      <div class="eqn">45 kW, rigid  →  Group 2, rigid support
+zones: A ≤ 1.4 · B ≤ 2.8 · C ≤ 4.5 · D &gt; 4.5
+4.1 mm/s ⇒ <b>Zone C — restricted operation</b>
+trend: 2.0 → 4.1 mm/s = +6.2 dB in 6 months (doubling)</div>
+      <p class="body"><em>Discussion:</em> the zone alone says "plan action"; the <strong>doubling trend</strong> says "soon". Next step is diagnostic, not administrative: capture a spectrum + phase set, identify whether the growth is 1× (balance), 2×/axial (alignment) or a bearing band, and schedule the specific correction — not a generic overhaul. If the same 4.1 mm/s were on a flexibly-mounted Group 1 fan, it would sit mid-Zone B: context is everything.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 4 — Single-plane trial-mass balancing</div>
+      <p class="body"><strong>Given:</strong> overhung fan, original 1× vector O = 7.2 mm/s ∠60°. Trial mass m<sub>t</sub> = 20 g at the 0° blade. New vector T = 4.8 mm/s ∠150°. Find the correction mass and its location.</p>
+      <div class="eqn">O = 7.2∠60°  = (3.60, 6.24)
+T = 4.8∠150° = (−4.16, 2.40)
+effect of trial mass  E = T − O = (−7.76, −3.84)  →  |E| = <b>8.66 mm/s</b> ∠206°
+
+sensitivity = |E|/m_t = 8.66/20 = 0.433 (mm/s)/g
+correction mass m_c = |O|/sens = 7.2/0.433 = <b>16.6 g</b>
+
+angle: E must rotate from 206° to oppose O (60°+180° = 240°)
+Δ = 240° − 206° = +34°  ⇒  move mass <b>34° from the trial position</b>
+(in the direction of shaft rotation used for phase reference)</div>
+      <p class="body"><em>Discussion:</em> the trial mass answered two questions at once — how many (mm/s per gram) and where (the angular lag between mass position and response). A good trial mass changes O by 30% or 30°; if T ≈ O the trial was too small to trust. After correction, repeat the measurement: residual ≤ 1 mm/s (or the ISO 21940 e_per target) closes the job.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 ============ -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 / 14 · MSc Practice</span>
+    <h2 class="page-title">Problem Set — 10 Questions</h2>
+    <p class="page-sub">Work each one before revealing. Calculator + the equation pages are all you need.</p>
+
+    <div class="card quiz">
+      <div class="label">Problem 1</div>
+      <p class="quiz-q">Convert 8 mm/s peak at 25 Hz into displacement (µm peak-to-peak).</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">X = V/ω = 8/(2π×25) = 0.0509 mm = 50.9 µm peak → <strong>≈ 102 µm p-p</strong>. Low frequency: modest velocity is already large displacement.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 2</div>
+      <p class="quiz-q">What acceleration (in g) corresponds to 2 mm/s peak at 3.2 kHz?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">A = ωV = 2π×3200×0.002 m/s = 40.2 m/s² ≈ <strong>4.1 g</strong>. Same velocity at high frequency = violent acceleration — why bearing work is done in g&#39;s.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 3</div>
+      <p class="quiz-q">A 3-blade fan runs at 1180 rpm. You see a clean peak at 59 Hz. Identify it.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">f_r = 1180/60 = 19.67 Hz; 59/19.67 = 3.0 → <strong>blade-pass frequency (3× = blades × 1×)</strong>. Rising BPF suggests flow disturbance: duct obstruction, damper position, or blade-to-housing clearance.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 4</div>
+      <p class="quiz-q">Fmax = 800 Hz, LOR = 3200. Give Δf, acquisition time per average, and samples taken.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Δf = 800/3200 = <strong>0.25 Hz</strong>; T = 3200/800 = <strong>4 s</strong>; N = 2.56 × 3200 = <strong>8192 samples</strong>.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 5</div>
+      <p class="quiz-q">Bearing: n = 13, B<sub>d</sub>/P<sub>d</sub> = 0.18, shaft 1490 rpm. Compute BPFO and BPFI (Hz and orders).</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">f_r = 24.83 Hz. BPFO = (13/2)(24.83)(0.82) = <strong>132.4 Hz = 5.33×</strong>; BPFI = (13/2)(24.83)(1.18) = <strong>190.5 Hz = 7.67×</strong>. Check: 132.4+190.5 = 322.9 ≈ 13×24.83 ✓</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 6</div>
+      <p class="quiz-q">Time waveform: peak 28 m/s², RMS 4 m/s². Compute crest factor and interpret.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">CF = 28/4 = <strong>7</strong> (sine = 1.414). Severe repetitive impacting — advanced rolling-element damage, gear tooth fault, or extreme looseness. Envelope spectrum next to name the source.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 7</div>
+      <p class="quiz-q">A 250 kg fan rotor must meet G6.3 at 1500 rpm. Find e_per and U_per.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">ω = 157.1 rad/s → e_per = 6300/157.1 ≈ <strong>40 µm</strong>. U_per = 250 kg × 40 µm = <strong>≈ 10 000 g·mm</strong> (e.g. 25 g at 400 mm radius). At 3000 rpm the same grade would halve to ~20 µm.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 8</div>
+      <p class="quiz-q">Why are ISO 20816 severity limits written in velocity rather than displacement or acceleration?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Over the 10–1000 Hz machine band, <strong>equal velocity ≈ equal vibrational energy and equal fatigue-damage potential</strong> regardless of frequency (energy ∝ v²). Displacement over-weights low f; acceleration over-weights high f. Velocity is the flattest proxy for "how hard the machine is shaking itself apart".</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 9</div>
+      <p class="quiz-q">A gearbox spectrum shows GMF at 1312 Hz with sidebands spaced 43.75 Hz. Input shaft: 2625 rpm; output shaft: 875 rpm. Which gear is modulating?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Input shaft = 2625/60 = 43.75 Hz → sideband spacing matches the <strong>input pinion</strong>. (Output would give 14.58 Hz spacing.) Bonus: teeth = 1312/43.75 = 30 on the pinion.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 10</div>
+      <p class="quiz-q">A machine passes its broadband alarm at 2.1 mm/s, but the envelope-spectrum BPFO tone has grown 10× in four surveys. Your call?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Plan a bearing replacement now, at the next opportunity window.</strong> Broadband velocity screens overall energy and misses early-stage tones; envelope trend growth of 10× signals stage 2→3 progression. Order parts, watch crest factor and the velocity-band bearing region for stage 3–4 confirmation, and shorten the survey interval.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 ============ -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 / 14 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">The three derivations examiners reach for, and the unit traps that sink real reports.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 — the ω ladder (x → v → a)</div>
+      <div class="eqn">x(t) = X sin(ωt)
+v(t) = dx/dt  = ωX cos(ωt)      = ωX sin(ωt + 90°)
+a(t) = dv/dt  = −ω²X sin(ωt)    = ω²X sin(ωt + 180°)
+
+⇒ each differentiation: amplitude ×ω, phase +90°
+⇒ V_peak = 2πf·X_peak      A_peak = (2πf)²·X_peak</div>
+      <p class="body"><em>Why it matters:</em> analysers integrate acceleration to display velocity (÷ω per step). Integration amplifies low-frequency noise by 1/ω — the origin of the "ski-slope" artefact — which is why integrated channels are high-pass filtered around 1–10 Hz.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 — bearing frequencies from rolling kinematics</div>
+      <div class="eqn">surface speeds (inner rotating at ω_r, outer fixed):
+v_inner = ω_r·(P_d − B_d cosθ)/2        v_outer = 0
+cage rolls between them  ⇒  v_cage = (v_inner + v_outer)/2
+
+ω_cage/ω_r = ½(1 − B_d/P_d·cosθ)   ⇒  <b>FTF = (f_r/2)(1 − B_d/P_d cosθ)</b>
+
+outer-race defect: struck by each of n elements at cage speed
+  ⇒ <b>BPFO = n·FTF</b>
+inner-race defect: relative speed = f_r − FTF
+  ⇒ <b>BPFI = n·(f_r − FTF) = (n·f_r/2)(1 + B_d/P_d cosθ)</b>
+⇒ BPFO + BPFI = n·f_r  (the sanity identity)</div>
+      <p class="body"><em>Why it matters:</em> deriving rather than memorising lets you handle the odd cases — rotating outer race (flip the roles), thin-section bearings, and the ~1–2% slip that makes measured tones sit slightly below calculated (calculated values assume pure rolling; real bearings skid a little, so search a window, not a line).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 — balance grade to permissible unbalance</div>
+      <div class="eqn">G-grade defines constant severity: <b>G = e_per·ω</b>  [mm/s]
+(the velocity the CG offset alone would impose)
+
+e_per [mm] = G/ω = G/(2πN/60)  →  e_per [µm] ≈ 9549·G/N   (N in rpm)
+U_per [g·mm] = m_rotor [kg] × e_per [µm]</div>
+      <p class="body"><em>Why it matters:</em> it shows the physics behind "balance tighter when faster": centrifugal force F = m·e·ω² grows as ω², so holding e·ω constant still lets force grow linearly with speed — the standard is a severity compromise, not a force limit. For fixed-speed machines you may balance to the grade; for VFD machines balance for the top speed.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol glossary</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Symbol</th><th>Meaning</th><th>Unit</th></tr>
+        <tr><td class="mono">X, V, A</td><td>Displacement / velocity / acceleration amplitude</td><td>µm · mm/s · m/s² (g)</td></tr>
+        <tr><td class="mono">ω = 2πf</td><td>Angular frequency</td><td>rad/s</td></tr>
+        <tr><td class="mono">f_r, 1×</td><td>Shaft rotational frequency (order 1)</td><td>Hz (or CPM = 60×Hz)</td></tr>
+        <tr><td class="mono">Fmax, LOR, Δf</td><td>Span, lines, bin width (Δf = Fmax/LOR)</td><td>Hz · — · Hz</td></tr>
+        <tr><td class="mono">FTF·BPFO·BPFI·BSF</td><td>Cage / outer / inner / ball-spin frequencies</td><td>Hz</td></tr>
+        <tr><td class="mono">n, B_d, P_d, θ</td><td>Element count, ball dia, pitch dia, contact angle</td><td>— · mm · mm · °</td></tr>
+        <tr><td class="mono">GMF</td><td>Gear mesh = teeth × shaft speed</td><td>Hz</td></tr>
+        <tr><td class="mono">CF</td><td>Crest factor = peak/RMS</td><td>—</td></tr>
+        <tr><td class="mono">G, e_per, U_per</td><td>Balance grade, CG offset, residual unbalance</td><td>mm/s · µm · g·mm</td></tr>
+        <tr><td class="mono">s, LF</td><td>Motor slip, line frequency</td><td>— · Hz</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven exam &amp; field traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>RMS vs peak vs pk-pk.</strong> A "6 mm/s" alarm in RMS is 8.5 pk and 17 p-p for a sine. State the descriptor on every number, always.</div></li>
+        <li><span class="num">2</span><div><strong>Hz vs CPM.</strong> American charts run in CPM (= Hz × 60). A 29.67 Hz shaft is 1780 CPM — mixing them shifts every diagnosis by ×60.</div></li>
+        <li><span class="num">3</span><div><strong>mm/s vs in/s.</strong> 1 in/s = 25.4 mm/s. Legacy US severity charts (0.3 in/s "rough") ≈ 7.6 mm/s — do not compare across unit systems unconverted.</div></li>
+        <li><span class="num">4</span><div><strong>Orders vs absolute Hz.</strong> A "2× peak" moves with speed; a 100 Hz electrical peak does not. On VFD machines only order-normalised spectra trend cleanly.</div></li>
+        <li><span class="num">5</span><div><strong>Bearing tones sit slightly LOW of calculation</strong> (1–2% slip). An exact integer match is more likely a shaft harmonic than a bearing tone.</div></li>
+        <li><span class="num">6</span><div><strong>Envelope amplitude is not ISO severity.</strong> gE / envelope units are relative trend indicators — never grade them against 20816 mm/s zones.</div></li>
+        <li><span class="num">7</span><div><strong>ISO zones apply to broadband, not to one spectral peak.</strong> Grading a single 1× line against the zone table misuses the standard (the zone value is the whole 10–1000 Hz RMS).</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 ============ -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 / 14 · MSc Practice</span>
+    <h2 class="page-title">Study &amp; Practice Path</h2>
+    <p class="page-sub">The canon, a hands-on ladder, and an honest self-check.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Resource</th><th>What it gives you</th><th>Level</th></tr>
+        <tr><td><b>Scheffer &amp; Girdhar</b> — <i>Practical Machinery Vibration Analysis &amp; Predictive Maintenance</i></td><td>The plant-floor handbook: signatures, setup, case studies</td><td>Practitioner</td></tr>
+        <tr><td><b>R. B. Randall</b> — <i>Vibration-based Condition Monitoring</i> (Wiley)</td><td>The rigorous text: envelope theory, cepstrum, gear/bearing signal models</td><td>MSc / reference</td></tr>
+        <tr><td><b>ISO 20816 series</b> (ex-10816)</td><td>Severity zones per machine class — the legal answer to "how bad?"</td><td>Standard</td></tr>
+        <tr><td><b>ISO 13373-1/-2</b></td><td>CM programme design: measurement, procedures, diagnostics</td><td>Standard</td></tr>
+        <tr><td><b>ISO 21940-11</b></td><td>Balance quality grades &amp; permissible residual unbalance</td><td>Standard</td></tr>
+        <tr><td><b>ISO 18436-2</b></td><td>Analyst certification body of knowledge (Cat I–IV) — the exam syllabus</td><td>Certification</td></tr>
+        <tr><td><b>Technical Associates wall chart</b> — <i>Illustrated Vibration Diagnostic Chart</i></td><td>Every signature on one page; the industry&#39;s crib sheet</td><td>Practitioner</td></tr>
+        <tr><td><b>Mobius Institute</b> learning resources</td><td>Animated simulators of every fault mechanism; Cat I–III training</td><td>All levels</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder — eight exercises</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Phone spectroscope.</strong> Use a phone accelerometer app on a desk fan: find 1× and blade-pass. Tape a coin to one blade and watch 1× jump.</div></li>
+        <li><span class="num">2</span><div><strong>20-line FFT.</strong> In Python/NumPy, synthesise 1× + 2× + noise, window it (Hanning), FFT it, and verify Δf = Fmax/LOR yourself.</div></li>
+        <li><span class="num">3</span><div><strong>Catalogue drill.</strong> Pull B<sub>d</sub>, P<sub>d</sub>, n for three bearings from the SKF catalogue and compute all four defect frequencies at your plant&#39;s common speeds.</div></li>
+        <li><span class="num">4</span><div><strong>Bump test.</strong> Accelerometer on a bracket, tap with a mallet, peak-hold spectrum → its natural frequencies. Then add a clamp mass and watch f_n drop.</div></li>
+        <li><span class="num">5</span><div><strong>Simulate envelope analysis.</strong> Multiply a 3 kHz ring-down train (rep rate 107 Hz) in code, band-pass + rectify + FFT — recover 107 Hz. This one exercise cements page 7.</div></li>
+        <li><span class="num">6</span><div><strong>Baseline a real machine.</strong> Three points × three directions on one pump, weekly for a month. Plot the trend; set mean+2σ alarms.</div></li>
+        <li><span class="num">7</span><div><strong>Before/after proof.</strong> Next alignment or balance job at work: capture spectra before and after, quantify the dB drop at 1×/2×, and write the one-page case study.</div></li>
+        <li><span class="num">8</span><div><strong>Sit the syllabus.</strong> Download the ISO 18436-2 Cat I/II body of knowledge and self-test; the gaps it exposes are your next study list.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment — can you…?</div>
+      <div class="grid-2">
+        <div class="mini"><div class="big">◔</div><h4>Recall</h4><p>Write V=ωX, A=ω²X, Δf=Fmax/LOR, all four bearing equations and BPFO+BPFI=n·f_r from memory.</p></div>
+        <div class="mini c-sky"><div class="big">◑</div><h4>Apply</h4><p>Choose Fmax/LOR for a stated diagnostic target and compute acquisition time before touching the analyser.</p></div>
+        <div class="mini c-purp"><div class="big">◕</div><h4>Diagnose</h4><p>Given a spectrum + directions + phase, separate unbalance / misalignment / looseness / bearing / electrical with stated confidence.</p></div>
+        <div class="mini c-grn"><div class="big">●</div><h4>Decide</h4><p>Turn a zone C reading plus a trend into a dated work order with the correct correction — and defend it to production.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="card memory">
+    <div class="label">Memory Hook</div>
+    <p class="quote">"1× unbalance · 2× + axial misalignment · harmonic forest looseness · non-integer tones = bearings — and the envelope hears them first."</p>
+  </div>
+
+  <div class="footer">
+    <p><strong>A42 · Vibration Analysis &amp; Diagnostics — Advanced Deep Dive</strong></p>
+    <p>Companion modules: <a href="A19_Bearings_Deep_Dive.html" style="color:var(--accent-soft)">A19 Bearings</a> · <a href="A41_Thermal_Imaging_Deep_Dive.html" style="color:var(--accent-soft)">A41 Thermal Imaging</a> · <a href="A23_TPM_Deep_Dive.html" style="color:var(--accent-soft)">A23 TPM</a> · <a href="A08_VFD_Deep_Dive.html" style="color:var(--accent-soft)">A08 VFD</a> · <a href="A09_Servo_Motion_Deep_Dive.html" style="color:var(--accent-soft)">A09 Servo &amp; Motion</a></p>
+    <p>Micro Learning · Advanced Library · optimised for iPad Pro 11&Prime; · dark, high-contrast, keratoconus-friendly</p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // FFT setup calculator
+  var fmaxR=document.getElementById('fmaxR'), lorR=document.getElementById('lorR'), avgR=document.getElementById('avgR');
+  function fft(){
+    var fmax=+fmaxR.value, lor=+lorR.value, avg=+avgR.value;
+    document.getElementById('fmaxV').textContent=fmax;
+    document.getElementById('lorV').textContent=lor;
+    document.getElementById('avgV').textContent=avg;
+    var df=fmax/lor, t1=lor/fmax, ttot=t1+(avg-1)*t1/2, ns=2.56*lor;
+    document.getElementById('fftOut').innerHTML=
+      'bin width Δf = '+fmax+'/'+lor+' = <b>'+df.toFixed(3)+' Hz</b> ('+(df*60).toFixed(1)+' CPM)<br>'+
+      'time per average T = <b>'+t1.toFixed(2)+' s</b> · samples = 2.56×LOR = <b>'+ns.toFixed(0)+'</b><br>'+
+      'total ('+avg+' avg, 50% overlap) ≈ <b>'+ttot.toFixed(1)+' s</b> per point<br>'+
+      'resolvable peak spacing (≥2 bins): <b>'+(2*df).toFixed(2)+' Hz</b>';
+  }
+  fmaxR.addEventListener('input',fft); lorR.addEventListener('input',fft); avgR.addEventListener('input',fft); fft();
+
+  // Bearing frequency calculator
+  var rpmR=document.getElementById('rpmR'), nbR=document.getElementById('nbR'), bpR=document.getElementById('bpR');
+  function brg(){
+    var rpm=+rpmR.value, n=+nbR.value, r=+bpR.value;
+    document.getElementById('rpmV').textContent=rpm;
+    document.getElementById('nbV').textContent=n;
+    document.getElementById('bpV').textContent=r.toFixed(2);
+    var fr=rpm/60;
+    var ftf=fr/2*(1-r);
+    var bpfo=n*ftf;
+    var bpfi=n*fr/2*(1+r);
+    var bsf=fr/(2*r)*(1-r*r);
+    document.getElementById('brgOut').innerHTML=
+      'f_r = <b>'+fr.toFixed(2)+' Hz</b><br>'+
+      'FTF  = <b>'+ftf.toFixed(1)+' Hz</b>  ('+(ftf/fr).toFixed(2)+'×)<br>'+
+      'BPFO = <b>'+bpfo.toFixed(1)+' Hz</b>  ('+(bpfo/fr).toFixed(2)+'×)<br>'+
+      'BPFI = <b>'+bpfi.toFixed(1)+' Hz</b>  ('+(bpfi/fr).toFixed(2)+'×)<br>'+
+      'BSF  = <b>'+bsf.toFixed(1)+' Hz</b>  ('+(bsf/fr).toFixed(2)+'×) — ball defect at 2×BSF = '+(2*bsf).toFixed(1)+' Hz<br>'+
+      'check: BPFO+BPFI = '+(bpfo+bpfi).toFixed(1)+' = n·f_r = '+(n*fr).toFixed(1)+' ✓';
+  }
+  rpmR.addEventListener('input',brg); nbR.addEventListener('input',brg); bpR.addEventListener('input',brg); brg();
+
+  // ISO severity checker
+  var zones=[[2.3,4.5,7.1],[3.5,7.1,11.0],[1.4,2.8,4.5],[2.3,4.5,7.1]];
+  var names=['Group 1 · rigid','Group 1 · flexible','Group 2 · rigid','Group 2 · flexible'];
+  var grp=0;
+  var seg=document.getElementById('grpSeg'), velR=document.getElementById('velR');
+  seg.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    seg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); grp=+b.dataset.g; sev();
+  });
+  function sev(){
+    var v=+velR.value;
+    document.getElementById('velV').textContent=v.toFixed(1);
+    var z=zones[grp], zone, col, msg;
+    if(v<=z[0]){zone='A';col='#4ade80';msg='new-machine quality — baseline it';}
+    else if(v<=z[1]){zone='B';col='#facc15';msg='acceptable for unrestricted long-term operation';}
+    else if(v<=z[2]){zone='C';col='#fb923c';msg='restricted operation — diagnose and plan correction';}
+    else {zone='D';col='#f87171';msg='vibration may cause damage — act now';}
+    document.getElementById('sevOut').innerHTML=
+      names[grp]+' · boundaries A≤'+z[0]+' · B≤'+z[1]+' · C≤'+z[2]+' mm/s<br>'+
+      'measured <b>'+v.toFixed(1)+' mm/s RMS</b> ⇒ zone <b style="color:'+col+'">'+zone+'</b><br>'+msg;
+  }
+  velR.addEventListener('input',sev); sev();
+})();
+</script>
+</body>
+</html>

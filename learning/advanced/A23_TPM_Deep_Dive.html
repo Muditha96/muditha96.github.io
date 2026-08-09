@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>TPM — Total Productive Maintenance · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #f472b6;       /* pink — matches micro card 23 TPM theme */
+    --accent-soft: #fbcfe8;
+    --accent-2: #60a5fa;     /* blue */
+    --accent-3: #fbbf24;     /* amber */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(244,114,182,0.12), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(96,165,250,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--bg); background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(244,114,182,0.30);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(244,114,182,0.12), rgba(96,165,250,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent); background: rgba(244,114,182,0.12); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--accent)!important; } .c-pink .big{color:var(--accent)}
+  .c-amb  { border-top-color: var(--accent-3)!important; } .c-amb .big{color:var(--accent-3)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .pro { background: linear-gradient(145deg, rgba(244,114,182,0.08), transparent); border:1px solid rgba(244,114,182,0.22); border-radius:14px; padding:16px; }
+  .pro .pt { font-weight:700; color:var(--accent-soft); margin-bottom:6px; font-size:15px; }
+  .pro p { font-size:13.5px; color:var(--text-dim); }
+  .pro em { color:var(--accent-3); font-style:normal; font-weight:600; }
+
+  .memory { background: linear-gradient(135deg, #f472b6, #9d174d); color: #fff; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(255,255,255,0.78); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(244,114,182,0.08); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  /* interactive pillar explorer */
+  .temple { display:grid; grid-template-columns:repeat(8,1fr); gap:5px; margin-top:6px; }
+  .pcol { background:var(--card-2); border:1px solid var(--border); border-bottom:3px solid var(--accent); border-radius:8px 8px 0 0; padding:12px 4px; text-align:center; cursor:pointer; transition:all .2s; }
+  .pcol .pi { font-size:20px; display:block; margin-bottom:4px; }
+  .pcol .pn { font-size:9.5px; font-weight:800; color:var(--accent-soft); line-height:1.15; text-transform:uppercase; letter-spacing:.02em; }
+  .pcol.active { background:var(--accent); border-color:var(--accent); }
+  .pcol.active .pn { color:var(--bg); }
+  .pinfo { margin-top:14px; background:var(--card-2); border-left:4px solid var(--accent); border-radius:12px; padding:18px 20px; }
+  .pinfo h4 { color:var(--accent-soft); font-size:18px; margin-bottom:6px; }
+  .pinfo p { font-size:15px; color:var(--text-dim); line-height:1.5; }
+  .pinfo .ex { font-size:14px; color:var(--text); margin-top:8px; } .pinfo .ex b { color:var(--accent); }
+  @media(max-width:620px){ .temple{grid-template-columns:repeat(4,1fr);} }
+
+  /* AM step interactive */
+  .demo-row { display:flex; gap:18px; flex-wrap:wrap; align-items:center; justify-content:center; margin-top:8px; }
+  .slider-box { background:var(--card-2); border-radius:12px; padding:14px 18px; min-width:200px; flex:1; }
+  .slider-box label { font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); display:block; margin-bottom:8px; }
+  .slider-box .val { font-family:ui-monospace,monospace; font-weight:800; color:var(--accent-soft); font-size:18px; }
+  input[type=range]{ width:100%; accent-color:var(--accent); }
+  .slider-box.pm input{accent-color:var(--accent-2)} .slider-box.pm .val{color:var(--accent-2)}
+  .verdict { text-align:center; margin-top:14px; font-family:ui-monospace,monospace; font-size:15px; color:var(--text-dim); }
+  .verdict strong{ color:var(--accent-soft); }
+  .big-num { text-align:center; margin-top:16px; }
+  .big-num .num { font-family:ui-monospace,monospace; font-size:clamp(48px,10vw,80px); font-weight:900; line-height:1; color:var(--accent); text-shadow:0 0 28px rgba(244,114,182,0.35); }
+  .big-num .grade { font-size:16px; font-weight:800; margin-top:6px; }
+
+  @keyframes fadeUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.4);opacity:.65;} }
+  @media (max-width: 620px){ .grid-2,.grid-3,.fail-grid{grid-template-columns:1fr;} .container{padding:26px 16px 70px;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Track · MSc-Level Deep Dive · ~10 pages</span></div>
+  <h1 class="hero"><span class="emoji">🛠️</span>TPM — Total Productive Maintenance</h1>
+  <p class="hero-sub">The full theory behind the maintenance philosophy that lifts a plant to world-class OEE: the maintenance-strategy evolution, the 8 pillars, autonomous maintenance, the 7 cleaning-to-care steps, MTBF/MTTR/availability math, the six-loss attack, and the culture that sustains it.</p>
+
+  <div class="connect">
+    <span class="pill">↔ MICRO 23</span>
+    <span>This deep dive expands the 90-second card <a href="../23_TPM.html">“TPM”</a>. The card gave you the temple, four pillars and the slogan “everyone owns every machine.” Here we build it rigorously: the four maintenance strategies and where each belongs, all <em>8</em> pillars (not just 4), the seven steps of Autonomous Maintenance, the reliability math (MTBF, MTTR, availability) that turns culture into a number, how TPM directly attacks the <a href="A22_OEE_Deep_Dive.html">A22 OEE</a> six big losses, and the rollout that makes it stick. It feeds forward into <a href="A22_OEE_Deep_Dive.html">A22 OEE</a> (the scoreboard), <a href="A19_Bearings_Deep_Dive.html">A19 Bearings</a> (the components AM protects) and <a href="A31_Digital_Twins_I40_Deep_Dive.html">A31 Digital Twins</a> (where condition data lives).</span>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · Why TPM exists</a>
+    <a href="#p2">2 · Maintenance strategies</a>
+    <a href="#p3">3 · The 8 pillars</a>
+    <a href="#p4">4 · Autonomous maintenance</a>
+    <a href="#p5">5 · Planned maintenance</a>
+    <a href="#p6">6 · The reliability math</a>
+    <a href="#p7">7 · Six losses &amp; OEE link</a>
+    <a href="#p8">8 · Rollout &amp; 12 steps</a>
+    <a href="#p9">9 · Pitfalls</a>
+    <a href="#p10">10 · Recall</a>
+  </div>
+
+  <!-- PAGE 1 -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 · Foundations</span>
+    <h2 class="page-title">Why TPM Exists — Maintenance as Production, Not Repair</h2>
+    <div class="card">
+      <div class="label">Precise Definition</div>
+      <p class="lead"><span class="hl">TPM</span> is a company-wide system that maximises <strong>equipment effectiveness over its whole life</strong> by making every employee — operators included — responsible for preventing loss, with the goal of <strong>zero breakdowns, zero defects, zero accidents</strong>.</p>
+      <p class="body">The micro card called TPM a “culture and method.” Let us make that precise. Traditional maintenance is a <em>fix-it department</em>: operators run, maintainers repair, and the two rarely meet. TPM rejects that split. It treats the machine's condition as a <strong>shared product</strong> of the people who run it and the people who service it. The word <span class="hl">“Total”</span> carries three meanings at once: total <em>effectiveness</em> (chase profit, not just uptime), total <em>system</em> (prevention designed across the whole life cycle), and total <em>participation</em> (everyone, every level).</p>
+      <p class="body">TPM was formalised by <strong>Seiichi Nakajima</strong> at the Japan Institute of Plant Maintenance (JIPM) and first deployed at <strong>Nippondenso</strong> (a Toyota supplier) in <strong>1971</strong>. It grew out of American Preventive Maintenance but added the radical step of <em>operator ownership</em> — and it is no accident that the same company gave us OEE. <strong>TPM is the engine; OEE is the gauge.</strong></p>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="mini c-pink"><h4>Loss-elimination, not repair</h4><p>The target is hidden loss across the whole lifecycle, not just the next breakdown.</p></div>
+        <div class="mini c-blue"><h4>Everyone participates</h4><p>Operators do basic care; specialists do complex work; design prevents loss upstream.</p></div>
+        <div class="mini c-amb"><h4>Measured by OEE</h4><p>Every pillar exists to lift Availability, Performance or Quality (A22).</p></div>
+        <div class="mini c-teal"><h4>Culture that lasts</h4><p>Small-group activity + visual standards keep gains from sliding back.</p></div>
+      </div>
+      <div class="label" style="margin-top:22px">The engineer's mindset</div>
+      <p class="body">A breakdown is never a surprise — it is the <strong>last event in a chain of ignored signals</strong>: a small leak, a loose bolt, a faint vibration, a missed lubrication. TPM's central insight is that the operator standing at the machine all shift is the cheapest, fastest sensor you have — if you teach them to look. The chapters ahead turn “everyone owns every machine” into a defined set of strategies, pillars, steps and equations.</p>
+    </div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 · The Strategy Ladder</span>
+    <h2 class="page-title">The Four Maintenance Strategies — and Where Each Belongs</h2>
+    <div class="card">
+      <p class="body">The micro card showed three strategies. There are really <strong>four</strong>, and TPM is not “one of them” — it is a <em>system that deploys the right mix of all four per asset</em>. The deciding question for every machine: <span class="hl">what does failure cost, and can I see it coming?</span></p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 540 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Maintenance strategy evolution from reactive to prescriptive with rising cost-avoidance">
+          <defs>
+            <linearGradient id="ramp" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#ef4444"/><stop offset="40%" stop-color="#fbbf24"/><stop offset="75%" stop-color="#34d399"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient>
+          </defs>
+          <!-- axes -->
+          <line x1="56" y1="230" x2="520" y2="230" stroke="#475569" stroke-width="1.5"/>
+          <line x1="56" y1="230" x2="56" y2="24" stroke="#475569" stroke-width="1.5"/>
+          <text x="40" y="130" fill="#94a3b8" font-size="10" transform="rotate(-90 40 130)" text-anchor="middle">Value / cost avoided →</text>
+          <text x="290" y="258" fill="#94a3b8" font-size="10" text-anchor="middle">Sophistication / data needed →</text>
+          <!-- rising curve -->
+          <path d="M70 218 Q200 200 260 150 T430 70 L500 46" fill="none" stroke="url(#ramp)" stroke-width="5" stroke-linecap="round"/>
+          <!-- nodes -->
+          <g font-size="11" font-weight="700">
+            <circle cx="86"  cy="212" r="8" fill="#ef4444"/>
+            <text x="86"  y="196" fill="#fca5a5" text-anchor="middle">Reactive</text>
+            <text x="86"  y="226" fill="#94a3b8" font-size="9" text-anchor="middle">run to fail</text>
+            <circle cx="210" cy="178" r="8" fill="#fbbf24"/>
+            <text x="210" y="162" fill="#fbbf24" text-anchor="middle">Preventive</text>
+            <text x="210" y="192" fill="#94a3b8" font-size="9" text-anchor="middle">time-based PM</text>
+            <circle cx="340" cy="120" r="8" fill="#34d399"/>
+            <text x="340" y="104" fill="#34d399" text-anchor="middle">Predictive (CBM)</text>
+            <text x="340" y="134" fill="#94a3b8" font-size="9" text-anchor="middle">condition-based</text>
+            <circle cx="470" cy="60" r="8" fill="#60a5fa"/>
+            <text x="470" y="44" fill="#60a5fa" text-anchor="middle">Prescriptive</text>
+            <text x="470" y="74" fill="#94a3b8" font-size="9" text-anchor="middle">AI + digital twin</text>
+          </g>
+        </svg>
+        <div class="cap">The maintenance maturity curve. Each step needs more data and discipline but avoids more cost. TPM moves an asset up the curve — and, crucially, decides <em>how far up each machine should go.</em></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:14px">
+        <table>
+          <thead><tr><th>Strategy</th><th>Trigger</th><th>Best for</th><th>Weakness</th></tr></thead>
+          <tbody>
+            <tr><td><b style="color:#fca5a5">Reactive (RTF)</b></td><td>Failure has happened</td><td>Cheap, non-critical, redundant items (a $5 lamp).</td><td>Unplanned stops, scrap, secondary damage, safety risk.</td></tr>
+            <tr><td><b style="color:var(--accent-3)">Preventive (PM)</b></td><td>Calendar / run-hours / cycles</td><td>Known wear-out items (filters, belts, oil).</td><td>Over-maintains some, under-maintains others — fixed interval ≠ real condition.</td></tr>
+            <tr><td><b style="color:var(--green)">Predictive (CBM/PdM)</b></td><td>Measured condition crosses a limit</td><td>Critical rotating gear — bearings, motors, gearboxes.</td><td>Needs sensors, baselines &amp; analysis skill (vibration, oil, thermography).</td></tr>
+            <tr><td><b style="color:var(--blue)">Prescriptive</b></td><td>Model predicts failure <em>and</em> recommends the fix</td><td>High-value assets with a digital twin.</td><td>Data-hungry; needs ML, RUL models &amp; trustworthy data (A31).</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pro" style="margin-top:14px">
+        <div class="pt">💡 The P-F curve — why PdM beats PM</div>
+        <p>Every failure has a <em>P-F interval</em>: the time from when a defect first becomes <strong>detectable (P)</strong> to <strong>functional failure (F)</strong>. Time-based PM ignores it and services on a fixed clock. Condition monitoring catches the defect at P and schedules the fix inside the P-F window — replacing a bearing the week before it would have seized, not on an arbitrary calendar date. TPM's <em>autonomous</em> inspection is the cheapest P-detector of all: the human eye and ear at point P.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 · The 8 Pillars</span>
+    <h2 class="page-title">The Eight Pillars of TPM — Tap to Explore</h2>
+    <div class="card">
+      <p class="body">The micro card showed four core pillars. The full JIPM model has <span class="hl">eight</span>, all standing on a <strong>5S foundation</strong> and supporting one roof: <em>zero breakdowns, zero defects, zero accidents.</em> Tap any pillar to see what it does and a shop-floor example.</p>
+      <div class="stage">
+        <div style="background:linear-gradient(180deg,var(--accent),#be185d);color:#fff;text-align:center;padding:14px 10px;font-weight:800;border-radius:6px;font-size:14px;letter-spacing:.03em;">🎯 ZERO BREAKDOWNS · ZERO DEFECTS · ZERO ACCIDENTS</div>
+        <div class="temple" id="temple">
+          <div class="pcol active" data-p="am"><span class="pi">👷</span><span class="pn">Autonomous Maint.</span></div>
+          <div class="pcol" data-p="pm"><span class="pi">📅</span><span class="pn">Planned Maint.</span></div>
+          <div class="pcol" data-p="ki"><span class="pi">🎯</span><span class="pn">Focused Improve</span></div>
+          <div class="pcol" data-p="qm"><span class="pi">🏆</span><span class="pn">Quality Maint.</span></div>
+          <div class="pcol" data-p="em"><span class="pi">📐</span><span class="pn">Early Equip. Mgmt</span></div>
+          <div class="pcol" data-p="tr"><span class="pi">🎓</span><span class="pn">Training &amp; Skills</span></div>
+          <div class="pcol" data-p="sh"><span class="pi">🦺</span><span class="pn">Safety/Health/Env</span></div>
+          <div class="pcol" data-p="of"><span class="pi">🗂️</span><span class="pn">Office TPM</span></div>
+        </div>
+        <div style="background:linear-gradient(180deg,var(--accent-3),#b45309);color:var(--bg);text-align:center;padding:12px;font-weight:800;border-radius:0 0 6px 6px;font-size:13px;letter-spacing:.04em;">🧹 FOUNDATION · 5S + Visual Management + Standard Work</div>
+        <div class="pinfo" id="pinfo">
+          <h4>👷 Pillar 1 · Autonomous Maintenance (Jishu Hozen)</h4>
+          <p>Operators take ownership of basic care — cleaning, lubrication, tightening (CLT) and inspection — so they detect and arrest deterioration before it becomes failure.</p>
+          <div class="ex">Example: <b>Operator cleans a conveyor daily, spots a hairline crack in a chain link, swaps it at the planned stop — no line-down event.</b></div>
+        </div>
+      </div>
+      <p class="body" style="margin-top:12px">The order matters: the first four pillars are the <strong>operational core</strong> (you'll see them on every TPM site). The last four are the <strong>enabling pillars</strong> — they make the core sustainable and push prevention upstream into design (Early Equipment Management) and across the office (Office TPM). 5S underneath is non-negotiable: <em>you cannot inspect a dirty machine</em>, because grime hides the very leaks and cracks AM is meant to catch.</p>
+    </div>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 · Pillar 1 in Depth</span>
+    <h2 class="page-title">Autonomous Maintenance — The Seven Steps</h2>
+    <div class="card">
+      <p class="body">Autonomous Maintenance (AM, <em>Jishu Hozen</em>) is the heart of TPM and the hardest to do well. It is rolled out in <span class="hl">seven disciplined steps</span> — each completed and audited before the next. The progression takes operators from “I just press the button” to “I understand and protect this machine.”</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Seven steps of autonomous maintenance as an ascending staircase">
+          <defs><linearGradient id="stair" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f472b6"/><stop offset="100%" stop-color="#be185d"/></linearGradient></defs>
+          <g font-size="9.5" fill="#fde">
+            <rect x="20"  y="200" width="64" height="34" rx="4" fill="url(#stair)" opacity="0.55"/><text x="52"  y="221" text-anchor="middle" fill="#fff" font-weight="700">1 Clean &amp;<tspan x="52" dy="11">inspect</tspan></text>
+            <rect x="88"  y="172" width="64" height="62" rx="4" fill="url(#stair)" opacity="0.62"/><text x="120" y="200" text-anchor="middle" fill="#fff" font-weight="700">2 Tackle<tspan x="120" dy="11">sources</tspan></text>
+            <rect x="156" y="144" width="64" height="90" rx="4" fill="url(#stair)" opacity="0.70"/><text x="188" y="186" text-anchor="middle" fill="#fff" font-weight="700">3 Stds:<tspan x="188" dy="11">CLT</tspan></text>
+            <rect x="224" y="116" width="64" height="118" rx="4" fill="url(#stair)" opacity="0.78"/><text x="256" y="172" text-anchor="middle" fill="#fff" font-weight="700">4 General<tspan x="256" dy="11">inspection</tspan></text>
+            <rect x="292" y="88"  width="64" height="146" rx="4" fill="url(#stair)" opacity="0.86"/><text x="324" y="158" text-anchor="middle" fill="#fff" font-weight="700">5 Auton.<tspan x="324" dy="11">inspection</tspan></text>
+            <rect x="360" y="60"  width="64" height="174" rx="4" fill="url(#stair)" opacity="0.93"/><text x="392" y="146" text-anchor="middle" fill="#fff" font-weight="700">6 Standard-<tspan x="392" dy="11">isation</tspan></text>
+            <rect x="428" y="32"  width="64" height="202" rx="4" fill="url(#stair)"/><text x="460" y="130" text-anchor="middle" fill="#fff" font-weight="700">7 Full self-<tspan x="460" dy="11">management</tspan></text>
+          </g>
+        </svg>
+        <div class="cap">The seven-step AM staircase. Each step is audited (a “step certification”) before the team climbs to the next — capability and ownership grow together.</div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:12px">
+        <table>
+          <thead><tr><th>Step</th><th>What the team does</th><th>What it builds</th></tr></thead>
+          <tbody>
+            <tr><td><b>1 · Initial clean</b></td><td>Deep-clean &amp; inspect; cleaning <em>is</em> inspection; tag every defect found.</td><td>Exposes hidden defects; restores base condition.</td></tr>
+            <tr><td><b>2 · Sources &amp; hard spots</b></td><td>Eliminate sources of contamination &amp; places hard to clean/lube/inspect.</td><td>Makes the machine quick to keep clean.</td></tr>
+            <tr><td><b>3 · CLT standards</b></td><td>Operators write provisional <em>Clean–Lubricate–Tighten</em> standards with time targets.</td><td>Daily care becomes repeatable &amp; visual.</td></tr>
+            <tr><td><b>4 · General inspection</b></td><td>Training on each subsystem (hydraulics, drives, electrics); inspect by checklist.</td><td>Operator skill — they now understand mechanisms.</td></tr>
+            <tr><td><b>5 · Autonomous inspection</b></td><td>Operators run their own inspection standards reliably; overlap with PM removed.</td><td>Ownership of condition monitoring.</td></tr>
+            <tr><td><b>6 · Standardisation</b></td><td>Standardise the whole workplace — flows, tools, data, visual controls.</td><td>Order &amp; consistency across the area.</td></tr>
+            <tr><td><b>7 · Full self-management</b></td><td>Team continuously improves, sets own targets, sustains the gains.</td><td>A self-directed, improving cell.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pro" style="margin-top:14px">
+        <div class="pt">🏷️ The red/blue tag system</div>
+        <p>During AM, every abnormality gets a physical <em>tag</em>. <strong>Blue (operator)</strong> tags = fixes the team can do; <strong>red (maintenance)</strong> tags = needs a specialist. Open-vs-closed tag counts become a live visual KPI of the machine's restoration — and a fair split of work between operators and maintainers. This is “everyone owns every machine,” made concrete.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 5 -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 · Pillar 2 in Depth</span>
+    <h2 class="page-title">Planned Maintenance — The Specialist's Half</h2>
+    <div class="card">
+      <p class="body">If AM is the operator's half, <span class="hl">Planned Maintenance (PM)</span> is the maintainer's. With operators now catching the small stuff, the maintenance team is freed to do proactive, scheduled, skilled work — and to drive the asset up the strategy curve from reactive toward predictive.</p>
+      <div class="grid-2">
+        <div class="mini c-blue"><h4>Build the asset register</h4><p>Criticality-rank every machine; failure here decides the strategy mix.</p></div>
+        <div class="mini c-pink"><h4>Eliminate forced deterioration</h4><p>Fix the AM tags; restore design condition so PM intervals make sense.</p></div>
+        <div class="mini c-amb"><h4>Information &amp; spares system</h4><p>CMMS history, BOMs, spares min/max, PM job plans — the data backbone.</p></div>
+        <div class="mini c-grn"><h4>Move to condition-based</h4><p>Add vibration/oil/thermal routes; replace calendar PM with PdM where it pays.</p></div>
+      </div>
+      <p class="body" style="margin-top:14px">A mature PM system tracks a small set of leading and lagging indicators and feeds them straight back into strategy. The key relationship: as AM + PM mature, <strong>the ratio of planned-to-unplanned work flips</strong>. A reactive plant runs ~80% unplanned (“firefighting”); a TPM plant pushes planned work above 80–90%, which is cheaper, safer and predictable.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bar comparison of planned versus unplanned work before and after TPM">
+          <text x="20" y="40" fill="#fca5a5" font-size="12" font-weight="700">Before TPM</text>
+          <rect x="120" y="26" width="312" height="26" rx="5" fill="#7f1d1d"/>
+          <rect x="120" y="26" width="62"  height="26" rx="5" fill="#34d399"/>
+          <text x="151" y="44" fill="#04140d" font-size="11" font-weight="800" text-anchor="middle">20%</text>
+          <text x="300" y="44" fill="#fecaca" font-size="11" font-weight="700" text-anchor="middle">80% unplanned firefighting</text>
+          <text x="20" y="108" fill="#6ee7b7" font-size="12" font-weight="700">After TPM</text>
+          <rect x="120" y="94" width="312" height="26" rx="5" fill="#7f1d1d"/>
+          <rect x="120" y="94" width="272" height="26" rx="5" fill="#34d399"/>
+          <text x="256" y="112" fill="#04140d" font-size="11" font-weight="800" text-anchor="middle">~87% planned (AM + PM + PdM)</text>
+          <text x="412" y="112" fill="#fecaca" font-size="11" font-weight="700" text-anchor="middle">13%</text>
+          <text x="120" y="142" fill="#94a3b8" font-size="10">🟩 planned &nbsp; 🟥 unplanned — the goal is to flip the ratio, not just shrink the bar.</text>
+        </svg>
+        <div class="cap">TPM flips the work mix from mostly-unplanned to mostly-planned. Planned work is roughly 3–5× cheaper per job than the same repair done as an emergency breakdown.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 6 -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 · The Math</span>
+    <h2 class="page-title">The Reliability Math — MTBF, MTTR &amp; Availability</h2>
+    <div class="card">
+      <p class="body">TPM is a culture, but it is measured with hard reliability engineering. Three metrics convert “fewer breakdowns” into numbers a manager can track — and they map straight onto the <strong>Availability</strong> factor of OEE.</p>
+      <div class="eqn">MTBF = Total Run Time / Number of failures        <span class="v2">Mean Time Between Failures — reliability</span>
+MTTR = Total Repair Time / Number of failures     <span class="v3">Mean Time To Repair — maintainability</span>
+
+Inherent Availability  A = MTBF / (MTBF + MTTR)   <span class="v2">the bridge to OEE's “A”</span></div>
+      <p class="body">Read the levers directly: <strong>AM and PdM raise MTBF</strong> (failures happen less often); <strong>better spares, job plans and training lower MTTR</strong> (when they do happen, you're back fast). Availability rises from <em>both</em> ends. This is why TPM attacks reliability <em>and</em> maintainability together — pushing only one leaves availability on the table.</p>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="mini c-pink"><div class="big">↑</div><h4>MTBF</h4><p>Autonomous care + condition monitoring → fewer failures.</p></div>
+        <div class="mini c-blue"><div class="big">↓</div><h4>MTTR</h4><p>Spares ready, job plans written, operators trained → faster recovery.</p></div>
+        <div class="mini c-grn"><div class="big">A↑</div><h4>Availability</h4><p>Both levers push A = MTBF/(MTBF+MTTR) upward.</p></div>
+      </div>
+      <div class="pro" style="margin-top:14px">
+        <div class="pt">🧮 Worked example</div>
+        <p>A machine runs <em>4 000 h</em> and suffers <em>8</em> breakdowns totalling <em>20 h</em> of repair. MTBF = 4000/8 = <strong>500 h</strong>; MTTR = 20/8 = <strong>2.5 h</strong>; A = 500/(500+2.5) = <strong>99.5%</strong>. Now halve the failures with AM (MTBF → 1000 h) and the same MTTR gives A = 1000/1002.5 = <strong>99.75%</strong> — and, more importantly, <em>half as many disruptive events</em>, which is where the real Performance and Quality gains hide.</p>
+      </div>
+      <p class="body" style="margin-top:14px">One caution: <strong>MTBF assumes a constant failure rate</strong> (the flat middle of the bathtub curve). During infant mortality or wear-out, the simple mean misleads — which is exactly why condition-based methods (Page 2) and Weibull analysis exist. TPM's AM step 1 (“initial clean exposes hidden defects”) is, in effect, an attack on the bathtub curve's early-failure region.</p>
+    </div>
+  </section>
+
+  <!-- PAGE 7 -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 · The OEE Link</span>
+    <h2 class="page-title">How TPM Attacks the Six Big Losses</h2>
+    <div class="card">
+      <p class="body">TPM and OEE are two halves of one idea: OEE <em>measures</em> the loss, TPM <em>removes</em> it. Every one of the <a href="A22_OEE_Deep_Dive.html" style="color:var(--accent-soft)">six big losses</a> has a TPM pillar or tool pointed straight at it. This table is the bridge between the two cards — and the single most exam-worthy connection in the whole manufacturing track.</p>
+      <div class="tbl-wrap" style="margin-top:8px">
+        <table>
+          <thead><tr><th>OEE factor</th><th>Big loss</th><th>TPM weapon</th></tr></thead>
+          <tbody>
+            <tr><td><b style="color:var(--accent-2)">Availability</b></td><td>1 · Breakdowns</td><td>Autonomous + Planned + Predictive maintenance (raise MTBF).</td></tr>
+            <tr><td><b style="color:var(--accent-2)">Availability</b></td><td>2 · Setup &amp; changeover</td><td>Focused Improvement → <em>SMED</em> (single-minute exchange of die).</td></tr>
+            <tr><td><b style="color:var(--accent-3)">Performance</b></td><td>3 · Minor stops &amp; idling</td><td>AM inspection + poka-yoke + line balancing.</td></tr>
+            <tr><td><b style="color:var(--accent-3)">Performance</b></td><td>4 · Reduced speed</td><td>Restore base condition (AM) so the machine runs at nameplate.</td></tr>
+            <tr><td><b style="color:var(--accent)">Quality</b></td><td>5 · Startup rejects</td><td>Quality Maintenance — control machine conditions at start-up.</td></tr>
+            <tr><td><b style="color:var(--accent)">Quality</b></td><td>6 · Production rejects</td><td>Quality Maintenance + SPC/RCA on the source condition.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="stage" style="margin-top:14px">
+        <svg class="illus" viewBox="0 0 520 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TPM pillars feeding into the three OEE factors">
+          <!-- pillars -->
+          <rect x="20" y="20" width="150" height="40" rx="8" fill="rgba(244,114,182,0.12)" stroke="#f472b6"/><text x="95" y="45" fill="#f9a8d4" font-size="12" text-anchor="middle" font-weight="800">AM + PM + PdM</text>
+          <rect x="20" y="72" width="150" height="40" rx="8" fill="rgba(251,191,36,0.12)" stroke="#fbbf24"/><text x="95" y="97" fill="#fbbf24" font-size="12" text-anchor="middle" font-weight="800">Focused Improve</text>
+          <rect x="20" y="124" width="150" height="40" rx="8" fill="rgba(52,211,153,0.12)" stroke="#34d399"/><text x="95" y="149" fill="#6ee7b7" font-size="12" text-anchor="middle" font-weight="800">Quality Maint.</text>
+          <!-- arrows -->
+          <g stroke="#64748b" stroke-width="2" fill="#64748b">
+            <line x1="170" y1="40"  x2="330" y2="50"/><polygon points="324,45 324,55 334,50"/>
+            <line x1="170" y1="92"  x2="330" y2="90"/><polygon points="324,85 324,95 334,90"/>
+            <line x1="170" y1="144" x2="330" y2="130"/><polygon points="324,125 324,135 334,130"/>
+          </g>
+          <!-- OEE factors -->
+          <rect x="334" y="32" width="166" height="36" rx="8" fill="#0b3b66" stroke="#60a5fa"/><text x="417" y="55" fill="#93c5fd" font-size="12" text-anchor="middle" font-weight="800">Availability ↑</text>
+          <rect x="334" y="74" width="166" height="36" rx="8" fill="#5a4408" stroke="#fbbf24"/><text x="417" y="97" fill="#fde68a" font-size="12" text-anchor="middle" font-weight="800">Performance ↑</text>
+          <rect x="334" y="116" width="166" height="36" rx="8" fill="#064e3b" stroke="#34d399"/><text x="417" y="139" fill="#6ee7b7" font-size="12" text-anchor="middle" font-weight="800">Quality ↑</text>
+        </svg>
+        <div class="cap">The pillars are not abstract — each one feeds a specific OEE factor. Lift the pillars and the OEE number rises by arithmetic, not hope.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 8 -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 · Rollout</span>
+    <h2 class="page-title">Deploying TPM — Nakajima's 12 Steps &amp; the Model Machine</h2>
+    <div class="card">
+      <p class="body">TPM fails far more often from <em>bad rollout</em> than bad theory. JIPM defines a <span class="hl">12-step programme</span> across four phases. You do not boil the ocean — you prove it on one <strong>model machine</strong>, then expand.</p>
+      <div class="tbl-wrap" style="margin-top:8px">
+        <table>
+          <thead><tr><th>Phase</th><th>Key steps</th></tr></thead>
+          <tbody>
+            <tr><td><b style="color:var(--accent)">Preparation</b></td><td>1 Management declares TPM · 2 Educate &amp; promote · 3 Form the TPM organisation · 4 Set policy &amp; baseline OEE targets · 5 Draft the master plan.</td></tr>
+            <tr><td><b style="color:var(--accent-2)">Kick-off</b></td><td>6 Formal launch (everyone, all levels).</td></tr>
+            <tr><td><b style="color:var(--accent-3)">Implementation</b></td><td>7 Focused improvement on the model machine · 8 Autonomous maintenance (7 steps) · 9 Planned maintenance · 10 Operations/maintenance training · 11 Early equipment management.</td></tr>
+            <tr><td><b style="color:var(--green)">Stabilise</b></td><td>12 Perfect TPM, raise the bar, pursue JIPM award.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul class="tips" style="margin-top:14px">
+        <li><span class="num">1</span><div><b>Pick a pilot, not the plant.</b> One “model machine” — visible, painful, winnable — proves the method and trains the first team.</div></li>
+        <li><span class="num">2</span><div><b>Measure OEE before you start.</b> No baseline, no proof. The before/after OEE is your business case for expansion.</div></li>
+        <li><span class="num">3</span><div><b>Small-group activity is the engine.</b> Cross-functional teams (operator + maintainer + engineer) own each machine — that is where ownership becomes real.</div></li>
+        <li><span class="num">4</span><div><b>Leadership must show up.</b> TPM that's delegated to “the maintenance department” dies. It is a management system, declared from the top.</div></li>
+      </ul>
+      <div class="pro" style="margin-top:14px">
+        <div class="pt">⏳ How long?</div>
+        <p>A realistic model-machine result takes <strong>3–6 months</strong>; a full-area rollout <strong>1–3 years</strong>; cultural maturity (self-managing cells, JIPM-award level) <strong>3–5+ years</strong>. TPM is a marathon — which is exactly why the quick early win on the model machine is so important to keep momentum.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 9 -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 · Pitfalls</span>
+    <h2 class="page-title">Why TPM Programmes Fail</h2>
+    <div class="card">
+      <p class="body">TPM's failure modes are remarkably consistent across industries — and almost all are organisational, not technical. Spot these early.</p>
+      <div class="fail-grid">
+        <div class="fail">
+          <div class="ft">🏚️ “Maintenance owns TPM”</div>
+          <p>Treated as a maintenance project, not a company system. Operators never engage, AM never lands. <em>Cure:</em> top-led, operations-owned, everyone participates.</p>
+        </div>
+        <div class="fail">
+          <div class="ft">🧹 Skipping 5S / base condition</div>
+          <p>Jumping to fancy PdM on a filthy, deteriorated machine. You can't monitor what you can't see. <em>Cure:</em> restore base condition first (AM step 1).</p>
+        </div>
+        <div class="fail">
+          <div class="ft">📉 No OEE baseline</div>
+          <p>No before/after number → no proof, no funding, programme quietly dies. <em>Cure:</em> measure honestly from day one (A22).</p>
+        </div>
+        <div class="fail">
+          <div class="ft">⏱️ No protected AM time</div>
+          <p>“Do AM when you get a chance” = never, under production pressure. <em>Cure:</em> scheduled, ring-fenced daily AM time.</p>
+        </div>
+        <div class="fail">
+          <div class="ft">🎖️ Award-chasing over loss-killing</div>
+          <p>Doing TPM for the certificate, not the losses — binders thicken, OEE doesn't move. <em>Cure:</em> keep the Pareto of losses as the scoreboard.</p>
+        </div>
+        <div class="fail">
+          <div class="ft">🔁 No standardisation / sustain</div>
+          <p>Gains slide back once the kaizen event ends. <em>Cure:</em> visual standards, audits, step-certification, leader standard work.</p>
+        </div>
+      </div>
+      <div class="pro" style="margin-top:14px">
+        <div class="pt">🔧 The integrity test</div>
+        <p>A real TPM programme has three fingerprints: <em>operators doing daily AM on a clean machine</em>, <em>a flipped planned/unplanned work ratio</em>, and <em>a rising OEE trend tied to a loss Pareto</em>. Missing any one means you have a poster on the wall, not a system on the floor.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 10 -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 · Consolidate</span>
+    <h2 class="page-title">Practice &amp; Active Recall</h2>
+
+    <div class="card">
+      <div class="label">Try It — Availability from MTBF &amp; MTTR</div>
+      <p class="body">Slide MTBF (reliability — driven up by AM/PdM) and MTTR (maintainability — driven down by spares/training). Watch Availability — the OEE bridge — respond to <em>both</em> levers.</p>
+      <div class="stage">
+        <div class="demo-row">
+          <div class="slider-box">
+            <label>MTBF (hours)</label>
+            <input type="range" id="mtbf" min="50" max="2000" value="500" step="10">
+            <div class="val"><span id="vmtbf">500</span> h</div>
+          </div>
+          <div class="slider-box pm">
+            <label>MTTR (hours)</label>
+            <input type="range" id="mttr" min="0.5" max="20" value="2.5" step="0.5">
+            <div class="val"><span id="vmttr">2.5</span> h</div>
+          </div>
+        </div>
+        <div class="big-num">
+          <div class="num" id="availNum">99.5%</div>
+          <div class="grade" id="availGrade">⭐ Strong availability</div>
+        </div>
+        <div class="verdict">
+          A = MTBF / (MTBF + MTTR) &nbsp;·&nbsp; lever to move = <strong id="lever">MTBF (fewer failures)</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">The TPM loop — five moves</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><b>Restore base condition:</b> 5S + initial clean expose &amp; tag hidden defects (AM step 1).</div></li>
+        <li><span class="num">2</span><div><b>Split the work:</b> operators take daily CLT &amp; inspection; maintainers take skilled/planned work.</div></li>
+        <li><span class="num">3</span><div><b>Measure with OEE:</b> baseline, then Pareto the six big losses (A22).</div></li>
+        <li><span class="num">4</span><div><b>Match pillar to loss:</b> SMED for changeover, PdM for breakdowns, Quality Maintenance for rejects.</div></li>
+        <li><span class="num">5</span><div><b>Standardise &amp; sustain:</b> visual standards, step-certification, leader standard work — then raise the bar.</div></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check 1</div>
+      <p class="quiz-q">Q: Why does TPM insist operators — not just maintainers — do daily cleaning and inspection?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal answer ↓</span>
+        <span class="hidden"><strong>A:</strong> The operator is at the machine every minute of every shift — the cheapest, earliest detector of the small signals (leaks, looseness, vibration, heat) that precede every breakdown. Cleaning <em>is</em> inspection: it forces hands and eyes over every surface, catching the defect at point <b>P</b> on the P-F curve, long before functional failure F.</span>
+      </div>
+      <div class="label">Quick Check 2</div>
+      <p class="quiz-q">Q: A machine runs 6 000 h with 12 breakdowns totalling 30 h of repair. Find MTBF, MTTR and inherent availability.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal answer ↓</span>
+        <span class="hidden"><strong>A:</strong> MTBF = 6000/12 = <b>500 h</b>. MTTR = 30/12 = <b>2.5 h</b>. A = 500/(500+2.5) = <b>99.5%</b>. To raise A, AM/PdM lifts MTBF (fewer events) while better spares/plans cut MTTR (faster recovery) — both push A up.</span>
+      </div>
+      <div class="label">Quick Check 3</div>
+      <p class="quiz-q">Q: Map each of the six big losses to the TPM weapon that removes it.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal answer ↓</span>
+        <span class="hidden"><strong>A:</strong> Breakdowns → AM/PM/PdM. Changeover → SMED (Focused Improvement). Minor stops → AM inspection + poka-yoke. Reduced speed → restore base condition. Startup rejects → Quality Maintenance. Production rejects → Quality Maintenance + SPC/RCA. (Losses 1–2 feed Availability, 3–4 Performance, 5–6 Quality.)</span>
+      </div>
+      <div class="label">Quick Check 4</div>
+      <p class="quiz-q">Q: A plant skips 5S and the initial clean and goes straight to vibration-based PdM. Why does the programme stall?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal answer ↓</span>
+        <span class="hidden"><strong>A:</strong> A dirty, deteriorated machine hides the very defects monitoring is meant to catch and generates so much “forced deterioration” noise that baselines are meaningless. TPM restores <b>base condition first</b> (5S + AM step 1) so signals are clean — only then does condition monitoring earn its keep.</span>
+      </div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"TPM = Operators care daily, specialists plan ahead — so OEE climbs and breakdowns vanish."</p>
+    </div>
+
+    <div class="footer">
+      Advanced Deep Dive A23 · companion to Micro Card 23 “TPM”<br>
+      Links to A22 OEE (the scoreboard) · A19 Bearings · A31 Digital Twins<br>
+      Optimized for iPad Pro 11″ M4 · keratoconus-friendly · self-contained HTML
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // pillar explorer
+  const pillars = {
+    am: {t:'👷 Pillar 1 · Autonomous Maintenance (Jishu Hozen)', p:'Operators take ownership of basic care — cleaning, lubrication, tightening (CLT) and inspection — so they detect and arrest deterioration before it becomes failure.', e:'Operator cleans a conveyor daily, spots a hairline crack in a chain link, swaps it at the planned stop — no line-down event.'},
+    pm: {t:'📅 Pillar 2 · Planned Maintenance', p:'The maintenance team performs scheduled, proactive, skilled work based on time, cycles or — better — measured condition. Builds the asset register, CMMS history and spares system.', e:'Gearbox oil analysed monthly; wear-metal trend triggers a planned bearing change before any breakdown.'},
+    ki: {t:'🎯 Pillar 3 · Focused Improvement (Kobetsu Kaizen)', p:'Cross-functional teams attack the biggest measured losses one at a time with structured problem solving (5-Why, fishbone, A3, SMED).', e:'Team cuts changeover from 40 min to 11 min with SMED — lifting Availability directly.'},
+    qm: {t:'🏆 Pillar 4 · Quality Maintenance (Hinshitsu Hozen)', p:'Build quality into the equipment: identify and control the machine conditions that cause defects, so quality problems are prevented at source, not inspected out.', e:'Lock spindle temperature ±0.5 °C → bore diameter stays in tolerance all shift; startup scrap falls to near zero.'},
+    em: {t:'📐 Pillar 5 · Early Equipment Management', p:'Feed shop-floor lessons back into the design and commissioning of the next machine — maintenance-prevention design, faster ramp-up, fewer inherited defects.', e:'New line specified with quick-access lube points & guards designed for cleaning, learned from AM pain on the old line.'},
+    tr: {t:'🎓 Pillar 6 · Training & Skill Development', p:'Systematically raise operator and maintainer skill — the four-step skill matrix — so the other pillars are actually executable.', e:'Operators trained to read hydraulic schematics can now complete AM step 4 general inspection unaided.'},
+    sh: {t:'🦺 Pillar 7 · Safety, Health & Environment', p:'Pursue zero accidents and zero environmental incidents — a clean, orderly, well-maintained machine is inherently a safer one.', e:'Eliminating an oil leak (an AM source) removes both a slip hazard and a fire risk while cutting waste.'},
+    of: {t:'🗂️ Pillar 8 · Office / Administrative TPM', p:'Apply loss-elimination to support functions — scheduling, procurement, planning — because office waste delays and starves the shop floor.', e:'Streamlined spares-ordering cuts a 5-day parts wait to next-day, slashing MTTR on every job.'}
+  };
+  const pinfo = document.getElementById('pinfo');
+  document.querySelectorAll('.pcol').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      document.querySelectorAll('.pcol').forEach(x=>x.classList.remove('active'));
+      c.classList.add('active');
+      const d = pillars[c.dataset.p];
+      pinfo.innerHTML = `<h4>${d.t}</h4><p>${d.p}</p><div class="ex">Example: <b>${d.e}</b></div>`;
+    });
+  });
+
+  // availability calculator
+  const mtbf=document.getElementById('mtbf'), mttr=document.getElementById('mttr');
+  const vmtbf=document.getElementById('vmtbf'), vmttr=document.getElementById('vmttr');
+  const availNum=document.getElementById('availNum'), availGrade=document.getElementById('availGrade'), lever=document.getElementById('lever');
+  function up(){
+    const b=+mtbf.value, r=+mttr.value;
+    vmtbf.textContent=b; vmttr.textContent=r;
+    const a=b/(b+r)*100;
+    availNum.textContent=a.toFixed(2)+'%';
+    let g,c;
+    if(a>=99){ g='🏆 World-class availability'; c='var(--green)'; }
+    else if(a>=95){ g='⭐ Strong availability'; c='var(--accent)'; }
+    else { g='😟 Frequent disruption'; c='#f87171'; }
+    availGrade.textContent=g; availNum.style.color=c; availGrade.style.color=c;
+    // which lever has more headroom (rough heuristic)
+    lever.textContent = (r/ b > 0.01) ? 'MTTR (faster recovery)' : 'MTBF (fewer failures)';
+  }
+  [mtbf,mttr].forEach(el=>el.addEventListener('input',up));
+  up();
+</script>
+</body>
+</html>

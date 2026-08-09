@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Electric Motors &amp; Machines · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #fb923c;       /* motor copper-orange */
+    --accent-soft: #fdba74;
+    --accent-2: #38bdf8;      /* rotor / flux blue */
+    --accent-3: #4ade80;      /* winding green */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(244,63,94,0.13), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(56,189,248,0.06), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(244,63,94,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(244,63,94,0.14), rgba(56,189,248,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(251,146,60,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-3)!important; } .c-sky .big{color:var(--accent-3)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #f87171, #881337); color: #fff1f2; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(255,241,242,0.8); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(251,146,60,0.10); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:70px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style></head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Electrical &amp; Electronics · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🔄</span>Electric Motors &amp; Machines</h1>
+  <p class="hero-sub">The workhorse of every factory, from first principles to the drive room. How torque is really made (force on a conductor, flux interaction, and reluctance), the four machine families — DC, induction, synchronous/PM, and stepper/special — their equivalent circuits and torque–speed curves, where every watt of loss goes, the IEC 60034 nameplate and its insulation/enclosure/duty codes, IE efficiency classes IE1–IE5, motor testing and protection, and how to size, select, protect and monitor a motor for a real load. The physics behind A08 (VFD), A09 (Servo) and A51 (Starters).</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>A full advanced module. Related:</span>
+    <a href="A08_VFD_Deep_Dive.html">A08 VFD →</a>
+    <a href="A09_Servo_Motion_Deep_Dive.html">A09 Servo &amp; Motion →</a>
+    <a href="A51_Motor_Starters_Control_Circuits_Deep_Dive.html">A51 Motor Starters →</a>
+    <a href="A30_Three_Phase_Power_Deep_Dive.html">A30 Three-Phase Power →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · How a Motor Makes Torque</a>
+    <a href="#p2">2 · Electromechanical Fundamentals</a>
+    <a href="#p3">3 · DC Motors</a>
+    <a href="#p4">4 · Induction Motor — Construction</a>
+    <a href="#p5">5 · Induction — Equivalent Circuit</a>
+    <a href="#p6">6 · Torque–Speed &amp; Operation</a>
+    <a href="#p7">7 · Synchronous &amp; PM Machines</a>
+    <a href="#p8">8 · Stepper &amp; Special Motors</a>
+    <a href="#p9">9 · Losses, Efficiency &amp; IE Classes</a>
+    <a href="#p10">10 · Nameplate, Insulation &amp; Cooling</a>
+    <a href="#p11">11 · Testing, Protection &amp; CM</a>
+    <a href="#p12">12 · Selection &amp; Sizing · Recap</a>
+    <a href="#p13">13 · Worked Examples</a>
+    <a href="#p14">14 · Problem Set</a>
+    <a href="#p15">15 · Derivations &amp; Traps</a>
+    <a href="#p16">16 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ============ PAGE 1 ============ -->
+  <section class="page" id="p1">
+    <div class="page-tag">Page 1 / 16</div>
+    <h2 class="page-title">How a Motor Actually Makes Torque</h2>
+    <p class="page-sub">Every electric motor is one idea in three costumes: put current in a magnetic field, get force — and the geometry decides which "family" you built.</p>
+
+    <p class="lead">An electric motor is an <b>electromechanical energy converter</b>: it turns electrical power (V·I) into mechanical power (T·ω) with the magnetic field as the invisible gear between them. Roughly <span class="hl">45% of the world's electricity</span> is consumed by electric motors, so a single point of efficiency is a national quantity of energy. Master the field and you master the whole zoo.</p>
+
+    <div class="card">
+      <div class="label">Two Ways to See the Same Torque</div>
+      <div class="grid-2">
+        <div class="mini c-blue"><h4>① Force on a conductor (BIL)</h4><p>A wire of length ℓ carrying current I in a field B feels <b>F = B·I·ℓ</b>. Wrap N such conductors on a rotor at radius r and the torque is T = N·B·I·ℓ·r. This is the "motor-effect" picture — brushed DC motors are its clearest embodiment.</p></div>
+        <div class="mini c-grn"><h4>② Two fields trying to align</h4><p>A stator field and a rotor field pull into alignment like two bar magnets. Torque ∝ the <b>product of the two field strengths × sin(δ)</b>, the angle between them. Synchronous and PM machines are this picture; the "torque angle" δ is the currency.</p></div>
+      </div>
+      <p style="margin-top:12px">Both are the same Maxwell-stress physics. A third, subtler mechanism — <span class="hl2">reluctance torque</span> — appears when the rotor is magnetically <i>shaped</i> so the flux path wants to pull it into the low-reluctance position (SynRM, IPM, stepper VR, and the salient-pole term in any machine).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The Motor Family Tree</div>
+      <div class="svg-wrap">
+      <svg viewBox="0 0 760 400" style="width:100%;height:auto;background:var(--bg-2);border-radius:12px" role="img" aria-label="Electric motor family tree">
+        <text x="380" y="30" text-anchor="middle" fill="#fdba74" font-size="19" font-weight="800">ELECTRIC MOTORS</text>
+        <line x1="380" y1="38" x2="200" y2="70" stroke="#475569" stroke-width="2"/>
+        <line x1="380" y1="38" x2="560" y2="70" stroke="#475569" stroke-width="2"/>
+        <!-- DC branch -->
+        <rect x="110" y="72" width="180" height="34" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+        <text x="200" y="94" text-anchor="middle" fill="#7dd3fc" font-size="15" font-weight="700">DC (commutated)</text>
+        <rect x="70" y="128" width="115" height="30" rx="7" fill="#0b1220" stroke="#334155"/><text x="127" y="148" text-anchor="middle" fill="#cbd5e1" font-size="12">Shunt / Series</text>
+        <rect x="70" y="166" width="115" height="30" rx="7" fill="#0b1220" stroke="#334155"/><text x="127" y="186" text-anchor="middle" fill="#cbd5e1" font-size="12">Compound / PM</text>
+        <rect x="70" y="204" width="115" height="30" rx="7" fill="#0b1220" stroke="#334155"/><text x="127" y="224" text-anchor="middle" fill="#cbd5e1" font-size="12">Universal (AC/DC)</text>
+        <line x1="200" y1="106" x2="127" y2="128" stroke="#334155"/><line x1="200" y1="106" x2="127" y2="166" stroke="#334155"/><line x1="200" y1="106" x2="127" y2="204" stroke="#334155"/>
+        <!-- AC branch -->
+        <rect x="470" y="72" width="180" height="34" rx="8" fill="#1e293b" stroke="#fb923c" stroke-width="2"/>
+        <text x="560" y="94" text-anchor="middle" fill="#fdba74" font-size="15" font-weight="700">AC</text>
+        <text x="560" y="130" text-anchor="middle" fill="#94a3b8" font-size="12" font-weight="700">Asynchronous</text>
+        <rect x="410" y="140" width="140" height="30" rx="7" fill="#0b1220" stroke="#334155"/><text x="480" y="160" text-anchor="middle" fill="#cbd5e1" font-size="12">Induction — cage</text>
+        <rect x="410" y="178" width="140" height="30" rx="7" fill="#0b1220" stroke="#334155"/><text x="480" y="198" text-anchor="middle" fill="#cbd5e1" font-size="12">Induction — wound</text>
+        <text x="640" y="130" text-anchor="middle" fill="#94a3b8" font-size="12" font-weight="700">Synchronous</text>
+        <rect x="575" y="140" width="150" height="30" rx="7" fill="#0b1220" stroke="#334155"/><text x="650" y="160" text-anchor="middle" fill="#cbd5e1" font-size="12">PMSM / BLDC</text>
+        <rect x="575" y="178" width="150" height="30" rx="7" fill="#0b1220" stroke="#334155"/><text x="650" y="198" text-anchor="middle" fill="#cbd5e1" font-size="12">SynRM / WRSM</text>
+        <line x1="560" y1="106" x2="480" y2="140" stroke="#334155"/><line x1="560" y1="106" x2="650" y2="140" stroke="#334155"/>
+        <!-- special row -->
+        <rect x="250" y="270" width="260" height="34" rx="8" fill="#1e293b" stroke="#4ade80" stroke-width="2"/>
+        <text x="380" y="292" text-anchor="middle" fill="#86efac" font-size="14" font-weight="700">Stepper · SRM · Hysteresis (special)</text>
+        <line x1="200" y1="234" x2="330" y2="270" stroke="#334155" stroke-dasharray="3 3"/>
+        <line x1="650" y1="208" x2="440" y2="270" stroke="#334155" stroke-dasharray="3 3"/>
+        <text x="380" y="345" text-anchor="middle" fill="#64748b" font-size="12.5">Blue = commutation supplies rotor current mechanically · Orange = field crosses the air-gap by induction or magnets</text>
+        <text x="380" y="368" text-anchor="middle" fill="#64748b" font-size="12.5">Asynchronous slips behind the field to make torque · Synchronous locks to it</text>
+      </svg></div>
+    </div>
+
+    <div class="card">
+      <div class="label">The One Distinction That Organises Everything</div>
+      <p>Ask of any AC machine: <b>does the rotor turn at the same speed as the stator's rotating field, or slower?</b></p>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>Synchronous</b> — rotor locks to the field (n = n<sub>s</sub>). The rotor carries its own excitation (magnets, DC winding, or salient iron). No slip, no rotor-copper loss → the efficiency champions (PMSM, SynRM). Speed is rigidly set by frequency.</span></li>
+        <li><span class="num">2</span><span><b>Asynchronous (induction)</b> — rotor runs <i>slower</i> than the field by the <b>slip</b> s. The relative motion <i>induces</i> the rotor current (Faraday), which is why it needs no brushes or magnets — the world's most-used motor precisely because it is so rugged and cheap.</span></li>
+        <li><span class="num">3</span><span><b>Commutated (DC / universal)</b> — a mechanical (brush) or electronic (BLDC) switch keeps rotor current always positioned to make torque, so torque control is trivial and instantaneous. The price is brushes, or the inverter that replaces them.</span></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">Why does an induction motor produce <b>zero</b> torque at exactly synchronous speed — the moment it would seem to be "keeping up" best?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Torque in an induction motor depends on rotor current, and rotor current is <i>induced</i> only when the rotor conductors cut lines of the rotating flux — i.e. when there is relative motion (slip). At synchronous speed the rotor moves exactly with the field, the relative speed is zero, no EMF is induced, no rotor current flows, and F = BIℓ = 0. The machine <b>must</b> slip to make torque; that is why it is called asynchronous. Real motors settle at a small slip (typically 1–5%) where the induced torque exactly balances the load.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 ============ -->
+  <section class="page" id="p2">
+    <div class="page-tag">Page 2 / 16</div>
+    <h2 class="page-title">Electromechanical Fundamentals</h2>
+    <p class="page-sub">Five equations run every motor on Earth. Learn them once here and the rest of this module is bookkeeping.</p>
+
+    <div class="card">
+      <div class="label">The Force / EMF Duality</div>
+      <p>The same B-field does two jobs at once, and they are reciprocal:</p>
+      <div class="eqn"><b>Motor effect</b> &nbsp; F = B·I·ℓ &nbsp;&nbsp;(force on a current-carrying conductor, N)</div>
+      <div class="eqn"><b>Generator effect</b> &nbsp; e = B·ℓ·v &nbsp;&nbsp;(motional EMF, the <span class="v2">back-EMF</span>, V)</div>
+      <p>Every motor is also a generator: as it spins it produces a back-EMF that <i>opposes</i> the supply. The back-EMF is what limits the current at speed — stall a motor and back-EMF collapses to zero, current soars to <b>V/R</b> (the locked-rotor current, 6–8× rated). This single fact explains inrush, starting protection, and why V/f control exists.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Torque, Power &amp; the Energy Balance</div>
+      <div class="eqn">T = k·Φ·I<sub>a</sub> &nbsp;&nbsp;·&nbsp;&nbsp; E<sub>b</sub> = k·Φ·ω &nbsp;&nbsp;·&nbsp;&nbsp; P<sub>mech</sub> = T·ω = E<sub>b</sub>·I<sub>a</sub></div>
+      <p>Multiply torque by speed and you get the mechanical power; multiply back-EMF by armature current and you get the <i>same</i> number — that identity <b>E<sub>b</sub>·I<sub>a</sub> = T·ω</b> is the electromechanical energy balance, the hinge of the whole subject. Note torque needs <b>flux × current</b>: weaken the field and you need more current for the same torque (the field-weakening trade at high speed).</p>
+      <div class="grid-3" style="margin-top:12px">
+        <div class="mini c-amb"><h4>P (kW)</h4><p class="big">T·ω/1000</p><p>ω in rad/s = 2πN/60</p></div>
+        <div class="mini c-blue"><h4>Shortcut</h4><p class="big">T ≈ 9550·P/N</p><p>T in N·m, P in kW, N in rpm</p></div>
+        <div class="mini c-grn"><h4>HP↔kW</h4><p class="big">1 hp = 746 W</p><p>metric hp = 736 W</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">The Rotating Magnetic Field — The Heart of AC Machines</div>
+      <p>Feed three windings, spaced 120° in space, with three currents 120° apart in <i>time</i>, and their combined MMF is a field of constant magnitude that <b>rotates</b> at the synchronous speed:</p>
+      <div class="eqn">n<sub>s</sub> = <span class="v2">120·f / P</span> &nbsp;&nbsp;(rpm) &nbsp;&nbsp; ω<sub>s</sub> = 4πf / P &nbsp;(rad/s) &nbsp;— P = number of poles</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Poles P</th><th>50 Hz n<sub>s</sub></th><th>60 Hz n<sub>s</sub></th><th>Typical use</th></tr>
+        <tr><td>2</td><td>3000 rpm</td><td>3600 rpm</td><td>Pumps, compressors, high-speed</td></tr>
+        <tr><td>4</td><td>1500 rpm</td><td>1800 rpm</td><td>The industrial default (fans, conveyors)</td></tr>
+        <tr><td>6</td><td>1000 rpm</td><td>1200 rpm</td><td>Mixers, mills, slow drives</td></tr>
+        <tr><td>8</td><td>750 rpm</td><td>900 rpm</td><td>Crushers, ball mills, high-torque</td></tr>
+      </table></div>
+      <p style="margin-top:10px">This is Tesla's and Ferraris' 1880s insight and it is why the world runs on three-phase: <b>no moving parts create the rotation</b> — the field spins electromagnetically, the rotor merely chases it. (See <a href="A30_Three_Phase_Power_Deep_Dive.html">A30</a> for the 120° phasor mathematics.)</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Where Reluctance Torque Comes From</div>
+      <p>If the rotor's magnetic geometry is <b>salient</b> (d-axis reluctance ≠ q-axis reluctance), the flux exerts a pull that drags the rotor toward the minimum-reluctance alignment. The general torque of a doubly-fed machine has two terms:</p>
+      <div class="eqn">T = <b>k·Φ<sub>f</sub>·I<sub>q</sub></b> &nbsp;+&nbsp; <span class="v3">½·(L<sub>d</sub> − L<sub>q</sub>)·I<sub>d</sub>·I<sub>q</sub></span> &nbsp;&nbsp;(excitation torque + reluctance torque)</div>
+      <p>The first term needs a magnet or field winding; the second needs only <i>shaped iron</i>. IPM (interior-magnet) machines deliberately use both, which is why they dominate EV traction (see <a href="A38_EV_Powertrain_Deep_Dive.html">A38</a>). A pure SynRM uses only the second term — no magnets, no rotor copper, so cheap and efficient but lower power factor.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A 4-pole, 50 Hz motor spins at 1470 rpm on load. What is the synchronous speed, the slip, and the frequency of the rotor currents?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> n<sub>s</sub> = 120·50/4 = <b>1500 rpm</b>. Slip s = (1500 − 1470)/1500 = 30/1500 = <b>0.02 (2%)</b>. Rotor-current frequency f<sub>r</sub> = s·f = 0.02·50 = <b>1 Hz</b>. The rotor sees the flux sweeping past it at only 30 rpm relative, so its induced currents are very low frequency — which is why rotor iron loss is negligible at running speed and why the rotor can be a solid cast-aluminium cage.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 ============ -->
+  <section class="page" id="p3">
+    <div class="page-tag">Page 3 / 16</div>
+    <h2 class="page-title">DC Motors — The Teaching Machine</h2>
+    <p class="page-sub">Obsolete in new installs, indispensable in your head: the DC motor is where torque control is transparent, and every VFD is an emulator of it.</p>
+
+    <div class="card">
+      <div class="label">Construction &amp; the Job of the Commutator</div>
+      <p>A DC motor has a stationary <b>field</b> (poles: wound or permanent magnet) and a rotating <b>armature</b> carrying the working current. The genius is the <span class="hl">commutator</span>: a segmented copper ring with carbon brushes that <b>mechanically reverses</b> the armature current every half-turn, so the force on each conductor always pushes the same rotational way. The commutator is a mechanical inverter — and its brushes are the wear item that killed the DC motor for most modern drives.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The Governing Equations</div>
+      <div class="eqn">V = E<sub>b</sub> + I<sub>a</sub>R<sub>a</sub> &nbsp;&nbsp;→&nbsp;&nbsp; E<sub>b</sub> = V − I<sub>a</sub>R<sub>a</sub> = k·Φ·ω</div>
+      <div class="eqn">ω = <b>(V − I<sub>a</sub>R<sub>a</sub>) / (k·Φ)</b> &nbsp;&nbsp;·&nbsp;&nbsp; T = k·Φ·I<sub>a</sub></div>
+      <p>Read the speed equation like a recipe: raise the <b>voltage V</b> → speed rises (armature-voltage control, the clean method, constant-torque region). Weaken the <b>flux Φ</b> → speed rises but max torque falls (field weakening, constant-power region above base speed). This is <i>exactly</i> what a VFD does to an induction motor by V/f below base and constant-V above — the DC motor just makes it visible.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The DC Motor Family &amp; Their Torque–Speed Signatures</div>
+      <div class="svg-wrap">
+      <svg viewBox="0 0 720 340" style="width:100%;height:auto;background:var(--bg-2);border-radius:12px" role="img" aria-label="DC motor torque-speed curves">
+        <line x1="70" y1="290" x2="680" y2="290" stroke="#475569" stroke-width="2"/>
+        <line x1="70" y1="290" x2="70" y2="40" stroke="#475569" stroke-width="2"/>
+        <text x="375" y="322" text-anchor="middle" fill="#94a3b8" font-size="13">Torque →</text>
+        <text x="30" y="165" text-anchor="middle" fill="#94a3b8" font-size="13" transform="rotate(-90 30 165)">Speed →</text>
+        <!-- shunt: nearly flat -->
+        <path d="M70,110 L640,150" stroke="#38bdf8" stroke-width="3" fill="none"/>
+        <text x="560" y="128" fill="#7dd3fc" font-size="13" font-weight="700">Shunt — stiff, ~constant speed</text>
+        <!-- series: hyperbolic -->
+        <path d="M90,70 Q200,120 340,200 Q460,265 660,285" stroke="#fb923c" stroke-width="3" fill="none"/>
+        <text x="380" y="235" fill="#fdba74" font-size="13" font-weight="700">Series — huge starting torque</text>
+        <text x="150" y="60" fill="#fdba74" font-size="12">runs away at no-load ▲</text>
+        <!-- compound -->
+        <path d="M80,92 Q250,140 420,215 Q520,255 660,278" stroke="#4ade80" stroke-width="3" fill="none" stroke-dasharray="7 4"/>
+        <text x="470" y="200" fill="#86efac" font-size="13" font-weight="700">Compound — a blend</text>
+      </svg></div>
+      <div class="tbl-wrap" style="margin-top:12px"><table>
+        <tr><th>Type</th><th>Field connection</th><th>Character</th><th>Classic use</th></tr>
+        <tr><td><b>Shunt</b></td><td>Field ∥ armature</td><td>Nearly constant speed; modest starting torque</td><td>Machine tools, fans</td></tr>
+        <tr><td><b>Series</b></td><td>Field in series with armature</td><td>T ∝ I<sub>a</sub>² — enormous starting torque; <b>runs away at no load</b></td><td>Traction, cranes, starter motors</td></tr>
+        <tr><td><b>Compound</b></td><td>Both windings</td><td>Series torque + shunt speed-safety</td><td>Presses, hoists, shears</td></tr>
+        <tr><td><b>PM / Sep-excited</b></td><td>Magnet or separate supply</td><td>Linear T–I; best for control</td><td>Servos, EV legacy, toys</td></tr>
+      </table></div>
+      <p style="margin-top:10px"><span class="hl2">Safety trap:</span> a <b>series</b> DC motor must never be belt-coupled or run unloaded — with T ∝ I², removing load lets speed climb until the armature bursts. Always positive-couple.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Armature Reaction &amp; Commutation</div>
+      <p>The armature current makes its own cross-field that <b>distorts and weakens</b> the main flux (armature reaction), shifting the magnetic neutral and causing sparking at the brushes. Cures: <b>interpoles</b> (commutating poles carrying armature current to cancel the reactance voltage in the commutating coil) and, on large machines, a <b>compensating winding</b> in the pole faces. Poor commutation shows as ring-fire and rapid brush wear — the DC machine's chronic maintenance headache.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A 240 V DC shunt motor draws an armature current of 40 A with R<sub>a</sub> = 0.25 Ω at 1200 rpm. If the load torque suddenly halves (flux constant), what happens to the steady-state speed, and why does it barely move?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> E<sub>b</sub> = 240 − 40·0.25 = <b>230 V</b>. Halving load halves I<sub>a</sub> to 20 A (since T = kΦI<sub>a</sub>). New E<sub>b</sub> = 240 − 20·0.25 = 235 V. Since ω ∝ E<sub>b</sub> (flux constant), new speed = 1200·(235/230) = <b>1226 rpm</b>, a rise of just 2.2%. The speed barely changes because the I<sub>a</sub>R<sub>a</sub> drop (10 V) is tiny next to the 230 V back-EMF — the shunt motor is inherently a "stiff", near-constant-speed source. That small stiffness is exactly the shunt curve on the chart above.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 ============ -->
+  <section class="page" id="p4">
+    <div class="page-tag">Page 4 / 16</div>
+    <h2 class="page-title">The Three-Phase Induction Motor</h2>
+    <p class="page-sub">The 90-plus-percent motor: no brushes, no magnets, no rotor connections — torque conjured out of pure induction. This is the one you will meet most.</p>
+
+    <div class="card">
+      <div class="label">Construction — Two Cylinders and an Air-Gap</div>
+      <div class="grid-2">
+        <div class="mini c-amb"><h4>Stator</h4><p>Laminated silicon-steel core, slotted, carrying a 3-phase distributed winding. Energised, it produces the rotating field n<sub>s</sub> = 120f/P. Identical in every 3-phase machine.</p></div>
+        <div class="mini c-blue"><h4>Rotor</h4><p><b>Cage:</b> aluminium/copper bars shorted by end-rings — cast in one piece, unbreakable, no external connection. <b>Wound:</b> a 3-phase winding brought out via slip-rings to add external resistance.</p></div>
+      </div>
+      <p style="margin-top:12px">The <b>air-gap</b> is deliberately tiny (0.3–2 mm) because it is the dominant reluctance in the magnetic circuit — a wider gap means more magnetising current and worse power factor. Concentricity of that gap is why bearing health (see <a href="A19_Bearings_Deep_Dive.html">A19</a>) is a motor-reliability issue.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The Slip Story — Numbers That Define Operation</div>
+      <div class="eqn">s = <b>(n<sub>s</sub> − n<sub>r</sub>) / n<sub>s</sub></b> &nbsp;·&nbsp; n<sub>r</sub> = n<sub>s</sub>(1 − s) &nbsp;·&nbsp; f<sub>r</sub> = s·f &nbsp;·&nbsp; E<sub>2s</sub> = s·E<sub>2</sub></div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>s = 1</b> at standstill (start): rotor frozen, full field sweeps past it — rotor EMF and frequency are maximal, so is current (locked-rotor, 6–8× rated).</span></li>
+        <li><span class="num">2</span><span><b>s ≈ 0.01–0.05</b> at full load: only a whisker of slip, so f<sub>r</sub> ≈ 0.5–2.5 Hz. Full-load speed for a 4-pole 50 Hz motor is ~1440–1470 rpm, never 1500.</span></li>
+        <li><span class="num">3</span><span><b>s = 0</b> is synchronous — reachable only if <i>driven</i> (then it generates). <b>s &gt; 1</b> is plugging (reverse braking); <b>s &lt; 0</b> is induction-generator territory (wind turbines, overhauling loads).</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Cage-Rotor &amp; the NEMA / IEC Design Classes</div>
+      <p>The rotor bar <b>shape</b> tunes the whole torque–speed curve, because at start (f<sub>r</sub> = 50 Hz) skin effect pushes current to the bar tops, raising effective resistance for high starting torque, then at run (f<sub>r</sub> ≈ 1 Hz) the current fills the bar for low running slip. Deep-bar and double-cage rotors exploit this.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>NEMA / IEC design</th><th>Start torque</th><th>Start current</th><th>Slip</th><th>Application</th></tr>
+        <tr><td><b>A</b> (IEC N)</td><td>Normal (150%)</td><td>High</td><td>Low (&lt;5%)</td><td>General, where inrush is tolerable</td></tr>
+        <tr><td><b>B</b> (IEC N)</td><td>Normal (150%)</td><td>Normal</td><td>Low (&lt;5%)</td><td><b>The workhorse</b> — fans, pumps</td></tr>
+        <tr><td><b>C</b> (IEC H)</td><td>High (200%+)</td><td>Normal</td><td>&lt;5%</td><td>Loaded starts: compressors, conveyors</td></tr>
+        <tr><td><b>D</b></td><td>Very high (275%+)</td><td>Low</td><td>High (5–13%)</td><td>High-inertia: punch presses, hoists, flywheels</td></tr>
+      </table></div>
+      <p style="margin-top:10px">On a VFD this all matters less — the drive can command any torque up to the current limit — but for <b>DOL/star-delta</b> starting the design letter decides whether the motor accelerates the load without cooking. (See <a href="A51_Motor_Starters_Control_Circuits_Deep_Dive.html">A51</a>.)</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A wound-rotor motor is started with external rotor resistance and produces its <i>maximum</i> torque at standstill. As it accelerates, the operator shorts out the resistance in steps. Why does that give a smooth, high-torque, low-current start?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Maximum torque always occurs at the slip where s = R<sub>2</sub>/(X<sub>2</sub> at that point) — the "breakdown slip" moves with rotor resistance. Adding external rotor resistance shifts the breakdown point to <b>s = 1 (standstill)</b>, so you get peak torque exactly when you need it to break the load away, while the added resistance simultaneously <i>limits</i> the starting current. As the motor speeds up, cutting resistance in steps keeps operation near the torque peak throughout the run-up, then the fully-shorted rotor gives efficient low-slip running. This is the classic slip-ring crane/hoist start — high torque and modest current, the two things DOL cannot deliver together.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 ============ -->
+  <section class="page" id="p5">
+    <div class="page-tag">Page 5 / 16</div>
+    <h2 class="page-title">Induction Motor — The Equivalent Circuit</h2>
+    <p class="page-sub">A transformer that lets its secondary spin. One per-phase circuit predicts current, torque, power factor and efficiency at every speed.</p>
+
+    <div class="card">
+      <div class="label">Why It Looks Like a Transformer</div>
+      <p>The stator is a primary, the rotor a short-circuited secondary coupled across the air-gap. The one twist: the rotor's effective secondary resistance is <b>R<sub>2</sub>′/s</b>, not R<sub>2</sub>′ — the slip appears in the denominator, and that single term carries <i>all</i> the mechanical power.</p>
+      <div class="svg-wrap">
+      <svg viewBox="0 0 720 250" style="width:100%;height:auto;background:var(--bg-2);border-radius:12px" role="img" aria-label="Induction motor per-phase equivalent circuit">
+        <line x1="40" y1="60" x2="40" y2="190" stroke="#fdba74" stroke-width="2"/>
+        <text x="30" y="130" fill="#fdba74" font-size="13" text-anchor="middle" transform="rotate(-90 30 130)">V₁ (phase)</text>
+        <!-- R1 X1 -->
+        <rect x="70" y="52" width="46" height="16" fill="none" stroke="#38bdf8" stroke-width="2"/><text x="93" y="45" fill="#7dd3fc" font-size="12" text-anchor="middle">R₁</text>
+        <path d="M126,60 q6,-9 12,0 q6,9 12,0 q6,-9 12,0" stroke="#38bdf8" stroke-width="2" fill="none"/><text x="150" y="45" fill="#7dd3fc" font-size="12" text-anchor="middle">X₁</text>
+        <line x1="40" y1="60" x2="70" y2="60" stroke="#cbd5e1" stroke-width="2"/><line x1="116" y1="60" x2="126" y2="60" stroke="#cbd5e1" stroke-width="2"/><line x1="174" y1="60" x2="330" y2="60" stroke="#cbd5e1" stroke-width="2"/>
+        <!-- magnetising branch -->
+        <line x1="330" y1="60" x2="330" y2="190" stroke="#cbd5e1" stroke-width="2"/>
+        <rect x="300" y="90" width="18" height="44" fill="none" stroke="#4ade80" stroke-width="2"/><text x="285" y="115" fill="#86efac" font-size="12" text-anchor="middle">R_c</text>
+        <path d="M348,90 q-9,6 0,12 q9,6 0,12 q-9,6 0,12" stroke="#4ade80" stroke-width="2" fill="none"/><text x="372" y="115" fill="#86efac" font-size="12" text-anchor="middle">X_m</text>
+        <line x1="330" y1="60" x2="309" y2="90" stroke="#cbd5e1" stroke-width="1.5"/><line x1="330" y1="60" x2="348" y2="90" stroke="#cbd5e1" stroke-width="1.5"/>
+        <!-- R2 X2 R2/s -->
+        <line x1="330" y1="60" x2="410" y2="60" stroke="#cbd5e1" stroke-width="2"/>
+        <rect x="410" y="52" width="46" height="16" fill="none" stroke="#38bdf8" stroke-width="2"/><text x="433" y="45" fill="#7dd3fc" font-size="12" text-anchor="middle">R₂′</text>
+        <path d="M466,60 q6,-9 12,0 q6,9 12,0 q6,-9 12,0" stroke="#38bdf8" stroke-width="2" fill="none"/><text x="490" y="45" fill="#7dd3fc" font-size="12" text-anchor="middle">X₂′</text>
+        <line x1="456" y1="60" x2="466" y2="60" stroke="#cbd5e1" stroke-width="2"/><line x1="514" y1="60" x2="600" y2="60" stroke="#cbd5e1" stroke-width="2"/>
+        <rect x="600" y="45" width="60" height="30" fill="none" stroke="#fb923c" stroke-width="2.5"/><text x="630" y="65" fill="#fdba74" font-size="13" text-anchor="middle" font-weight="700">R₂′/s</text>
+        <text x="630" y="95" fill="#fdba74" font-size="11" text-anchor="middle">= R₂′ + R₂′(1−s)/s</text>
+        <line x1="600" y1="75" x2="600" y2="190" stroke="#cbd5e1" stroke-width="2"/><line x1="660" y1="45" x2="660" y2="190" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="40" y1="190" x2="660" y2="190" stroke="#cbd5e1" stroke-width="2"/>
+        <text x="360" y="222" fill="#94a3b8" font-size="12" text-anchor="middle">The mechanical power P_mech = 3·I₂′²·R₂′(1−s)/s appears in the split-out orange resistor</text>
+      </svg></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Power Flow — Follow the Watts</div>
+      <div class="eqn">P_in → (stator Cu &amp; iron loss) → <b>P<sub>ag</sub></b> (air-gap) → (rotor Cu loss) → P<sub>mech</sub> → (friction/windage) → P<sub>shaft</sub></div>
+      <p>The air-gap power splits in a fixed ratio set only by slip — this is the most examined fact in the subject:</p>
+      <div class="eqn">P<sub>ag</sub> : P<sub>cu2</sub> : P<sub>mech</sub> = <b>1 : s : (1−s)</b> &nbsp;&nbsp;⇒&nbsp;&nbsp; P<sub>cu2</sub> = <span class="v2">s·P<sub>ag</sub></span>, &nbsp; P<sub>mech</sub> = (1−s)·P<sub>ag</sub></div>
+      <p>Consequence: rotor copper loss is <i>directly</i> proportional to slip. A motor forced to run at 10% slip wastes 10% of its air-gap power as rotor heat — which is exactly why rotor-resistance speed control and high-slip operation cook rotors, and why VFDs (which change frequency, keeping slip tiny) win on efficiency.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The Torque Equation (Thevenin Form)</div>
+      <div class="eqn">T = <b>(3 / ω<sub>s</sub>) · V<sub>th</sub>² · (R₂′/s) / [ (R<sub>th</sub> + R₂′/s)² + (X<sub>th</sub> + X₂′)² ]</b></div>
+      <p>Two limiting cases fall straight out:</p>
+      <div class="grid-2">
+        <div class="mini c-blue"><h4>Breakdown (max) torque</h4><p>Occurs at <b>s<sub>maxT</sub> = R₂′ / √(R<sub>th</sub>² + (X<sub>th</sub>+X₂′)²)</b>. The value of T<sub>max</sub> is <b>independent of R₂′</b> — but the <i>slip</i> at which it occurs is proportional to R₂′. That is the whole wound-rotor trick.</p></div>
+        <div class="mini c-amb"><h4>Voltage sensitivity</h4><p>T ∝ V² at every slip. A 10% voltage sag drops available torque by <b>19%</b> — a classic cause of stalling on a weak feeder or during a large DOL start elsewhere on the bus.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A 4-pole 50 Hz motor delivers 15 kW of air-gap power at 3% slip. Estimate the rotor copper loss and the mechanical power developed.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Using P<sub>cu2</sub> = s·P<sub>ag</sub> = 0.03 × 15 000 = <b>450 W</b>. Mechanical power P<sub>mech</sub> = (1−s)·P<sub>ag</sub> = 0.97 × 15 000 = <b>14.55 kW</b>. Note the shaft power is slightly less again after friction &amp; windage. The elegance: you needed <i>only</i> the slip and the air-gap power — the 1 : s : (1−s) rule does the rest, no circuit solving required.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 ============ -->
+  <section class="page" id="p6">
+    <div class="page-tag">Page 6 / 16</div>
+    <h2 class="page-title">Torque–Speed Curve &amp; the Four Quadrants</h2>
+    <p class="page-sub">One curve tells you whether the motor will start the load, how it settles, and where it will stall. Then learn to run it backwards and as a brake.</p>
+
+    <div class="card">
+      <div class="label">Anatomy of the Curve</div>
+      <div class="svg-wrap">
+      <svg viewBox="0 0 720 360" style="width:100%;height:auto;background:var(--bg-2);border-radius:12px" role="img" aria-label="Induction motor torque speed curve">
+        <line x1="70" y1="300" x2="680" y2="300" stroke="#475569" stroke-width="2"/>
+        <line x1="70" y1="300" x2="70" y2="40" stroke="#475569" stroke-width="2"/>
+        <text x="375" y="332" text-anchor="middle" fill="#94a3b8" font-size="13">Speed → (0 at left, n_s at right)</text>
+        <text x="34" y="170" text-anchor="middle" fill="#94a3b8" font-size="13" transform="rotate(-90 34 170)">Torque →</text>
+        <!-- motor curve -->
+        <path d="M70,190 Q130,150 200,120 Q300,80 360,70 Q430,80 500,120 Q560,160 610,240 L648,300" stroke="#fb923c" stroke-width="3.5" fill="none"/>
+        <circle cx="70" cy="190" r="5" fill="#38bdf8"/><text x="82" y="182" fill="#7dd3fc" font-size="12">Locked-rotor T (start)</text>
+        <circle cx="200" cy="120" r="5" fill="#4ade80"/><text x="150" y="112" fill="#86efac" font-size="12">Pull-up T (min)</text>
+        <circle cx="360" cy="70" r="6" fill="#f472b6"/><text x="330" y="58" fill="#f9a8d4" font-size="12">Breakdown T (max)</text>
+        <circle cx="620" cy="255" r="5" fill="#fbbf24"/><text x="500" y="250" fill="#fde68a" font-size="12">Full-load point (stable)</text>
+        <!-- load line -->
+        <line x1="70" y1="270" x2="648" y2="255" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="120" y="288" fill="#cbd5e1" font-size="11">load torque</text>
+        <line x1="648" y1="40" x2="648" y2="300" stroke="#64748b" stroke-width="1.5" stroke-dasharray="3 3"/><text x="648" y="34" fill="#94a3b8" font-size="12" text-anchor="middle">n_s</text>
+        <text x="375" y="352" text-anchor="middle" fill="#64748b" font-size="11.5">Stable operation lies on the steep right-hand slope — a speed dip raises torque, restoring balance. Left of breakdown is unstable → stall.</text>
+      </svg></div>
+      <p style="margin-top:8px">The motor settles where its curve crosses the load curve <b>on the stable (right) side</b>. If the load ever exceeds breakdown torque — a jam, a voltage sag (T∝V²), an over-tightened belt — the operating point slides left, torque <i>falls</i> as it slows, and the motor stalls at locked-rotor current until protection trips.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — Slip / Torque Explorer</div>
+      <p class="page-sub">Per-phase parameters of a small motor. Move slip and watch the torque, current and rotor-loss share track the equivalent circuit.</p>
+      <div class="demo">
+        <div class="demo-row"><label>Slip s: <b id="d1s_v">0.03</b></label><input type="range" id="d1s" min="0.2" max="100" value="3" step="0.2"><span class="page-sub" style="font-size:12px">(0.2%…100% — try 100% for locked-rotor)</span></div>
+        <div class="demo-row"><label>Rotor resistance R₂′ (Ω): <b id="d1r_v">0.30</b></label><input type="range" id="d1r" min="0.15" max="1.5" value="0.30" step="0.05"></div>
+        <div class="demo-row"><label>Supply voltage (% rated): <b id="d1v_v">100</b></label><input type="range" id="d1v" min="70" max="110" value="100" step="1"></div>
+        <div class="demo-out" id="d1out">—</div>
+      </div>
+      <p class="page-sub" style="margin-top:8px">Model: 400 V, 4-pole, 50 Hz; R₁=0.5, X₁=X₂′=0.9 Ω. Watch how raising R₂′ moves the breakdown point toward standstill (higher start torque) and how a voltage sag scythes torque by V².</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Four-Quadrant Operation</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Quadrant</th><th>Slip / speed</th><th>Power flow</th><th>Example</th></tr>
+        <tr><td><b>I — Forward motoring</b></td><td>0 &lt; s &lt; 1</td><td>Elec → mech</td><td>Driving a conveyor forward</td></tr>
+        <tr><td><b>II — Forward braking (regen)</b></td><td>s &lt; 0 (n &gt; n<sub>s</sub>)</td><td>Mech → elec</td><td>Overhauling load, downhill; induction generator</td></tr>
+        <tr><td><b>III — Reverse motoring</b></td><td>swap two phases</td><td>Elec → mech</td><td>Running the conveyor back</td></tr>
+        <tr><td><b>IV — Plugging</b></td><td>s &gt; 1</td><td>Both → heat</td><td>Reverse-phase braking; violent, heats rotor hard</td></tr>
+      </table></div>
+      <p style="margin-top:10px">Regenerative braking (Q II/IV) is only useful if something absorbs the returned energy: a VFD needs a <b>braking resistor or active front end</b> (see <a href="A08_VFD_Deep_Dive.html">A08</a>), otherwise the DC bus over-volts and trips. Plugging dumps everything as rotor heat and is reserved for small or rare stops.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A fan motor runs happily at 1470 rpm. Someone stiffens the belt so the load torque at every speed rises 40%, pushing the new load line above the motor's breakdown torque. Predict the outcome.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> If the raised load line no longer intersects the motor curve on the stable slope (or only above breakdown), there is <b>no stable operating point</b>. On start-up the motor may not even accelerate past the pull-up torque; if it was running, the extra load slows it, but past breakdown the developed torque <i>falls</i> as it slows further — a runaway deceleration into <b>stall</b>. It sits at near-locked-rotor current (6–8× rated), heating fast, until the overload relay (thermal class 10/20, see <a href="A51_Motor_Starters_Control_Circuits_Deep_Dive.html">A51</a>) trips. Fixes: reduce the load, raise the voltage, or select a higher-breakdown (Design C) or larger motor.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 7 ============ -->
+  <section class="page" id="p7">
+    <div class="page-tag">Page 7 / 16</div>
+    <h2 class="page-title">Synchronous &amp; Permanent-Magnet Machines</h2>
+    <p class="page-sub">Lock the rotor to the field, kill the rotor-copper loss, and you get the efficiency and power-density champions — the motors behind every servo, EV and IE5 pump.</p>
+
+    <div class="card">
+      <div class="label">The Family — Same Stator, Different Rotors</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Machine</th><th>Rotor</th><th>Back-EMF</th><th>Control</th><th>Where</th></tr>
+        <tr><td><b>PMSM</b></td><td>Surface/interior magnets</td><td>Sinusoidal</td><td>FOC (vector)</td><td>Servos, EV traction, robotics</td></tr>
+        <tr><td><b>BLDC</b></td><td>Surface magnets</td><td>Trapezoidal</td><td>6-step (Hall)</td><td>Fans, drones, appliances, e-bikes</td></tr>
+        <tr><td><b>SynRM</b></td><td>Shaped iron flux-barriers, no magnets</td><td>—</td><td>FOC</td><td>IE4/IE5 pumps &amp; fans (magnet-free)</td></tr>
+        <tr><td><b>WRSM</b></td><td>DC field winding + slip-rings/brushless exciter</td><td>Sinusoidal</td><td>Field + armature</td><td>Large generators, big drives, ships</td></tr>
+        <tr><td><b>PM-assisted SynRM</b></td><td>Flux-barriers + small magnets</td><td>Sinusoidal</td><td>FOC</td><td>EV (Prius/BMW), high-eff industrial</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Why They Win on Efficiency</div>
+      <p>In an induction motor, rotor current — and therefore rotor copper loss <b>s·P<sub>ag</sub></b> — is unavoidable; it is the price of induction. A synchronous rotor carries its excitation from magnets or a DC winding, so at steady state there is <span class="hl">essentially no rotor copper loss</span>. Remove that whole loss bucket and efficiency climbs a class or two — which is precisely why <b>IE5 (Ultra-Premium) is only reachable with PMSM or SynRM</b> technology, per IEC 60034-30-1:2025.</p>
+      <div class="svg-wrap">
+      <svg viewBox="0 0 720 240" style="width:100%;height:auto;background:var(--bg-2);border-radius:12px" role="img" aria-label="PMSM rotor topologies">
+        <text x="120" y="30" text-anchor="middle" fill="#fdba74" font-size="14" font-weight="700">Surface PM (SPM)</text>
+        <circle cx="120" cy="130" r="60" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+        <circle cx="120" cy="130" r="34" fill="#0b1220" stroke="#334155"/>
+        <path d="M120,96 A34,34 0 0,1 149,113 L165,104 A60,60 0 0,0 120,70 Z" fill="#ef4444" opacity="0.7"/>
+        <path d="M120,164 A34,34 0 0,1 91,147 L75,156 A60,60 0 0,0 120,190 Z" fill="#3b82f6" opacity="0.7"/>
+        <text x="120" y="212" text-anchor="middle" fill="#94a3b8" font-size="11">Magnets on surface · L_d ≈ L_q</text>
+
+        <text x="360" y="30" text-anchor="middle" fill="#fdba74" font-size="14" font-weight="700">Interior PM (IPM)</text>
+        <circle cx="360" cy="130" r="60" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+        <rect x="330" y="80" width="60" height="10" rx="3" fill="#ef4444" opacity="0.8" transform="rotate(-20 360 85)"/>
+        <rect x="330" y="180" width="60" height="10" rx="3" fill="#3b82f6" opacity="0.8" transform="rotate(-20 360 185)"/>
+        <text x="360" y="212" text-anchor="middle" fill="#94a3b8" font-size="11">Buried magnets · L_q &gt; L_d → reluctance torque</text>
+
+        <text x="600" y="30" text-anchor="middle" fill="#fdba74" font-size="14" font-weight="700">SynRM</text>
+        <circle cx="600" cy="130" r="60" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+        <path d="M560,105 Q600,120 640,105" stroke="#64748b" stroke-width="3" fill="none"/>
+        <path d="M560,125 Q600,140 640,125" stroke="#64748b" stroke-width="3" fill="none"/>
+        <path d="M560,145 Q600,160 640,145" stroke="#64748b" stroke-width="3" fill="none"/>
+        <text x="600" y="212" text-anchor="middle" fill="#94a3b8" font-size="11">Flux-barriers only · pure reluctance</text>
+      </svg></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Torque, Torque-Angle &amp; the Need for a Drive</div>
+      <div class="eqn">T = <b>(3P/4)·[ λ<sub>m</sub>·i<sub>q</sub> + (L<sub>d</sub> − L<sub>q</sub>)·i<sub>d</sub>·i<sub>q</sub> ]</b> &nbsp;&nbsp;(magnet torque + reluctance torque)</div>
+      <p>A PMSM cannot start across the line — connect it to 50 Hz and the rotor, at rest, cannot instantly lock to a field already spinning at 1500 rpm; it just vibrates. It <b>needs an inverter</b> that ramps frequency from zero and, via <span class="hl2">field-oriented control</span>, keeps the stator current vector 90° (electrical) ahead of the rotor flux for maximum torque-per-amp. The rotor position must be known (encoder, resolver, or sensorless back-EMF estimation) — this is the servo drive of <a href="A09_Servo_Motion_Deep_Dive.html">A09</a>.</p>
+      <div class="grid-2" style="margin-top:10px">
+        <div class="mini c-grn"><h4>Advantages</h4><p>Highest efficiency &amp; power density; full torque at zero speed; precise position control; compact.</p></div>
+        <div class="mini c-red"><h4>Trade-offs</h4><p>Needs an inverter always; magnet cost &amp; rare-earth supply risk; demagnetisation if over-temp; safety — a spinning PMSM is a live generator.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A technician disconnects a PMSM servo from its drive but the axis is still coasting. He measures voltage at the motor terminals and gets a shock. Explain — and give the safe-handling rule.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> A permanent-magnet machine is a permanent <i>generator</i>: whenever the rotor spins, the magnets induce a back-EMF at the terminals regardless of whether the drive is connected — voltage rises with speed and can reach hundreds of volts on a large or fast axis. So a "disconnected" but coasting or gravity-driven PMSM is live. Safe rule: <b>bring the axis to a true mechanical stop and lock/brake it before touching terminals</b>; treat a PM motor's terminals as live any time the shaft can turn. This is also why EV and large-servo systems use an <b>active short-circuit</b> or crowbar to safely brake a runaway PMSM, and why over-speed can over-volt (and destroy) an inverter's DC bus.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 8 ============ -->
+  <section class="page" id="p8">
+    <div class="page-tag">Page 8 / 16</div>
+    <h2 class="page-title">Stepper &amp; Special Motors</h2>
+    <p class="page-sub">When you want position without a feedback loop, torque at standstill, or a motor that runs on the mains and screams at 20 000 rpm — the specialists.</p>
+
+    <div class="card">
+      <div class="label">The Stepper — Digital Motion</div>
+      <p>A stepper moves in fixed angular <b>steps</b>, one per drive pulse, holding position between pulses with no feedback. It is a synchronous machine run open-loop by counting pulses.</p>
+      <div class="eqn">Step angle θ = <b>360° / (N<sub>r</sub> · phases · 2)</b> &nbsp;— a 1.8° hybrid stepper = 200 full steps/rev</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Type</th><th>Rotor</th><th>Step angle</th><th>Character</th></tr>
+        <tr><td><b>Variable Reluctance</b></td><td>Toothed soft iron</td><td>Large (7.5–15°)</td><td>Reluctance torque only; no detent</td></tr>
+        <tr><td><b>Permanent Magnet</b></td><td>Magnetised</td><td>Coarse (7.5–18°)</td><td>Has detent torque (holds unpowered)</td></tr>
+        <tr><td><b>Hybrid</b></td><td>Magnet + teeth</td><td>Fine (0.9–1.8°)</td><td>The standard — best resolution &amp; torque</td></tr>
+      </table></div>
+      <ul class="tips" style="margin-top:12px">
+        <li><span class="num">1</span><span><b>Microstepping</b> — sinusoidally proportion the two phase currents to interpolate between full steps (÷2…÷256), for smoothness and resolution. Torque per microstep falls; accuracy is limited by detent torque, not by the electrical division.</span></li>
+        <li><span class="num">2</span><span><b>Open-loop risk</b> — if load torque exceeds available torque the motor <b>skips steps silently</b> and position is lost with no error flag. Size for ≥2× margin, or close the loop (encoder + "closed-loop stepper").</span></li>
+        <li><span class="num">3</span><span><b>Mid-band resonance</b> — steppers have a natural oscillation (~100–200 pps) where they can stall; ride through it, add damping, or microstep.</span></li>
+        <li><span class="num">4</span><span><b>Torque falls with speed</b> — winding inductance chokes current as pulse rate rises; the torque–speed (pull-out) curve droops steeply. Chopper drives with high bus voltage push current in faster to extend it.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Other Specialists</div>
+      <div class="grid-2">
+        <div class="mini c-amb"><h4>Universal motor</h4><p>A series DC motor that also runs on AC (field and armature reverse together). Cheap, very high speed (10–30k rpm), high power density — <b>power tools, vacuums, blenders</b>. Brushes wear; noisy; poor efficiency.</p></div>
+        <div class="mini c-blue"><h4>Switched Reluctance (SRM)</h4><p>Doubly-salient, no magnets, no rotor winding — torque purely by reluctance as stator phases energise in sequence. Rugged, cheap, fault-tolerant; needs a precise controller and can be acoustically noisy (torque ripple).</p></div>
+        <div class="mini c-grn"><h4>Hysteresis motor</h4><p>Smooth, quiet synchronous run using a hard-magnetic ring rotor. Low torque — clocks, gyros, small precision drives.</p></div>
+        <div class="mini c-purp"><h4>Single-phase induction</h4><p>No inherent rotating field — needs a start method: <b>split-phase, capacitor-start, capacitor-run (PSC), shaded-pole</b>. Domestic pumps, fans, compressors. The start/run capacitor is the usual failure.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A 3D-printer axis uses a 1.8° hybrid stepper at 1/16 microstepping driving a 40 mm/rev belt. What is the theoretical linear resolution — and why is the <i>real</i> repeatability far coarser?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Full steps/rev = 360/1.8 = 200; with 1/16 microstepping = 3200 microsteps/rev. Linear resolution = 40 mm ÷ 3200 = <b>0.0125 mm (12.5 µm) per microstep</b>. But real repeatability is far coarser because microstep <i>position accuracy</i> is set by the ratio of drive torque to <b>detent + load torque</b>, not by the electronic division — the rotor sits where torques balance, which can be off by several microsteps. Add belt compliance, backlash, and missed steps under load, and true positioning is more like ±50–100 µm. Microstepping buys smoothness and quietness, <i>not</i> proportional accuracy — a classic exam and shop-floor trap. (See <a href="A18_Additive_3D_Printing_Deep_Dive.html">A18</a>.)</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 9 ============ -->
+  <section class="page" id="p9">
+    <div class="page-tag">Page 9 / 16</div>
+    <h2 class="page-title">Losses, Efficiency &amp; the IE Classes</h2>
+    <p class="page-sub">A motor bought once is paid for a hundred times in electricity. Where the watts leak, and the standard that grades how few of them you waste.</p>
+
+    <div class="card">
+      <div class="label">The Five Loss Buckets</div>
+      <div class="svg-wrap">
+      <svg viewBox="0 0 720 250" style="width:100%;height:auto;background:var(--bg-2);border-radius:12px" role="img" aria-label="Motor loss Sankey diagram">
+        <rect x="30" y="95" width="90" height="60" fill="#fb923c" opacity="0.85" rx="4"/>
+        <text x="75" y="120" text-anchor="middle" fill="#0b0f14" font-size="13" font-weight="800">P_in</text>
+        <text x="75" y="138" text-anchor="middle" fill="#0b0f14" font-size="12" font-weight="700">100%</text>
+        <polygon points="120,95 560,110 560,140 120,155" fill="#4ade80" opacity="0.55"/>
+        <rect x="560" y="108" width="120" height="46" fill="#4ade80" opacity="0.85" rx="4"/>
+        <text x="620" y="128" text-anchor="middle" fill="#0b0f14" font-size="12" font-weight="800">P_shaft</text>
+        <text x="620" y="145" text-anchor="middle" fill="#0b0f14" font-size="12" font-weight="700">~90%</text>
+        <!-- loss taps -->
+        <line x1="175" y1="95" x2="175" y2="55" stroke="#f87171" stroke-width="8"/><text x="175" y="46" text-anchor="middle" fill="#fca5a5" font-size="11">Stator Cu ~35%</text>
+        <line x1="260" y1="97" x2="260" y2="55" stroke="#fbbf24" stroke-width="8"/><text x="260" y="46" text-anchor="middle" fill="#fde68a" font-size="11">Rotor Cu ~20%</text>
+        <line x1="345" y1="99" x2="345" y2="55" stroke="#c084fc" stroke-width="8"/><text x="345" y="46" text-anchor="middle" fill="#d8b4fe" font-size="11">Iron ~20%</text>
+        <line x1="430" y1="101" x2="430" y2="55" stroke="#38bdf8" stroke-width="8"/><text x="430" y="46" text-anchor="middle" fill="#7dd3fc" font-size="11">Fric+wind ~10%</text>
+        <line x1="510" y1="103" x2="510" y2="55" stroke="#f472b6" stroke-width="8"/><text x="510" y="46" text-anchor="middle" fill="#f9a8d4" font-size="11">Stray ~15%</text>
+        <text x="360" y="205" text-anchor="middle" fill="#94a3b8" font-size="12">Percentages are shares of <tspan fill="#f87171">total loss</tspan>, not of input. A 90%-efficient motor loses ~10% of input as these five.</text>
+        <text x="360" y="228" text-anchor="middle" fill="#64748b" font-size="11.5">Copper loss ∝ I² (rises with load) · Iron &amp; friction ≈ constant (dominate at light load)</text>
+      </svg></div>
+      <div class="tbl-wrap" style="margin-top:10px"><table>
+        <tr><th>Loss</th><th>Physics</th><th>Depends on</th><th>Reduce by</th></tr>
+        <tr><td>Stator copper</td><td>I₁²R₁ (Joule)</td><td>Load²</td><td>More/better copper, larger slots</td></tr>
+        <tr><td>Rotor copper</td><td>s·P<sub>ag</sub></td><td>Slip / load²</td><td>Copper (not Al) cage, lower slip</td></tr>
+        <tr><td>Iron (core)</td><td>Hysteresis + eddy</td><td>Flux, f (~constant)</td><td>Thin, low-loss silicon steel laminations</td></tr>
+        <tr><td>Friction &amp; windage</td><td>Bearings + fan drag</td><td>Speed (~constant)</td><td>Better bearings, efficient fan</td></tr>
+        <tr><td>Stray load</td><td>Leakage-flux eddies</td><td>Load²</td><td>Good design; ~0.5–2% (hard to model)</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Efficiency vs Load — and Why Over-Sizing Wastes Money</div>
+      <p>Because iron and friction losses are roughly constant while copper losses grow with load², efficiency <b>peaks near 75% load</b> and falls off at light load (constant losses dominate a small output) and slightly at overload. A motor run at 30% load — a common over-sizing sin — sits well down the efficiency curve <i>and</i> at poor power factor.</p>
+      <div class="eqn">η = P<sub>out</sub> / P<sub>in</sub> = P<sub>out</sub> / (P<sub>out</sub> + ΣP<sub>loss</sub>) &nbsp;·&nbsp; peak η at load where <b>variable loss = constant loss</b></div>
+    </div>
+
+    <div class="card">
+      <div class="label">IEC 60034-30-1 — the IE Efficiency Classes</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Class</th><th>Name</th><th>vs IE1</th><th>Typical technology</th></tr>
+        <tr><td><b>IE1</b></td><td>Standard</td><td>baseline</td><td>Basic induction (now banned in many MEPS)</td></tr>
+        <tr><td><b>IE2</b></td><td>High</td><td>~ +3%</td><td>Improved induction</td></tr>
+        <tr><td><b>IE3</b></td><td>Premium</td><td>~ +7%</td><td>Premium induction (= NEMA Premium); EU legal minimum for most 0.75–1000 kW</td></tr>
+        <tr><td><b>IE4</b></td><td>Super-Premium</td><td>~ +12%</td><td>Copper-rotor, SynRM, PM-assisted; EU min for 75–200 kW since 2023</td></tr>
+        <tr><td><b>IE5</b></td><td>Ultra-Premium</td><td>~ +20% loss cut</td><td><b>PMSM / SynRM</b> — induction largely cannot reach it</td></tr>
+      </table></div>
+      <ul class="tips" style="margin-top:12px">
+        <li><span class="num">1</span><span>The 2025 second edition of IEC 60034-30-1 formalises the ladder to <b>IE5</b> and widens scope. IE5 targets ~20% <i>lower losses</i> than IE4 — reachable in practice only with permanent-magnet or synchronous-reluctance rotors, which is the commercial reason PMSM/SynRM are displacing induction in new efficient pumps and fans.</span></li>
+        <li><span class="num">2</span><span>MEPS (Minimum Energy Performance Standards) turn these classes into <b>law</b>: the EU, US (DOE/NEMA), China (GB), and others mandate a floor and ratchet it upward. Buying below the mandated class is illegal for new equipment in those markets.</span></li>
+        <li><span class="num">3</span><span>The <b>system</b> beats the motor: an IE3 motor on a VFD driving a variable-torque load saves far more than an IE4 motor throttled by a valve. Efficiency class is necessary, not sufficient — see the affinity laws in <a href="A47_Fluid_Mechanics_Pumps_Deep_Dive.html">A47</a> and <a href="A08_VFD_Deep_Dive.html">A08</a>.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — Efficiency &amp; Running-Cost Calculator</div>
+      <div class="demo">
+        <div class="demo-row"><label>Rated power (kW): <b id="d2p_v">30</b></label><input type="range" id="d2p" min="1.5" max="200" value="30" step="0.5"></div>
+        <div class="demo-row"><label>Efficiency (%): <b id="d2e_v">92</b></label><input type="range" id="d2e" min="80" max="97" value="92" step="0.5"></div>
+        <div class="demo-row"><label>Load factor (%): <b id="d2l_v">75</b></label><input type="range" id="d2l" min="20" max="100" value="75" step="5"></div>
+        <div class="demo-row"><label>Running hours/yr: <b id="d2h_v">6000</b></label><input type="range" id="d2h" min="1000" max="8760" value="6000" step="500"></div>
+        <div class="demo-row"><label>Tariff (LKR/kWh): <b id="d2t_v">45</b></label><input type="range" id="d2t" min="15" max="90" value="45" step="5"></div>
+        <div class="demo-out" id="d2out">—</div>
+      </div>
+      <p class="page-sub" style="margin-top:8px">Try 30 kW at 6000 h: each 1% of efficiency is real money. Compare an IE2 (≈90%) vs IE4 (≈94%) motor and read the annual loss difference — that gap is why upgrades pay back in months.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A plant runs a 22 kW motor at only 35% load "to be safe." Give two independent reasons this is costing money.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> (1) <b>Efficiency falls off at light load</b> — the constant iron and friction losses are now a large fraction of the small output, so η is several points below the ~75%-load peak. (2) <b>Power factor collapses at light load</b> — the magnetising current is fixed while the working current shrinks, so cos φ can drop to 0.5–0.6, raising line current, cable/transformer losses, and any kVA/PF penalty on the bill (see <a href="A30_Three_Phase_Power_Deep_Dive.html">A30</a>). A correctly sized smaller motor (or a VFD matching output to demand) would run near peak efficiency <i>and</i> good PF. Over-sizing "for safety" is a persistent, invisible energy tax.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 10 ============ -->
+  <section class="page" id="p10">
+    <div class="page-tag">Page 10 / 16</div>
+    <h2 class="page-title">Nameplate, Insulation, Enclosure &amp; Cooling</h2>
+    <p class="page-sub">The nameplate is a contract. Every code on it — insulation class, IP, IC, duty, service factor — bounds how hard and how long you may push the machine.</p>
+
+    <div class="card">
+      <div class="label">Reading the IEC 60034 Nameplate</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Field</th><th>Example</th><th>Means</th></tr>
+        <tr><td>Rated power</td><td>30 kW</td><td><b>Shaft</b> output at rated conditions (not input)</td></tr>
+        <tr><td>Voltage / connection</td><td>400 Δ / 690 Y</td><td>Δ for 400 V mains; the Y figure enables star-delta start at 400 V</td></tr>
+        <tr><td>Current</td><td>55 A</td><td>Full-load line current at rated V (the FLC for protection)</td></tr>
+        <tr><td>Frequency / poles</td><td>50 Hz, 4-pole</td><td>Sets n<sub>s</sub> = 1500 rpm; rated 1465 rpm ⇒ s ≈ 2.3%</td></tr>
+        <tr><td>cos φ / efficiency</td><td>0.86 / IE3 94.5%</td><td>Power factor &amp; efficiency class</td></tr>
+        <tr><td>Insulation / rise</td><td>Class F / rise B</td><td>F-rated (155°C) but used to class-B rise — a longevity margin</td></tr>
+        <tr><td>IP / IC</td><td>IP55 / IC411</td><td>Ingress protection / cooling method</td></tr>
+        <tr><td>Duty / SF</td><td>S1 / 1.15</td><td>Continuous duty; 15% short-term overload allowance</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Insulation Thermal Classes — Life Halves Every 10°C</div>
+      <div class="svg-wrap">
+      <svg viewBox="0 0 720 210" style="width:100%;height:auto;background:var(--bg-2);border-radius:12px" role="img" aria-label="Insulation class temperature ladder">
+        <line x1="60" y1="175" x2="680" y2="175" stroke="#475569" stroke-width="2"/>
+        <g font-size="12">
+          <rect x="80" y="120" width="70" height="55" fill="#38bdf8" opacity="0.7"/><text x="115" y="150" text-anchor="middle" fill="#0b0f14" font-weight="800">A</text><text x="115" y="195" text-anchor="middle" fill="#94a3b8">105°C</text>
+          <rect x="180" y="105" width="70" height="70" fill="#4ade80" opacity="0.7"/><text x="215" y="145" text-anchor="middle" fill="#0b0f14" font-weight="800">E</text><text x="215" y="195" text-anchor="middle" fill="#94a3b8">120°C</text>
+          <rect x="280" y="88" width="70" height="87" fill="#a3e635" opacity="0.75"/><text x="315" y="140" text-anchor="middle" fill="#0b0f14" font-weight="800">B</text><text x="315" y="195" text-anchor="middle" fill="#94a3b8">130°C</text>
+          <rect x="380" y="62" width="70" height="113" fill="#fbbf24" opacity="0.8"/><text x="415" y="125" text-anchor="middle" fill="#0b0f14" font-weight="800">F</text><text x="415" y="195" text-anchor="middle" fill="#94a3b8">155°C</text>
+          <rect x="480" y="38" width="70" height="137" fill="#fb923c" opacity="0.85"/><text x="515" y="110" text-anchor="middle" fill="#0b0f14" font-weight="800">H</text><text x="515" y="195" text-anchor="middle" fill="#94a3b8">180°C</text>
+          <rect x="580" y="20" width="70" height="155" fill="#f87171" opacity="0.85"/><text x="615" y="100" text-anchor="middle" fill="#0b0f14" font-weight="800">N/R</text><text x="615" y="195" text-anchor="middle" fill="#94a3b8">200°C+</text>
+        </g>
+        <text x="360" y="16" text-anchor="middle" fill="#94a3b8" font-size="12">Max hot-spot temperature by insulation class · F is the modern industrial default</text>
+      </svg></div>
+      <p style="margin-top:10px">The class sets the <b>maximum hot-spot temperature</b> = ambient (40°C ref) + permitted rise + hot-spot allowance. The <span class="hl2">10-degree rule</span>: every 10°C above the class limit roughly <b>halves</b> insulation life (Montsinger/Arrhenius). Specifying <b>Class F insulation used to a Class B rise</b> banks a ~25°C margin — the standard reliability hedge, and why VFD-fed motors (extra harmonic heating) and hot climates like Sri Lanka's should insist on it.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">IP, IC &amp; Duty Codes</div>
+      <div class="grid-3">
+        <div class="mini c-blue"><h4>IP — ingress</h4><p><b>IP55</b>: 5 = dust-protected, 5 = jets of water. IP54/55 general; IP56/65 washdown/marine. First digit solids, second liquids.</p></div>
+        <div class="mini c-amb"><h4>IC — cooling</h4><p><b>IC411</b>: totally-enclosed, shaft-fan surface cooling (TEFC) — the workhorse. IC416 = forced (separate blower) for VFD low-speed. IC01 = open drip-proof.</p></div>
+        <div class="mini c-grn"><h4>IM — mounting</h4><p><b>IM B3</b> foot, <b>B5</b> flange, <b>B35</b> both, <b>V1</b> vertical. Determines bearing arrangement &amp; thrust capacity.</p></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:12px"><table>
+        <tr><th>Duty</th><th>Meaning</th><th>Example</th></tr>
+        <tr><td><b>S1</b></td><td>Continuous — reaches thermal steady state</td><td>Pump, fan running 24/7</td></tr>
+        <tr><td><b>S2</b></td><td>Short-time — runs, then cools fully</td><td>Sluice-gate, valve actuator</td></tr>
+        <tr><td><b>S3–S5</b></td><td>Intermittent, with/without starting &amp; braking</td><td>Cranes, lifts, presses</td></tr>
+        <tr><td><b>S6–S8</b></td><td>Continuous with periodic load/speed change</td><td>Rolling mills, winders</td></tr>
+        <tr><td><b>S9–S10</b></td><td>Non-periodic / discrete duty-cycle</td><td>Traction, special drives</td></tr>
+      </table></div>
+      <p style="margin-top:10px"><b>Derating:</b> above 40°C ambient or 1000 m altitude the motor must be derated (thinner air cools less, and insulation sits closer to its limit). Sri Lankan ambient of 35–40°C plus VFD harmonics eats most of the S1 margin — spec generously.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A Class F motor is run continuously so its winding sits at 150°C hot-spot. It "works." Why is the maintenance engineer still unhappy, and what is the likely outcome?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> 150°C is only just under the Class F limit of 155°C, so the motor has used up <i>all</i> its thermal margin — there is no Class-B safety hedge left. By the 10-degree rule, running ~25°C hotter than a class-B rise would allow means insulation life is cut by roughly a factor of 2³ ≈ 8×: a 20-year winding becomes a 2–3-year winding. The outcome is premature insulation breakdown — turn-to-turn shorts, then a phase-to-earth fault. The engineer wants the root cause found (overload, blocked cooling, high ambient, VFD harmonics, under-voltage raising current) and the operating temperature brought back under a class-B rise, not merely "it runs."</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 11 ============ -->
+  <section class="page" id="p11">
+    <div class="page-tag">Page 11 / 16</div>
+    <h2 class="page-title">Testing, Protection &amp; Condition Monitoring</h2>
+    <p class="page-sub">How you extract the equivalent circuit on a test bench, how you keep the motor alive in service, and how you catch a failure weeks before it strands the line.</p>
+
+    <div class="card">
+      <div class="label">Bench Tests → the Equivalent-Circuit Parameters</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Test</th><th>Condition</th><th>Yields</th></tr>
+        <tr><td><b>No-load</b></td><td>Rated V, no shaft load (s≈0)</td><td>Iron loss + friction/windage; magnetising branch X<sub>m</sub>, R<sub>c</sub></td></tr>
+        <tr><td><b>Blocked-rotor</b></td><td>Rotor locked, reduced V to rated I (s=1)</td><td>Series impedance R<sub>eq</sub>, X<sub>eq</sub> (R₁+R₂′, X₁+X₂′)</td></tr>
+        <tr><td><b>DC resistance</b></td><td>DC across two terminals</td><td>Stator R₁ (correct to operating temp)</td></tr>
+      </table></div>
+      <p style="margin-top:10px">No-load and blocked-rotor are the induction motor's equivalent of a transformer's open- and short-circuit tests (see <a href="A32_Transformers_Deep_Dive.html">A32</a>) — same idea, one machine that spins.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Insulation Health — Megger, PI &amp; Surge</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>Insulation Resistance (IR / "megger")</b> — apply 500/1000 V DC winding-to-earth. Rule of thumb: ≥ (rated kV + 1) MΩ at 40°C, corrected for temperature. Trends matter more than absolutes.</span></li>
+        <li><span class="num">2</span><span><b>Polarization Index (PI)</b> = IR(10 min)/IR(1 min). &gt;2 good, 1–2 questionable, &lt;1 wet/contaminated. It sees moisture and dirt that a spot reading misses.</span></li>
+        <li><span class="num">3</span><span><b>Surge / hi-pot</b> — stresses turn-to-turn insulation (IR only tests to earth). Catches the incipient turn short that IR passes. Off-line, done with care.</span></li>
+        <li><span class="num">4</span><span><b>Motor Current / Electrical Signature Analysis (MCA/ESA)</b> — on-line: broken rotor bars show as sidebands at (1±2s)·f around the line frequency; eccentricity and bearing faults have their own signatures.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Protection — the Motor's Guardian Angels</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Threat</th><th>Protection</th><th>Device / ANSI</th></tr>
+        <tr><td>Sustained overload</td><td>Thermal overload relay, class 10/20/30</td><td>OL / 49 (see <a href="A51_Motor_Starters_Control_Circuits_Deep_Dive.html">A51</a>)</td></tr>
+        <tr><td>Short circuit</td><td>MCCB / fuses (fast)</td><td>50 / 51</td></tr>
+        <tr><td>Winding over-temp</td><td>Embedded PTC thermistor / PT100 RTD / bimetal</td><td>26 / 38 / 49</td></tr>
+        <tr><td>Single-phasing</td><td>Phase-loss relay</td><td>46 / 47</td></tr>
+        <tr><td>Voltage/current unbalance</td><td>Unbalance relay (I⁻ heats rotor hard)</td><td>46</td></tr>
+        <tr><td>Earth fault</td><td>Core-balance CT / differential</td><td>50N/51N, 87M</td></tr>
+        <tr><td>Under-voltage / stall</td><td>UV &amp; locked-rotor timing</td><td>27 / 48/51LR</td></tr>
+      </table></div>
+      <p style="margin-top:10px"><span class="hl2">Single-phasing</span> is the silent killer: lose one line and the remaining two carry ~1.7× current while the motor keeps turning at reduced torque — it survives minutes, cooks in hours. A negative-sequence/phase-loss relay is cheap insurance. Modern motor-protection relays (SEL, Multilin, Sepam) fold all of these into one thermal-model device.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Condition Monitoring — Predict, Don't React</div>
+      <div class="grid-3">
+        <div class="mini c-amb"><h4>Vibration</h4><p>1× (unbalance), 2× (misalignment), bearing tones (BPFO/BPFI), 2×line-freq (electrical). The richest early-warning channel → <a href="A42_Vibration_Analysis_Deep_Dive.html">A42</a>.</p></div>
+        <div class="mini c-blue"><h4>Thermography</h4><p>Hot bearings, hot terminals, unbalanced phases show as thermal patterns before failure → <a href="A41_Thermal_Imaging_Deep_Dive.html">A41</a>.</p></div>
+        <div class="mini c-grn"><h4>Electrical</h4><p>MCA/ESA for rotor bars &amp; eccentricity; PI trending for insulation; partial-discharge on MV machines.</p></div>
+      </div>
+      <p style="margin-top:12px"><b>Shaft currents &amp; bearing fluting</b> deserve a special mention on VFD-fed motors: fast dV/dt induces a shaft voltage that discharges through the bearing (EDM pitting → fluting → noise → failure). Cures: insulated (hybrid ceramic) NDE bearing, shaft grounding ring, dV/dt or sine filter (see <a href="A19_Bearings_Deep_Dive.html">A19</a> and <a href="A08_VFD_Deep_Dive.html">A08</a>).</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A motor passes its IR (megger) test at 500 MΩ but fails within a week with a turn-to-turn short. How did the test miss it, and what test would have caught it?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> An IR/megger test measures insulation resistance from the <b>winding to earth</b>. A turn-to-turn (or coil-to-coil) weakness is insulation <i>within</i> the winding, between adjacent conductors at nearly the same potential — the megger's DC voltage barely stresses it, so the reading looks healthy. A <b>surge comparison test</b> (or a controlled AC hi-pot) applies a fast, high-voltage pulse that develops a large volt-drop <i>between turns</i>, exposing the weak inter-turn insulation as a change in the ringing waveform. Lesson: IR proves the ground-wall, not the turn insulation — you need surge testing to certify the latter, which is why both belong in a rewind acceptance test.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 ============ -->
+  <section class="page" id="p12">
+    <div class="page-tag">Page 12 / 16</div>
+    <h2 class="page-title">Selection, Sizing &amp; Recap</h2>
+    <p class="page-sub">Match the motor to the load's torque profile and thermal duty — then protect and monitor it. The whole module in one workflow.</p>
+
+    <div class="card">
+      <div class="label">Load Types — the First Question</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Load class</th><th>Torque vs speed</th><th>Power vs speed</th><th>Examples</th></tr>
+        <tr><td><b>Constant torque</b></td><td>T constant</td><td>P ∝ N</td><td>Conveyors, hoists, positive-displacement pumps, extruders</td></tr>
+        <tr><td><b>Variable torque</b></td><td>T ∝ N²</td><td>P ∝ N³</td><td>Centrifugal fans &amp; pumps (the affinity laws → <a href="A47_Fluid_Mechanics_Pumps_Deep_Dive.html">A47</a>)</td></tr>
+        <tr><td><b>Constant power</b></td><td>T ∝ 1/N</td><td>P constant</td><td>Winders, spindles, lathes (field-weakening region)</td></tr>
+        <tr><td><b>High-inertia / high-breakaway</b></td><td>Big start, then modest</td><td>—</td><td>Crushers, centrifuges, mills (Design C/D)</td></tr>
+      </table></div>
+      <p style="margin-top:10px">The variable-torque row is where the money is: a fan at 80% speed needs only ~51% power (0.8³), so a VFD instead of a damper is the single biggest energy save in most plants.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Thermal Sizing — the RMS-Torque Rule</div>
+      <p>For a duty cycle of varying load, the motor is sized on the <b>heating (RMS) torque</b>, not the peak — because heating follows I²t. The peak torque must still fit under breakdown (with margin), but continuous rating is governed by:</p>
+      <div class="eqn">T<sub>rms</sub> = √( Σ T<sub>i</sub>²·t<sub>i</sub> / Σ t<sub>i</sub> ) &nbsp;≤&nbsp; T<sub>rated</sub> &nbsp;·&nbsp; and T<sub>peak</sub> ≤ 0.8·T<sub>breakdown</sub></div>
+      <p>For servo/dynamic axes you also match <b>inertia</b> (J<sub>load</sub>/J<sub>motor</sub> within ~1–10) for good response and stability — the reflected-inertia problem of <a href="A09_Servo_Motion_Deep_Dive.html">A09</a>.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The Selection Workflow</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>Load</b> — torque–speed profile, duty cycle (S1…S10), inertia, breakaway, direction/quadrants.</span></li>
+        <li><span class="num">2</span><span><b>Speed &amp; control</b> — fixed (DOL/star-delta) or variable (VFD)? Sets poles, and whether you need PMSM/SynRM for efficiency or servo dynamics.</span></li>
+        <li><span class="num">3</span><span><b>Environment</b> — ambient, altitude, dust/water (IP), hazardous area (Ex), cooling (IC), mounting (IM). Derate for Sri Lankan heat.</span></li>
+        <li><span class="num">4</span><span><b>Efficiency &amp; economics</b> — meet MEPS (IE3 min), then run the life-cycle cost: energy dwarfs purchase price, so buy up a class for high-hour duties.</span></li>
+        <li><span class="num">5</span><span><b>Protect &amp; monitor</b> — FLC-set overload (class 10/20), short-circuit, thermistors, phase-loss; add CM (vibration/thermal) for critical machines.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Recap — Eight Ideas to Keep</div>
+      <div class="grid-2">
+        <div class="mini c-amb"><h4>1 · Field is the gear</h4><p>Every motor: current in a B-field → force. F=BIℓ and e=BLv are reciprocal.</p></div>
+        <div class="mini c-blue"><h4>2 · Slip makes torque</h4><p>Induction motors must lag the field; s=(n<sub>s</sub>−n<sub>r</sub>)/n<sub>s</sub>, and P<sub>cu2</sub>=s·P<sub>ag</sub>.</p></div>
+        <div class="mini c-grn"><h4>3 · T ∝ V²</h4><p>A 10% sag cuts induction torque 19%. Voltage quality is torque.</p></div>
+        <div class="mini c-purp"><h4>4 · No rotor loss = IE5</h4><p>PMSM/SynRM kill rotor copper loss → the efficiency ceiling.</p></div>
+        <div class="mini c-org"><h4>5 · Nameplate is a contract</h4><p>Insulation class, IP, IC, duty, SF bound how hard you may push.</p></div>
+        <div class="mini c-pink"><h4>6 · 10°C halves life</h4><p>Spec Class F used to rise B; derate for heat &amp; VFD harmonics.</p></div>
+        <div class="mini c-teal"><h4>7 · Size on RMS torque</h4><p>Heating follows I²t; peak fits under breakdown, continuous under T<sub>rms</sub>.</p></div>
+        <div class="mini c-red"><h4>8 · Protect the invisible</h4><p>Single-phasing, unbalance &amp; shaft currents kill quietly. Relay + CM.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Six Ways Motors Die in Service</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">Overload / over-temp</div>Sustained I above FLC or blocked cooling cooks insulation — the 10° rule bites. Cure: correct sizing, class 10/20 OL, clean the fins.</div>
+        <div class="fail"><div class="ft">Single-phasing</div>Lose one line; the other two carry 1.7× and the winding burns in a phase pattern. Cure: phase-loss / negative-sequence relay.</div>
+        <div class="fail"><div class="ft">Bearing failure</div>~50% of all motor failures. Contamination, misalignment, lubrication, or VFD shaft currents (fluting). Cure: alignment, sealing, grounding ring → <a href="A19_Bearings_Deep_Dive.html">A19</a>.</div>
+        <div class="fail"><div class="ft">Insulation breakdown</div>Turn-to-turn short from thermal ageing, moisture, or VFD dV/dt spikes → phase-to-earth fault. Cure: Class F+, PI trending, dV/dt filter.</div>
+        <div class="fail"><div class="ft">Voltage unbalance</div>A few % unbalance drives a large negative-sequence current that heats the rotor disproportionately. Cure: balance the supply, unbalance relay.</div>
+        <div class="fail"><div class="ft">Broken rotor bars</div>Repeated heavy starts crack cage bars; MCA sidebands at (1±2s)f flag it. Cure: soft-start/VFD, copper rotor, ESA monitoring.</div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A centrifugal pump is throttled by a valve to 70% flow, wasting energy across the valve. Why is fitting a VFD and slowing the motor so dramatically better — and roughly how much power might it save?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> A centrifugal pump is a <b>variable-torque</b> load obeying the affinity laws: flow ∝ speed, head ∝ speed², power ∝ <b>speed³</b>. Throttling to 70% flow with a valve keeps the motor at ~full speed and just burns the surplus head as heat across the valve — power stays near 100%. Slowing the motor to deliver 70% flow instead needs only 0.7³ ≈ <b>0.34, i.e. ~34% of full power</b> — a saving on the order of <b>60%+</b>, minus static-head and drive-efficiency corrections. That cubic relationship (see <a href="A47_Fluid_Mechanics_Pumps_Deep_Dive.html">A47</a> / <a href="A08_VFD_Deep_Dive.html">A08</a>) is why VFDs on fans and pumps are the highest-return energy project in most plants — usually a bigger win than upgrading the motor's IE class.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 ============ -->
+  <section class="page" id="p13">
+    <div class="page-tag">Page 13 / 16 · MSc Practice</div>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade problems worked end-to-end. Cover the answer, try it, then read the discussion.</p>
+
+    <div class="card">
+      <div class="label">WE-1 · Slip, Rotor Frequency &amp; Power Flow</div>
+      <p>A 3-phase, 415 V, 4-pole, 50 Hz induction motor runs at 1440 rpm. Its stator input is 12 kW; stator copper + iron losses total 900 W; friction &amp; windage = 300 W. Find slip, rotor frequency, air-gap power, rotor copper loss, mechanical power and shaft output, and efficiency.</p>
+      <div class="eqn">n<sub>s</sub> = 120·50/4 = 1500 rpm · s = (1500−1440)/1500 = <b>0.04 (4%)</b> · f<sub>r</sub> = s·f = <b>2 Hz</b></div>
+      <div class="eqn">P<sub>ag</sub> = P<sub>in</sub> − (stator losses) = 12 000 − 900 = <b>11 100 W</b></div>
+      <div class="eqn">P<sub>cu2</sub> = s·P<sub>ag</sub> = 0.04 × 11 100 = <b>444 W</b> · P<sub>mech</sub> = (1−s)·P<sub>ag</sub> = <b>10 656 W</b></div>
+      <div class="eqn">P<sub>shaft</sub> = P<sub>mech</sub> − F&amp;W = 10 656 − 300 = <b>10 356 W</b> · η = 10 356/12 000 = <b>86.3%</b></div>
+      <p class="page-sub"><b>Discussion:</b> The 1 : s : (1−s) rule did the heavy lifting — no equivalent circuit needed. Notice rotor copper loss (444 W) is locked to slip; halve the slip (better design or lower load) and you halve that loss. The 86% efficiency is typical of a small older motor; an IE3 version would trim the stator copper and stray losses to reach ~90%.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-2 · Breakdown Torque from the Equivalent Circuit</div>
+      <p>Per-phase (referred): V₁ = 240 V (phase), R₁ = 0.5 Ω, X₁ = X₂′ = 1.0 Ω, R₂′ = 0.4 Ω, magnetising branch neglected. The machine is 4-pole, 50 Hz. Find the slip at maximum torque and the maximum (breakdown) torque per phase basis. (Take V<sub>th</sub>≈V₁, R<sub>th</sub>≈R₁ with X<sub>m</sub> large.)</p>
+      <div class="eqn">s<sub>maxT</sub> = R₂′ / √(R<sub>th</sub>² + (X<sub>th</sub>+X₂′)²) = 0.4 / √(0.5² + 2.0²) = 0.4/2.062 = <b>0.194</b></div>
+      <div class="eqn">ω<sub>s</sub> = 4πf/P = 4π·50/4 = <b>157.1 rad/s</b></div>
+      <div class="eqn">T<sub>max</sub> = (3/ω<sub>s</sub>)·V<sub>th</sub>² / [2·(R<sub>th</sub> + √(R<sub>th</sub>²+(X<sub>th</sub>+X₂′)²))]</div>
+      <div class="eqn">= (3/157.1)·240² / [2·(0.5 + 2.062)] = 0.01910·57 600 / 5.124 = <b>214.7 N·m</b></div>
+      <p class="page-sub"><b>Discussion:</b> T<sub>max</sub> does <i>not</i> contain R₂′ — proof that breakdown torque is set by the leakage reactances and voltage, while rotor resistance only relocates the <i>slip</i> at which it occurs (here ~19%). Double R₂′ (add external rotor resistance) and s<sub>maxT</sub> would jump toward 0.39, moving peak torque toward standstill for starting — the wound-rotor lever, at the same T<sub>max</sub>.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-3 · DC Motor Speed &amp; Field Weakening</div>
+      <p>A 220 V DC shunt motor: R<sub>a</sub> = 0.4 Ω, runs at 1000 rpm drawing I<sub>a</sub> = 25 A. (a) Find E<sub>b</sub>. (b) The field flux is then reduced to 80% (constant load torque). Find the new armature current and speed.</p>
+      <div class="eqn">(a) E<sub>b1</sub> = V − I<sub>a</sub>R<sub>a</sub> = 220 − 25·0.4 = <b>210 V</b></div>
+      <div class="eqn">T ∝ Φ·I<sub>a</sub> constant ⇒ I<sub>a2</sub> = I<sub>a1</sub>·(Φ₁/Φ₂) = 25/0.8 = <b>31.25 A</b></div>
+      <div class="eqn">E<sub>b2</sub> = 220 − 31.25·0.4 = 207.5 V · ω ∝ E<sub>b</sub>/Φ</div>
+      <div class="eqn">N₂ = N₁·(E<sub>b2</sub>/E<sub>b1</sub>)·(Φ₁/Φ₂) = 1000·(207.5/210)·(1/0.8) = <b>1235 rpm</b></div>
+      <p class="page-sub"><b>Discussion:</b> Weakening the field <i>raises</i> speed (by ~24% here) but forces more armature current for the same torque — the constant-power trade above base speed. Push it too far and commutation suffers and I<sub>a</sub> overheats the armature. This is exactly the field-weakening region a VFD emulates above base frequency on an induction motor.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-4 · Efficiency Upgrade Payback (IE2 → IE4)</div>
+      <p>A 37 kW motor runs 6 500 h/yr at 80% load. Replace an IE2 unit (η = 91.0%) with an IE4 (η = 94.3%). Tariff = 45 LKR/kWh. Price premium = 180 000 LKR. Find annual energy saved and simple payback.</p>
+      <div class="eqn">Output power drawn = 37·0.80 = 29.6 kW · Input(IE2) = 29.6/0.910 = 32.53 kW · Input(IE4) = 29.6/0.943 = 31.39 kW</div>
+      <div class="eqn">ΔP = 32.53 − 31.39 = <b>1.14 kW</b> · Energy saved = 1.14 × 6 500 = <b>7 410 kWh/yr</b></div>
+      <div class="eqn">Saving = 7 410 × 45 = <b>333 450 LKR/yr</b> · Payback = 180 000 / 333 450 = <b>0.54 yr ≈ 6.5 months</b></div>
+      <p class="page-sub"><b>Discussion:</b> A 3.3-point efficiency gain on a high-hours motor pays for itself in well under a year, then saves ~333 k LKR every year of a 15–20-year life. This is why life-cycle costing — not purchase price — must drive motor buying, and why MEPS keep ratcheting the floor. Add a VFD if the load is variable-torque and the saving multiplies again.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 ============ -->
+  <section class="page" id="p14">
+    <div class="page-tag">Page 14 / 16 · MSc Practice</div>
+    <h2 class="page-title">Problem Set</h2>
+    <p class="page-sub">Ten problems, increasing difficulty. Work each fully before revealing.</p>
+
+    <div class="card quiz"><div class="label">P1 · Synchronous speed</div><p class="quiz-q">A 6-pole motor on a 60 Hz supply — synchronous speed? And at 3% slip, shaft speed?</p><div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> n<sub>s</sub> = 120·60/6 = <b>1200 rpm</b>. n<sub>r</sub> = 1200(1−0.03) = <b>1164 rpm</b>.</span></div></div>
+
+    <div class="card quiz"><div class="label">P2 · Torque from power</div><p class="quiz-q">An 11 kW motor runs at 1455 rpm. What is the shaft torque?</p><div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> T = 9550·P/N = 9550·11/1455 = <b>72.2 N·m</b>. (Or T = P/ω = 11000/(2π·1455/60) = 11000/152.4 = 72.2 N·m.)</span></div></div>
+
+    <div class="card quiz"><div class="label">P3 · Voltage-sag torque</div><p class="quiz-q">The supply to an induction motor sags to 85% of rated during a neighbouring DOL start. By how much does available torque fall?</p><div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> T ∝ V², so T falls to 0.85² = 0.7225 → a drop of <b>~27.8%</b>. If load torque exceeded 72% of normal breakdown, the motor could stall. This is why large starts are staggered on weak feeders.</span></div></div>
+
+    <div class="card quiz"><div class="label">P4 · Rotor copper loss</div><p class="quiz-q">A motor's air-gap power is 20 kW and it runs at 5% slip. What is the rotor copper loss, and what does raising slip to 10% do to it?</p><div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> P<sub>cu2</sub> = s·P<sub>ag</sub> = 0.05·20 000 = <b>1000 W</b>. At 10% slip it <b>doubles to 2000 W</b> for the same air-gap power — rotor heating is directly proportional to slip, the reason high-slip control cooks rotors.</span></div></div>
+
+    <div class="card quiz"><div class="label">P5 · Star-delta starting torque</div><p class="quiz-q">A motor's DOL starting torque is 180% of full-load. What is its starting torque in star during a star-delta start?</p><div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Star gives ⅓ of DOL torque (and ⅓ of DOL current). Star start torque = 180%/3 = <b>60% of full-load torque</b>. If the load needs more than 60% to break away, star-delta will stall in star — pick a higher-torque design or a soft-starter/VFD. (See <a href="A51_Motor_Starters_Control_Circuits_Deep_Dive.html">A51</a>.)</span></div></div>
+
+    <div class="card quiz"><div class="label">P6 · Efficiency at part load</div><p class="quiz-q">Why can a motor's power factor drop below 0.6 at 25% load even though its full-load PF is 0.87?</p><div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> The magnetising current (reactive, ~constant, set by the air-gap) stays roughly fixed while the working (real) current shrinks with load. As real current falls, the ratio of real to total current — the power factor — collapses. Hence over-sized, lightly-loaded motors both waste energy and drag the plant PF down.</span></div></div>
+
+    <div class="card quiz"><div class="label">P7 · Insulation life</div><p class="quiz-q">A Class F winding designed for a class-B rise (nominal hot-spot ~130°C) is actually run at 160°C. Estimate the relative life.</p><div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> ΔT above the intended 130°C is 30°C. Life halves per 10°C, so relative life ≈ (½)^(30/10) = (½)³ = <b>1/8</b> of design life — an 18-year winding becomes ~2 years. And 160°C also exceeds the 155°C Class F ceiling, so ageing is even faster than the linear rule implies.</span></div></div>
+
+    <div class="card quiz"><div class="label">P8 · Single-phasing current</div><p class="quiz-q">A delta-connected motor loses one supply line while running. Roughly what happens to the current in the two remaining lines, and why is it dangerous?</p><div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> The motor keeps running (the rotating field degrades to pulsating but inertia carries it) at reduced torque, but to deliver similar power on two lines the remaining line currents rise to roughly <b>1.7–2×</b> normal. Because it still turns, no obvious symptom appears, yet the overheated windings burn out within minutes-to-hours in a characteristic phase pattern. A phase-loss / negative-sequence relay is essential.</span></div></div>
+
+    <div class="card quiz"><div class="label">P9 · PMSM vs induction efficiency</div><p class="quiz-q">Two 15 kW motors, same frame, one induction, one PMSM, both on drives. Why is the PMSM typically 2–4 points more efficient, and where does that gap come from?</p><div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> The PMSM's rotor is excited by permanent magnets, so at steady state it carries essentially <b>no rotor current and no rotor copper loss</b> (s·P<sub>ag</sub> = 0). In the induction motor, rotor copper loss is unavoidable — it is the price of induction — and it is largest of the load-dependent losses after stator copper. Removing that whole bucket is why PMSM/SynRM reach IE4/IE5 where induction struggles.</span></div></div>
+
+    <div class="card quiz"><div class="label">P10 · Stepper step count</div><p class="quiz-q">A 0.9° hybrid stepper drives a leadscrew of 5 mm pitch at 1/8 microstepping. What is the linear resolution per microstep, and why should you not quote it as the machine's accuracy?</p><div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Full steps/rev = 360/0.9 = 400; ×8 microsteps = 3200/rev. Linear = 5 mm/3200 = <b>1.56 µm per microstep</b>. But that is <i>resolution</i>, not accuracy: microstep position is set by the balance of drive torque against detent + load torque, so the rotor can sit several microsteps off the commanded angle; add leadscrew backlash and lost steps under load and true repeatability is far coarser. Microstepping buys smoothness, not proportional precision.</span></div></div>
+  </section>
+
+  <!-- ============ PAGE 15 ============ -->
+  <section class="page" id="p15">
+    <div class="page-tag">Page 15 / 16 · MSc Practice</div>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">Derive the three results examiners love, keep the symbols straight, and sidestep the seven classic mistakes.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 · The Air-Gap Power Split (1 : s : 1−s)</div>
+      <p>In the equivalent circuit the entire rotor branch resistance is R₂′/s, carrying rotor current I₂′. The power crossing the air-gap is the power into that resistance:</p>
+      <div class="eqn">P<sub>ag</sub> = 3·I₂′²·(R₂′/s)</div>
+      <p>The actual rotor copper loss is the power in the <i>real</i> rotor resistance R₂′:</p>
+      <div class="eqn">P<sub>cu2</sub> = 3·I₂′²·R₂′ = s·[3·I₂′²·(R₂′/s)] = <b>s·P<sub>ag</sub></b></div>
+      <p>The remainder is mechanical, modelled by the split-out resistor R₂′(1−s)/s:</p>
+      <div class="eqn">P<sub>mech</sub> = 3·I₂′²·R₂′·(1−s)/s = (1−s)·P<sub>ag</sub> &nbsp;⇒&nbsp; P<sub>ag</sub> : P<sub>cu2</sub> : P<sub>mech</sub> = <b>1 : s : (1−s)</b></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 · Slip at Maximum Torque</div>
+      <p>From the Thevenin torque T = (3/ω<sub>s</sub>)·V<sub>th</sub>²·(R₂′/s) / [(R<sub>th</sub>+R₂′/s)² + (X<sub>th</sub>+X₂′)²], set dT/ds = 0. The maximum occurs where the rotor branch resistance equals the magnitude of the rest of the series impedance:</p>
+      <div class="eqn">R₂′/s = √(R<sub>th</sub>² + (X<sub>th</sub>+X₂′)²) &nbsp;⇒&nbsp; s<sub>maxT</sub> = <b>R₂′ / √(R<sub>th</sub>² + (X<sub>th</sub>+X₂′)²)</b></div>
+      <p>Substituting back, T<sub>max</sub> = (3/ω<sub>s</sub>)·V<sub>th</sub>² / [2·(R<sub>th</sub> + √(R<sub>th</sub>²+(X<sub>th</sub>+X₂′)²))] — <b>independent of R₂′</b>. So rotor resistance sets <i>where</i> the peak sits, never <i>how high</i> it is. This is the maximum-power-transfer idea in rotating-machine clothing.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 · The DC Motor Speed Equation</div>
+      <p>KVL round the armature: V = E<sub>b</sub> + I<sub>a</sub>R<sub>a</sub>, with E<sub>b</sub> = kΦω. Solve for ω:</p>
+      <div class="eqn">ω = (V − I<sub>a</sub>R<sub>a</sub>) / (kΦ) &nbsp;·&nbsp; and since T = kΦI<sub>a</sub>, I<sub>a</sub> = T/(kΦ)</div>
+      <div class="eqn">ω = V/(kΦ) − R<sub>a</sub>T/(kΦ)² &nbsp;— a straight line: no-load speed V/(kΦ) minus a droop ∝ torque</div>
+      <p>This is the mathematical shape of the shunt curve on Page 3, and the template for every four-quadrant drive: change V to translate the line up/down, change Φ to rotate its slope.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol Glossary</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Symbol</th><th>Meaning</th><th>Unit</th></tr>
+        <tr><td>n<sub>s</sub>, ω<sub>s</sub></td><td>Synchronous speed / angular speed = 120f/P, 4πf/P</td><td>rpm, rad/s</td></tr>
+        <tr><td>s</td><td>Slip = (n<sub>s</sub>−n<sub>r</sub>)/n<sub>s</sub></td><td>—</td></tr>
+        <tr><td>P<sub>ag</sub></td><td>Air-gap (rotor input) power</td><td>W</td></tr>
+        <tr><td>R₂′, X₂′</td><td>Rotor resistance / leakage reactance referred to stator</td><td>Ω</td></tr>
+        <tr><td>E<sub>b</sub>, kΦ</td><td>Back-EMF; machine constant × flux</td><td>V; V·s/rad</td></tr>
+        <tr><td>λ<sub>m</sub></td><td>PM flux linkage</td><td>Wb</td></tr>
+        <tr><td>L<sub>d</sub>, L<sub>q</sub></td><td>Direct / quadrature inductance (saliency)</td><td>H</td></tr>
+        <tr><td>η, cos φ</td><td>Efficiency; power factor</td><td>—</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven Exam &amp; Field Traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>Rated speed ≠ synchronous.</b> A "1500 rpm" motor runs at ~1440–1470; 1500 is the field speed, reached only at zero load (never on an induction machine).</span></li>
+        <li><span class="num">2</span><span><b>T ∝ V², not V.</b> A 10% sag costs 19% torque — the most-missed factor-of-two-ish error.</span></li>
+        <li><span class="num">3</span><span><b>T<sub>max</sub> is independent of R₂′.</b> Rotor resistance moves the <i>slip</i> of peak torque, not its value.</span></li>
+        <li><span class="num">4</span><span><b>Nameplate kW is output.</b> Input = output/η. Don't size cables/protection off the shaft power.</span></li>
+        <li><span class="num">5</span><span><b>Star-delta gives ⅓ torque and ⅓ current</b> — not ⅓ voltage-then-linear. If the load needs &gt;⅓ breakaway, star stalls.</span></li>
+        <li><span class="num">6</span><span><b>Microstepping ≠ accuracy.</b> It divides the electrical angle, not the mechanical error; detent torque limits real position.</span></li>
+        <li><span class="num">7</span><span><b>A PM motor is always a generator.</b> A spinning PMSM is live at its terminals with the drive off — brake before touching.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 16 ============ -->
+  <section class="page" id="p16">
+    <div class="page-tag">Page 16 / 16 · MSc Practice</div>
+    <h2 class="page-title">Study &amp; Practice Path</h2>
+    <p class="page-sub">The canon, a hands-on ladder, and a self-check. Work the ladder on real motors and this subject becomes muscle memory.</p>
+
+    <div class="card">
+      <div class="label">Reference Shelf</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Source</th><th>Why</th></tr>
+        <tr><td><b>Hughes &amp; Drury — Electric Motors and Drives</b>, 4th/5th ed <span class="hl">(in your material folder)</span></td><td>The intuition-first bible — read this before any maths-heavy text. Covers every family + drives.</td></tr>
+        <tr><td><b>P.S. Bimbhra — Electrical Machinery</b> <span class="hl">(in your material folder)</span></td><td>Rigorous derivations of the equivalent circuit, torque and tests — exam-grade problems.</td></tr>
+        <tr><td><b>Electrical Machines (2013)</b> &amp; <b>Electric Motors AC/DC</b> <span class="hl">(in your material folder)</span></td><td>Supplementary worked examples and construction detail.</td></tr>
+        <tr><td><b>Rex Miller — Industrial Electricity &amp; Motor Controls</b> <span class="hl">(in your material folder)</span></td><td>Shop-floor wiring, starters, protection — pairs with A51.</td></tr>
+        <tr><td>Chapman — <i>Electric Machinery Fundamentals</i></td><td>The classic teaching text; MATLAB examples.</td></tr>
+        <tr><td>Fitzgerald, Kingsley &amp; Umans — <i>Electric Machinery</i></td><td>Graduate reference; energy-conversion rigour.</td></tr>
+        <tr><td>Krishnan — <i>Electric Motor Drives</i> / <i>PMSM &amp; BLDC Drives</i></td><td>Modelling &amp; control of PM machines and FOC.</td></tr>
+        <tr><td>IEC 60034 series (esp. -1, -2-1, -30-1:2025), NEMA MG-1</td><td>Ratings, efficiency test methods, IE classes, the nameplate law.</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Eight-Step Hands-On Ladder</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span>Photograph five real nameplates around the plant and decode <i>every</i> field — kW, V/connection, FLC, poles/rpm, cos φ, IE, insulation, IP, IC, duty, SF.</span></li>
+        <li><span class="num">2</span><span>On a spare motor, run no-load and (carefully, reduced-voltage) blocked-rotor tests; extract R<sub>eq</sub>, X<sub>eq</sub>, and iron+F&amp;W loss.</span></li>
+        <li><span class="num">3</span><span>Megger a motor cold and warm; compute PI (10 min/1 min) and interpret. Trend it over months.</span></li>
+        <li><span class="num">4</span><span>Measure slip with a strobe or by counting rotor-bar-pass with a clamp meter; back-calculate f<sub>r</sub> and check against nameplate rpm.</span></li>
+        <li><span class="num">5</span><span>Set a thermal overload relay from FLC (class 10 vs 20) and verify the trip curve against a hot start.</span></li>
+        <li><span class="num">6</span><span>Commission a VFD on a fan: log power at 100/90/80/70% speed and verify the cubic (affinity) saving against A08/A47.</span></li>
+        <li><span class="num">7</span><span>Take a vibration spectrum (A42) and a thermogram (A41) of a running motor; identify 1×, 2×, bearing tones, hot terminals.</span></li>
+        <li><span class="num">8</span><span>Do a life-cycle-cost comparison (IE3 vs IE4, or throttle vs VFD) for one real machine and present the payback.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-Assessment — Can You…?</div>
+      <div class="grid-2">
+        <div class="mini c-amb"><h4>Explain</h4><p>Why an induction motor needs slip; why T<sub>max</sub> is independent of R₂′; why PMSM reaches IE5.</p></div>
+        <div class="mini c-blue"><h4>Calculate</h4><p>Slip, f<sub>r</sub>, power-flow split, breakdown slip, DC speed with field weakening, efficiency-upgrade payback.</p></div>
+        <div class="mini c-grn"><h4>Select</h4><p>Poles, design class, IE class, IP/IC/duty, and starting method for a stated load &amp; environment.</p></div>
+        <div class="mini c-purp"><h4>Diagnose</h4><p>Single-phasing, insulation ageing, bearing/shaft-current faults, and the right test/relay for each.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MEMORY HOOK ============ -->
+  <div class="card memory" style="background:linear-gradient(135deg,var(--card-2),var(--card));border:1px solid var(--accent);border-radius:16px;padding:26px;margin-top:26px;text-align:center">
+    <div class="label" style="justify-content:center">Memory Hook</div>
+    <p style="font-size:clamp(19px,3vw,26px);font-weight:800;color:var(--accent-soft);line-height:1.3;margin:6px 0">"Current in a field makes force — the rest is geometry.<br>Slip makes an induction motor's torque; magnets make a synchronous motor's efficiency."</p>
+    <p class="page-sub" style="margin-top:10px">Field is the gear · slip is the price of induction · no rotor loss is the road to IE5 · the nameplate is a contract · ten degrees halves the life.</p>
+  </div>
+
+  <div class="footer">
+    <p><b>A55 · Electric Motors &amp; Machines</b> — Advanced Deep Dive · MSc Level</p>
+    <p>Part of the Micro Learning Advanced Library · Standalone module · Related: <a href="A08_VFD_Deep_Dive.html">A08 VFD</a> · <a href="A09_Servo_Motion_Deep_Dive.html">A09 Servo</a> · <a href="A51_Motor_Starters_Control_Circuits_Deep_Dive.html">A51 Starters</a> · <a href="A30_Three_Phase_Power_Deep_Dive.html">A30 Three-Phase</a> · <a href="A19_Bearings_Deep_Dive.html">A19 Bearings</a> · <a href="A42_Vibration_Analysis_Deep_Dive.html">A42 Vibration</a></p>
+    <p><a href="index.html">← Back to Advanced Library</a></p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+
+  // ---- D1: Slip / Torque explorer (Page 6) ----
+  // Model: 400V line -> 231 V phase, 4-pole 50Hz, R1=0.5, X1=X2'=0.9 ohm
+  var R1=0.5, X1=0.9, X2=0.9, ws=2*Math.PI*(2*50/4); // ws = 157.08 rad/s (P=4)
+  function d1render(){
+    var out=$('d1out'); if(!out) return;
+    var s = parseFloat($('d1s').value)/100;
+    var R2 = parseFloat($('d1r').value);
+    var vpct = parseFloat($('d1v').value);
+    $('d1s_v').textContent = s.toFixed(s<0.1?4:2).replace(/0+$/,'').replace(/\.$/,'') || s.toFixed(2);
+    $('d1s_v').textContent = (s).toFixed(4);
+    $('d1r_v').textContent = R2.toFixed(2);
+    $('d1v_v').textContent = vpct.toFixed(0);
+    var Vph = 231*(vpct/100);
+    var Rs = R1 + R2/s;
+    var Z2 = Rs*Rs + (X1+X2)*(X1+X2);
+    var I2 = Vph/Math.sqrt(Z2);
+    var T = (3/ws)*Vph*Vph*(R2/s)/Z2;
+    var Pag = 3*I2*I2*(R2/s);
+    var Pcu2 = s*Pag;
+    var Pmech = (1-s)*Pag;
+    var smax = R2/Math.sqrt(R1*R1 + (X1+X2)*(X1+X2));
+    var note='';
+    if(Math.abs(s-1)<0.001) note='At s = 1 this is the <b>locked-rotor / starting</b> point — note the large current.';
+    else if(s > smax*1.05) note='You are LEFT of breakdown (s &gt; s_maxT) — the <b>unstable</b> region; torque falls as it slows → stall.';
+    else if(Math.abs(s-smax) < smax*0.15) note='Near <b>breakdown (max) torque</b> — s ≈ s_maxT.';
+    else note='Stable running region (right of breakdown). Small slip → low rotor loss.';
+    out.innerHTML =
+      'Torque T = <b>'+T.toFixed(1)+' N·m</b> &nbsp;·&nbsp; Rotor current I₂′ ≈ <b>'+I2.toFixed(1)+' A</b><br>'+
+      'Breakdown slip s_maxT = <b>'+smax.toFixed(3)+'</b> ('+(smax*100).toFixed(1)+'%)<br>'+
+      'Air-gap power '+ (Pag/1000).toFixed(2) +' kW → rotor Cu loss <b>'+Math.round(Pcu2)+' W</b> ('+(s*100).toFixed(1)+'%), mech '+(Pmech/1000).toFixed(2)+' kW<br>'+
+      '<span style="font-size:13px">'+note+'</span>';
+  }
+  ['d1s','d1r','d1v'].forEach(function(id){ var e=$(id); if(e) e.addEventListener('input', d1render); });
+  d1render();
+
+  // ---- D2: Efficiency & running-cost calculator (Page 9) ----
+  function d2render(){
+    var out=$('d2out'); if(!out) return;
+    var P=parseFloat($('d2p').value), eff=parseFloat($('d2e').value), load=parseFloat($('d2l').value),
+        hrs=parseFloat($('d2h').value), tar=parseFloat($('d2t').value);
+    $('d2p_v').textContent=P.toFixed(1); $('d2e_v').textContent=eff.toFixed(1);
+    $('d2l_v').textContent=load.toFixed(0); $('d2h_v').textContent=hrs.toFixed(0); $('d2t_v').textContent=tar.toFixed(0);
+    var Pout=P*load/100;
+    var Pin=Pout/(eff/100);
+    var Ploss=Pin-Pout;
+    var energyIn=Pin*hrs;              // kWh/yr
+    var costIn=energyIn*tar;           // LKR/yr
+    var lossEnergy=Ploss*hrs;
+    var lossCost=lossEnergy*tar;
+    // reference: same duty at +3 points efficiency
+    var effRef=Math.min(eff+3, 98);
+    var PinRef=Pout/(effRef/100);
+    var saveCost=(Pin-PinRef)*hrs*tar;
+    out.innerHTML =
+      'Shaft load <b>'+Pout.toFixed(1)+' kW</b> → input <b>'+Pin.toFixed(1)+' kW</b> · losses <b>'+Ploss.toFixed(2)+' kW</b><br>'+
+      'Energy in: <b>'+Math.round(energyIn).toLocaleString()+' kWh/yr</b> · Bill: <b>'+Math.round(costIn).toLocaleString()+' LKR/yr</b><br>'+
+      'Wasted as loss: '+Math.round(lossEnergy).toLocaleString()+' kWh/yr = <b>'+Math.round(lossCost).toLocaleString()+' LKR/yr</b><br>'+
+      '<span style="font-size:13px">Upgrade +3 eff points ('+eff.toFixed(1)+'→'+effRef.toFixed(1)+'%) would save ≈ <b>'+Math.round(saveCost).toLocaleString()+' LKR/yr</b>.</span>';
+  }
+  ['d2p','d2e','d2l','d2h','d2t'].forEach(function(id){ var e=$(id); if(e) e.addEventListener('input', d2render); });
+  d2render();
+})();
+</script>
+</body>
+</html>

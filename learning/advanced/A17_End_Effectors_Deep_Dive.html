@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>End-Effectors &amp; Grippers — Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #f472b6;        /* pink — Mechatronics & Motion category */
+    --accent-soft: #f9a8d4;
+    --accent-2: #a3e635;      /* lime — the "linked to micro" colour */
+    --accent-3: #fb923c;
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(244,114,182,0.14), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(163,230,53,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page, .card { animation: fadeUp 0.6s ease both; }
+  .page { margin-bottom: 30px; }
+
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--bg); background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(244,114,182,0.35);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+
+  .badge { display: inline-flex; align-items: center; gap: 10px; background: var(--card); padding: 10px 18px; border-radius: 999px; font-size: 14px; color: var(--text-dim); border: 1px solid var(--border); margin-bottom: 22px; }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect { display:flex; align-items:center; gap:12px; flex-wrap:wrap; background: linear-gradient(135deg, rgba(244,114,182,0.12), rgba(163,230,53,0.06)); border:1px solid var(--border); border-left:4px solid var(--accent-2); border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px; }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-2); background: rgba(163,230,53,0.12); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .toc { background: var(--card); border:1px solid var(--border); border-radius:18px; padding:22px 24px; margin-bottom:30px; }
+  .toc h3 { font-size:13px; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); margin-bottom:14px; }
+  .toc ol { list-style:none; counter-reset:toc; display:grid; grid-template-columns:1fr 1fr; gap:8px 18px; }
+  .toc li { counter-increment:toc; font-size:14px; color:var(--text-dim); display:flex; gap:10px; }
+  .toc li::before { content:counter(toc,decimal-leading-zero); font-family:ui-monospace,monospace; color:var(--accent); font-weight:700; }
+  @media(max-width:600px){ .toc ol{grid-template-columns:1fr;} }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media(max-width:600px){ .grid-2,.grid-3{grid-template-columns:1fr;} }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:24px; font-weight:800; color: var(--accent); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-lime { border-top-color: var(--accent-2)!important; } .c-lime .big{color:var(--accent-2)}
+  .c-amb  { border-top-color: var(--accent-3)!important; } .c-amb .big{color:var(--accent-3)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-green{ border-top-color: var(--green)!important; } .c-green .big{color:var(--green)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .callout { border-radius:14px; padding:16px 18px; margin-top:14px; font-size:14px; border:1px solid var(--border); }
+  .callout.key { background: linear-gradient(135deg, rgba(244,114,182,0.12), rgba(96,165,250,0.04)); border-left:4px solid var(--accent); }
+  .callout.warn { background: linear-gradient(135deg, rgba(248,113,113,0.10), transparent); border-left:4px solid var(--danger); }
+  .callout.win { background: linear-gradient(135deg, rgba(52,211,153,0.10), transparent); border-left:4px solid var(--green); }
+  .callout b { color: var(--text); }
+
+  .steps { counter-reset:step; display:grid; gap:12px; }
+  .step { background:var(--card-2); border-radius:14px; padding:16px 18px 16px 54px; position:relative; font-size:15px; color:#d7dee8; }
+  .step::before { counter-increment:step; content:counter(step); position:absolute; left:16px; top:16px; width:26px; height:26px; background:var(--accent); color:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+  .step b { color: var(--text); }
+
+  .quiz { background: var(--card); border: 2px dashed var(--accent); }
+  .quiz-q { font-size: 19px; font-weight: 500; margin-bottom: 16px; }
+  .quiz-answer { background: var(--card-2); padding: 16px; border-radius: 12px; font-size: 15px; color: var(--text-dim); cursor: pointer; user-select: none; transition: all 0.3s ease; }
+  .quiz-answer.revealed { color: var(--text); border-left:4px solid var(--accent-2); }
+  .quiz-answer b { color: var(--accent-2); }
+  .quote { font-size: clamp(20px,3vw,28px); font-weight:700; text-align:center; line-height:1.4; background:linear-gradient(135deg,var(--accent),var(--accent-2)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; padding:8px 0; }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:14px; margin-top:40px; line-height:1.9; }
+  .footer a { color: var(--accent-soft); text-decoration:none; }
+
+  @keyframes fadeUp { from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:none;} }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="badge"><span class="dot"></span><span>Advanced Track · A17 · MSc-Level Deep Dive</span></div>
+  <h1 class="hero"><span class="emoji">🦾</span>End-Effectors &amp; Grippers</h1>
+  <p class="hero-sub">The robot's hand — grasp mechanics, force-closure theory, actuation physics, vacuum &amp; magnetic engineering, soft &amp; compliant grasping, sensing, tool-changing and the grip-force budget that decides whether automation succeeds.</p>
+
+  <div class="connect">
+    <span class="pill">↔ LINKS</span>
+    <span>This deep dive expands <a href="../17_End_Effectors.html">Micro Card 17 — End-Effectors</a>. It is the payload of
+    <a href="A15_Robotics_ROS2_Deep_Dive.html">Robotics &amp; ROS 2 (A15)</a>, driven by
+    <a href="A09_Servo_Motion_Deep_Dive.html">Servo Motion (A09)</a> &amp; <a href="A12_Pneumatic_Systems_Deep_Dive.html">Pneumatics (A12)</a>,
+    senses through <a href="A11_Industrial_Sensors_Deep_Dive.html">Sensors (A11)</a> &amp; <a href="A16_Machine_Vision_Deep_Dive.html">Machine Vision (A16)</a>.</span>
+  </div>
+
+  <div class="toc">
+    <h3>What this deep dive covers</h3>
+    <ol>
+      <li>The grasp problem &amp; why the gripper is 50% of success</li>
+      <li>Grasp mechanics: form- vs force-closure, friction cones</li>
+      <li>Parallel jaw grippers — kinematics &amp; the force budget</li>
+      <li>Actuation physics: pneumatic vs electric vs hydraulic</li>
+      <li>Vacuum grasping — flow, leakage &amp; cup engineering</li>
+      <li>Magnetic &amp; specialty (Bernoulli, needle, cryo) grippers</li>
+      <li>Soft robotics &amp; underactuated compliant hands</li>
+      <li>Sensing: force/torque, tactile &amp; slip detection</li>
+      <li>Tool changers, payload &amp; the wrist moment budget</li>
+      <li>Selection framework, standards &amp; Industry 4.0 value</li>
+    </ol>
+  </div>
+
+  <!-- ===== PAGE 1 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 1 · The Problem</span>
+    <h2 class="page-title">Why the gripper decides if automation works</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">Quick Recap → Going Deeper</div>
+    <p class="lead">The micro card said: <span class="hl">"The Robot is the Arm — the Gripper is the Job."</span> The MSc truth behind that line is that the robot arm (<a href="A15_Robotics_ROS2_Deep_Dive.html" style="color:var(--accent-soft)">A15</a>) only delivers a <em>pose</em>; everything that makes a task succeed — grasp, hold, orient, release — happens in the <span class="hl">end-effector</span>.</p>
+    <p class="body">A six-axis arm with sub-0.05&nbsp;mm repeatability is worthless if its gripper crushes the part, drops it under acceleration, or cannot reach into the fixture. This is why integrators repeat the rule of thumb the micro card gave: <strong>gripper selection accounts for roughly half of automation-project success</strong>. The arm is a commodity; the <span class="hl2">grasp</span> is the engineering. The end-effector (EOAT — End-Of-Arm Tooling) is the only part of the cell that physically <em>touches the product</em>, so it carries the entire burden of part variation, surface finish, mass, and cycle-rate demands.</p>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 220" role="img" aria-label="A robot arm delivers a pose; the end-effector does the job">
+        <defs>
+          <linearGradient id="armg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#475569"/><stop offset="1" stop-color="#1e293b"/>
+          </linearGradient>
+          <linearGradient id="jaw" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#f472b6"/><stop offset="1" stop-color="#be185d"/>
+          </linearGradient>
+        </defs>
+        <!-- base + arm -->
+        <rect x="40" y="160" width="90" height="40" rx="6" fill="url(#armg)"/>
+        <rect x="70" y="70" width="26" height="100" rx="10" fill="url(#armg)"/>
+        <rect x="83" y="74" width="180" height="22" rx="11" fill="url(#armg)" transform="rotate(18 90 85)"/>
+        <circle cx="84" cy="80" r="14" fill="#64748b" stroke="#94a3b8" stroke-width="2"/>
+        <text x="84" y="200" text-anchor="middle" fill="#94a3b8" font-size="12">robot = pose only</text>
+        <!-- wrist + gripper -->
+        <g transform="translate(250,118)">
+          <rect x="-14" y="-12" width="28" height="24" rx="5" fill="#334155" stroke="#64748b"/>
+          <rect x="-30" y="6" width="14" height="40" rx="4" fill="url(#jaw)"/>
+          <rect x="16" y="6" width="14" height="40" rx="4" fill="url(#jaw)"/>
+          <rect x="-6" y="34" width="22" height="22" rx="3" fill="#fbbf24" stroke="#b45309"/>
+          <text x="0" y="-22" text-anchor="middle" fill="#f9a8d4" font-size="12" font-weight="700">end-effector = the job</text>
+        </g>
+        <!-- value chain -->
+        <g transform="translate(360,40)" font-size="13">
+          <rect x="0" y="0" width="360" height="150" rx="12" fill="#11161f" stroke="#334155"/>
+          <text x="20" y="30" fill="#a3e635" font-weight="700">The half that gets ignored</text>
+          <text x="20" y="58" fill="#cbd5e1">• Arm: repeatability, reach, speed — buy it</text>
+          <text x="20" y="84" fill="#cbd5e1">• Gripper: grasp force, finger geometry,</text>
+          <text x="40" y="104" fill="#cbd5e1">compliance, sensing — design it</text>
+          <text x="20" y="132" fill="#f472b6" font-weight="700">≈50% of project risk lives here</text>
+        </g>
+      </svg>
+      <div class="cap">The arm provides position; the end-effector provides the grasp. Project failures cluster in the gripper, not the robot.</div>
+    </div>
+    <div class="callout key"><b>MSc framing:</b> Think of EOAT as a <span class="hl">force/torque transducer with geometry</span>. Its job is to create a stable wrench (force + moment) on the part that resists gravity, inertia and process loads — without exceeding the part's allowable stress. Everything in this deep dive is a way to engineer that wrench.</div>
+  </div>
+
+  <!-- ===== PAGE 2 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 2 · Grasp Theory</span>
+    <h2 class="page-title">Form-closure, force-closure &amp; the friction cone</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">The physics of "holding"</div>
+    <p class="body">A grasp is stable when the contacts can resist <em>any</em> external wrench. Two regimes are distinguished in grasp theory:</p>
+    <div class="grid-2">
+      <div class="mini c-pink"><h4>Form-closure</h4><p>Geometry alone immobilises the part — contacts cage it so no motion is possible even with zero friction. Needs ≥ 7 frictionless contacts for a 3D rigid body. Example: a part nested in a matching V-pocket.</p></div>
+      <div class="mini c-lime"><h4>Force-closure</h4><p>Friction at the contacts supplies the constraint. Fewer contacts (often 2) suffice, but only if the required forces stay <em>inside the friction cone</em>. This is what almost every industrial gripper relies on.</p></div>
+    </div>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 210" role="img" aria-label="Friction cone diagram for a two-finger force-closure grasp">
+        <defs><linearGradient id="part2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbbf24"/><stop offset="1" stop-color="#d97706"/></linearGradient></defs>
+        <rect x="320" y="55" width="120" height="100" rx="8" fill="url(#part2)" stroke="#92400e"/>
+        <text x="380" y="110" text-anchor="middle" fill="#1c1917" font-size="14" font-weight="700">part</text>
+        <!-- left finger -->
+        <rect x="250" y="80" width="60" height="50" rx="6" fill="#f472b6"/>
+        <rect x="450" y="80" width="60" height="50" rx="6" fill="#f472b6"/>
+        <!-- normal force arrows -->
+        <line x1="312" y1="105" x2="360" y2="105" stroke="#34d399" stroke-width="4" marker-end="url(#ah2)"/>
+        <line x1="448" y1="105" x2="400" y2="105" stroke="#34d399" stroke-width="4" marker-end="url(#ah2)"/>
+        <text x="335" y="96" fill="#34d399" font-size="12" font-weight="700">Fₙ</text>
+        <!-- friction cone -->
+        <path d="M312,105 L372,60 M312,105 L372,150" stroke="#60a5fa" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="200" y="60" fill="#60a5fa" font-size="12">friction cone</text>
+        <text x="200" y="78" fill="#94a3b8" font-size="11">half-angle = arctan(µ)</text>
+        <!-- gravity -->
+        <line x1="380" y1="155" x2="380" y2="195" stroke="#f87171" stroke-width="4" marker-end="url(#ah2)"/>
+        <text x="392" y="185" fill="#f87171" font-size="12" font-weight="700">m·g</text>
+        <defs><marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/></marker></defs>
+        <text x="540" y="100" fill="#cbd5e1" font-size="13">Grip holds while the</text>
+        <text x="540" y="120" fill="#cbd5e1" font-size="13">friction force needed</text>
+        <text x="540" y="140" fill="#cbd5e1" font-size="13">stays inside the cone:</text>
+        <text x="540" y="166" fill="#a3e635" font-size="13" font-family="ui-monospace">F_tangential ≤ µ·Fₙ</text>
+      </svg>
+      <div class="cap">Force-closure: the contact force vector must stay within the friction cone (half-angle arctan µ) or the part slips.</div>
+    </div>
+    <div class="label" style="margin-top:18px">The grip-force inequality</div>
+    <p class="body">For a two-jaw grasp lifting a mass <span class="mono">m</span> with safety factor <span class="mono">S</span>, vertical robot acceleration <span class="mono">a</span>, friction coefficient <span class="mono">µ</span> and <span class="mono">n</span> friction surfaces, the required normal force per jaw is:</p>
+    <div class="eqn"><b>F_grip</b> ≥ <span class="v2">S</span> · m · (g + <span class="v3">a</span>) / (<span class="v2">µ · n</span>)
+
+  m   = part mass            µ  = friction coefficient (steel-on-steel ≈ 0.1–0.2)
+  g+a = gravity + dynamic    n  = number of gripping friction surfaces (2 for parallel)
+  S   = safety factor (typ. 2–4; up to 8 for rotating/heavy moves)</div>
+    <div class="callout warn"><b>Why parts get dropped:</b> Engineers size for static <span class="mono">g</span> but forget the <span class="hl3">dynamic term a</span>. A part that needs 40&nbsp;N at rest may need 200&nbsp;N during a fast slew. Always size for the worst-case acceleration on the trajectory (links to motion profiles in <a href="A09_Servo_Motion_Deep_Dive.html" style="color:var(--accent-soft)">A09</a>).</div>
+  </div>
+
+  <!-- ===== PAGE 3 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 3 · Parallel Jaw</span>
+    <h2 class="page-title">The workhorse — parallel &amp; angular jaw mechanics</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">From the micro card's "🔧 Parallel" tab to the mechanism</div>
+    <p class="body">The micro card listed parallel jaws as the rigid-part default. Mechanically, the jaws must stay <em>parallel through their whole stroke</em> so contact stays flat — achieved by a <span class="hl">wedge-cam</span>, <span class="hl">rack-and-pinion</span>, or <span class="hl">linkage (toggle)</span> drive. Angular grippers instead swing the fingers about a pivot — cheaper, but contact geometry changes through the arc.</p>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 200" role="img" aria-label="Parallel jaw wedge mechanism versus angular pivot gripper">
+        <!-- parallel -->
+        <g transform="translate(40,20)">
+          <text x="120" y="0" text-anchor="middle" fill="#f472b6" font-size="13" font-weight="700">Parallel (wedge / rail)</text>
+          <rect x="80" y="20" width="80" height="34" rx="5" fill="#334155" stroke="#64748b"/>
+          <polygon points="110,54 130,54 120,78" fill="#fbbf24"/>
+          <rect x="60" y="78" width="22" height="70" rx="4" fill="#f472b6"/>
+          <rect x="158" y="78" width="22" height="70" rx="4" fill="#f472b6"/>
+          <line x1="82" y1="100" x2="158" y2="100" stroke="#34d399" stroke-width="2" stroke-dasharray="3 3"/>
+          <text x="120" y="170" text-anchor="middle" fill="#94a3b8" font-size="11">jaws stay parallel → flat contact</text>
+        </g>
+        <!-- angular -->
+        <g transform="translate(420,20)">
+          <text x="120" y="0" text-anchor="middle" fill="#60a5fa" font-size="13" font-weight="700">Angular (pivot)</text>
+          <rect x="80" y="20" width="80" height="34" rx="5" fill="#334155" stroke="#64748b"/>
+          <circle cx="100" cy="60" r="5" fill="#fbbf24"/><circle cx="140" cy="60" r="5" fill="#fbbf24"/>
+          <rect x="84" y="60" width="18" height="80" rx="4" fill="#60a5fa" transform="rotate(-18 100 60)"/>
+          <rect x="138" y="60" width="18" height="80" rx="4" fill="#60a5fa" transform="rotate(18 140 60)"/>
+          <text x="120" y="170" text-anchor="middle" fill="#94a3b8" font-size="11">opens wide, contact angle varies</text>
+        </g>
+      </svg>
+      <div class="cap">Parallel jaws preserve flat contact through the stroke; angular jaws trade that for a wider, cheaper open swing.</div>
+    </div>
+    <div class="label" style="margin-top:18px">Finger design — the part you actually engineer</div>
+    <p class="body">The gripper body is bought; the <span class="hl2">fingers (jaws)</span> are custom. Rules that separate a robust cell from a flaky one:</p>
+    <div class="steps">
+      <div class="step"><b>Locate, then grip.</b> Fingers should self-centre the part into a known datum (V-grooves, prism pockets) so grasp pose is repeatable — this feeds back into <a href="../21_GD_and_T.html" style="color:var(--accent-soft)">GD&amp;T</a> datums and downstream placement accuracy.</div>
+      <div class="step"><b>Keep fingers short &amp; stiff.</b> Finger length is a moment arm; long fingers deflect and amplify positioning error. Deflection ∝ L³.</div>
+      <div class="step"><b>Match the contact to the surface.</b> Hard tips for machined steel; urethane/HNBR pads for finished or fragile parts to raise µ and spread pressure.</div>
+      <div class="step"><b>Design for the worst part in tolerance.</b> Size stroke for max material condition and min grip for least material condition.</div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 4 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 4 · Actuation</span>
+    <h2 class="page-title">Pneumatic vs electric vs hydraulic</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">The micro card's bullet, fully unpacked</div>
+    <p class="body">Micro 17 noted "pneumatic, electric, or hydraulic actuation." Each maps to a distinct physics and control story — and to other deep dives in this library.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Trait</th><th>Pneumatic</th><th>Electric (servo)</th><th>Hydraulic</th></tr></thead>
+        <tbody>
+          <tr><td><b>Force source</b></td><td>Air pressure × piston area (<a href="A12_Pneumatic_Systems_Deep_Dive.html" style="color:var(--accent-soft)">A12</a>)</td><td>Motor torque → screw/cam (<a href="A09_Servo_Motion_Deep_Dive.html" style="color:var(--accent-soft)">A09</a>)</td><td>Oil pressure × area (<a href="A13_Hydraulic_Systems_Deep_Dive.html" style="color:var(--accent-soft)">A13</a>)</td></tr>
+          <tr><td><b>Force control</b></td><td>On/off; regulate line pressure</td><td>Continuous, closed-loop, programmable</td><td>Very high force; coarse control</td></tr>
+          <tr><td><b>Position control</b></td><td>2 states (open/closed) + stops</td><td>Any position, multi-part recipes</td><td>Limited</td></tr>
+          <tr><td><b>Force feedback</b></td><td>No (add a sensor)</td><td>Native — motor current ∝ force</td><td>Pressure sensing</td></tr>
+          <tr><td><b>Speed / cost</b></td><td>Fast, cheap, light</td><td>Moderate, costlier, smart</td><td>Slow, heavy, expensive</td></tr>
+          <tr><td><b>Best for</b></td><td>High-rate, fixed parts</td><td>Mixed parts, delicate, data-rich</td><td>Very heavy castings, forging</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout key"><b>The electric-gripper revolution:</b> An electric gripper makes <span class="hl">force a software variable</span> — the same hardware can grip an egg at 5&nbsp;N or a casting at 200&nbsp;N, report grip width (part-present / part-size verification), and log force for every cycle. That telemetry is exactly the field data that feeds <a href="A31_Digital_Twins_I40_Deep_Dive.html" style="color:var(--accent-soft)">Digital Twins / Industry 4.0 (A31)</a> and predictive maintenance.</div>
+    <p class="body"><strong>Pneumatic grip force</strong> is simply <span class="mono">F = P·A·η</span> (pressure × effective piston area × mechanism efficiency). Doubling the bore quadruples nothing — it multiplies area linearly, so <span class="mono">A = πd²/4</span> means force scales with the <em>square</em> of bore diameter. This is the same gas-law/area physics developed in the Pneumatics deep dive.</p>
+  </div>
+
+  <!-- ===== PAGE 5 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 5 · Vacuum</span>
+    <h2 class="page-title">Vacuum grasping — flow, leakage &amp; cup engineering</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">From "🌪️ Vacuum" tab to the suction physics</div>
+    <p class="body">Vacuum is the most common gripper type in the world (think every cardboard, sheet-metal, and glass line). The holding force is deceptively simple but the <em>flow</em> behaviour is where designs fail.</p>
+    <div class="eqn"><b>F_hold</b> = ΔP · A_eff · <span class="v2">n_cups</span> / <span class="v3">S</span>
+
+  ΔP    = vacuum level below atmosphere (max ≈ 101 kPa, real ≈ 60–85 kPa)
+  A_eff = effective sealed cup area (NOT nominal cup diameter)
+  n     = number of cups       S = safety factor (≥ 2; ≥ 4 if porous/shear loads)</div>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 210" role="img" aria-label="Vacuum cup holding a sheet, with venturi generator and the flow-vs-vacuum tradeoff">
+        <defs><linearGradient id="cupg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs>
+        <!-- sheet -->
+        <rect x="60" y="150" width="320" height="16" rx="3" fill="#94a3b8"/>
+        <text x="220" y="190" text-anchor="middle" fill="#94a3b8" font-size="12">workpiece (sheet)</text>
+        <!-- cups -->
+        <g>
+          <path d="M120,150 q20,-40 40,0 z" fill="url(#cupg)"/>
+          <path d="M220,150 q20,-40 40,0 z" fill="url(#cupg)"/>
+          <path d="M320,150 q20,-40 40,0 z" fill="url(#cupg)"/>
+          <rect x="135" y="80" width="10" height="30" fill="#334155"/>
+          <rect x="235" y="80" width="10" height="30" fill="#334155"/>
+          <rect x="335" y="80" width="10" height="30" fill="#334155"/>
+          <rect x="110" y="70" width="260" height="14" rx="4" fill="#475569"/>
+        </g>
+        <text x="140" y="128" text-anchor="middle" fill="#0f172a" font-size="11" font-weight="700">ΔP</text>
+        <!-- venturi -->
+        <g transform="translate(440,40)">
+          <rect x="0" y="0" width="290" height="150" rx="12" fill="#11161f" stroke="#334155"/>
+          <text x="16" y="28" fill="#a3e635" font-weight="700" font-size="13">Venturi vs pump tradeoff</text>
+          <text x="16" y="54" fill="#cbd5e1" font-size="12">• High ΔP, low flow → grips flat,</text>
+          <text x="30" y="72" fill="#cbd5e1" font-size="12">non-porous parts well</text>
+          <text x="16" y="98" fill="#cbd5e1" font-size="12">• High flow, modest ΔP → needed</text>
+          <text x="30" y="116" fill="#cbd5e1" font-size="12">for porous / leaky parts</text>
+          <text x="16" y="142" fill="#fb923c" font-size="12" font-weight="700">Leakage, not area, kills the grasp</text>
+        </g>
+      </svg>
+      <div class="cap">Holding force = ΔP × sealed area × cups. Reality is governed by leakage flow vs the generator's flow capacity.</div>
+    </div>
+    <div class="grid-3" style="margin-top:6px">
+      <div class="mini c-teal"><div class="big">≤101</div><h4>kPa max</h4><p>Theoretical limit = 1 atmosphere; you never get it all.</p></div>
+      <div class="mini c-amb"><div class="big">Q</div><h4>Flow matters</h4><p>Porous parts leak; the generator must out-flow the leak to hold vacuum.</p></div>
+      <div class="mini c-pink"><div class="big">τ</div><h4>Shear</h4><p>Cups are weak in shear — add friction skirts or form-fit for side loads.</p></div>
+    </div>
+    <div class="callout warn"><b>Classic error:</b> sizing on cup <em>diameter</em>, not <em>sealed area</em>, and ignoring that a venturi (air-driven) generator wastes compressed air continuously, while an electric vacuum pump with a check valve can hold a sealed part with the pump off — a major energy-saving lever in <a href="../22_OEE.html" style="color:var(--accent-soft)">OEE/energy</a> programs.</div>
+  </div>
+
+  <!-- ===== PAGE 6 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 6 · Magnetic &amp; Specialty</span>
+    <h2 class="page-title">Magnetic, Bernoulli, needle &amp; cryo grippers</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">The micro card's "🧲 Magnetic" answer, generalised</div>
+    <p class="body">The micro quiz answer was a magnetic gripper for a flat steel plate — correct because it needs <em>no clearance</em> and holds anywhere on the surface. Here is the full specialty family for parts that defeat jaws and vacuum.</p>
+    <div class="grid-2">
+      <div class="mini c-pink"><h4>🧲 Electro-permanent magnetic</h4><p>Permanent magnet holds with <em>zero power</em>; a brief current pulse switches it on/off. Fails safe (holds during power loss). Only ferrous parts; force drops fast with air gap and on thin/curved sheets.</p></div>
+      <div class="mini c-blue"><h4>🌬️ Bernoulli (non-contact)</h4><p>High-velocity air over the part creates low pressure (Bernoulli) that lifts it while air film prevents contact. Ideal for silicon wafers, fragile films, hot/sticky parts.</p></div>
+      <div class="mini c-amb"><h4>📌 Needle / pin</h4><p>Fine needles penetrate slightly to grip textiles, foam, leather — limp materials no jaw or cup can hold.</p></div>
+      <div class="mini c-teal"><h4>❄️ Cryogenic / electrostatic</h4><p>Freeze a thin water layer to grip soft food/fabric; or electrostatic charge to hold films &amp; PCBs. Used where contamination must be near-zero.</p></div>
+    </div>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 170" role="img" aria-label="Magnetic flux holding a steel plate and the air-gap force decay curve">
+        <!-- magnet -->
+        <rect x="60" y="30" width="150" height="50" rx="6" fill="#f472b6"/>
+        <text x="135" y="60" text-anchor="middle" fill="#1f2937" font-size="13" font-weight="700">EPM</text>
+        <rect x="60" y="92" width="150" height="14" rx="3" fill="#94a3b8"/>
+        <text x="135" y="128" text-anchor="middle" fill="#94a3b8" font-size="11">ferrous plate</text>
+        <g stroke="#a3e635" stroke-width="2" fill="none" opacity="0.8">
+          <path d="M75,80 C60,95 60,95 75,92"/>
+          <path d="M195,80 C210,95 210,95 195,92"/>
+        </g>
+        <!-- decay curve -->
+        <g transform="translate(300,20)">
+          <line x1="0" y1="110" x2="400" y2="110" stroke="#475569"/>
+          <line x1="0" y1="110" x2="0" y2="0" stroke="#475569"/>
+          <path d="M5,8 C60,20 120,75 240,98 S360,108 395,109" fill="none" stroke="#fb923c" stroke-width="3"/>
+          <text x="200" y="135" text-anchor="middle" fill="#94a3b8" font-size="12">air gap →</text>
+          <text x="-6" y="-2" fill="#94a3b8" font-size="12" transform="rotate(-90 -6 -2)" text-anchor="end" >hold force</text>
+          <text x="120" y="40" fill="#fb923c" font-size="12" font-weight="700">F ∝ 1/gap² (roughly)</text>
+        </g>
+      </svg>
+      <div class="cap">Magnetic hold force collapses with air gap — so surface finish, paint, and sheet curvature directly degrade the grasp.</div>
+    </div>
+    <div class="callout key"><b>Selection insight:</b> jaws grip the <em>geometry</em>, vacuum grips the <em>surface</em>, magnets grip the <em>material</em>, soft hands grip the <em>uncertainty</em>. Name what is constant about your part and the gripper class follows.</div>
+  </div>
+
+  <!-- ===== PAGE 7 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 7 · Soft Robotics</span>
+    <h2 class="page-title">Soft &amp; underactuated compliant grasping</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">From the tomato line to the theory of compliance</div>
+    <p class="body">The micro card's real-world example — <span class="hl">soft silicone grippers picking 80 tomatoes/min without bruising</span> — is the headline application of soft robotics. The principle: instead of <em>controlling</em> force precisely, the gripper's <span class="hl2">mechanical compliance</span> spreads contact and self-adapts to shape, so a single tool handles huge part variation.</p>
+    <div class="grid-2">
+      <div class="mini c-green"><h4>Fluidic elastomer actuators</h4><p>Air-filled silicone bellows bend around the object. Low pressure (≈ 1–2&nbsp;bar) gives a gentle, conforming wrap. Pressure ∝ curvature.</p></div>
+      <div class="mini c-purp"><h4>Underactuated fingers</h4><p>Many joints, few motors. Tendons + springs let fingers passively conform around irregular parts (adaptive/“Fin-Ray” effect) — the structure does the thinking.</p></div>
+      <div class="mini c-amb"><h4>Granular jamming</h4><p>A membrane of granules (e.g. coffee) flows around the part, then vacuum jams it rigid — universal grip of arbitrary shapes.</p></div>
+      <div class="mini c-pink"><h4>Gecko / electroadhesion</h4><p>Van-der-Waals micro-structures or electrostatic pads grip smooth, delicate, or flat items with near-zero pressure.</p></div>
+    </div>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 170" role="img" aria-label="Soft fluidic finger conforming around a round fruit">
+        <defs><radialGradient id="fruit" cx="0.4" cy="0.35"><stop offset="0" stop-color="#f87171"/><stop offset="1" stop-color="#b91c1c"/></radialGradient></defs>
+        <circle cx="380" cy="100" r="48" fill="url(#fruit)"/>
+        <path d="M380,52 q6,-14 14,-10" stroke="#16a34a" stroke-width="5" fill="none"/>
+        <!-- soft fingers wrapping -->
+        <path d="M300,30 q-20,60 28,118 q20,22 52,22" fill="none" stroke="#34d399" stroke-width="16" stroke-linecap="round"/>
+        <path d="M460,30 q20,60 -28,118 q-20,22 -52,22" fill="none" stroke="#34d399" stroke-width="16" stroke-linecap="round"/>
+        <text x="380" y="160" text-anchor="middle" fill="#94a3b8" font-size="12">compliant fingers conform → contact spread → no bruising</text>
+        <text x="120" y="80" fill="#a3e635" font-size="13" font-weight="700">One tool,</text>
+        <text x="120" y="100" fill="#a3e635" font-size="13" font-weight="700">many shapes</text>
+      </svg>
+      <div class="cap">Soft grippers replace precise force control with passive compliance — the geometry adapts, lowering peak contact pressure.</div>
+    </div>
+    <div class="callout win"><b>Where it wins:</b> food, agriculture, e-commerce piece-picking, and any line where part shape varies cycle-to-cycle. Brands the micro card named — <span class="hl">Soft Robotics, OnRobot, SCHUNK</span> — all ship compliant or adaptive lines today.</div>
+  </div>
+
+  <!-- ===== PAGE 8 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 8 · Sensing</span>
+    <h2 class="page-title">Force/torque, tactile sensing &amp; slip detection</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">"Force feedback enables gentle grasping" — the systems view</div>
+    <p class="body">The micro card's fourth fact pointed at sensing. At MSc level this is a control loop: the gripper measures contact and closes a feedback loop that other deep dives describe at the signal level (<a href="A11_Industrial_Sensors_Deep_Dive.html" style="color:var(--accent-soft)">Sensors A11</a>) and the controller level (<a href="A10_PID_Control_Deep_Dive.html" style="color:var(--accent-soft)">PID A10</a>).</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Sensor</th><th>Measures</th><th>Enables</th></tr></thead>
+        <tbody>
+          <tr><td><b>6-axis F/T sensor</b> (wrist)</td><td>3 forces + 3 moments</td><td>Force-controlled assembly, peg-in-hole, polishing, collision detection</td></tr>
+          <tr><td><b>Motor current</b> (electric grip)</td><td>Grip force (∝ torque)</td><td>Programmable force, part-size check, no extra hardware</td></tr>
+          <tr><td><b>Tactile array</b> (fingertip)</td><td>Pressure distribution</td><td>Contact location, object pose, texture</td></tr>
+          <tr><td><b>Slip / vibration</b></td><td>Incipient micro-slip</td><td>Auto-tighten just enough — minimum bruising force</td></tr>
+          <tr><td><b>Vision-in-gripper</b></td><td>Part pose pre-grasp</td><td>Adaptive grasp planning (links <a href="A16_Machine_Vision_Deep_Dive.html" style="color:var(--accent-soft)">A16</a>)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 150" role="img" aria-label="Closed loop: tactile slip detection raises grip force to the minimum stable value">
+        <g font-size="12">
+          <rect x="20" y="50" width="120" height="48" rx="10" fill="#1a2230" stroke="#f472b6"/><text x="80" y="79" text-anchor="middle" fill="#f9a8d4">Grip force cmd</text>
+          <rect x="190" y="50" width="120" height="48" rx="10" fill="#1a2230" stroke="#60a5fa"/><text x="250" y="79" text-anchor="middle" fill="#93c5fd">Gripper + part</text>
+          <rect x="360" y="50" width="130" height="48" rx="10" fill="#1a2230" stroke="#34d399"/><text x="425" y="73" text-anchor="middle" fill="#6ee7b7">Tactile / slip</text><text x="425" y="90" text-anchor="middle" fill="#6ee7b7">sensor</text>
+          <rect x="540" y="50" width="190" height="48" rx="10" fill="#1a2230" stroke="#fb923c"/><text x="635" y="73" text-anchor="middle" fill="#fdba74">Controller: raise force</text><text x="635" y="90" text-anchor="middle" fill="#fdba74">until slip stops</text>
+          <line x1="140" y1="74" x2="190" y2="74" stroke="#94a3b8" stroke-width="2" marker-end="url(#a8)"/>
+          <line x1="310" y1="74" x2="360" y2="74" stroke="#94a3b8" stroke-width="2" marker-end="url(#a8)"/>
+          <line x1="490" y1="74" x2="540" y2="74" stroke="#94a3b8" stroke-width="2" marker-end="url(#a8)"/>
+          <path d="M635,98 L635,128 L80,128 L80,98" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#a8)"/>
+          <defs><marker id="a8" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/></marker></defs>
+        </g>
+      </svg>
+      <div class="cap">Slip-controlled grasping: detect incipient slip, raise force to the minimum that holds — the algorithm behind "gentle but secure".</div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 9 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 9 · Wrist Budget</span>
+    <h2 class="page-title">Tool changers, payload &amp; the moment budget</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">"Quick-change tool plates allow multi-task robots"</div>
+    <p class="body">The micro card's second fact — quick-change plates — is how one arm becomes many tools. An <span class="hl">Automatic Tool Changer (ATC)</span> is a master plate on the wrist and tool plates on each EOAT; pneumatics lock a ball mechanism and pass through air, power and signal. But every gram and millimetre you add to the wrist spends the robot's <span class="hl2">payload budget</span>.</p>
+    <div class="eqn"><b>Effective payload</b> must cover:  m_part + m_gripper + m_changer + m_cabling
+
+and the wrist sees a MOMENT, not just a mass:   <span class="v3">M = m · g · L</span>
+   L = distance from wrist flange to the combined centre of gravity
+A 5 kg load at 300 mm offset = the same wrist torque as 15 kg at 100 mm.</div>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 170" role="img" aria-label="Wrist flange with offset centre of gravity creating a moment">
+        <rect x="60" y="60" width="40" height="50" rx="6" fill="#475569"/>
+        <text x="80" y="135" text-anchor="middle" fill="#94a3b8" font-size="11">flange</text>
+        <rect x="100" y="72" width="220" height="26" rx="6" fill="#334155"/>
+        <circle cx="340" cy="85" r="26" fill="#fbbf24" stroke="#b45309"/>
+        <text x="340" y="90" text-anchor="middle" fill="#1c1917" font-size="12" font-weight="700">CoG</text>
+        <line x1="80" y1="120" x2="340" y2="120" stroke="#60a5fa" stroke-width="2" marker-end="url(#a9)"/>
+        <text x="210" y="138" text-anchor="middle" fill="#60a5fa" font-size="12">offset L</text>
+        <line x1="340" y1="112" x2="340" y2="158" stroke="#f87171" stroke-width="4" marker-end="url(#a9)"/>
+        <text x="352" y="150" fill="#f87171" font-size="12" font-weight="700">m·g</text>
+        <defs><marker id="a9" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/></marker></defs>
+        <text x="470" y="70" fill="#cbd5e1" font-size="13">Robot datasheets give a payload</text>
+        <text x="470" y="92" fill="#cbd5e1" font-size="13">AND an allowable inertia/moment.</text>
+        <text x="470" y="118" fill="#a3e635" font-size="13" font-weight="700">Heavy gripper far out = derate</text>
+        <text x="470" y="138" fill="#a3e635" font-size="13" font-weight="700">speed or the joints fault.</text>
+      </svg>
+      <div class="cap">The wrist feels mass × offset as a moment. Light, compact EOAT close to the flange protects speed and accuracy.</div>
+    </div>
+    <div class="callout warn"><b>Integration trap:</b> a perfectly sized gripper can still fail the cell if cabling/hoses snag through the robot's motion, or if the changer offset pushes the CoG past the wrist's allowable inertia. Always model the EOAT in the robot's payload tool before buying.</div>
+  </div>
+
+  <!-- ===== PAGE 10 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 10 · Value + Cheat Sheet</span>
+    <h2 class="page-title">A selection framework &amp; the Industry 4.0 payoff</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">Choosing a gripper — a 5-question framework</div>
+    <div class="steps">
+      <div class="step"><b>What is constant about the part?</b> Rigid geometry → jaws; flat smooth surface → vacuum; ferrous material → magnet; shape varies → soft/adaptive.</div>
+      <div class="step"><b>What is the grip-force budget?</b> Compute <span class="mono">F_grip ≥ S·m·(g+a)/(µ·n)</span> at worst-case acceleration, not at rest.</div>
+      <div class="step"><b>How much variation &amp; how many SKUs?</b> One rigid part → pneumatic; many parts or delicate → electric/soft for programmable, data-rich grasping.</div>
+      <div class="step"><b>What's the wrist budget?</b> Part + gripper + changer + cabling mass and offset must fit the robot's payload and moment limits.</div>
+      <div class="step"><b>What data do you need?</b> Grip-width, force, and cycle logging turn the gripper into an Industry 4.0 sensor feeding the twin.</div>
+    </div>
+
+    <div class="label" style="margin-top:22px">End-effectors in one screen</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Type</th><th>Grips by</th><th>Best part</th><th>Watch-out</th></tr></thead>
+        <tbody>
+          <tr><td><b>Parallel jaw</b></td><td>Geometry + friction</td><td>Rigid machined parts, gears</td><td>Finger design, force budget</td></tr>
+          <tr><td><b>Vacuum</b></td><td>Pressure × sealed area</td><td>Sheets, boxes, glass, panels</td><td>Leakage flow, shear, porosity</td></tr>
+          <tr><td><b>Magnetic (EPM)</b></td><td>Material (ferrous)</td><td>Flat steel plates, blanks</td><td>Air gap, thin/curved sheets</td></tr>
+          <tr><td><b>Soft / adaptive</b></td><td>Compliance</td><td>Food, fragile, varied shapes</td><td>Lower max force, wear</td></tr>
+          <tr><td><b>Specialty</b></td><td>Bernoulli, needle, cryo, ESD</td><td>Wafers, textiles, films</td><td>Niche; integration cost</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout key" style="margin-top:16px"><b>Why it matters (the A-to-Z thread):</b> the gripper is where the digital plan meets the physical world. It executes the pose from <a href="A15_Robotics_ROS2_Deep_Dive.html" style="color:var(--accent-soft)">Robotics (A15)</a>, is powered by <a href="A09_Servo_Motion_Deep_Dive.html" style="color:var(--accent-soft)">Servo (A09)</a>/<a href="A12_Pneumatic_Systems_Deep_Dive.html" style="color:var(--accent-soft)">Pneumatics (A12)</a>, guided by <a href="A16_Machine_Vision_Deep_Dive.html" style="color:var(--accent-soft)">Vision (A16)</a> &amp; <a href="A11_Industrial_Sensors_Deep_Dive.html" style="color:var(--accent-soft)">Sensors (A11)</a>, and its telemetry feeds <a href="A31_Digital_Twins_I40_Deep_Dive.html" style="color:var(--accent-soft)">Digital Twins (A31)</a>. Brands to know (from Micro 17): <span class="hl">SCHUNK, OnRobot, SMC, Festo, Soft Robotics, Zimmer, Piab</span>.</div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="card quiz">
+    <div class="label">Quick Check — MSc level</div>
+    <p class="quiz-q">A 6&nbsp;kg steel casting (µ ≈ 0.15) is carried by a 2-jaw parallel gripper through a fast slew with peak vertical acceleration of 12&nbsp;m/s². Using safety factor S&nbsp;=&nbsp;3, roughly what normal force must each jaw apply — and what single design change most cheaply halves it?</p>
+    <div class="quiz-answer" onclick="this.classList.add('revealed'); this.querySelector('.a').style.display='block';">
+      Tap to reveal answer ↓
+      <span class="a" style="display:none">
+        <br><br><b>F_grip ≥ S·m·(g+a)/(µ·n) = 3 × 6 × (9.81+12) / (0.15 × 2) ≈ 1308 N per jaw.</b>
+        That is a large pneumatic gripper. The cheapest force-halving change is to <b>raise µ</b> — bond a high-friction urethane/HNBR pad (µ ≈ 0.6–0.8) to the jaws. Going from µ&nbsp;=&nbsp;0.15 to µ&nbsp;≈&nbsp;0.6 cuts the required force ~4×. Slowing the trajectory (lower <b>a</b>) also helps but costs cycle time. This is why <b>finger/pad design — not a bigger gripper — is the real lever.</b>
+      </span>
+    </div>
+  </div>
+
+  <!-- MEMORY HOOK -->
+  <div class="card">
+    <div class="label">Memory Hook</div>
+    <p class="quote">"Jaws grip geometry · Vacuum grips surface · Magnets grip material · Soft grips uncertainty — and µ beats brute force."</p>
+  </div>
+
+  <div class="footer">
+    A17 · Advanced Micro Learning — companion to <a href="../17_End_Effectors.html">Micro Card 17</a><br>
+    Optimized for iPad Pro 11″ M4 · keratoconus-friendly · self-contained HTML<br>
+    <a href="index.html">← Back to the Advanced Library</a>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.card, .page').forEach(function (el, i) {
+    el.style.animationDelay = Math.min(i * 0.05, 0.6) + 's';
+  });
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      document.querySelectorAll('.card, .page').forEach(function (el) {
+        var o = parseFloat(getComputedStyle(el).opacity);
+        if (isNaN(o) || o < 0.95) { el.style.opacity = '1'; el.style.transform = 'none'; el.style.animation = 'none'; }
+      });
+    }, 1200);
+  });
+</script>
+</body>
+</html>

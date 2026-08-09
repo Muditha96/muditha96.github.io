@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Advanced Micro Learning — Library</title>
+<style>
+  :root{
+    --bg:#0f1419; --card:#1a2230; --card-2:#232d3f;
+    --accent:#a3e635; --blue:#60a5fa; --amber:#fbbf24; --teal:#2dd4bf;
+    --pink:#f472b6; --purple:#c084fc; --orange:#fb923c; --green:#34d399;
+    --text:#f1f5f9; --dim:#94a3b8; --border:#334155;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    background:
+      radial-gradient(1100px 560px at 85% -10%, rgba(163,230,53,0.10), transparent 60%),
+      radial-gradient(800px 480px at -10% 15%, rgba(96,165,250,0.08), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+    line-height:1.6; min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:36px 26px 90px;}
+  .badge{display:inline-flex;align-items:center;gap:10px;background:var(--card);
+    padding:10px 18px;border-radius:999px;font-size:14px;color:var(--dim);
+    border:1px solid var(--border);margin-bottom:22px;}
+  .badge .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;
+    box-shadow:0 0 12px var(--accent);animation:pulse 2s infinite;}
+  h1{font-size:clamp(36px,6vw,60px);font-weight:800;letter-spacing:-0.03em;line-height:1.04;margin-bottom:12px;}
+  h1 .e{font-size:.8em;margin-right:10px;}
+  .sub{font-size:clamp(16px,2.2vw,21px);color:var(--dim);margin-bottom:14px;max-width:640px;}
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 34px;}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;min-width:120px;}
+  .stat b{display:block;font-size:26px;font-family:ui-monospace,monospace;color:var(--accent);}
+  .stat span{font-size:12px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;}
+
+  /* search */
+  .search{width:100%;background:var(--card);border:1px solid var(--border);border-radius:14px;
+    color:var(--text);font-size:16px;padding:14px 18px;margin-bottom:30px;outline:none;}
+  .search:focus{border-color:var(--accent);}
+
+  .cat{margin-bottom:34px;}
+  .cat-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .cat-head .bar{width:6px;height:26px;border-radius:4px;background:var(--accent);}
+  .cat-head h2{font-size:19px;font-weight:700;letter-spacing:.02em;}
+  .cat-head .cnt{font-family:ui-monospace,monospace;font-size:12px;color:var(--dim);
+    border:1px solid var(--border);border-radius:999px;padding:3px 10px;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+  a.tile{display:block;text-decoration:none;background:var(--card);border:1px solid var(--border);
+    border-radius:18px;padding:20px;transition:transform .2s,border-color .2s,box-shadow .2s;
+    border-top:3px solid var(--accent);}
+  a.tile:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 14px 30px rgba(0,0,0,.35);}
+  a.tile .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  a.tile .ico{font-size:30px;}
+  a.tile .num{font-family:ui-monospace,monospace;font-size:11px;font-weight:700;color:var(--accent);
+    background:rgba(163,230,53,.12);padding:3px 9px;border-radius:8px;}
+  a.tile h3{font-size:17px;color:var(--text);margin-bottom:6px;}
+  a.tile p{font-size:13px;color:var(--dim);line-height:1.5;}
+  a.tile .meta{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;}
+  a.tile .chip{font-size:11px;font-family:ui-monospace,monospace;color:var(--dim);
+    border:1px solid var(--border);border-radius:6px;padding:2px 7px;}
+  a.tile .link07{font-size:11px;color:var(--blue);}
+
+  /* color variants per category */
+  .v-blue a.tile{border-top-color:var(--blue);} .v-blue a.tile .num{color:var(--blue);background:rgba(96,165,250,.12);} .v-blue .bar{background:var(--blue);} .v-blue:hover a.tile{}
+  .v-amber a.tile{border-top-color:var(--amber);} .v-amber a.tile .num{color:var(--amber);background:rgba(251,191,36,.12);} .v-amber .bar{background:var(--amber);}
+  .v-teal a.tile{border-top-color:var(--teal);} .v-teal a.tile .num{color:var(--teal);background:rgba(45,212,191,.12);} .v-teal .bar{background:var(--teal);}
+  .v-pink a.tile{border-top-color:var(--pink);} .v-pink a.tile .num{color:var(--pink);background:rgba(244,114,182,.12);} .v-pink .bar{background:var(--pink);}
+  .v-purple a.tile{border-top-color:var(--purple);} .v-purple a.tile .num{color:var(--purple);background:rgba(192,132,252,.12);} .v-purple .bar{background:var(--purple);}
+  .v-orange a.tile{border-top-color:var(--orange);} .v-orange a.tile .num{color:var(--orange);background:rgba(251,146,60,.12);} .v-orange .bar{background:var(--orange);}
+
+  .soon{opacity:.5;cursor:default;border-top-style:dashed;}
+  .soon:hover{transform:none;box-shadow:none;border-color:var(--border);}
+  .soon .num{background:transparent;border:1px dashed var(--border);color:var(--dim);}
+
+  .portfolio-back{display:inline-flex;align-items:center;gap:8px;margin-bottom:18px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--accent);font-size:13px;font-weight:800;text-decoration:none;transition:border-color .2s ease,transform .2s ease;}
+  .portfolio-back:hover,.portfolio-back:focus-visible{border-color:var(--accent);transform:translateY(-1px);outline:none;}
+  .footer{text-align:center;color:var(--dim);font-size:13px;margin-top:40px;line-height:1.8;}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.4);opacity:.7;}}
+  @media(max-width:560px){.wrap{padding:26px 16px 60px;}.grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="portfolio-back" href="../../index.html">&larr; Back to Portfolio</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Track · MSc-Level Deep Dives</span></div>
+  <h1><span class="e">🏭</span>Advanced Micro Learning</h1>
+  <p class="sub">Deep, exam-grade companions to the 90-second micro cards. Every concept and theory, explained in full — built for visual learning and low eye strain.</p>
+
+  <div class="stats">
+    <div class="stat"><b id="totalCount">63</b><span>Deep dives</span></div>
+    <div class="stat"><b>20</b><span>Categories</span></div>
+    <div class="stat"><b>A–Z</b><span>Coverage goal</span></div>
+    <div class="stat"><b id="progStat">0 started</b><span>My progress</span></div>
+  </div>
+
+  <input class="search" id="search" type="text" placeholder="🔎 Search topics — PLC, servo, pneumatics, GD&amp;T…">
+
+  <!-- ===== INDUSTRIAL NETWORKS & PROTOCOLS ===== -->
+  <div class="cat v-teal" data-cat="Industrial Networks">
+    <div class="cat-head"><span class="bar"></span><h2>🌐 Industrial Networks & Protocols</h2><span class="cnt">7 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A06_OPC_UA_Deep_Dive.html" data-name="opc-ua opc ua iec 62541 information model address space nodeid namespacearray namespace index browsename references hastypedefinition modelling rule objecttype variabletype analogitemtype engineeringunits datavalue statuscode sourcetimestamp servertimestamp service sets read write browse translatebrowsepathtonodeid operation limits maxnodesperread batching subscription monitoreditem sampling interval publishing interval queue size deadband datachangefilter publishrequest credit window keepalive lifetime transfersubscriptions republish security policy basic256sha256 aes256 signandencrypt certificate trust list rejected gds certificatemanager user identity role based access control transport opc.tcp 4840 chunking reverse connect uadp json encoding pubsub mqtt amqp sparkplug b security key service opc ua fx companion specification packml euromap umati vdma machinery devices di isa-95 historyread aggregates alarms conditions eventfilter whereclause conditionrefresh redundancy serverdiagnostics gateway aggregating server">
+        <div class="top"><span class="ico">🌐</span><span class="num">A06</span></div>
+        <h3>OPC-UA</h3>
+        <p>Meaning not values: address space &amp; NodeIds, the namespace-index trap, type-based information modelling, DataValue &amp; status, service sets and batching, subscriptions and the publish credit window, security &amp; certificate lifecycle, transport &amp; encoding, PubSub/UA&nbsp;FX, companion specs, history &amp; alarms, sizing and commissioning.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">predict-first</span><span class="link07">↔ links Micro 06</span></div>
+      </a>
+      <a class="tile" href="A01_Modbus_RTU_Deep_Dive.html" data-name="modbus rtu tcp ascii serial register coil discrete input holding master slave client server function code crc-16 polynomial a001 lrc rs-485 termination bias stub unit load repeater 3.5 char gap 1.5t turnaround scan budget poll cycle mbap port 502 gateway unit id endianness word order abcd cdab 4xxxx addressing fc03 fc16 fc23 exception code diagnostics fc08">
+        <div class="top"><span class="ico">🔗</span><span class="num">A01</span></div>
+        <h3>Modbus RTU</h3>
+        <p>The scan-budget law (why baud rate has a floor), the four data tables &amp; addressing, frame anatomy, CRC-16 from the polynomial up, function &amp; exception codes, 3.5T timing, RS-485 as a transmission line, register-map design &amp; word order, gateways, diagnosis, security and commissioning.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">predict-first</span><span class="link07">↔ links Micro 01</span></div>
+      </a>
+      <a class="tile" href="A02_PROFINET_Deep_Dive.html" data-name="profinet industrial ethernet rt irt nrt conformance class cc-a cc-b cc-c cc-d tsn iec 61158 61784 pi gsdml vendorid deviceid io controller device supervisor ar application relation cr communication relation slot subslot dap dcp lldp mrp mrpd ptcp isochronous red green phase profisafe sil3 ple black channel profienergy ertec tps-1 apl ethernet-apl device name 0x8892 31.25us ethertype 0x8892 vlan priority 6 frameid apdu status cycle counter data status min frame 64 byte plateau 6.72us frame time link load impossibility condition send clock reduction ratio phase update time watchdog accepted cycles store and forward bridge delay blocking 123.36us hop budget line star tree topology mindeviceinterval 31.25 units guard band sync master ptcp isochronous mode ti to netload class i ii iii pdev port submodule i&m records channel error type wire break alarm cr record data cr module difference substitute value station name rules lowercase lldp neighbour device replacement without programming device factory reset system redundancy s2 r1 rstp f_wd_time f_dest_add black channel sfrt twcdt delta wd iso 13855 safety distance security class 1 2 3 wireshark eth.type">
+        <div class="top"><span class="ico">🔌</span><span class="num">A02</span></div>
+        <h3>PROFINET</h3>
+        <p>A glove line defeated at three layers: the frame-time and link-load law, worst-case latency L(H) and the 123 µs blocking term, the AR/CR/slot device model, GSDML &amp; MinDeviceInterval, DCP names and tool-free device replacement, send clock × reduction ratio, IRT red/green phases, conformance and netload classes, MRP vs MRPD against the watchdog, diagnostics, and PROFIsafe SFRT turned into millimetres of guarding.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">predict-first</span><span class="link07">↔ links Micro 02</span></div>
+      </a>
+      <a class="tile" href="A03_EtherCAT_Deep_Dive.html" data-name="ethercat msc practice pack predict first worked examples problem set derivations study path processing on the fly bus load turnaround cycle planner 32 byte plateau 1486 ceiling frame time chain delay forwarding delay station alias identity by position sync0 shift time jitter millimetres registration error watchdog vs recovery cable redundancy error counter localisation rx error forwarded error lost link al status code esc ethercat slave controller et1100 lan9252 fmmu fieldbus memory management unit syncmanager working counter wkc ethertype 0x88a4 datagram lrw fprd logical addressing 4gb process image distributed clocks dc sync0 reference clock propagation delay state machine esm init pre-op safe-op op coe canopen cia 402 soe sercos eoe foe mailbox hot connect cable redundancy ring line topology fsoe safety sil3 ple etg iec 61158 beckhoff">
+        <div class="top"><span class="ico">⚡</span><span class="num">A03</span></div>
+        <h3>EtherCAT</h3>
+        <p>A shrink-sleeve line 1.2 mm out on a perfectly healthy bus: processing on the fly and the two budgets (load vs turnaround), the 0x88A4 frame with its 32-byte plateau and 1486-byte ceiling, the Working Counter's algebra and its irreducible ambiguity, FMMU bit-mapping &amp; SyncManager buffering, identity by position and the alias that cures it, the ESM as a diagnostic ladder, Distributed Clocks derived from first principles, SYNC0 shift time, jitter turned into millimetres, cable redundancy vs the watchdog, error-counter localisation, and FSoE black-channel safety.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">predict-first</span><span class="link07">↔ links Micro 03</span></div>
+      </a>
+      <a class="tile" href="A37_TSN_Deterministic_Ethernet_Deep_Dive.html" data-name="tsn time sensitive networking deterministic ethernet ieee 802.1 bounded latency jitter converged network it ot convergence 802.1as gptp ptp ieee 1588 grandmaster bmca peer delay hardware timestamp sync follow_up correction field syntonization sub-microsecond clock 802.1qbv time aware shaper tas gate control list gcl cycle guard band scheduled traffic tt window 802.1qbu 802.3br frame preemption express preemptable mac fragment 64 byte 802.1qav cbs credit based shaper avb idleslope 802.1qcr ats asynchronous traffic shaping strict priority queuing store and forward serialisation serialization propagation switch latency worst case 802.1cb frer frame replication elimination r-tag sequence number disjoint paths seamless redundancy prp hsr mrp rstp iec 62439 802.1qci psfp per stream filtering policing babbling idiot 802.1qcc cuc cnc centralized network configuration netconf restconf yang stream reservation srp 802.1qat admission control iec ieee 60802 industrial profile profinet over tsn conformance class d opc ua fx pub sub uadp cc-link ie tsn ethercat automotive zonal 5g urllc wireless tsn ethernet-apl iec 61850 sampled values">
+        <div class="top"><span class="ico">⏱️</span><span class="num">A37</span></div>
+        <h3>TSN — Time-Sensitive Networking</h3>
+        <p>Why best-effort Ethernet can't promise, the four latency components, the 802.1 toolbox (T-S-R-R pillars), gPTP clock sync math, Qbv gates &amp; guard bands, frame preemption, CBS/ATS, FRER seamless redundancy vs PRP/HSR, CUC/CNC configuration and PROFINET/OPC UA FX deployment reality.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">◆ standalone · links A02/A03/A06/A33</span></div>
+      </a>
+      <a class="tile" href="A04_CAN_Bus_Deep_Dive.html" data-name="msc practice pack predict first worked examples problem set derivations study path can bus controller area network bosch iso 11898 multi-master message based differential can_h can_l 120 ohm termination 60 ohm dominant recessive wired-and csma/cr bitwise arbitration lowest id wins non-destructive frame sof identifier 11 29 bit dlc crc ack eof rtr bit stuffing 55+10n worst case frame length bit timing time quanta sample point sjw resynchronization prop_seg phase_seg oscillator tolerance trilemma bus length response time analysis tindell davis worst case latency blocking interference deadline monotonic schedulability load is not latency error detection bit monitoring form crc ack error frame fault confinement tec rec one in nine error active passive bus-off recovery can fd brs fdf tdc ssp iso non-iso sic can xl canopen cia 301 cob-id object dictionary pdo sdo nmt heartbeat emcy lss cia 402 j1939 pgn spn fmi pdu1 pdu2 bam transport protocol dm1 obd-ii uds iso-tp socketcan candump canopen safety srdo bus-off attack secoc security automotive genset">
+        <div class="top"><span class="ico">🚗</span><span class="num">A04</span></div>
+        <h3>CAN Bus</h3>
+        <p>The one bus where every node may talk at once. Wired-AND arbitration, the frame bit by bit and why <b>55&nbsp;+&nbsp;10n</b> is exact, the bit-timing trilemma (length ↔ sample point ↔ clock), <b>worst-case response-time analysis</b> — why a message misses its deadline at 27&nbsp;% load — fault confinement and the one-in-nine rule, CAN FD, CANopen, J1939 and the bus-off attack.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">predict-first</span><span class="link07">↔ links Micro 04</span></div>
+      </a>
+      <a class="tile" href="A05_IO_Link_Deep_Dive.html" data-name="io-link sdci iec 61131-9 msc practice pack predict-first worked examples problem set derivations study path single drop digital communication interface point to point not a bus smart sensor c/q pin 4 m12 3 wire 20 m capacitance 3 nf port class a class b auxiliary supply sio fallback wurq wake-up 80us 500ma uart 11 bit frame com1 com2 com3 4.8 38.4 230.4 kbit m-sequence mc ckt cks mincycletime encoding time base multiplier 0.4 ms floor process data pd pqi validity isdu on-request data od bandwidth law index subindex error codes 0x8023 events ne 107 direct parameter page vendorid deviceid revisionid iodd ioddfinder gradient offset scaling data storage upload flag download only device validation type compatible identical plug and play replacement master fieldbus profinet ethernet ip ethercat opc ua companion mqtt rest jitter latency cascade missed pulse plc scan io-link safety iec 61139-2 sil3 ossde io-link wireless iec 61139-3 5 ms 40 devices hub 16 channel security deviceaccesslocks">
+        <div class="top"><span class="ico">📶</span><span class="num">A05</span></div>
+        <h3>IO-Link</h3>
+        <p>A glaze line losing LKR 0.94M a month on a network with every light green. Point-to-point not a bus; the C/Q physical layer and why 20 m is a <b>capacitance</b> limit; the cycle-time law and MinCycleTime encoding; the ISDU bandwidth law B<sub>OD</sub> = 8n/T and the irreducible M&times;H floor; Data Storage&apos;s identity gate and its four silent failures; the four-stage jitter cascade that collapses to its slowest sampler; Safety, Wireless, hubs and security. Full MSc pack.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">predict-first</span><span class="link07">↔ links Micro 05</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== CONTROL SYSTEMS & THEORY ===== -->
+  <div class="cat v-teal" data-cat="Control Systems &amp; Theory">
+    <div class="cat-head"><span class="bar"></span><h2>🎛️ Control Systems &amp; Theory</h2><span class="cnt">6 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A57_Control_Systems_Theory_Deep_Dive.html" data-name="msc practice pack worked examples problem set derivations study path control systems theory dynamic response laplace transform transfer function block diagram algebra poles zeros s-plane first order second order fopdt dead time damping ratio zeta natural frequency overshoot settling time stability routh hurwitz characteristic equation steady state error system type root locus bode plot frequency response nyquist gain margin phase margin sensitivity function pid design lead lag compensator simc lambda tuning ziegler nichols digital control sampling aliasing zero order hold z transform state space controllability observability lqr kalman observer anti windup stiction saturation">
+        <div class="top"><span class="ico">🎛️</span><span class="num">A57</span></div>
+        <h3>Control Systems Theory &amp; Dynamic Response</h3>
+        <p>The mathematics under every loop: Laplace &amp; transfer functions, poles/zeros, 1st &amp; 2nd order response, Routh stability, steady-state error, root locus, Bode &amp; Nyquist, gain/phase margin, PID as lead-lag, digital sampling &amp; aliasing, state-space — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">interactive</span></div>
+      </a>
+      <a class="tile" href="A58_Advanced_Process_Control_Deep_Dive.html" data-name="msc practice pack worked examples problem set derivations study path advanced process control cascade inner outer loop external reset feedback feedforward static dynamic lead lag realisability ratio control cross limiting combustion air fuel excess oxygen override select high low constraint split range dead time compensation smith predictor imc interaction rga relative gain array niederlinski decoupling pairing condition number inferential soft sensor pressure compensated temperature model predictive control mpc receding horizon constraints dmc adaptive gain scheduling fuzzy logic nonlinear characteriser titration curve three element boiler drum level shrink swell distillation configuration antisurge harris index loop performance monitoring service factor stiction benefits case variability">
+        <div class="top"><span class="ico">🔀</span><span class="num">A58</span></div>
+        <h3>Advanced Process Control</h3>
+        <p>When single-loop PID runs out: cascade, feedforward, ratio &amp; cross-limiting, override &amp; split-range, Smith predictors, RGA pairing &amp; decoupling, soft sensors, MPC, gain scheduling, the strategies that run real units, loop-performance monitoring &amp; the benefits case — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">interactive</span></div>
+      </a>
+      <a class="tile" href="A59_Control_Valves_Final_Elements_Deep_Dive.html" data-name="msc practice pack worked examples problem set derivations study path control valves final control elements cv kv sizing iec 60534 flow coefficient piping geometry factor fp reynolds fr liquid gas steam expansion factor y xt choked flow cavitation flashing vena contracta pressure recovery factor fl ff sigma cavitation index anti-cavitation multi-stage trim inherent installed characteristic equal percentage linear quick opening rangeability valve authority beta gain variation actuator spring diaphragm piston thrust unbalance force bench set fail safe air to open air to close positioner i/p smart dvc hart partial stroke test diagnostics valve signature deadband hysteresis stiction resolution stroking time isa 75.25 limit cycle noise iec 60534-8-3 erosion wire drawing materials ansi class b16.34 leakage class fci 70-2 packing iso 15848 nace vfd damper dosing pump globe butterfly ball">
+        <div class="top"><span class="ico">🔧</span><span class="num">A59</span></div>
+        <h3>Control Valves &amp; Final Elements</h3>
+        <p>Cv/Kv sizing to IEC 60534 for liquid, gas &amp; steam; choked flow, cavitation &amp; flashing; inherent vs installed characteristic and valve authority; actuators, thrust &amp; fail-safe; positioners &amp; diagnostics; stiction and the dead time it costs your loop; noise, materials &amp; leakage classes — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">interactive</span></div>
+      </a>
+      <a class="tile" href="A60_Sequential_Discrete_Control_Deep_Dive.html" data-name="msc practice pack worked examples problem set derivations study path sequential discrete control design event systems boolean algebra de morgan karnaugh map quine mccluskey minimisation prime implicant voting 2oo3 majority fail safe wiring finite state machine moore mealy state transition table encoding one hot enumerated statechart hierarchy orthogonal history state explosion grafcet iec 60848 sfc iec 61131-3 step transition receptivity action qualifier n s r p p1 p0 l d sd ds sl step x t evolution rules selective simultaneous divergence convergence macro step enclosing step forcing gemma petri net place transition token marking incidence matrix state equation p-invariant t-invariant boundedness liveness reversibility deadlock coffman circular wait mutual exclusion coloured timed stochastic software model configuration resource task program pou function block var in out retain data types five languages ladder fbd st il cfc structured text case state machine edge detection seal in stop priority scan order run through dual coil mcr interlock permissive trip bypass override cause and effect matrix mode logic isa 88 iec 61512 batch physical procedural model process cell unit equipment module control module procedure unit procedure operation phase recipe general site master control phase state model idle running held holding restarting stopping aborting packml isa-tr88.00.02 packtags isa 106 arbitration resource allocation fifo priority ageing starvation livelock blocking wait for graph timeout confirmation homing diagnostics step trace waiting for first out model checking uppaal tina cpn tools coverage verification gamp plcopen">
+        <div class="top"><span class="ico">🔁</span><span class="num">A60</span></div>
+        <h3>Sequential &amp; Discrete Control Design</h3>
+        <p>The other half of control engineering: Boolean &amp; combinational logic done properly; finite state machines, Moore vs Mealy &amp; state encoding; GRAFCET (IEC 60848) as specification and SFC (IEC 61131-3, now Ed. 4.0) as implementation; Petri nets for concurrency, mutual exclusion &amp; provable deadlock freedom; the 61131-3 software model and its five languages; Structured Text &amp; Ladder craft; interlocks, permissives &amp; mode logic; ISA-88 batch with the full phase state model and PackML; resource arbitration; timeouts, confirmations &amp; diagnostics — with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">interactive</span></div>
+      </a>
+      <a class="tile" href="A61_DCS_Process_Automation_Architecture_Deep_Dive.html" data-name="msc practice pack worked examples problem set derivations study path dcs distributed control system process automation architecture plc pac scada comparison single engineering database namespace isa 95 iec 62264 purdue levels 0 1 2 3 4 dmz manufacturing operations management equipment hierarchy controller loading cpu memory peer communication execution period task i/o architecture marshalling electronic marshalling charm universal io single channel characterisation remote io intrinsic safety namur ne 43 control network determinism media redundancy prp hsr mrp rstp fieldbus hart foundation fieldbus h1 profibus pa dp ethernet-apl 10base-t1l ieee 802.3cg 2-wise segment voltage budget redundancy availability mtbf mttr beta common cause simplex hot standby 1oo2d tmr 2oo3 voting control database class based engineering instance library bulk build instrument index naming kks online change audit trail configuration management isa 101 hmi philosophy style guide toolkit high performance graphics display hierarchy situation awareness iso 11064 console span of control alarms detection controller sequence of events soe ptp ieee 1588 ntp time synchronisation first out chatter suppression state based suppression isa 18.2 historian time series compression swinging door deadband exception store and forward quality codes contextualisation retention batch server phase logic isa 88 split mpc apc rto operator training simulator safety sis separated interfaced integrated iec 61511 independence risk reduction factor bypass asset management namur ne 107 eddl fdt dtm fdi plant asset management calibration valve diagnostics cmms lifecycle fat sat loop checking obsolescence migration phased hot cutover virtualisation mtp vdi vde namur 2658 module type package noa ne 175 open process automation o-pas opaf distributed control node unified namespace iec 61499">
+        <div class="top"><span class="ico">🖥️</span><span class="num">A61</span></div>
+        <h3>DCS &amp; Process Automation Architecture</h3>
+        <p>What a DCS actually is and why integration &mdash; not distribution &mdash; defines it; ISA-95 and the Purdue hierarchy as really built; controller loading and the marshalling revolution; control networks, fieldbus and Ethernet-APL; redundancy, common cause and the availability mathematics; class-based engineering; ISA-101 consoles and display hierarchy; alarms, SOE and time synchronisation; historians and compression; batch and APC allocation; integrated vs separated safety; NE 107 asset management; FAT, obsolescence and migration; MTP, NOA, O-PAS and virtualisation &mdash; with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">interactive</span></div>
+      </a>
+      <a class="tile" href="A63_Automation_Capstone_Exam.html" data-name="msc practice pack worked examples problem set derivations study path automation capstone examination exam paper mark scheme model answers grade bands assessment integrated design question scenario ceylon spice foods dryer retrofit sri lanka step test fopdt identification two point smith simc tuning proportional band ultimate period stiction diagnosis limit cycle valve positioner filter phase margin cascade feedforward ratio override low select external reset windup inferential soft sensor supervisory setpoint trim isa 88 batch recipe phase state model moore mealy state machine timeout permissive interlock trip de-energise to trip fail safe lopa layer of protection analysis independent protection layer initiating event tolerable frequency risk reduction factor rrf sil pfdavg proof test interval partial stroke testing common cause beta safety requirements specification alarm management isa 18.2 flood bad actors rationalisation priority distribution operator ipl credit isa 95 purdue dmz opc ua profinet mrp ring controller loading task period scan zero order hold sampling power factor correction detuned reactor harmonic resonance ieee 519 affinity laws vfd bearing currents edm shaft grounding l10 bearing life iso 20816 vibration bpfo thermography emissivity oee moisture giveaway variability sigma npv payback business case phasing">
+        <div class="top"><span class="ico">&#127891;</span><span class="num">A63</span></div>
+        <h3>Automation Capstone Examination</h3>
+        <p>One plant, 200 marks, eleven disciplines &mdash; a full MSc-level paper that forces the whole automation track to be used at once: identification &amp; tuning, strategy selection, valve sizing, sequence &amp; batch design, LOPA and SIL verification, alarm benchmarking, architecture, power &amp; drives, reliability and the business case &mdash; with the mark scheme, model answers and examiner&#39;s reasoning printed alongside, plus a 30-mark integrated design question, a second paper, derivations and a self-marking study planner.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">interactive</span><span class="link07">&#9670; capstone &middot; assesses A57&ndash;A61</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== INDUSTRIAL AUTOMATION ===== -->
+  <div class="cat v-blue" data-cat="Industrial Automation">
+    <div class="cat-head"><span class="bar"></span><h2>⚙️ Industrial Automation</h2><span class="cnt">6 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A50_Instrumentation_Calibration_PID_Deep_Dive.html" data-name="msc practice pack worked examples problem set instrumentation calibration p&id piping instrumentation diagram isa 5.1 symbols tags 4-20ma live zero namur loop hart transmitter span lrv urv elevated suppressed rtd pt100 thermocouple cjc orifice dp flow square root wet leg level radar as-found as-left 5-point tur uncertainty traceability control valve cv fail open closed loop check">
+        <div class="top"><span class="ico">🧪</span><span class="num">A50</span></div>
+        <h3>Instrumentation, Calibration &amp; P&amp;ID</h3>
+        <p>The measurement chain, %span metrology, why 4–20 mA rules (live zero, NAMUR, HART), P/T/F/L measured properly, 5-point calibration &amp; as-found/as-left, uncertainty &amp; TUR 4:1, ISA-5.1 tag grammar, control valves &amp; loop commissioning — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">16 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ standalone</span></div>
+      </a>
+      <a class="tile" href="A07_PLC_Deep_Dive.html" data-name="msc practice pack worked examples problem set plc programmable logic controller scan cycle iec 61131-3 ladder response time analog scaling 4-20ma high speed counter encoder availability mtbf redundancy retentive timer ton tof tp seal-in watchdog">
+        <div class="top"><span class="ico">🧠</span><span class="num">A07</span></div>
+        <h3>PLC — In Depth</h3>
+        <p>Architecture, scan cycle, IEC 61131-3 languages, memory & addressing, determinism, safety PLCs — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">12 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">↔ links Micro 07</span></div>
+      </a>
+      <a class="tile" href="A45_PLC_Brands_Tools_Deep_Dive.html" data-name="msc practice pack worked examples problem set plc brands programming tools software sri lanka lecture mitsubishi fx fx1n fx2n fx3u fx5u iq-r gx works gx developer omron cp1e cp2e cj nx nj cx-programmer cx-one sysmac studio siemens s7 s7-200 s7-300 s7-1200 s7-1500 logo tia portal step 7 microwin plcsim scl delta dvp as ispsoft wplsoft diadesigner fatek winproladder xinje wecon invt panasonic allen bradley rockwell studio 5000 rslogix ccw micro800 compactlogix tags udt schneider zelio modicon machine expert codesys openplc raspberry pi factory io plc fiddle logixpro simulator addressing octal x y m d cio word bit %i %q rosetta ladder structured text st sfc fbd apparel tea garment boi naita cgtti moratuwa career migration archive upload comments">
+        <div class="top"><span class="ico">🧰</span><span class="num">A45</span></div>
+        <h3>PLC Brands &amp; Programming Tools — Sri Lanka Field Guide</h3>
+        <p>The brand map of SL industry (Mitsubishi / Omron / Siemens / Delta / AB / CODESYS), each ecosystem&#39;s hardware families &amp; IDEs, the addressing Rosetta stone, one program in five dialects, free simulators &amp; a zero-budget home lab, career learning order, migration &amp; archive-rescue workflows — plus worked examples, a 10-problem set, deep structure &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ companion · links A07/A36/A14</span></div>
+      </a>
+      <a class="tile" href="A10_PID_Control_Deep_Dive.html" data-name="msc practice pack worked examples problem set pid control proportional integral derivative tuning ziegler nichols lambda anti-windup derivative filter cascade feed-forward closed loop offset dead time fopdt">
+        <div class="top"><span class="ico">🎚️</span><span class="num">A10</span></div>
+        <h3>PID Control — In Depth</h3>
+        <p>Closed loop &amp; error, P/I/D terms, offset &amp; windup, derivative filtering, Ziegler–Nichols &amp; Lambda tuning, discrete code, cascade &amp; feed-forward — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">↔ links Micro 10</span></div>
+      </a>
+      <a class="tile" href="A08_VFD_Deep_Dive.html" data-name="msc practice pack worked examples problem set vfd variable frequency drive sensorless vector dtc pwm affinity harmonics regenerative braking brake resistor sizing v/f flux boost field weakening derating carrier frequency bearing currents fluting cable reflection dv/dt">
+        <div class="top"><span class="ico">🌀</span><span class="num">A08</span></div>
+        <h3>VFD — In Depth</h3>
+        <p>Rectifier–DC bus–inverter, PWM, V/f vs vector vs DTC, affinity laws, braking & harmonics — now with worked examples (energy payback, V/f arithmetic, brake-resistor sizing, cable reflections), a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">↔ links Micro 08</span></div>
+      </a>
+      <a class="tile" href="A14_SCADA_HMI_Deep_Dive.html" data-name="msc practice pack worked examples problem set derivations study path predict first interactive calculators scada hmi supervisory control data acquisition rtu poll cycle budget latency rtt transactions concurrent channels scan class critical important background exception reporting unsolicited dnp3 iec 60870-5-104 integrity poll store and forward publish subscribe mqtt sparkplug birth death certificate opc ua tag database naming standard udt real-time database quality good uncertain bad propagate source timestamp receipt timestamp sequence of events soe ntp ptp gps stale data historian time series swinging door compression deadband time weighted average retention tiered aggregation high performance hmi isa-101 situation awareness endsley perception comprehension projection greyscale analog indicator embedded trend display hierarchy level 1 overview navigation shift handover alarm flood watchdog k consecutive nuisance alarm isa-18.2 redundancy availability mtbf mttr common cause beta factor hot standby dual path autonomy purdue isa-95 dmz iec 62443 fat sat point to point checkout management of change kpi">
+        <div class="top"><span class="ico">🖥️</span><span class="num">A14</span></div>
+        <h3>SCADA &amp; HMI</h3>
+        <p>Architecture &amp; the seven-hop data path, the poll-cycle budget (latency &times; transactions), scan classes, protocols &amp; telemetry links, quality flags &amp; source timestamps, historian compression &amp; storage maths, High-Performance HMI &amp; situation awareness, display hierarchy, comms-watchdog design, availability with common cause, security essentials, FAT/SAT &amp; lifecycle — now with 5 calculators, predict-first cards and a full MSc practice pack.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">predict-first</span><span class="link07">↔ links Micro 14</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== MECHATRONICS & MOTION ===== -->
+  <div class="cat v-pink" data-cat="Mechatronics">
+    <div class="cat-head"><span class="bar"></span><h2>🤖 Mechatronics & Motion</h2><span class="cnt">6 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A16_Machine_Vision_Deep_Dive.html" data-name="machine vision camera lens lighting cmos sensor global rolling shutter bayer monochrome backlight darkfield brightfield dome coaxial pinhole model intrinsics extrinsics calibration zhang distortion sub-pixel edge caliper ncc otsu morphology convolution sobel cnn deep learning yolo unet anomaly detection patchcore autoencoder stereo laser triangulation structured light time of flight tof point cloud bin picking gige usb3 cxp genicam cognex keyence basler telecentric depth of field diffraction snr nyquist">
+        <div class="top"><span class="ico">📷</span><span class="num">A16</span></div>
+        <h3>Machine Vision</h3>
+        <p>The imaging chain, optics &amp; lighting geometry, CMOS/shutter/Bayer, pinhole calibration, the classical filter→segment→measure pipeline, CNN/anomaly deep learning, 3D vision &amp; system specification.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 16</span></div>
+      </a>
+      <a class="tile" href="A09_Servo_Motion_Deep_Dive.html" data-name="msc practice pack worked examples problem set derivations study path predict first interactive calculators servo motor drive tuning encoder resolver absolute multiturn endat biss hiperface pmsm bldc foc field oriented control clarke park id iq torque constant kt back emf ke cascaded loop position velocity current bandwidth feedforward following error kv gain kvp inertia ratio reflected inertia gearbox ratio n squared ball screw lead rack pinion two-mass resonance anti-resonance notch filter backlash compliance motion profile trapezoidal s-curve jerk input shaping rms torque duty cycle sizing regeneration braking resistor dc bus emc screening bearing currents electronic gearing camming cam table virtual master flying shear registration plcopen cia 402 csp ethercat distributed clocks sto ss1 sls safe torque off iec 61800-5-2 homing commissioning following error alarm i2t overload">
+        <div class="top"><span class="ico">🎯</span><span class="num">A09</span></div>
+        <h3>Servo & Motion Control</h3>
+        <p>PMSM &amp; FOC (Clarke/Park, i<sub>d</sub>/i<sub>q</sub>), encoders &amp; resolvers, the three nested loops, K<sub>vp</sub> = J&times;&omega;<sub>bw</sub>, following error &amp; feedforward, reflected inertia &amp; the two-mass resonance, motion profiles &amp; jerk, RMS-torque sizing, deliberate tuning, DC bus &amp; regeneration, camming &amp; fieldbus cycle time, STO/SS1/SLS — now with 5 calculators, predict-first cards and a full MSc practice pack.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">predict-first</span><span class="link07">↔ links Micro 09</span></div>
+      </a>
+      <a class="tile" href="A15_Robotics_ROS2_Deep_Dive.html" data-name="robotics ros2 ros 2 kinematics dh denavit hartenberg forward inverse jacobian singularity nodes topics services actions dds urdf tf2 ros2_control nav2 moveit gazebo six axis 6r scara delta cobot dof tcp jazzy humble">
+        <div class="top"><span class="ico">🦾</span><span class="num">A15</span></div>
+        <h3>Robotics &amp; ROS 2</h3>
+        <p>DH kinematics, forward/inverse, Jacobian &amp; singularities, trajectory planning — plus ROS 2 nodes/topics/actions, DDS, URDF/TF2, Nav2 &amp; MoveIt 2.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 15</span></div>
+      </a>
+      <a class="tile" href="A17_End_Effectors_Deep_Dive.html" data-name="end effector end-effector eoat gripper grasp parallel jaw angular vacuum cup venturi magnetic electro permanent epm bernoulli needle cryogenic electrostatic soft robotics compliant underactuated fin ray granular jamming gecko electroadhesion fluidic elastomer form closure force closure friction cone grip force budget safety factor coefficient of friction mu pneumatic electric servo hydraulic actuation force feedback torque tactile slip detection f/t sensor six axis automatic tool changer atc payload moment wrist offset center of gravity schunk onrobot smc festo soft robotics zimmer piab pick and place">
+        <div class="top"><span class="ico">🦾</span><span class="num">A17</span></div>
+        <h3>End-Effectors &amp; Grippers</h3>
+        <p>Grasp theory (form/force-closure, friction cones), the grip-force budget, parallel/vacuum/magnetic/soft &amp; specialty grippers, actuation physics, force/tactile/slip sensing, tool changers &amp; the wrist moment budget.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 17</span></div>
+      </a>
+      <a class="tile" href="A35_Cobot_Safety_Deep_Dive.html" data-name="cobot collaborative robot safety iso 10218 ts 15066 iso 12100 risk assessment iso 13849 performance level pl d category 3 sil iec 62061 iso 13855 minimum distance speed and separation monitoring ssm protective separation distance sp power and force limiting pfl biomechanical limits quasi-static transient contact body model force pressure spring constant effective mass reduced mass hand guiding monitored stop enabling device three position light curtain safety laser scanner safety mat interlock iso 14119 muting blanking sto ss1 ss2 sos sls slp slt sdi sbc iec 61800-5-2 stop category machinery regulation 2023/1230 ce mark validation force measurement device fenceless">
+        <div class="top"><span class="ico">🛡️</span><span class="num">A35</span></div>
+        <h3>Cobot Safety — ISO 10218 &amp; TS 15066</h3>
+        <p>Why safety belongs to the application, the A/B/C standards map, the four collaborative methods, SSM separation-distance math, PFL biomechanical limits &amp; v_max, PL d/Cat 3 functional safety, safeguard tech and validation to CE.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">◆ standalone · links A15/A17/A33</span></div>
+      </a>
+      <a class="tile" href="A36_Embedded_RaspberryPi_Deep_Dive.html" data-name="embedded systems raspberry pi rpi pi 5 compute module cm4 cm5 pico rp2350 microcontroller mcu mpu soc bcm2712 rp1 cortex a76 cortex m arm real-time rtos freertos zephyr preempt_rt linux latency jitter worst case wcet rate monotonic rms liu layland edf scheduling utilisation bound gpio 3.3v pull-up debounce optocoupler isolation level shifter mosfet driver flyback diode relay uart i2c spi 1-wire rs-485 logic analyser pull-up resistor cpol cpha adc mcp3008 ads1115 4-20ma shunt lsb resolution pwm servo duty cycle modbus can codesys soft plc revolution pi revpi din rail sd card wear read-only overlayfs emmc nvme watchdog brownout undervoltage thermal throttling ups supercap edge gateway node-red docker containers mqtt opc ua influxdb tinyml hailo npu ai hat vibration fft predictive maintenance security ssh firewall tls esp32 arduino ipc industrial pc safety plc sil pl tco">
+        <div class="top"><span class="ico">🍓</span><span class="num">A36</span></div>
+        <h3>Industrial Embedded Systems &amp; Raspberry Pi</h3>
+        <p>MCU/MPU/IPC spectrum &amp; SoC anatomy (BCM2712 + RP1), real-time scheduling math (RMS bound), 24 V-proof GPIO interfacing, I²C/SPI/UART, 4–20 mA via external ADC, SD/power/watchdog reliability, edge-gateway &amp; AI patterns, and when NOT to use a Pi.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">◆ standalone · links A04/A06/A11/A33</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== MECHANICAL ENGINEERING ===== -->
+  <div class="cat v-purple" data-cat="Mechanical Engineering">
+    <div class="cat-head"><span class="bar"></span><h2>⚙️ Mechanical Engineering</h2><span class="cnt">2 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A19_Bearings_Deep_Dive.html" data-name="msc practice pack worked examples problem set bearings rolling element deep groove ball angular contact cylindrical tapered spherical roller thrust needle plain bushing race ring cage retainer rolling element seal shield friction coefficient mu hertzian contact stress subsurface shear spalling fatigue 52100 hardened l10 basic rating life iso 281 c p exponent cube law equivalent dynamic load x y factor modified life a1 aiso reliability lubrication ehl film lambda stribeck curve boundary mixed hydrodynamic grease oil nlgi viscosity n dm speed factor designation 6205 6204 bore code dimension series suffix 2rs zz c3 p5 ftf bpfo bpfi ball pass frequency vibration analysis condition monitoring failure analysis contamination electrical fluting brinelling fretting misalignment skf fag nsk ntn timken predictive maintenance">
+        <div class="top"><span class="ico">⚙️</span><span class="num">A19</span></div>
+        <h3>Bearings</h3>
+        <p>Contact principles, the full bearing family, Hertzian contact stress, the L10 cube-law life equation (ISO&nbsp;281), lubrication regimes &amp; the Stribeck curve, ISO designation decode, and forensic failure analysis — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">↔ links Micro 19</span></div>
+      </a>
+      <a class="tile" href="A20_Gears_Deep_Dive.html" data-name="gears spur helical herringbone double bevel spiral hypoid worm wheel rack pinion planetary epicyclic sun ring annulus carrier involute conjugate action law of gearing pitch point line of action pressure angle 20 module diametral pitch circular pitch addendum dedendum base circle contact ratio undercut minimum teeth profile shift gear ratio compound train idler reflected inertia willis equation tooth force tangential radial axial thrust wt wr wa lewis equation agma iso 6336 bending stress pitting contact hertzian quality grade gear mesh frequency gmf scoring scuffing pitting tooth breakage backlash reducer reflected inertia">
+        <div class="top"><span class="ico">⚙️</span><span class="num">A20</span></div>
+        <h3>Gears &amp; Gear Trains</h3>
+        <p>Conjugate action &amp; why teeth are involute, module/pressure-angle geometry, the full gear family, compound &amp; planetary trains (Willis equation), tooth force resolution, AGMA bending/pitting rating, and forensic failure analysis.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 20</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== ELECTRICAL & ELECTRONICS ===== -->
+  <div class="cat v-amber" data-cat="Electrical & Electronics">
+    <div class="cat-head"><span class="bar"></span><h2>⚡ Electrical & Electronics</h2><span class="cnt">7 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A55_Electric_Motors_Deep_Dive.html" data-name="msc practice pack worked examples problem set electric motors induction dc pmsm bldc synrm stepper equivalent circuit slip torque speed curve breakdown insulation class nameplate ie efficiency ie3 ie4 ie5 iec 60034 starting testing megger protection failure modes selection sizing">
+        <div class="top"><span class="ico">🔄</span><span class="num">A55</span></div>
+        <h3>Electric Motors &amp; Machines Deep Dive</h3>
+        <p>From F=BIℓ to the drive room: DC, induction, PMSM/SynRM &amp; steppers; equivalent circuits &amp; torque–speed; losses, IE1–IE5, nameplate, testing, protection &amp; sizing — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">16 pages</span><span class="chip">MSc practice pack</span></div>
+      </a>
+      <a class="tile" href="A56_Power_Quality_Harmonics_Deep_Dive.html" data-name="msc practice pack worked examples problem set derivations study path power quality harmonics thd tdd trd sags dips swells interruptions transients notching flicker pst plt unbalance negative sequence triplen neutral true power factor distortion power resonance detuned capacitor bank line reactor passive tuned filter 12 pulse active harmonic filter afe k-factor factor-k transformer derating skin effect crest factor true rms fourier six pulse rectifier smps led driver ieee 519 2022 ieee 1159 iec 61000 2-4 3-2 3-12 4-7 4-15 4-30 class a en 50160 itic cbema curve point of common coupling isc il survey measurement">
+        <div class="top"><span class="ico">📊</span><span class="num">A56</span></div>
+        <h3>Power Quality &amp; Harmonics Deep Dive</h3>
+        <p>THD, TDD &amp; true power factor; where harmonics are born; triplens &amp; hot neutrals; capacitor resonance &amp; detuning; the full mitigation ladder; sags, unbalance &amp; flicker; IEEE 519-2022 and IEC 61000 — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">16 pages</span><span class="chip">MSc practice pack</span></div>
+      </a>
+      <a class="tile soon" data-name="generators ups diesel genset alternator avr synchronization transfer switch battery backup online offline topology sizing">
+        <div class="top"><span class="ico">🔋</span><span class="num">SOON</span></div>
+        <h3>Generators &amp; UPS Systems</h3>
+        <p>Gensets &amp; AVRs, synchronization &amp; transfer, UPS topologies, sizing backup power.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="electrical safety arc flash loto lockout tagout nfpa 70e ppe incident energy boundaries safe isolation test">
+        <div class="top"><span class="ico">⚠️</span><span class="num">SOON</span></div>
+        <h3>Electrical Safety, Arc Flash &amp; LOTO</h3>
+        <p>Incident energy &amp; boundaries, PPE categories, safe isolation, lockout-tagout discipline.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile" href="A32_Transformers_Deep_Dive.html" data-name="msc practice pack worked examples problem set derivations study path predict first interactive calculators transformer step-up step-down turns ratio n1 n2 mutual induction faraday emf equation 4.44 flux phi_m core laminated silicon steel hysteresis eddy current b-h loop saturation inrush magnetizing current ideal transformer impedance matching a squared referred equivalent circuit leakage reactance winding resistance r_eq x_eq magnetizing branch x_m core loss r_c copper loss iron loss efficiency all-day efficiency maximum efficiency voltage regulation per-unit percent impedance %z fault current parallel operation three-phase vector group dyn11 delta star wye zigzag clock number 30 degrees phase shift open-circuit short-circuit test onan onaf ofaf odaf cooling autotransformer instrument transformer ct pt isolation tap changer oltc buchholz relay differential protection 87t ref dga dissolved gas analysis 2nd harmonic restraint load sharing kva over percent z circulating current tap mismatch vector group mismatch dyn1 hot spot iec 60076-7 ageing rate 6 degree rule insulation life paper degree of polymerisation furan k-factor derating harmonic loss factor total ownership cost toc amorphous core sfra tan delta duval triangle buchholz breather silica gel">
+        <div class="top"><span class="ico">🔁</span><span class="num">A32</span></div>
+        <h3>Transformers</h3>
+        <p>Faraday &amp; the 4.44 EMF equation, turns ratio &amp; the a² impedance rule, the B–H loop &amp; inrush, the equivalent circuit, OC/SC tests &amp; per-unit, iron-vs-copper losses &amp; all-day efficiency, regulation &amp; %Z as a fault level, Dyn11 vector groups &amp; zero sequence, parallel load sharing, taps/autos/CTs, IEC 60076-7 hot-spot ageing, 87T &amp; DGA — now with 5 calculators, predict-first cards and a full MSc practice pack.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">predict-first</span><span class="link07">↔ links Micro 31</span></div>
+      </a>
+      <a class="tile" href="A30_Three_Phase_Power_Deep_Dive.html" data-name="msc practice pack worked examples problem set derivations study path three phase power 3-phase polyphase 120 degrees phasor line voltage phase voltage root three √3 wye star delta connection neutral v_l v_ph i_l i_ph power triangle real reactive apparent active p q s kw kvar kva power factor cos phi pf correction capacitor kvar rotating magnetic field ferraris tesla stator synchronous speed ns 120f/p poles pole pairs induction motor squirrel cage slip rotor torque speed curve breakdown starting torque dol direct on line star-delta soft starter vfd inrush harmonics thd triplen 3rd harmonic ieee 519 dyn11 transformer single-phasing phase sequence reversal voltage unbalance negative sequence earth ground fault protection relay tesla dolivo-dobrowolsky constant power constant torque self starting">
+        <div class="top"><span class="ico">🔱</span><span class="num">A30</span></div>
+        <h3>Three-Phase Power</h3>
+        <p>120° phasor math &amp; the zero-sum, line-vs-phase &amp; the √3, Wye/Delta, the P/Q/S power triangle, the rotating magnetic field &amp; n_s=120f/P, induction slip, star-delta starting, PF correction &amp; harmonics — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">MSc practice pack</span><span class="chip">interactive</span><span class="link07">↔ links Micro 30</span></div>
+      </a>
+      <a class="tile" href="A28_Switching_Power_Electronics_Deep_Dive.html" data-name="relays contactors mosfet igbt sic gan power electronics switching gate driver bootstrap dead time shoot-through snubber flyback freewheel diode rds(on) qg gate charge conduction loss switching loss fsw frequency arc quenching utilisation category ac-1 ac-3 ac-4 iec 60947 dol starter overload relay seal-in spdt dpdt poles throws solid state relay ssr zero cross desat ocp safe operating area soa thermal resistance rthjc heatsink half-bridge inverter body diode miller">
+        <div class="top"><span class="ico">🔌</span><span class="num">A28</span></div>
+        <h3>Switching &amp; Power Electronics</h3>
+        <p>Relays/contactors &amp; the arc, the MOSFET channel, conduction vs switching loss, gate drive &amp; dead-time, MOSFET/IGBT/SiC/GaN selection, snubbers &amp; the thermal chain.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 28 · 29</span></div>
+      </a>
+      <a class="tile" href="A29_MOSFETs_Deep_Dive.html" data-name="msc practice pack worked examples problem set mosfet metal oxide semiconductor field effect transistor n-channel p-channel enhancement depletion threshold voltage vth vgs vds id gate drain source inversion channel oxide siO2 device physics atalla kahng transfer characteristic output curves cut-off saturation active triode ohmic linear region transconductance gm rds(on) on-resistance conduction loss i squared r positive temperature coefficient body diode reverse recovery gate charge qg ciss crss coss cgd cgs cds miller plateau capacitance gate driver rg bootstrap switching loss psw fsw frequency pwm duty cycle half-bridge high-side low-side dead-time shoot-through inverter dv/dt false turn-on safe operating area soa avalanche thermal resistance rthjc rthcs rthsa junction temperature tj heatsink thermal chain si sic gan igbt wide bandgap hemt bjt selection vfd servo drive">
+        <div class="top"><span class="ico">🔌</span><span class="num">A29</span></div>
+        <h3>MOSFETs</h3>
+        <p>Device physics &amp; the inversion channel, the I–V curves, Rds(on) &amp; conduction loss, gate charge &amp; the Miller plateau, switching loss vs frequency, the half-bridge &amp; dead-time, SOA &amp; thermal chain, Si/SiC/GaN/IGBT selection — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">↔ links Micro 29</span></div>
+      </a>
+      <a class="tile" href="A11_Industrial_Sensors_Deep_Dive.html" data-name="msc practice pack worked examples problem set derivations study path predict first checkpoints industrial sensors measurement chain transduction signal conditioning static characteristics span lrv urv sensitivity resolution accuracy precision repeatability linearity hysteresis dead band drift turndown error budget rss root sum square uncertainty gum type a type b coverage factor traceability tur test uncertainty ratio calibration as-found as-left five point dynamic characteristics first order second order time constant tau damping ratio ramp lag amplitude ratio phase lag corner frequency thermowell inductive proximity eddy current reduction factor sn sa assured sensing distance flush non-flush factor 1 capacitive dielectric constant epsilon r photoelectric through beam retroreflective diffuse background suppression excess gain contrast ratio ultrasonic time of flight speed of sound blind zone rtd pt100 callendar van dusen class a lead resistance 3 wire 4 wire self heating thermocouple seebeck cold junction compensation type k j t n extension wire thermistor steinhart hart infrared emissivity pressure piezoresistive capacitive resonant gauge absolute differential level dp hydrostatic wet leg zero elevation suppression radar guided wave gwr load cells flow orifice vortex strouhal magnetic faraday coriolis mass flow ultrasonic transit time thermal mass straight run encoder incremental absolute quadrature ppr gray code resolver lvdt strain gauge factor wheatstone bridge mv/v load cell dead load creep shunt calibration 4-20 ma live zero namur ne 43 ne 107 loop voltage budget barrier npn pnp sourcing sinking noise capacitive inductive conductive coupling shielding earth loop aliasing hart io-link ethernet apl ip rating atex diagnostics common cause redundancy">
+        <div class="top"><span class="ico">📡</span><span class="num">A11</span></div>
+        <h3>Industrial Sensors</h3>
+        <p>The whole measurement chain to MSc depth: static &amp; dynamic characteristics, uncertainty and the error budget, the physics inside inductive, capacitive, photoelectric, ultrasonic, RTD, thermocouple, pressure, level, flow, encoder and strain-gauge sensing, signal integrity and 4&ndash;20 mA loop budgets, diagnostics and common cause &mdash; now rebuilt with predict-first cards, checkpoints, depth tiers and a full practice pack.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">predict-first</span><span class="link07">↔ links Micro 11</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== PNEUMATICS & HYDRAULICS ===== -->
+  <div class="cat v-orange" data-cat="Fluid Power">
+    <div class="cat-head"><span class="bar"></span><h2>💨 Pneumatics & Hydraulics</h2><span class="cnt">2 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A12_Pneumatic_Systems_Deep_Dive.html" data-name="pneumatics compressed air valves 5/2 3/2 cylinders frl flow sizing cv kv iso 6358 meter-out vacuum venturi gas laws boyle force area bore rod annulus dew point leaks energy">
+        <div class="top"><span class="ico">💨</span><span class="num">A12</span></div>
+        <h3>Pneumatic Systems</h3>
+        <p>Gas laws &amp; compressibility, ISO 1219 valve symbols, force/area &amp; the rod penalty, meter-out speed control, Cv/ISO 6358 flow sizing, FRL &amp; dew point, vacuum &amp; energy economics.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 12</span></div>
+      </a>
+      <a class="tile" href="A13_Hydraulic_Systems_Deep_Dive.html" data-name="hydraulics pressure pump pascal gear vane piston pump relief counterbalance accumulator iso 4406 contamination heat cavitation proportional servo valve regeneration bulk modulus bladder nitrogen">
+        <div class="top"><span class="ico">🛢️</span><span class="num">A13</span></div>
+        <h3>Hydraulic Systems</h3>
+        <p>Pascal &amp; power, gear/vane/piston pumps, directional/pressure/flow valves, accumulators, ISO 4406 cleanliness &amp; heat, proportional &amp; servo control.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 13</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== MANUFACTURING TECH ===== -->
+  <div class="cat v-teal" data-cat="Manufacturing Technology">
+    <div class="cat-head"><span class="bar"></span><h2>🏗️ Manufacturing Technology</h2><span class="cnt">9 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A21_GDT_Tolerances_Deep_Dive.html" data-name="msc practice pack worked examples problem set gd&t gdt geometric dimensioning tolerancing tolerances asme y14.5 iso 1101 5458 2692 8015 14253 gps feature control frame fcf datum reference frame drf 3-2-1 six degrees of freedom dof mmc lmc rfs material condition modifier bonus tolerance datum shift virtual condition vc position true position profile of surface line straightness flatness circularity cylindricity perpendicularity angularity parallelism runout total circular concentricity symmetry deprecated stack up worst case rss monte carlo cmm functional gauge go gauge envelope rule 1 mbd model based definition basic dimension">
+        <div class="top"><span class="ico">📐</span><span class="num">A21</span></div>
+        <h3>GD&amp;T &amp; Tolerances</h3>
+        <p>Why ± fails, the Feature Control Frame, the 14 characteristics, the datum reference frame &amp; 6&nbsp;DOF, MMC/LMC bonus tolerance, true-position math, virtual condition, profile &amp; tolerance stack-up (WC/RSS/Monte&nbsp;Carlo) — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">↔ links Micro 21</span></div>
+      </a>
+      <a class="tile" href="A40_CNC_Machining_GCode_Deep_Dive.html" data-name="cnc machining g-code gcode numerical control machine tool vmc hmc lathe turning centre 5-axis five axis swiss edm mit parsons 1952 apt fanuc siemens sinumerik heidenhain iso 6983 6983 block word modal group safety block g00 g01 g02 g03 g17 g21 g40 g41 g42 cutter compensation g43 tool length offset h d wear offset g54 g59 work offset wcs g90 g91 absolute incremental canned cycle g81 peck drilling m03 m06 m08 m30 macro b step-nc iso 841 machine zero program zero tcp rtcp g43.4 traori trunnion interpolation chord error look-ahead block processing data starving jerk s-curve following error kv speeds feeds vc surface speed rpm chip load fz feed per tooth mrr specific cutting force kc chip thinning climb conventional milling ballscrew backlash carbide coating tin ticn tialn alcrn pcd insert cnmg nose radius taylor tool life vt n c flank wear crater built-up edge notch chipping runout er collet hydraulic shrink fit hsk bt40 workholding 3-2-1 vise soft jaws zero point pallet fixturing cutting force chatter regenerative stability lobe diagram tap test stickout variable helix tooth passing frequency cam toolpath post processor cl data verification vericut adaptive trochoidal hsm high efficiency roughing constant engagement scallop height stepover ball nose rest machining pencil surface finish ra rt accuracy repeatability resolution iso 230 ballbar qc20 laser interferometer pitch error compensation backlash comp thermal growth volumetric probing renishaw tool setter in-process gauging spc cmm">
+        <div class="top"><span class="ico">🛠️</span><span class="num">A40</span></div>
+        <h3>CNC Machining &amp; G-Code</h3>
+        <p>Machine anatomy &amp; the servo loop, the offset chain (G54/G43), full G-code grammar, interpolation &amp; data starving, speeds-and-feeds physics, Taylor tool life, chatter &amp; stability lobes, CAM/HSM strategy and micron-level metrology.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links A09 · A21 · A27</span></div>
+      </a>
+      <a class="tile" href="A18_Additive_3D_Printing_Deep_Dive.html" data-name="3d printing fdm fff additive manufacturing am iso astm 52900 sla dlp sls mjf dmls slm ebm binder jetting ded waam layer adhesion anisotropy slicing gcode infill perimeter walls supports overhang dfam topology lattice metal hip porosity filament pla petg abs nylon">
+        <div class="top"><span class="ico">🖨️</span><span class="num">A18</span></div>
+        <h3>Additive / 3D Printing</h3>
+        <p>The 7 AM families, FDM physics &amp; layer adhesion, slicing &amp; toolpaths, supports &amp; orientation, DfAM, material anisotropy, metal AM &amp; QA.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 18</span></div>
+      </a>
+      <a class="tile" href="A22_OEE_Deep_Dive.html" data-name="oee overall equipment effectiveness availability performance quality six big losses time ladder planned production time fully productive time multiplicative trap teep ooe utilisation world class 85% ideal cycle time scada mes reason codes pareto bottleneck nakajima tpm goodhart">
+        <div class="top"><span class="ico">📈</span><span class="num">A22</span></div>
+        <h3>OEE — Overall Equipment Effectiveness</h3>
+        <p>The time ladder &amp; six big losses, why A·P·Q multiply (not average), OEE vs OOE vs TEEP, measuring it via SCADA/MES, world-class benchmarks, gaming pitfalls &amp; the improvement loop.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 22</span></div>
+      </a>
+      <a class="tile" href="A23_TPM_Deep_Dive.html" data-name="tpm total productive maintenance nakajima jipm nippondenso autonomous maintenance jishu hozen planned maintenance focused improvement kobetsu kaizen quality maintenance hinshitsu hozen early equipment management training safety office tpm 8 pillars 5s seven steps clt clean lubricate tighten red blue tag mtbf mttr availability reliability maintainability p-f curve bathtub curve reactive preventive predictive prescriptive cbm pdm smed six big losses 12 steps model machine rollout zero breakdowns">
+        <div class="top"><span class="ico">🛠️</span><span class="num">A23</span></div>
+        <h3>TPM — Total Productive Maintenance</h3>
+        <p>The four maintenance strategies &amp; P-F curve, all 8 pillars, the 7 autonomous-maintenance steps, MTBF/MTTR/availability math, how TPM attacks the six OEE losses, and the 12-step rollout.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 23</span></div>
+      </a>
+      <a class="tile" href="A24_5S_Deep_Dive.html" data-name="5s six s 6s seiri seiton seiso seiketsu shitsuke sort set in order shine standardise sustain visual workplace visual management visual control red tag holding area shadow board 30 second rule point of use floor marking colour code cleaning is inspection source of dirt audit score 125 layered audit safety security workplace organisation lean foundation tpm autonomous maintenance toyota production system housekeeping motion waste searching waste">
+        <div class="top"><span class="ico">🧹</span><span class="num">A24</span></div>
+        <h3>5S — Workplace Organisation</h3>
+        <p>The five Japanese pillars, the visual-workplace ladder, red-tag economics, shadow boards &amp; the 30-second rule, "cleaning is inspection" (→ TPM), audit scoring, Sustain &amp; the 6th S Safety.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 24</span></div>
+      </a>
+      <a class="tile" href="A25_Root_Cause_Analysis_Deep_Dive.html" data-name="rca root cause analysis 5 whys five whys fishbone ishikawa 6m 6 ms man machine method material measurement environment fault tree analysis fta boolean and or gate minimal cut set probability pareto 80 20 vital few juran fmea failure mode effects analysis rpn severity occurrence detection aiag vda action priority 8d eight disciplines ford a3 toyota corrective preventive action read across swiss cheese james reason latent active error blameless human error causal chain symptom physical latent system apollo cause map barrier bowtie poka yoke focused improvement kobetsu kaizen tpm dmaic">
+        <div class="top"><span class="ico">🔎</span><span class="num">A25</span></div>
+        <h3>Root Cause Analysis</h3>
+        <p>What a root cause really is, the causal chain (symptom→physical→human→latent), all 7 tools, 5 Whys done right, Fishbone 6M, Fault-Tree Boolean math, Pareto &amp; FMEA RPN, the 8D/A3 process, and Reason's Swiss-cheese systems view.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 25</span></div>
+      </a>
+      <a class="tile" href="A26_Lean_7_Wastes_Deep_Dive.html" data-name="lean manufacturing toyota production system tps muda mura muri 7 wastes 8 wastes downtime defects overproduction waiting non-used talent transport inventory motion extra processing timwood ohno shingo womack jones krafcik value stream map vsm process cycle efficiency pce takt time continuous flow single piece pull kanban heijunka levelling smed poka-yoke jidoka andon autonomation standard work kaizen gemba 5 principles jit just in time little's law wip first pass yield lean six sigma">
+        <div class="top"><span class="ico">🌿</span><span class="num">A26</span></div>
+        <h3>Lean &amp; the 8 Wastes</h3>
+        <p>The TPS house (JIT + Jidoka), the 5 principles, Muda/Mura/Muri, the 8 wastes (DOWNTIME), VSM &amp; PCE, takt/flow/line-balance, pull &amp; Kanban sizing, the Lean toolbox &amp; metrics.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 26</span></div>
+      </a>
+      <a class="tile" href="A27_Six_Sigma_DMAIC_Deep_Dive.html" data-name="msc practice pack worked examples problem set derivations study path six sigma dmaic dmadv dfss lean six sigma motorola general electric jack welch variation standard deviation sigma normal distribution gaussian bell curve empirical rule 68 95 99.7 z-score dpmo defects per million opportunities 3.4 1.5 sigma shift yield cp cpk pp ppk process capability potential usl lsl spec limits centring gauge r&r msa measurement system analysis repeatability reproducibility aiag define measure analyze improve control charter sipoc voc ctq kano hypothesis test null alternative p-value alpha beta type i ii error t-test 2-sample anova analysis of variance chi-square regression f-test levene effect size doe design of experiments ofat full fractional factorial 2k response surface rsm ccd taguchi orthogonal array signal to noise interactions spc statistical process control control chart ucl lcl common cause special cause tampering shewhart deming x-bar r i-mr p-chart np c-chart u-chart control plan poka-yoke iso 13053 belts yellow green black master black belt">
+        <div class="top"><span class="ico">📊</span><span class="num">A27</span></div>
+        <h3>Six Sigma &amp; DMAIC</h3>
+        <p>Variation &amp; the normal curve, sigma level/DPMO &amp; the 1.5σ shift, Cp/Cpk capability, the DMAIC roadmap, MSA/Gauge R&amp;R, hypothesis tests &amp; ANOVA, DOE, and SPC control charts — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">MSc practice pack</span><span class="chip">interactive</span><span class="link07">↔ links Micro 27</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== AUTOMOTIVE ENGINEERING ===== -->
+  <div class="cat v-orange" data-cat="Automotive Engineering">
+    <div class="cat-head"><span class="bar"></span><h2>🚗 Automotive Engineering</h2><span class="cnt">2 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A38_EV_Powertrain_Deep_Dive.html" data-name="ev electric vehicle powertrain automotive engineering bev phev hev fcev traction motor pmsm ipm induction motor srm wrsm torque speed curve base speed flux weakening field weakening reluctance torque back emf single speed reducer gearbox inverter sic silicon carbide igbt mosfet svpwm space vector pwm foc field oriented control clarke park transform id iq dc link 400v 800v battery pack cell module lithium ion nmc nca lfp lmfp solid state energy density wh/kg c-rate dod cell to pack bms battery management system soc soh sop coulomb counting ocv kalman filter cell balancing passive active thermal management thermal runaway lithium plating preconditioning charging ac dc fast charging obc onboard charger ccs nacs j3400 chademo gb/t chaoji mcs megawatt cc-cv taper charge curve v2g v2h v2l iso 15118 regenerative braking regen blended braking one pedal driving road load equation aero drag cd rolling resistance crr range consumption wh/km heat pump can can-fd vcu mcu ecu zonal architecture ota iso 26262 asil functional safety isolation monitoring imd hvil interlock pyro fuse contactor bearing currents edm orange cable high voltage">
+        <div class="top"><span class="ico">🚗</span><span class="num">A38</span></div>
+        <h3>EV Powertrain Engineering</h3>
+        <p>Cell to wheel: PMSM vs induction &amp; the torque-speed envelope, SiC inverters &amp; FOC, battery chemistry &amp; pack sizing, BMS &amp; SoC estimation, CC-CV fast charging, regen braking, the road-load equation and ISO 26262 safety.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">◆ standalone · links A29/A30/A08/A04</span></div>
+      </a>
+      <a class="tile" href="A39_Battery_Cells_BMS_Deep_Dive.html" data-name="battery cells bms lithium ion li-ion cell electrochemistry intercalation rocking chair anode cathode graphite silicon separator electrolyte lipf6 sei solid electrolyte interphase gibbs free energy faraday nmc nca lfp lmfp lto sodium ion na-ion solid state chemistry energy density wh/kg cycle life cylindrical 18650 21700 4680 prismatic pouch jelly roll tabless blade cell to pack ctp cell to chassis ctc series parallel 96s ocv open circuit voltage flat plateau equivalent circuit thevenin r0 rc pair internal resistance sag terminal voltage soc state of charge coulomb counting kalman filter ekf soh state of health sop state of power capacity fade resistance growth balancing passive active bleed resistor afe csc isospi daisy chain contactor precharge imd hvil thermal management cooling cold plate immersion preconditioning thermal runaway sei decomposition separator melt oxygen release propagation vent pyro fuse un gtr 20 gb 38031 degradation lithium plating particle cracking dod depth of discharge arrhenius calendar aging knee point hppc eis impedance spectroscopy un 38.3 iec 62660 iso 6469 unece r100 ul 2580 eu battery regulation battery passport second life recycling hydrometallurgy pyrometallurgy direct recycling green">
+        <div class="top"><span class="ico">🔋</span><span class="num">A39</span></div>
+        <h3>Battery Cells &amp; BMS</h3>
+        <p>Inside the Li-ion cell: intercalation &amp; the chemistry zoo, formats &amp; CTP packs, the Thevenin model &amp; OCV curves, Kalman SoC estimation, balancing, thermal runaway, degradation physics, standards &amp; second life.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">◆ standalone · links A38/A29/A36/A33</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== NANOTECH & EMERGING ===== -->
+  <div class="cat v-purple" data-cat="Nanotechnology & Emerging">
+    <div class="cat-head"><span class="bar"></span><h2>🔬 Nanotech & Industry 4.0</h2><span class="cnt">3 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A31_Digital_Twins_I40_Deep_Dive.html" data-name="digital twin industry 4.0 5.0 edge fog cloud iiot smart factory ai kritzinger taxonomy digital shadow model iso 23247 rami 4.0 asset administration shell aas iec 63278 iec 62443 mqtt sparkplug b unified namespace isa-95 predictive maintenance rul reduced order model pinn kalman data assimilation cyber physical system cps five dimension tao">
+        <div class="top"><span class="ico">🌐</span><span class="num">A31</span></div>
+        <h3>Digital Twins &amp; Industry 4.0</h3>
+        <p>Kritzinger taxonomy, Tao's 5-dimension model, ISO 23247 &amp; RAMI 4.0 &amp; the AAS, the IIoT pipeline, edge/fog/cloud, MQTT/Sparkplug, the model stack, IEC 62443 security &amp; Industry 5.0.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 32 · 33</span></div>
+      </a>
+      <a class="tile" href="A33_Industry_4_5_Deep_Dive.html" data-name="industry 4.0 5.0 fourth industrial revolution cyber physical system cps nine pillars iiot big data cloud digital twin simulation autonomous robots additive manufacturing augmented reality horizontal vertical integration cybersecurity rami 4.0 asset administration shell aas iec 62443 isa-95 purdue model automation pyramid edge cloud mqtt opc ua unified namespace predictive maintenance digital thread analytics ladder cobot human centric sustainable resilient acatech maturity">
+        <div class="top"><span class="ico">🏭</span><span class="num">A33</span></div>
+        <h3>Industry 4.0 &amp; 5.0</h3>
+        <p>The nine pillars, RAMI 4.0 &amp; the AAS, the collapsing automation pyramid, edge–cloud IIoT, the digital thread &amp; predictive maintenance, digital twins, OT/IT cybersecurity (IEC 62443) and the human-centric leap to Industry 5.0.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">↔ links Micro 33</span></div>
+      </a>
+      <a class="tile" href="A34_Nanotech_MEMS_Deep_Dive.html" data-name="nanotechnology nano mems microelectromechanical iso ts 80004 nanoscale nanometre surface to volume ratio surface atoms quantum confinement brus equation quantum dot cdse bandgap cnt carbon nanotube graphene 0d 1d 2d 3d dimensionality photolithography top down bottom up cvd ald atomic layer deposition colloidal synthesis cleanroom iso 5 scaling laws cube square proof mass comb drive capacitive accelerometer coriolis gyroscope mems microphone piezoresistive pressure sensor gauge factor electrostatic actuator pull-in voltage drie deep reactive ion etch sacrificial release stiction sem tem afm xrd scherrer dls raman metrology nano ehs safety control banding nanomaterials">
+        <div class="top"><span class="ico">🔬</span><span class="num">A34</span></div>
+        <h3>Nanotechnology &amp; MEMS</h3>
+        <p>The nanoscale &amp; surface-to-volume physics, quantum confinement &amp; the Brus equation, 0D–3D nanomaterials, photolithography &amp; bottom-up synthesis, MEMS scaling laws, sensors &amp; electrostatic actuators, pull-in design, metrology &amp; nano-EHS.</p>
+        <div class="meta"><span class="chip">10 pages</span><span class="chip">interactive</span><span class="link07">◆ standalone · links A11/A33</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== THERMAL IMAGING & CONDITION MONITORING ===== -->
+  <div class="cat v-orange" data-cat="Thermal Imaging & Condition Monitoring">
+    <div class="cat-head"><span class="bar"></span><h2>🌡️ Thermal Imaging &amp; Condition Monitoring</h2><span class="cnt">3 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A41_Thermal_Imaging_Deep_Dive.html" data-name="msc practice pack worked examples problem set thermal imaging infrared thermography ir camera flir thermogram temperature non contact blackbody planck law wien displacement stefan boltzmann emissivity reflected apparent temperature transmission atmosphere lwir mwir 8-14 micron microbolometer cooled detector insb mct netd fpa focal plane array ifov spot size ratio distance to spot electrical inspection delta t severity neta iso 18434 loose connection i2r load normalization ir window arc flash bearing motor coupling steam trap refractory predictive maintenance pdm condition monitoring iso 18436 category thermographer certification reflection solar loading emissivity error building insulation moisture pcb hotspot">
+        <div class="top"><span class="ico">🌡️</span><span class="num">A41</span></div>
+        <h3>Thermal Imaging &amp; IR Thermography</h3>
+        <p>Blackbody physics (Planck, Wien, Stefan-Boltzmann), emissivity &amp; the measurement equation, microbolometer vs cooled cameras, IFOV &amp; spot-size, electrical ΔT severity criteria, mechanical &amp; process surveys, ISO 18434/18436 practice — plus worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ standalone · links A19/A23/A11</span></div>
+      </a>
+      <a class="tile" href="A42_Vibration_Analysis_Deep_Dive.html" data-name="msc practice pack worked examples problem set vibration analysis condition monitoring fft spectrum envelope demodulation peakvue spike energy iso 10816 20816 13373 18436 21940 velocity acceleration displacement mm/s rms peak crest factor kurtosis accelerometer iepe icp proximity probe mounting resonance fmax lor lines resolution bin width hanning window averaging nyquist aliasing orders 1x 2x unbalance misalignment looseness bent shaft resonance phase bearing defect frequencies ftf bpfo bpfi bsf sidebands gear mesh gmf broken rotor bars slip severity zones alarms baseline band alarm trending balancing g2.5 g6.3 trial mass single plane residual unbalance laser alignment soft foot p-f curve route based monitoring">
+        <div class="top"><span class="ico">📈</span><span class="num">A42</span></div>
+        <h3>Vibration Analysis &amp; Diagnostics</h3>
+        <p>The P-F curve &amp; why vibration speaks first, V=ωX physics, sensors &amp; mounting, FFT setup (Δf = Fmax/LOR), synchronous fault signatures, bearing defect frequencies &amp; failure stages, envelope analysis, ISO 20816 severity zones, balancing &amp; laser alignment — plus worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ standalone · links A19/A41/A23</span></div>
+      </a>
+      <a class="tile" href="A43_NDT_Ultrasound_Oil_Deep_Dive.html" data-name="msc practice pack worked examples problem set ndt non destructive testing ultrasound ultrasonic testing ut pulse echo a-scan acoustic impedance reflection coefficient couplant thickness gauging corrosion tml api 570 510 phased array paut tofd angle beam guided wave airborne ultrasound 40 khz heterodyne leak detection compressed air steam trap corona tracking arcing grease by ear oil analysis lubricant viscosity tan tbn ftir karl fischer water particle count iso 4406 cleanliness code wear debris spectroscopy ferrography pq index elements fe cu pb sn si dye penetrant pt magnetic particle mt flux leakage eddy current et skin depth radiography rt gamma iqi iso 9712 18436 5817 condition monitoring program p-f matrix">
+        <div class="top"><span class="ico">🔍</span><span class="num">A43</span></div>
+        <h3>NDT, Ultrasound &amp; Oil Analysis</h3>
+        <p>Ultrasonic physics (Z, R, d=vt/2), airborne ultrasound for leaks / bearings / traps / electrical, UT thickness &amp; PAUT/TOFD, oil analysis triad &amp; ISO 4406, wear-debris ferrography, PT / MT / ET / RT with method-selection table, combined-programme design — plus worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ standalone · links A42/A41/A19</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== CAD & SOLIDWORKS ===== -->
+  <div class="cat v-blue" data-cat="CAD & SolidWorks">
+    <div class="cat-head"><span class="bar"></span><h2>🖥️ CAD &amp; SolidWorks</h2><span class="cnt">2 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A49_SolidWorks_Part_Modeling_Deep_Dive.html" data-name="msc practice pack worked examples problem set solidworks part modeling sketch feature design intent extrude revolve sweep loft fillet shell draft rib hole wizard pattern parametric feature tree parent child rollback configurations equations global variables design table b-rep parasolid dof fully defined master model multibody mass properties step stl export">
+        <div class="top"><span class="ico">🖥️</span><span class="num">A49</span></div>
+        <h3>SolidWorks Part Modeling &amp; Design Intent</h3>
+        <p>B-rep &amp; the Parasolid kernel, sketch DOF states, relations before dimensions, the full feature toolbox, feature order &amp; the tree as a program, equations/configurations/design tables, mass properties as engineering data, export intelligence ladder — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">16 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ standalone</span></div>
+      </a>
+      <a class="tile soon" data-name="solidworks assemblies mates drawings bom detailing balloon section view exploded top down bottom up in context">
+        <div class="top"><span class="ico">🧩</span><span class="num">SOON</span></div>
+        <h3>Assemblies, Mates &amp; Drawings</h3>
+        <p>Mate strategy &amp; degrees of freedom, top-down vs bottom-up, drawing views, BOM &amp; ballooning, detailing to standards.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile" href="A62_CSWA_Simulation_Exam_Guide.html" data-name="msc practice pack worked examples problem set derivations study path cswa simulation cswa-s exam guide certification solidworks simulation associate fea finite element analysis linear static stiffness matrix ku=f degrees of freedom element types solid tetrahedral draft high quality parabolic shell beam truss node count meshing standard curvature based blended global element size mesh control aspect ratio jacobian h-adaptive p-adaptive materials elastic modulus poisson ratio yield strength units si mmgs ips lbf newton psi ksi mpa conversion fixtures fixed geometry roller slider fixed hinge symmetry reference geometry rigid body modes loads force pressure torque gravity centrifugal bearing load remote load prescribed displacement contact sets bonded no penetration allow penetration connectors pin bolt spring link elastic support results von mises principal stress p1 p3 ures displacement strain factor of safety tresca probe list results reaction force convergence singularity richardson extrapolation saint venant stress concentration kt plate with hole hand verification beam bending cantilever buckling euler frequency fatigue nonlinear study types">
+        <div class="top"><span class="ico">📊</span><span class="num">A62</span></div>
+        <h3>CSWA-Simulation: Full Exam Guide</h3>
+        <p>The complete guide to the SOLIDWORKS Simulation Associate exam &mdash; format, scoring and the official topic list; what the solver really does; element types and DOF; meshing and quality metrics; materials and the unit traps that fail more candidates than theory; fixtures, loads, contacts and connectors; von Mises, principal stress and factor of safety; convergence versus singularity; hand verification; the three hands-on problems worked; error messages decoded; and an exam-day strategy &mdash; with worked examples, a 10-problem set, derivations &amp; an eight-week study path.</p>
+        <div class="meta"><span class="chip">19 pages</span><span class="chip">MSc practice pack</span><span class="chip">interactive</span></div>
+      </a>
+      <a class="tile soon" data-name="solidworks sheet metal surfacing weldments k factor bend allowance flat pattern loft boundary structural member gusset">
+        <div class="top"><span class="ico">📄</span><span class="num">SOON</span></div>
+        <h3>Sheet Metal, Surfacing &amp; Weldments</h3>
+        <p>K-factor &amp; bend allowance, flat patterns, surface modeling, weldment profiles &amp; cut lists for real fabrication.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== MECHANISMS & MACHINE ELEMENTS ===== -->
+  <div class="cat v-purple" data-cat="Mechanisms & Machine Elements">
+    <div class="cat-head"><span class="bar"></span><h2>🔩 Mechanisms &amp; Machine Elements</h2><span class="cnt">1 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A48_Linkages_Kinematics_Deep_Dive.html" data-name="msc practice pack worked examples problem set mechanisms linkages kinematics kinematic pairs lower higher pair revolute prismatic mobility degrees of freedom gruebler kutzbach four bar slider crank grashof law inversions drag link crank rocker double rocker scotch yoke oldham pantograph geneva vector loop freudenstein position velocity instant centre kennedy theorem acceleration coriolis transmission angle toggle dead centre quick return whitworth straight line peaucellier synthesis burmester precision points branch defect">
+        <div class="top"><span class="ico">🔗</span><span class="num">A48</span></div>
+        <h3>Linkages &amp; Kinematics</h3>
+        <p>Kinematic pairs &amp; mobility (Gruebler/Kutzbach), the four-bar &amp; Grashof&#39;s law, inversions, slider-crank geometry &amp; harmonics, vector-loop &amp; Freudenstein position analysis, velocity via instant centres &amp; Kennedy, acceleration &amp; the Coriolis term, transmission angle &amp; toggle, the classic special mechanisms, and linkage synthesis — plus worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">16 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ standalone · links A20/A09/A17/A15</span></div>
+      </a>
+      <a class="tile soon" data-name="cams followers displacement diagram svaj cycloidal harmonic dwell pressure angle radius of curvature undercutting">
+        <div class="top"><span class="ico">⚙️</span><span class="num">SOON</span></div>
+        <h3>Cams &amp; Followers</h3>
+        <p>SVAJ diagrams, cycloidal vs harmonic motion laws, pressure angle, undercutting &amp; cam sizing.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="shafts keys couplings fasteners shaft design fatigue keyway spline rigid flexible coupling bolted joint preload torque">
+        <div class="top"><span class="ico">🔩</span><span class="num">SOON</span></div>
+        <h3>Shafts, Keys, Couplings &amp; Fasteners</h3>
+        <p>Shaft sizing &amp; fatigue, keys &amp; splines, coupling selection, bolted-joint preload &amp; torque control.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="springs clutches brakes helical spring rate wahl factor belleville friction clutch disc brake energy heat">
+        <div class="top"><span class="ico">🌀</span><span class="num">SOON</span></div>
+        <h3>Springs, Clutches &amp; Brakes</h3>
+        <p>Spring rate &amp; Wahl factor, spring materials, friction clutch &amp; brake sizing, energy &amp; heat dissipation.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== ELECTRICAL WIRING & INSTALLATION ===== -->
+  <div class="cat v-amber" data-cat="Electrical Wiring & Installation">
+    <div class="cat-head"><span class="bar"></span><h2>🔌 Electrical Wiring &amp; Installation</h2><span class="cnt">3 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A44_Domestic_Wiring_Deep_Dive.html" data-name="msc practice pack worked examples problem set domestic wiring house consumer unit ring radial final circuit lighting socket mcb type b c d trip curve rcd rcbo spd 30ma type a ac f b core balance earthing tn-s tn-c-s pme tt earth rod ze zs r1 r2 loop impedance disconnection 0.4s adiabatic k 115 cable sizing derating ca cg ci voltage drop mv/a/m diversity maximum demand cooker shower ev charger twin earth swa bonding bathroom zones safe isolation prove test prove insulation resistance continuity iec 60364 bs 7671 iet on-site guide sls 1080">
+        <div class="top"><span class="ico">🏠</span><span class="num">A44</span></div>
+        <h3>Domestic Wiring &amp; Consumer Units</h3>
+        <p>Supply chain &amp; earthing systems (TN-S / PME / TT), consumer unit anatomy, MCB trip curves, RCD core-balance physics &amp; types, ring vs radial design, cable sizing with derating &amp; voltage drop, Zs = Ze + R1+R2 disconnection math, adiabatic check, bonding, bathroom zones &amp; safe isolation — plus worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ standalone · links A30/A28/A32</span></div>
+      </a>
+      <a class="tile" href="A46_Control_Panel_Wiring_Deep_Dive.html" data-name="msc practice pack worked examples problem set industrial control panel wiring iec 61439 iec 60204 machine electrical enclosure busbar icw ipk icc form of separation type 2 coordination 60947 motor branch contactor overload scpd selectivity cascading e-stop stop category 0 1 2 safety relay edm 24v pelv psu control transformer inrush wire colours orange ferrule bootlace terminal push-in spring torque duct fill segregation thermal iec 60890 delta t filter fan heat exchanger emc vfd screened cable 360 gland dv/dt pe earth bar bonding eplan 81346 60617 routine verification insulation resistance dielectric residual voltage pe continuity fat sat sccr ul 508a">
+        <div class="top"><span class="ico">🏭</span><span class="num">A46</span></div>
+        <h3>Industrial Control Panel Wiring</h3>
+        <p>IEC 61439 assembly ratings (I<sub>cw</sub>/I<sub>pk</sub>/I<sub>cc</sub>, Forms 1–4b) &amp; IEC 60204-1 machine rules, motor branch with Type 2 coordination, 24 V control &amp; E-stop categories with EDM, wire colours &amp; ferrule craft, thermal design ΔT = P/kA, VFD EMC discipline, documentation &amp; the §18 test sequence — plus worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">14 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ standalone · links A44/A35/A08/A07</span></div>
+      </a>
+      <a class="tile soon" data-name="earthing grounding tn tt it systems rcd protection coordination discrimination selectivity fault loop impedance touch voltage">
+        <div class="top"><span class="ico">⚡</span><span class="num">SOON</span></div>
+        <h3>Earthing, RCDs &amp; Protection</h3>
+        <p>TN/TT/IT earthing systems, fault-loop impedance, RCD types, discrimination &amp; protection coordination.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="cable sizing selection iec 60364 current carrying capacity derating voltage drop short circuit withstand conduit tray gland">
+        <div class="top"><span class="ico">🧵</span><span class="num">SOON</span></div>
+        <h3>Cable Sizing &amp; Selection</h3>
+        <p>Ampacity &amp; derating factors, voltage drop, short-circuit withstand, containment &amp; glanding to IEC 60364.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile" href="A51_Motor_Starters_Control_Circuits_Deep_Dive.html" data-name="msc practice pack worked examples problem set motor starter control circuits dol direct on line star delta wye reversing contactor coil a1 a2 seal in latch 3 wire 2 wire overload relay trip class 10 20 30 bimetal thermal image 95 96 97 98 interlock mechanical electrical mirror contact ac-3 ac-4 utilization category autotransformer korndorfer reactor soft starter scr thyristor phase angle current limit kickstart bypass vfd selection type 1 type 2 coordination scpd fuse mccb jog sequence pilot iec 60947 60204 60073 emergency stop">
+        <div class="top"><span class="ico">🔄</span><span class="num">A51</span></div>
+        <h3>Motor Starters &amp; Control Circuits</h3>
+        <p>The starting problem (6–8× inrush), contactor anatomy &amp; AC-3/AC-4 categories, the DOL seal-in latch, overload trip classes with the I²t law, reversing interlocks, the star-delta ⅓ derivation, autotransformer x² taps, soft-starter phase control, VFD-vs-all selection, control-circuit craft (jog, sequence, E-stop) &amp; Type 2 coordination — plus worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">16 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ standalone · links A08/A46/A30/A44</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== ENGINEERING STANDARDS & COMPLIANCE ===== -->
+  <div class="cat v-teal" data-cat="Engineering Standards & Compliance">
+    <div class="cat-head"><span class="bar"></span><h2>📐 Engineering Standards &amp; Compliance</h2><span class="cnt">0 published</span></div>
+    <div class="grid">
+      <a class="tile soon" data-name="standards landscape iso iec asme ansi din en bs astm sae standards bodies harmonized normative how standards work">
+        <div class="top"><span class="ico">📐</span><span class="num">SOON</span></div>
+        <h3>The Standards Landscape</h3>
+        <p>ISO vs IEC vs ASME/ANSI/DIN/EN — who writes what, how standards are structured, and how to actually read one.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="iso 9001 quality management system qms audit process approach pdca risk based thinking documentation nonconformity capa">
+        <div class="top"><span class="ico">✅</span><span class="num">SOON</span></div>
+        <h3>ISO 9001 &amp; Quality Management</h3>
+        <p>The process approach &amp; PDCA, risk-based thinking, audits, nonconformity &amp; CAPA, certification in practice.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="ce marking machinery regulation 2023/1230 directive conformity assessment technical file declaration harmonized standards ukca">
+        <div class="top"><span class="ico">🇪🇺</span><span class="num">SOON</span></div>
+        <h3>CE Marking &amp; Machinery Regulation</h3>
+        <p>Conformity assessment routes, the technical file, harmonized standards, Declaration of Conformity &amp; UKCA.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="ip ratings iec 60529 ingress protection nema atex iecex hazardous area zones temperature class environmental testing iec 60068">
+        <div class="top"><span class="ico">🛡️</span><span class="num">SOON</span></div>
+        <h3>IP Ratings, ATEX &amp; Environmental</h3>
+        <p>IEC 60529 IP codes vs NEMA, ATEX/IECEx zones &amp; temperature classes, environmental test standards.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== THERMAL & FLUID ENGINEERING ===== -->
+  <div class="cat v-blue" data-cat="Thermal & Fluid Engineering">
+    <div class="cat-head"><span class="bar"></span><h2>🔥 Thermal &amp; Fluid Engineering</h2><span class="cnt">1 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A47_Fluid_Mechanics_Pumps_Deep_Dive.html" data-name="msc practice pack worked examples problem set fluid mechanics pumps viscosity newtonian statics pressure head bernoulli hgl egl continuity reynolds laminar turbulent moody darcy weisbach friction factor minor losses k dimensional analysis buckingham pi similitude froude centrifugal pump euler velocity triangle backward curved impeller bep pump curve system curve operating point series parallel npsh available required cavitation vapour pressure affinity laws speed cube law vfd throttle impeller trim specific speed positive displacement selection dead head troubleshooting">
+        <div class="top"><span class="ico">🌊</span><span class="num">A47</span></div>
+        <h3>Fluid Mechanics &amp; Pumps</h3>
+        <p>Fluid properties &amp; statics, continuity &amp; Bernoulli (HGL/EGL), viscous flow with Reynolds &amp; the Moody chart, dimensional analysis, centrifugal pump theory (Euler &amp; velocity triangles), pump-vs-system curves &amp; the operating point, NPSH &amp; cavitation, the affinity laws (P∝N³), pump types &amp; selection — plus worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">16 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ standalone · links A12/A13/A08/A42</span></div>
+      </a>
+      <a class="tile soon" data-name="thermodynamics heat transfer conduction convection radiation heat exchanger lmtd effectiveness ntu boiler steam rankine cycle entropy enthalpy">
+        <div class="top"><span class="ico">♨️</span><span class="num">SOON</span></div>
+        <h3>Thermodynamics &amp; Heat Transfer</h3>
+        <p>Laws &amp; cycles, conduction/convection/radiation, heat exchangers (LMTD, ε-NTU), boilers &amp; steam systems.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="hvac refrigeration chiller vapour compression cycle cop evaporator condenser expansion valve refrigerant cooling tower psychrometrics air handling">
+        <div class="top"><span class="ico">❄️</span><span class="num">SOON</span></div>
+        <h3>HVAC &amp; Industrial Refrigeration</h3>
+        <p>Vapour-compression cycle &amp; COP, chillers &amp; cooling towers, psychrometrics, plant-room troubleshooting.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="compressed air systems compressor screw reciprocating dryer receiver leak detection specific power energy cost pressure drop piping">
+        <div class="top"><span class="ico">💨</span><span class="num">SOON</span></div>
+        <h3>Compressed Air Systems</h3>
+        <p>Compressor types, dryers &amp; treatment, leak economics, specific power &amp; the biggest energy waste on site.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== MATERIALS & STRUCTURAL INTEGRITY ===== -->
+  <div class="cat v-purple" data-cat="Materials & Structural Integrity">
+    <div class="cat-head"><span class="bar"></span><h2>🧱 Materials &amp; Structural Integrity</h2><span class="cnt">0 published</span></div>
+    <div class="grid">
+      <a class="tile soon" data-name="engineering materials heat treatment steel alloy carbon stainless aluminium hardness annealing quenching tempering case hardening microstructure phase diagram">
+        <div class="top"><span class="ico">🔩</span><span class="num">SOON</span></div>
+        <h3>Engineering Materials &amp; Heat Treatment</h3>
+        <p>Steel families &amp; the Fe-C diagram, hardening/tempering/annealing, stainless &amp; aluminium selection, hardness testing.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="strength of materials stress strain analysis bending torsion shear moment beam deflection mohr circle von mises factor of safety">
+        <div class="top"><span class="ico">📐</span><span class="num">SOON</span></div>
+        <h3>Strength of Materials &amp; Stress Analysis</h3>
+        <p>Stress/strain, bending &amp; torsion, Mohr's circle, von Mises &amp; factor of safety — the math under every machine part.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="fatigue fracture mechanics sn curve endurance limit crack growth paris law stress concentration kt notch goodman miner damage">
+        <div class="top"><span class="ico">💥</span><span class="num">SOON</span></div>
+        <h3>Fatigue &amp; Fracture Mechanics</h3>
+        <p>S-N curves &amp; endurance, stress concentration, Goodman &amp; Miner, Paris-law crack growth, reading fracture faces.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="welding joining mig tig stick arc weld defects porosity distortion wps procedure qualification brazing soldering adhesive ndt of welds">
+        <div class="top"><span class="ico">🔥</span><span class="num">SOON</span></div>
+        <h3>Welding &amp; Joining Technology</h3>
+        <p>MIG/TIG/stick processes, weld defects &amp; distortion control, WPS &amp; qualification, brazing &amp; adhesives.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="lubrication tribology friction wear grease oil viscosity additives film thickness stribeck contamination iso 4406 cleanliness relubrication">
+        <div class="top"><span class="ico">🛢️</span><span class="num">SOON</span></div>
+        <h3>Lubrication &amp; Tribology</h3>
+        <p>Friction &amp; wear regimes, oil vs grease selection, viscosity &amp; additives, ISO 4406 cleanliness, relube intervals.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== PROCESS SAFETY & RELIABILITY ===== -->
+  <div class="cat v-teal" data-cat="Process Safety & Reliability">
+    <div class="cat-head"><span class="bar"></span><h2>🛡️ Process Safety &amp; Reliability</h2><span class="cnt">2 published</span></div>
+    <div class="grid">
+      <a class="tile" href="A52_Functional_Safety_SIL_Deep_Dive.html" data-name="msc practice pack worked examples problem set functional safety sil iec 61511 61508 safety instrumented system sis sif pfd pfdavg pfh rrf risk reduction hazop lopa layer of protection ipl independent protection layer safety lifecycle srs safety requirements specification lambda du dangerous undetected diagnostic coverage sff proof test interval partial stroke testing pst voting architecture 1oo1 1oo2 2oo2 2oo3 hft beta factor common cause de-energise to trip safety plc logic solver tuv bypass moc demand mode pl performance level 13849 62061 machinery bridge">
+        <div class="top"><span class="ico">🛡️</span><span class="num">A52</span></div>
+        <h3>Functional Safety &amp; SIL (IEC 61511)</h3>
+        <p>Layers of protection &amp; BPCS/SIS separation, the safety lifecycle &amp; SRS, SIL bands with PFD<sub>avg</sub>/PFH/RRF, SIF anatomy &amp; de-energise-to-trip, LOPA with IPL credits, λ<sub>DU</sub>·TI/2 math with diagnostic coverage, voting architectures &amp; the β common-cause ceiling, hardware constraints, proof-test coverage &amp; PST, safety PLCs, and the SIL↔PL machinery bridge — plus worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">16 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ standalone · links A35/A50/A07/A14</span></div>
+      </a>
+      <a class="tile" href="A53_Alarm_Management_ISA182_Deep_Dive.html" data-name="msc practice pack worked examples problem set alarm management isa 18.2 iec 62682 eemua 191 alarm rationalization philosophy master alarm database priority matrix severity time to respond 80 15 5 distribution flood chattering fleeting stale nuisance deadband on-delay off-delay hysteresis setpoint placement response gap shelving designed suppression out of service state-based alarming first-out eclipsing consequential kpi annunciated per operator 150 per day 10 per 10 minutes bad actor pareto hmi isa-101 silence acknowledge texaco milford haven lopa credit operator response">
+        <div class="top"><span class="ico">🚨</span><span class="num">A53</span></div>
+        <h3>Alarm Management (ISA-18.2)</h3>
+        <p>The alarm lifecycle, philosophy &amp; rationalization, priority from severity × time, setpoint/deadband/delay engineering, the three suppression states, state-based alarming, flood mathematics, KPIs &amp; bad-actor Pareto, alarm HMI — with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">16 pages</span><span class="chip">interactive</span><span class="chip">MSc practice pack</span><span class="link07">◆ standalone · links A14/A52/A50/A10</span></div>
+      </a>
+      <a class="tile soon" data-name="rcm fmea reliability centered maintenance failure mode effects analysis rpn criticality weibull mtbf mttr availability maintenance strategy">
+        <div class="top"><span class="ico">🔧</span><span class="num">SOON</span></div>
+        <h3>RCM &amp; FMEA — Reliability Engineering</h3>
+        <p>Failure modes &amp; criticality, RCM logic, Weibull analysis, MTBF/availability math, strategy selection.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="energy management iso 50001 energy audit baseline enpi kpi monitoring targeting motor systems pumps compressed air lighting savings">
+        <div class="top"><span class="ico">⚡</span><span class="num">SOON</span></div>
+        <h3>Energy Management (ISO 50001)</h3>
+        <p>Energy audits &amp; baselines, EnPIs, the big four savings systems, monitoring &amp; targeting.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== ENERGY & EMERGING TECH ===== -->
+  <div class="cat v-orange" data-cat="Energy & Emerging Tech">
+    <div class="cat-head"><span class="bar"></span><h2>🌱 Energy &amp; Emerging Tech</h2><span class="cnt">1 published</span></div>
+    <div class="grid">
+      <a class="tile soon" data-name="ai machine learning predictive maintenance anomaly detection classification regression feature engineering vibration data model deployment edge ml">
+        <div class="top"><span class="ico">🤖</span><span class="num">SOON</span></div>
+        <h3>AI &amp; ML for Predictive Maintenance</h3>
+        <p>Anomaly detection &amp; classification on sensor data, feature engineering, model deployment at the edge.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="solar pv photovoltaic engineering module inverter mppt string design shading iv curve performance ratio degradation">
+        <div class="top"><span class="ico">☀️</span><span class="num">SOON</span></div>
+        <h3>Solar PV Engineering</h3>
+        <p>Cell → string → inverter, MPPT, I-V curves, shading &amp; degradation, performance ratio.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="wind turbine engineering blade aerodynamics betz limit pitch yaw gearbox direct drive power curve nacelle condition monitoring">
+        <div class="top"><span class="ico">🌬️</span><span class="num">SOON</span></div>
+        <h3>Wind Turbine Engineering</h3>
+        <p>Betz limit &amp; power curves, pitch/yaw control, drivetrain options, condition monitoring.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="hydrogen fuel cells electrolyser pem soec fuel cell stack storage safety green hydrogen industrial applications">
+        <div class="top"><span class="ico">🫧</span><span class="num">SOON</span></div>
+        <h3>Hydrogen &amp; Fuel Cells</h3>
+        <p>Electrolysers &amp; fuel-cell stacks, storage &amp; safety, where green H₂ actually makes engineering sense.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile" href="A54_OT_Cybersecurity_Deep_Dive.html" data-name="ot cybersecurity iec 62443 isa 62443 zones conduits purdue enterprise reference architecture dmz level 3.5 iiot 62443-1-6 62443-3-2 62443-3-3 62443-4-1 62443-4-2 security level sl-t sl-c sl-a foundational requirements iac uc si dc rdf tre ra risk assessment zcr csms security management system stuxnet triton trisis colonial pipeline ukraine grid sbom cvss cve reachability defense in depth data diode jump host secure remote access mfa segmentation hardening patching virtual patching backup 3-2-1 ransomware passive monitoring ot ids siem soc incident response safe state nist 800-82 csf sis safety instrumented system supply chain sdl zero trust msc practice pack worked examples problem set derivations study path">
+        <div class="top"><span class="ico">🔐</span><span class="num">A54</span></div>
+        <h3>OT Cybersecurity &amp; IEC 62443</h3>
+        <p>Why OT flips the CIA triad, the ISA/IEC 62443 family &amp; three roles, the Purdue model &amp; the IIoT break, zones &amp; conduits, security levels &amp; the 62443-3-2 risk assessment, the 7 foundational requirements, secure development &amp; SBOMs, OT-safe patching &amp; backups, monitoring &amp; incident response — now with worked examples, a 10-problem set, derivations &amp; a practice path.</p>
+        <div class="meta"><span class="chip">16 pages</span><span class="chip">MSc practice pack</span><span class="chip">interactive</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== CAPSTONE EXAMS ===== -->
+  <div class="cat v-amber" data-cat="Capstone Exams">
+    <div class="cat-head"><span class="bar"></span><h2>🎓 Capstone Exams</h2><span class="cnt">0 published</span></div>
+    <div class="grid">
+      <a class="tile soon" data-name="capstone exam automation plc vfd servo pid sensors networks cross module mixed mock exam">
+        <div class="top"><span class="ico">🎓</span><span class="num">SOON</span></div>
+        <h3>Automation Capstone Exam</h3>
+        <p>Cross-module problems mixing PLC, drives, PID, sensors &amp; networks — the way real plants fail.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="capstone exam mechanical bearings gears gdt materials fatigue mechanisms mixed mock exam">
+        <div class="top"><span class="ico">🎓</span><span class="num">SOON</span></div>
+        <h3>Mechanical Design Capstone Exam</h3>
+        <p>Integrated design problems across bearings, gears, GD&amp;T, materials &amp; fatigue.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="capstone exam electrical three phase transformers motors power electronics wiring protection mixed mock exam">
+        <div class="top"><span class="ico">🎓</span><span class="num">SOON</span></div>
+        <h3>Electrical Systems Capstone Exam</h3>
+        <p>Three-phase, transformers, drives, protection &amp; wiring in combined scenario questions.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+      <a class="tile soon" data-name="capstone full msc mock exam all subjects mixed comprehensive assessment">
+        <div class="top"><span class="ico">🏆</span><span class="num">SOON</span></div>
+        <h3>Full MSc Mock Exam</h3>
+        <p>A timed, comprehensive mock spanning the whole library — the final boss.</p>
+        <div class="meta"><span class="chip">planned</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer">
+    🏭 Advanced Micro Learning · MSc-level deep dives, built for visual learning &amp; low eye strain<br>
+    Companion to the <a href="../index.html" style="color:var(--dim)">90-second micro cards</a> · New deep dives added continuously
+  </div>
+
+</div>
+
+<script>
+  // live count of published deep dives
+  (function(){
+    var n = document.querySelectorAll('a.tile:not(.soon)').length;
+    var el = document.getElementById('totalCount');
+    if (el) el.textContent = n;
+  })();
+
+  // search filter
+  (function(){
+    var q = document.getElementById('search');
+    if (!q) return;
+    q.addEventListener('input', function(){
+      var v = q.value.toLowerCase().trim();
+      document.querySelectorAll('a.tile').forEach(function(t){
+        var hay = (t.getAttribute('data-name')||'') + ' ' + t.textContent.toLowerCase();
+        t.style.display = hay.indexOf(v) !== -1 ? '' : 'none';
+      });
+      document.querySelectorAll('.cat').forEach(function(c){
+        var any = Array.prototype.some.call(c.querySelectorAll('a.tile'), function(t){ return t.style.display !== 'none'; });
+        c.style.display = any ? '' : 'none';
+      });
+    });
+  })();
+</script>
+
+<style>
+  .prog{ margin-left:auto; cursor:pointer; font-size:15px; line-height:1; padding:2px 4px; border-radius:6px; user-select:none; }
+  .prog:hover{ background:rgba(148,163,184,.15); }
+  a.tile .top{ display:flex; align-items:center; }
+  a.tile.p-studied{ box-shadow:0 0 0 1.5px rgba(251,191,36,.45); }
+  a.tile.p-mastered{ box-shadow:0 0 0 1.5px rgba(74,222,128,.55); }
+</style>
+<script>
+  // progress tracker: tap the circle on a tile to cycle none -> studied -> mastered
+  (function(){
+    var KEY='aml-progress', states=['none','studied','mastered'], icons={none:'\u25CB',studied:'\uD83D\uDCD6',mastered:'\u2705'};
+    var st={}; try{ st=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ st={}; }
+    function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+    function stat(){
+      var s=0,m=0,k; for(k in st){ if(st[k]==='studied')s++; else if(st[k]==='mastered')m++; }
+      var el=document.getElementById('progStat');
+      if(el) el.textContent=(s+m)+' started \u00B7 '+m+' mastered';
+    }
+    document.querySelectorAll('a.tile:not(.soon)').forEach(function(t){
+      var h=t.getAttribute('href'); if(!h) return;
+      var el=document.createElement('span'); el.className='prog';
+      function paint(){
+        var v=st[h]||'none';
+        el.textContent=icons[v];
+        el.title='Progress: '+v+' \u2014 tap to change';
+        t.classList.remove('p-studied','p-mastered');
+        if(v!=='none') t.classList.add('p-'+v);
+      }
+      el.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var v=states[(states.indexOf(st[h]||'none')+1)%3];
+        if(v==='none') delete st[h]; else st[h]=v;
+        save(); paint(); stat();
+      });
+      var top=t.querySelector('.top'); (top||t).appendChild(el);
+      paint();
+    });
+    stat();
+  })();
+</script>
+</body>
+</html>

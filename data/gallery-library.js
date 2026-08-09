@@ -537,14 +537,6 @@ window.portfolioGalleryLibrary = [
         "text":  "Public-safe CAD or automation visual showing mechanism, machine-layout or control-system thinking."
     },
     {
-        "title":  "Screenshot (305) Copy",
-        "category":  "gallery / CAD \u0026 automation",
-        "filter":  "image library cad automation machine",
-        "image":  "assets/images/gallery/library/gallery-068-screenshot-305-copy.png",
-        "alt":  "Screenshot (305) Copy",
-        "text":  "Public-safe CAD or automation visual showing mechanism, machine-layout or control-system thinking."
-    },
-    {
         "title":  "Techno 2023",
         "category":  "gallery / achievement",
         "filter":  "image library achievement",
@@ -577,3 +569,45 @@ window.portfolioGalleryLibrary = [
         "text":  "Engineering achievement, training, exhibition or public project-presentation evidence."
     }
 ];
+
+const portfolioGalleryTitleOverrides = {
+  1: "Custom Linear-Motion Machine Frame", 2: "Custom CNC Engraving Machine Prototype", 8: "Early 3D Printer Prototype",
+  16: "Custom FDM Printer Electronics", 17: "Line-Follower Robot Test Rig", 18: "3D Printed Quadruped Robot",
+  19: "CNC Pen Plotter Portrait Trial", 20: "UOJ Battlegrounds 2020 Poster", 21: "Combat Robot Chassis",
+  22: "Project Exhibition Demonstration", 23: "Engineering Exhibition Machine Demo", 24: "Public Machine Demonstration",
+  25: "Laser-Engraved Wood Artwork", 26: "Laser Engraver V4", 27: "Laser Engraving Material Trials",
+  28: "3D Printed Gripper Component", 29: "Laser Artwork on Leaf", 30: "Laser Portrait Engraving Comparison",
+  31: "Laser-Engraved Cultural Artwork", 32: "3D Printed Groot Planter", 33: "Laser Portrait Engraving Trial",
+  34: "Laser-Engraved Family Portrait", 35: "Laser Portrait on Natural Material", 54: "University Engineering Exhibition",
+  63: "Laser-Engraved Leather Product", 64: "Multi-Nozzle Liquid Filling Machine CAD", 65: "Screen Printing Machine CAD",
+  66: "Chain Guard CAD", 67: "Machine Mechanism CAD", 68: "Combustion Chamber SCADA Interface"
+};
+window.portfolioGalleryLibrary = window.portfolioGalleryLibrary.map((item, index) => {
+  const title = portfolioGalleryTitleOverrides[index + 1];
+  return title ? { ...item, title, alt: title } : item;
+});
+
+// Add human-friendly categories without changing the generated source records.
+// The filename and title remain available for rebuilding and future review.
+window.portfolioGalleryLibrary = window.portfolioGalleryLibrary.map(item => {
+  const searchable = `${item.title} ${item.category} ${item.filter}`.toLowerCase();
+  const filters = new Set(String(item.filter || '').toLowerCase().split(/\s+/).filter(Boolean));
+  let category = item.category;
+
+  if (/exhibition|innovation festival|techno 2023|battle ?ground|public machine demonstration|project demonstration/.test(searchable)) {
+    category = 'Exhibitions & Public Events';
+    filters.add('exhibition');
+    filters.add('achievement');
+  } else if (/award|degree|certificate|course|training/.test(searchable)) {
+    category = 'Achievements & Training';
+    filters.add('achievement');
+  }
+
+  if (/laser|engrav/.test(searchable)) filters.add('laser');
+  if (/3d print|fdm|additive|printed part/.test(searchable)) filters.add('printing');
+  if (/robot|gripper|line-follower|quadruped/.test(searchable)) filters.add('robotics');
+  if (/cad|model|design/.test(searchable)) filters.add('cad');
+  if (/machine|printer|plotter|engraver/.test(searchable)) filters.add('machine');
+
+  return { ...item, category, filter: [...filters].join(' ') };
+});

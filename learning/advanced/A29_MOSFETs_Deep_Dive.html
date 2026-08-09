@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>MOSFETs · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #a855f7;       /* purple — matches micro card 29 (--accent-mf) */
+    --accent-soft: #d8b4fe;
+    --accent-2: #60a5fa;     /* blue */
+    --accent-3: #fbbf24;     /* amber */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(168,85,247,0.16), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(96,165,250,0.08), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #fff; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(168,85,247,0.4);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(168,85,247,0.14), rgba(96,165,250,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(168,85,247,0.16); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--accent-3)!important; } .c-amb .big{color:var(--accent-3)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .pro { background: linear-gradient(145deg, rgba(168,85,247,0.1), transparent); border:1px solid rgba(168,85,247,0.25); border-radius:14px; padding:16px; }
+  .pro .pt { font-weight:700; color:var(--accent-soft); margin-bottom:6px; font-size:15px; }
+  .pro p { font-size:13.5px; color:var(--text-dim); }
+  .pro em { color:var(--accent-3); font-style:normal; font-weight:600; }
+
+  .memory { background: linear-gradient(135deg, #a855f7, #6b21a8); color: #fff; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(255,255,255,0.85); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(168,85,247,0.1); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  /* interactive transfer-curve / gate demo */
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .region-pill { display:inline-block; font-family:ui-monospace,monospace; font-size:12px; font-weight:800; padding:3px 9px; border-radius:6px; }
+  .reg-off { background:rgba(148,163,184,0.2); color:#94a3b8; }
+  .reg-sat { background:rgba(251,191,36,0.2); color:#fbbf24; }
+  .reg-ohm { background:rgba(74,222,128,0.2); color:#4ade80; }
+
+  /* loss split bars */
+  .loss-bar { display:flex; height:34px; border-radius:8px; overflow:hidden; margin-top:10px; border:1px solid var(--border); }
+  .loss-seg { display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#0b0f14; transition:width .4s ease; white-space:nowrap; }
+  .seg-cond { background:linear-gradient(90deg,#a855f7,#c084fc); }
+  .seg-sw { background:linear-gradient(90deg,#fbbf24,#fb923c); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Electrical & Electronics · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🔌</span>MOSFETs</h1>
+  <p class="hero-sub">The voltage-controlled switch that runs the modern world — from device physics and the I–V curves to gate charge, switching loss, the half-bridge, SOA and the thermal chain that decides whether it lives or dies.</p>
+
+  <div class="connect">
+    <span class="pill">↔ MICRO 29</span>
+    <span>This is the exam-grade companion to your 90-second card.</span>
+    <a href="../29_MOSFETs.html">Open Micro Card 29 →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · What a MOSFET Is</a>
+    <a href="#p2">2 · Device Physics</a>
+    <a href="#p3">3 · The I–V Curves</a>
+    <a href="#p4">4 · As a Switch: Rds(on)</a>
+    <a href="#p5">5 · Gate Charge & Driving</a>
+    <a href="#p6">6 · Switching Loss & Heat</a>
+    <a href="#p7">7 · The Half-Bridge</a>
+    <a href="#p8">8 · SOA & Thermal Chain</a>
+    <a href="#p9">9 · Si vs SiC vs GaN vs IGBT</a>
+    <a href="#p10">10 · Failure Modes & Quiz</a>
+  <a href="#p11">11 · Worked Examples</a>
+    <a href="#p12">12 · Problem Set</a>
+    <a href="#p13">13 · Derivations &amp; Traps</a>
+    <a href="#p14">14 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ===== PAGE 1 ===== -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 14</span>
+    <h2 class="page-title">What a MOSFET Really Is</h2>
+    <p class="page-sub">A silicon valve where a voltage — not a current — controls the flow.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead">A MOSFET — <span class="hl">Metal-Oxide-Semiconductor Field-Effect Transistor</span> — is a voltage-controlled switch: a voltage on the insulated <strong>gate</strong> creates an electric field that opens or closes a conducting <strong>channel</strong> between the <strong>drain</strong> and <strong>source</strong>. Because the gate sits behind a thin insulating oxide, it draws <span class="hl2">almost zero steady current</span> — you control amperes with microamps.</p>
+      <p class="body">Invented in concept by Lilienfeld (1925) and first built at Bell Labs by <strong>Atalla & Kahng (1959)</strong>, the MOSFET became the most-manufactured device in human history. In power electronics it is the switch that chops, regulates and inverts energy in everything from a phone charger to your micro card's <a href="../08_VFD.html" style="color:var(--accent-soft)">VFD</a> and <a href="../09_Servo_Motor.html" style="color:var(--accent-soft)">servo drive</a>.</p>
+      <p class="body">The key contrast with the older <strong>BJT</strong> (bipolar junction transistor): a BJT is <em>current</em>-controlled (base current sets collector current); a MOSFET is <em>voltage</em>-controlled (gate voltage sets the channel). That single difference makes MOSFETs fast, efficient and easy to drive from logic.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">G·D·S</div><h4>Three terminals</h4><p>Gate controls; current flows Drain↔Source.</p></div>
+      <div class="mini c-blue"><div class="big">~0 A</div><h4>Gate current</h4><p>Insulated gate — voltage-controlled, not current.</p></div>
+      <div class="mini c-amb"><div class="big">&gt;95%</div><h4>Efficiency</h4><p>As a switch, almost no loss when fully ON or OFF.</p></div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 2 ===== -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 14</span>
+    <h2 class="page-title">Device Physics — How the Channel Forms</h2>
+    <p class="page-sub">The "field effect": an electric field reaches through an insulator to summon a channel of charge.</p>
+
+    <div class="card">
+      <div class="label">Structure of an N-Channel Enhancement MOSFET</div>
+      <p class="body">Take a <strong>p-type</strong> silicon body. Diffuse two heavily-doped <strong>n+ wells</strong> — these become the source and drain. Grow a thin <strong>SiO₂ oxide</strong> over the gap and deposit a gate (metal or poly-silicon) on top. With zero gate voltage the two n-wells are isolated by the p-body — <em>no current can flow.</em></p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cross-section of an N-channel MOSFET showing inversion channel forming under the gate">
+          <defs>
+            <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b2a52"/><stop offset="100%" stop-color="#241834"/></linearGradient>
+            <linearGradient id="chan" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#d8b4fe"/></linearGradient>
+          </defs>
+          <!-- p-body -->
+          <rect x="60" y="120" width="640" height="150" rx="6" fill="url(#body)" stroke="#6d28d9" stroke-width="2"/>
+          <text x="380" y="220" fill="#c4b5fd" font-size="16" text-anchor="middle" font-weight="700">p-type body (substrate)</text>
+          <!-- n+ source -->
+          <rect x="120" y="120" width="120" height="60" rx="4" fill="#1d4ed8" stroke="#60a5fa" stroke-width="2"/>
+          <text x="180" y="156" fill="#dbeafe" font-size="15" text-anchor="middle" font-weight="800">n+ source</text>
+          <!-- n+ drain -->
+          <rect x="520" y="120" width="120" height="60" rx="4" fill="#1d4ed8" stroke="#60a5fa" stroke-width="2"/>
+          <text x="580" y="156" fill="#dbeafe" font-size="15" text-anchor="middle" font-weight="800">n+ drain</text>
+          <!-- oxide -->
+          <rect x="240" y="104" width="280" height="16" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
+          <text x="380" y="98" fill="#cbd5e1" font-size="13" text-anchor="middle" font-family="monospace">thin SiO₂ oxide (insulator)</text>
+          <!-- gate -->
+          <rect x="250" y="74" width="260" height="28" rx="3" fill="#9ca3af" stroke="#e5e7eb" stroke-width="1.5"/>
+          <text x="380" y="93" fill="#111" font-size="14" text-anchor="middle" font-weight="800">GATE (+Vgs)</text>
+          <!-- inversion channel -->
+          <rect x="240" y="120" width="280" height="12" fill="url(#chan)"/>
+          <text x="380" y="150" fill="#f5d0fe" font-size="13" text-anchor="middle" font-weight="700">↑ inversion channel (electrons pulled up)</text>
+          <!-- field arrows -->
+          <g stroke="#fbbf24" stroke-width="2" marker-end="url(#ah)">
+            <line x1="300" y1="104" x2="300" y2="124"/><line x1="380" y1="104" x2="380" y2="124"/><line x1="460" y1="104" x2="460" y2="124"/>
+          </g>
+          <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#fbbf24"/></marker></defs>
+          <text x="380" y="290" fill="#94a3b8" font-size="13" text-anchor="middle">Positive gate field repels holes &amp; attracts electrons → a thin n-channel "inverts" the surface, bridging source→drain.</text>
+        </svg>
+        <div class="cap">When Vgs exceeds the threshold Vth, the field inverts the silicon surface into an electron channel — current can now flow drain↔source.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Threshold, Enhancement vs Depletion, N vs P</div>
+      <div class="grid-2">
+        <div class="mini"><h4>Vth — threshold voltage</h4><p>The minimum Vgs that forms the channel. Logic-level FETs: ~1–2 V; standard: ~2–4 V.</p></div>
+        <div class="mini c-blue"><h4>Enhancement vs depletion</h4><p><b>Enhancement</b> (normally-off): needs Vgs to turn ON — 99% of power parts. <b>Depletion</b>: normally-on.</p></div>
+        <div class="mini c-amb"><h4>N-channel</h4><p>Electrons carry current. Lower Rds(on), faster — the workhorse. Turn ON with +Vgs.</p></div>
+        <div class="mini c-pink"><h4>P-channel</h4><p>Holes carry current. Easy high-side switching but higher Rds(on). Turn ON with −Vgs.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 3 ===== -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 14</span>
+    <h2 class="page-title">The I–V Curves — Three Regions</h2>
+    <p class="page-sub">Cut-off, saturation (active) and triode (ohmic). Power switching lives in two of them.</p>
+
+    <div class="card">
+      <div class="label">The Output Characteristic</div>
+      <p class="body">Plot drain current <span class="mono hl">Id</span> against drain-source voltage <span class="mono hl">Vds</span> for several gate voltages and you get the classic family of curves with three regions:</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MOSFET output characteristic curves with triode and saturation regions">
+          <!-- axes -->
+          <line x1="80" y1="270" x2="720" y2="270" stroke="#334155" stroke-width="2"/>
+          <line x1="80" y1="270" x2="80" y2="40" stroke="#334155" stroke-width="2"/>
+          <text x="400" y="305" fill="#94a3b8" font-size="14" text-anchor="middle">Vds (drain–source voltage) →</text>
+          <text x="34" y="160" fill="#94a3b8" font-size="14" text-anchor="middle" transform="rotate(-90 34 160)">Id (drain current) →</text>
+          <!-- saturation boundary (dashed parabola) -->
+          <path d="M80,270 Q180,120 320,90" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <text x="250" y="80" fill="#64748b" font-size="12">Vds = Vgs−Vth (boundary)</text>
+          <!-- curves for increasing Vgs -->
+          <path d="M80,270 C120,160 180,120 320,112 L710,108" fill="none" stroke="#d8b4fe" stroke-width="2.5"/>
+          <path d="M80,270 C115,195 165,165 300,158 L710,154" fill="none" stroke="#a855f7" stroke-width="2.5"/>
+          <path d="M80,270 C110,225 150,205 280,200 L710,197" fill="none" stroke="#7c3aed" stroke-width="2.5"/>
+          <path d="M80,270 C108,250 140,238 260,235 L710,233" fill="none" stroke="#6d28d9" stroke-width="2.5"/>
+          <g font-size="12" font-family="monospace" fill="#d8b4fe">
+            <text x="715" y="111">Vgs=8V</text><text x="715" y="157">Vgs=6V</text>
+            <text x="715" y="200" fill="#a78bfa">Vgs=4V</text><text x="715" y="236" fill="#a78bfa">Vgs=3V</text>
+          </g>
+          <!-- region labels -->
+          <rect x="92" y="60" width="120" height="200" fill="rgba(74,222,128,0.07)"/>
+          <text x="150" y="80" fill="#4ade80" font-size="13" font-weight="700" text-anchor="middle">TRIODE</text>
+          <text x="150" y="96" fill="#4ade80" font-size="11" text-anchor="middle">(ohmic / linear)</text>
+          <text x="150" y="252" fill="#4ade80" font-size="10" text-anchor="middle">switch = ON here</text>
+          <rect x="340" y="60" width="350" height="200" fill="rgba(251,191,36,0.06)"/>
+          <text x="515" y="80" fill="#fbbf24" font-size="13" font-weight="700" text-anchor="middle">SATURATION (active)</text>
+          <text x="515" y="96" fill="#fbbf24" font-size="11" text-anchor="middle">Id ≈ constant — amplifier region</text>
+        </svg>
+        <div class="cap">Left of the dashed line = triode (a voltage-controlled resistor — where a closed switch sits). Right = saturation (a current source — used for linear amps, and crossed briefly during every switching transition).</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">The Governing Equations</div>
+      <div class="eqn">Cut-off  (Vgs < Vth):        Id = 0          → switch OFF
+Saturation (Vds ≥ Vgs−Vth):  Id = ½·k·(Vgs−Vth)²   → amplifier / transition
+Triode   (Vds < Vgs−Vth):    Id ≈ k·[(Vgs−Vth)·Vds]  → acts as a resistor
+
+where  k = μ·Cox·(W/L)   (process &amp; geometry constant)
+Transconductance  <b>gm = ∂Id/∂Vgs</b>  — the "gain" of the device in saturation.</div>
+      <p class="body"><strong>The switching insight:</strong> a power MOSFET wants to spend its life in <em>cut-off</em> (fully OFF) or deep <em>triode</em> (fully ON, looking like a tiny resistor). The <span class="hl3">saturation region in between is where heat is made</span> — so we cross it as fast as possible.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 4 ===== -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 14</span>
+    <h2 class="page-title">As a Switch — Rds(on) & Conduction Loss</h2>
+    <p class="page-sub">Fully ON, a MOSFET is just a small resistor. That resistance sets your steady-state heat.</p>
+
+    <div class="card">
+      <div class="label">On-Resistance</div>
+      <p class="body">When fully enhanced (high Vgs), the channel behaves as a fixed resistance <span class="mono hl">Rds(on)</span> — modern power parts hit <strong>single-digit milliohms</strong>. The power burned simply conducting load current is pure I²R:</p>
+      <div class="eqn">Conduction loss:  <b>P_cond = I²d(rms) × Rds(on) × D</b>
+                  (D = duty cycle the FET is ON)
+
+Rds(on) rises with temperature  →  ~+0.4%/°C  (positive tempco)
+  ✅ This is GOOD: it forces current sharing when paralleling FETs.</div>
+      <p class="body"><strong>The positive temperature coefficient</strong> is a safety feature: if one paralleled FET hogs current and heats up, its Rds(on) rises and pushes current to its cooler siblings. (BJTs do the opposite and thermally run away.)</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — Conduction Heat Calculator</div>
+      <p class="body">Drag load current and Rds(on); watch the steady-state conduction power.</p>
+      <div class="demo">
+        <div class="demo-row"><span>Load current (A rms)</span><b id="iOut">10 A</b></div>
+        <input type="range" id="iSlider" min="1" max="60" value="10">
+        <div class="demo-row" style="margin-top:10px;"><span>Rds(on)</span><b id="rOut">10 mΩ</b></div>
+        <input type="range" id="rSlider" min="1" max="100" value="10">
+        <div class="demo-out" id="condOut"></div>
+      </div>
+    </div>
+
+    <div class="card pro">
+      <div class="pt">The Body Diode</div>
+      <p>Every power MOSFET has an intrinsic <em>body diode</em> from source to drain (a by-product of the p-body / n-drain junction). It conducts reverse current — essential as a <em>freewheeling</em> path in motor &amp; inverter half-bridges — but it is slow with poor reverse recovery, a real source of switching loss and ringing in hard-switched bridges.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 5 ===== -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 14</span>
+    <h2 class="page-title">Gate Charge & Driving the Gate</h2>
+    <p class="page-sub">The gate is a capacitor. Turning the FET ON means shoving charge into it — fast.</p>
+
+    <div class="card">
+      <div class="label">Why "Zero Gate Current" Is a Half-Truth</div>
+      <p class="body">DC gate current is ~0, but the gate is a <strong>capacitor</strong> (Ciss = Cgs + Cgd). To switch, you must charge and discharge it every cycle. The total charge is <span class="mono hl">Qg</span>, and how fast you can move it sets the switching speed:</p>
+      <div class="eqn">Gate-drive current:   <b>Ig = Qg × fsw</b>      (average drive current)
+Turn-on/off time:     <b>t ≈ Qg / I_driver</b>
+Drive power:          <b>P_drive = Qg × Vgs × fsw</b>
+
+Caps:  Ciss = Cgs+Cgd (input) · Crss = Cgd (reverse, the troublemaker) · Coss = Cds+Cgd (output)</div>
+    </div>
+
+    <div class="card">
+      <div class="label">The Miller Plateau</div>
+      <p class="body">During switching, the gate voltage stalls at a flat <strong>"Miller plateau."</strong> Here all the driver's charge is diverted into the <span class="hl3">Cgd (Miller) capacitance</span> as Vds swings, instead of raising Vgs. The plateau is exactly the slow, lossy part of the transition — minimising Cgd (Crss) and using a stiff, low-impedance gate driver is how you shorten it.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gate voltage versus charge showing the Miller plateau">
+          <line x1="70" y1="210" x2="710" y2="210" stroke="#334155" stroke-width="2"/>
+          <line x1="70" y1="210" x2="70" y2="30" stroke="#334155" stroke-width="2"/>
+          <text x="390" y="240" fill="#94a3b8" font-size="13" text-anchor="middle">Gate charge Qg →</text>
+          <text x="30" y="120" fill="#94a3b8" font-size="13" text-anchor="middle" transform="rotate(-90 30 120)">Vgs →</text>
+          <!-- curve with plateau -->
+          <path d="M70,210 L200,120 L470,108 L600,55 L710,48" fill="none" stroke="#a855f7" stroke-width="3"/>
+          <!-- plateau highlight -->
+          <line x1="200" y1="120" x2="470" y2="108" stroke="#fbbf24" stroke-width="5"/>
+          <text x="335" y="95" fill="#fbbf24" font-size="13" font-weight="700" text-anchor="middle">Miller plateau (Vds is switching)</text>
+          <line x1="70" y1="120" x2="200" y2="120" stroke="#64748b" stroke-dasharray="4 4"/>
+          <text x="100" y="138" fill="#94a3b8" font-size="11" font-family="monospace">Vth/Vplateau</text>
+          <line x1="70" y1="48" x2="710" y2="48" stroke="#64748b" stroke-dasharray="4 4"/>
+          <text x="120" y="42" fill="#94a3b8" font-size="11" font-family="monospace">Vgs(driver) — fully ON</text>
+          <circle cx="200" cy="120" r="5" fill="#4ade80"/><circle cx="470" cy="108" r="5" fill="#4ade80"/>
+        </svg>
+        <div class="cap">The flat region is the Miller plateau — the gate driver is busy charging Cgd while Vds collapses. This interval is where most switching energy is lost.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Gate-Driver Essentials</div>
+      <div class="grid-3">
+        <div class="mini c-grn"><h4>Stiff &amp; low-Z</h4><p>A dedicated driver IC sources/sinks amps to move Qg in nanoseconds.</p></div>
+        <div class="mini c-amb"><h4>Rg — gate resistor</h4><p>Trades speed for control: smaller Rg = faster but more ringing/EMI.</p></div>
+        <div class="mini c-red"><h4>Negative/clamp off</h4><p>Pull gate firmly to 0 V (or below) to defeat Miller-induced false turn-on.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 6 ===== -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 14</span>
+    <h2 class="page-title">Switching Loss — Where the Heat Hides</h2>
+    <p class="page-sub">The answer to your micro card's quiz: why 100% duty is cool but PWM gets hot.</p>
+
+    <div class="card">
+      <div class="label">Two Kinds of Loss</div>
+      <p class="body">Total MOSFET loss splits into <strong>conduction</strong> (steady I²R while ON) and <strong>switching</strong> (energy burned during each ON↔OFF transition, while both voltage and current are momentarily high). Switching loss scales directly with frequency:</p>
+      <div class="eqn"><b>P_total = P_cond + P_sw</b>
+P_cond = I²·Rds(on)·D
+<b>P_sw  = ½ · Vds · Id · (t_on + t_off) · fsw</b>   ← grows with frequency!
+Plus:  gate loss (Qg·Vgs·fsw)  +  Coss &amp; body-diode recovery losses</div>
+      <p class="body"><strong>The trade-off that defines power design:</strong> raise the switching frequency and your magnetics &amp; capacitors shrink (good) — but P_sw climbs linearly (bad). The art is picking fsw where total loss + size is optimal.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — Loss Split vs Frequency</div>
+      <p class="body">Slide the switching frequency. Watch conduction stay flat while switching loss grows and eventually dominates.</p>
+      <div class="demo">
+        <div class="demo-row"><span>Switching frequency</span><b id="fOut">20 kHz</b></div>
+        <input type="range" id="fSlider" min="2" max="200" value="20">
+        <div class="loss-bar">
+          <div class="loss-seg seg-cond" id="segCond" style="width:70%">Conduction</div>
+          <div class="loss-seg seg-sw" id="segSw" style="width:30%">Switching</div>
+        </div>
+        <div class="demo-out" id="lossOut"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">The Micro-Card Quiz, Answered Rigorously</div>
+      <p class="body"><em>"Why almost no heat at 100% duty but lots at 50%?"</em> At 100% duty the FET is <strong>continuously ON</strong> — it only ever burns small conduction loss (I²·Rds(on)) and <em>never transitions</em>, so P_sw ≈ 0. At 50% PWM it transitions thousands of times per second, and each crossing of the lossy saturation region dumps ½·V·I·t of energy — multiplied by fsw. Hence: <span class="hl3">switching, not conduction, is what cooks a hard-switched FET.</span></p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 7 ===== -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 14</span>
+    <h2 class="page-title">The Half-Bridge — Building Block of Drives</h2>
+    <p class="page-sub">Two FETs stacked across the DC bus. Six of these = the inverter in your VFD.</p>
+
+    <div class="card">
+      <div class="label">Topology</div>
+      <p class="body">A <strong>half-bridge</strong> places a high-side and a low-side FET in series across the DC bus, with the load tapped at the midpoint. Toggling them alternately swings the output between +V and 0, and PWM sets the average. Three half-bridges in parallel make the <strong>3-phase inverter</strong> — exactly the 6-switch stage your micro card cites in a VFD.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Half-bridge schematic with high-side and low-side MOSFET">
+          <!-- bus rails -->
+          <line x1="120" y1="40" x2="640" y2="40" stroke="#f87171" stroke-width="3"/>
+          <text x="120" y="32" fill="#fca5a5" font-size="13" font-family="monospace">+V DC bus</text>
+          <line x1="120" y1="250" x2="640" y2="250" stroke="#64748b" stroke-width="3"/>
+          <text x="120" y="270" fill="#94a3b8" font-size="13" font-family="monospace">0 V (GND)</text>
+          <!-- high-side FET -->
+          <rect x="300" y="70" width="90" height="60" rx="8" fill="#2b1a44" stroke="#a855f7" stroke-width="2.5"/>
+          <text x="345" y="105" fill="#d8b4fe" font-size="14" text-anchor="middle" font-weight="800">Q1 (HS)</text>
+          <line x1="345" y1="40" x2="345" y2="70" stroke="#475569" stroke-width="2.5"/>
+          <!-- low-side FET -->
+          <rect x="300" y="160" width="90" height="60" rx="8" fill="#2b1a44" stroke="#a855f7" stroke-width="2.5"/>
+          <text x="345" y="195" fill="#d8b4fe" font-size="14" text-anchor="middle" font-weight="800">Q2 (LS)</text>
+          <line x1="345" y1="220" x2="345" y2="250" stroke="#475569" stroke-width="2.5"/>
+          <!-- midpoint to load -->
+          <line x1="345" y1="130" x2="345" y2="160" stroke="#fbbf24" stroke-width="3"/>
+          <line x1="345" y1="145" x2="520" y2="145" stroke="#fbbf24" stroke-width="3"/>
+          <circle cx="345" cy="145" r="5" fill="#fbbf24"/>
+          <text x="430" y="138" fill="#fde68a" font-size="13" font-family="monospace">phase output</text>
+          <!-- load (motor) -->
+          <circle cx="560" cy="145" r="38" fill="#11161f" stroke="#60a5fa" stroke-width="2.5"/>
+          <text x="560" y="151" fill="#93c5fd" font-size="22" text-anchor="middle">⚙</text>
+          <text x="560" y="205" fill="#93c5fd" font-size="13" text-anchor="middle">motor / load</text>
+          <line x1="560" y1="183" x2="560" y2="250" stroke="#475569" stroke-width="2"/>
+          <!-- gate drive labels -->
+          <text x="220" y="105" fill="#67e8f9" font-size="12" font-family="monospace">G1 ◀ driver</text>
+          <text x="220" y="195" fill="#67e8f9" font-size="12" font-family="monospace">G2 ◀ driver</text>
+          <line x1="270" y1="100" x2="300" y2="100" stroke="#06b6d4" stroke-width="2"/>
+          <line x1="270" y1="190" x2="300" y2="190" stroke="#06b6d4" stroke-width="2"/>
+        </svg>
+        <div class="cap">One leg of an inverter. Q1 high, Q2 low → output ≈ +V; reverse → output ≈ 0. Never both ON together.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Dead-Time & Shoot-Through</div>
+      <p class="body">If Q1 and Q2 are ever ON simultaneously, they form a direct short across the bus — <strong>shoot-through</strong> — and explode. The fix is <strong>dead-time</strong>: a deliberate few-hundred-nanosecond gap where <em>both</em> are OFF during the cross-over, letting one fully turn off before the other turns on. Too little dead-time = shoot-through; too much = output distortion. The body diode freewheels the inductive load current during the gap.</p>
+      <div class="grid-2">
+        <div class="mini c-red"><h4>⚡ Shoot-through</h4><p>Both FETs on → bus short → catastrophic. Dead-time prevents it.</p></div>
+        <div class="mini c-blue"><h4>🔋 Bootstrap supply</h4><p>The high-side gate floats — a bootstrap cap/diode (or isolated supply) powers its driver above the bus.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 8 ===== -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 14</span>
+    <h2 class="page-title">SOA & the Thermal Chain</h2>
+    <p class="page-sub">Silicon lives or dies by junction temperature. Master the thermal resistor ladder.</p>
+
+    <div class="card">
+      <div class="label">The Thermal Equation — Ohm's Law for Heat</div>
+      <p class="body">Heat flows from the silicon junction to ambient through a series of thermal resistances, exactly like current through resistors. Power is the "current," temperature rise is the "voltage":</p>
+      <div class="eqn"><b>Tj = Ta + P_loss × (Rθjc + Rθcs + Rθsa)</b>
+   Tj  = junction temperature (keep below Tj(max), usually 150–175°C)
+   Rθjc = junction→case   ·  Rθcs = case→heatsink (TIM)  ·  Rθsa = heatsink→air
+Analogy:  P ↔ current,  ΔT ↔ voltage,  Rθ ↔ resistance,  Tj ↔ node voltage</div>
+      <p class="body"><strong>Design loop:</strong> estimate P_loss (pages 4 &amp; 6) → add the Rθ ladder → check Tj stays under limit with margin. If not: lower Rds(on), drop fsw, add heatsink/airflow, or parallel devices. This ties straight back to your <a href="../08_VFD.html" style="color:var(--accent-soft)">VFD</a> thermal sizing.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Safe Operating Area (SOA)</div>
+      <p class="body">The <strong>SOA</strong> is a log-log chart of allowable Vds vs Id, bounded by four limits: Rds(on) (current), package power, thermal, and at high voltage the dreaded <em>thermal instability</em> line. Stay inside it for the relevant pulse time and the part survives; a hard-switched inductive turn-off that punches outside the SOA is a classic failure.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Safe Operating Area boundary chart">
+          <line x1="80" y1="240" x2="710" y2="240" stroke="#334155" stroke-width="2"/>
+          <line x1="80" y1="240" x2="80" y2="30" stroke="#334155" stroke-width="2"/>
+          <text x="395" y="270" fill="#94a3b8" font-size="13" text-anchor="middle">Vds (log) →</text>
+          <text x="38" y="135" fill="#94a3b8" font-size="13" text-anchor="middle" transform="rotate(-90 38 135)">Id (log) →</text>
+          <!-- SOA polygon -->
+          <path d="M80,80 L300,80 L470,160 L560,210 L560,240 L80,240 Z" fill="rgba(168,85,247,0.16)" stroke="#a855f7" stroke-width="2.5"/>
+          <text x="200" y="74" fill="#d8b4fe" font-size="11" font-family="monospace">Rds(on) limit</text>
+          <text x="395" y="120" fill="#fbbf24" font-size="11" font-family="monospace" transform="rotate(-26 395 120)">max power (P)</text>
+          <text x="540" y="135" fill="#fca5a5" font-size="11" font-family="monospace">thermal instability</text>
+          <text x="575" y="230" fill="#fca5a5" font-size="11" font-family="monospace">Vds(max)</text>
+          <text x="250" y="210" fill="#c4b5fd" font-size="16" font-weight="800" text-anchor="middle">SAFE</text>
+          <!-- pulse curves -->
+          <path d="M80,60 L360,60 L520,150 L600,210" fill="none" stroke="#4ade80" stroke-width="1.6" stroke-dasharray="4 4"/>
+          <text x="120" y="52" fill="#4ade80" font-size="10" font-family="monospace">10µs pulse (bigger)</text>
+        </svg>
+        <div class="cap">Inside the polygon = safe. Short pulses extend the area (dashed); DC operation shrinks it. Inductive switching transients must be snubbed/clamped to stay inside.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 9 ===== -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 14</span>
+    <h2 class="page-title">Si vs SiC vs GaN vs IGBT</h2>
+    <p class="page-sub">Picking the right switch: the four technologies that share the power-electronics map.</p>
+
+    <div class="card">
+      <div class="label">The Selection Map</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Device</th><th>Voltage sweet spot</th><th>Speed</th><th>Best for</th></tr>
+          <tr><td><b>Si MOSFET</b></td><td class="mono">&lt; 250 V</td><td>Fast (kHz–MHz)</td><td>SMPS, low-V drives, DC-DC</td></tr>
+          <tr><td><b>Si IGBT</b></td><td class="mono">600–6500 V</td><td>Slower (≤20 kHz)</td><td>VFDs, traction, welders, high-current AC</td></tr>
+          <tr><td><b>SiC MOSFET</b></td><td class="mono">650–1700 V+</td><td>Very fast</td><td>EV inverters, solar, fast chargers</td></tr>
+          <tr><td><b>GaN HEMT</b></td><td class="mono">&lt; 650 V</td><td>Ultra-fast (MHz)</td><td>Tiny chargers, LiDAR, high-density DC-DC</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Why MOSFET vs IGBT Is the Classic Decision</div>
+      <p class="body">An <strong>IGBT</strong> is a hybrid: a MOSFET gate driving a BJT-like output. It has a near-constant ~1.5–2 V on-state <em>voltage drop</em> (Vce(sat)) instead of a resistance, so at <strong>high voltage and high current</strong> it loses less than a MOSFET would — but it switches slower and has a turn-off "tail current." Rule of thumb: high-V + high-I + lower-frequency ⇒ <span class="hl3">IGBT</span> (the VFD inverter); lower-V or high-frequency ⇒ <span class="hl">MOSFET</span>.</p>
+      <div class="grid-2">
+        <div class="mini c-amb"><h4>SiC — wide bandgap</h4><p>Blocks higher voltage in less silicon, runs hotter, switches faster → smaller, cooler EV inverters. Higher cost.</p></div>
+        <div class="mini c-grn"><h4>GaN — high electron mobility</h4><p>Lateral HEMT, no body diode, blistering speed at &lt;650 V → the shrinking phone charger. Sensitive gate.</p></div>
+      </div>
+      <p class="body" style="margin-top:12px;">This is the same hierarchy your <a href="../29_MOSFETs.html" style="color:var(--accent-soft)">micro card's BJT/MOSFET/IGBT trio</a> introduced — now with the wide-bandgap newcomers that are displacing silicon at the high-performance edge.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 10 ===== -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 14</span>
+    <h2 class="page-title">Failure Modes, Recap & Quiz</h2>
+    <p class="page-sub">How MOSFETs die — and the one-line truths to carry away.</p>
+
+    <div class="card">
+      <div class="label">How Power MOSFETs Fail</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">💥 Overvoltage / avalanche</div><p>Vds spike past the rating (inductive turn-off, no snubber) punches through. Clamp &amp; snub.</p></div>
+        <div class="fail"><div class="ft">🔥 Thermal overstress</div><p>Tj exceeds limit — undersized heatsink or runaway switching loss. Cooks the die.</p></div>
+        <div class="fail"><div class="ft">⚡ Gate-oxide rupture</div><p>Vgs over ±20 V (ESD or ringing) destroys the thin oxide. Use a Zener clamp &amp; handle with care.</p></div>
+        <div class="fail"><div class="ft">🔌 Shoot-through</div><p>Insufficient dead-time → both bridge FETs on → bus short → instant death.</p></div>
+        <div class="fail"><div class="ft">🌀 dV/dt false turn-on</div><p>Fast Vds edge couples through Cgd, momentarily turning the FET on. Stiff, low-Z (or negative) gate off.</p></div>
+        <div class="fail"><div class="ft">↩️ Body-diode recovery</div><p>Slow body diode + hard reverse recovery → huge current spike &amp; ringing in bridges. Add SiC/Schottky.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">One-Page Recap</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span>A MOSFET is a <b>voltage-controlled</b> switch — a gate field opens an inversion channel from drain to source.</span></li>
+        <li><span class="num">2</span><span>It lives in <b>cut-off</b> (OFF) or deep <b>triode</b> (ON as a tiny Rds(on)); the <b>saturation</b> region in between makes heat.</span></li>
+        <li><span class="num">3</span><span>Loss = <b>conduction</b> (I²·Rds(on)) + <b>switching</b> (½·V·I·t·fsw). Switching loss grows with frequency.</span></li>
+        <li><span class="num">4</span><span>The gate is a capacitor: <b>Qg</b> &amp; the <b>Miller plateau</b> set switching speed — drive it stiff and fast.</span></li>
+        <li><span class="num">5</span><span><b>Half-bridges</b> with <b>dead-time</b> build inverters; survival is governed by <b>SOA</b> and the <b>Rθ thermal chain</b>.</span></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check — Tap to Reveal</div>
+      <p class="quiz-q">Q1: A MOSFET stays cool at 100% duty but overheats at 50% PWM. Why?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> At 100% it never transitions → only small conduction loss. At 50% it switches thousands of times/sec, and each crossing of the saturation region dumps ½·V·I·t of energy × fsw — switching loss dominates.</span></div>
+
+      <p class="quiz-q">Q2: Why does the positive temperature coefficient of Rds(on) make MOSFETs easy to parallel?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> If one FET hogs current and heats up, its Rds(on) rises (~+0.4%/°C), which pushes current to the cooler parallel devices — automatic current sharing. BJTs do the opposite and thermally run away.</span></div>
+
+      <p class="quiz-q">Q3: What is the Miller plateau and why does it matter?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> The flat region of Vgs-vs-Qg where all the driver charge feeds Cgd (Miller cap) as Vds swings. It's the slow, lossy part of every transition — minimise Crss and use a stiff driver to shorten it.</span></div>
+
+      <p class="quiz-q">Q4: Why is dead-time mandatory in a half-bridge, and what's the risk of too much?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> To prevent shoot-through (both FETs on = bus short). Too much dead-time distorts the output waveform and lets the body diode conduct longer (extra loss). It's a tuned compromise.</span></div>
+
+      <p class="quiz-q">Q5: When would you choose an IGBT over a MOSFET for a motor drive?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> At high voltage + high current + moderate frequency (e.g. a 480 V VFD inverter). The IGBT's fixed ~2 V drop beats a MOSFET's I²·Rds(on) there. For low voltage or high frequency, the MOSFET wins.</span></div>
+    </div>
+
+  </section>
+
+  <!-- ===== PAGE 11 · MSc PACK ===== -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 / 14 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade numericals — loss budget, gate drive, thermal chain, dead-time.</p>
+
+    <div class="card">
+      <div class="label">WE1 — Full Loss Budget of a Buck-Converter Switch</div>
+      <div class="eqn">
+        Buck 48 V → 12 V, I<sub>out</sub> = 10 A, f<sub>sw</sub> = 100 kHz, D = 12/48 = 0.25.<br>
+        FET: Rds(on) = 8 mΩ @ 25 °C (×1.5 hot → 12 mΩ), t<sub>r</sub>+t<sub>f</sub> = 40 ns.<br><br>
+        Conduction: P<sub>cond</sub> = I²·Rds(hot)·D = 10² × 0.012 × 0.25 = <b>0.30 W</b><br>
+        Switching: P<sub>sw</sub> = ½·V·I·(t<sub>r</sub>+t<sub>f</sub>)·f<sub>sw</sub> = ½ × 48 × 10 × 40n × 100k = <b>0.96 W</b><br>
+        Total ≈ <b>1.26 W</b> — switching is 3× conduction even at a modest 100 kHz.
+      </div>
+      <p class="lead"><b>Discussion:</b> the hot-resistance correction (×1.4–1.6 at Tj ≈ 100–125 °C) is the single most-forgotten step in student loss budgets — datasheet Rds(on) is a 25 °C number. Note also what happens if f<sub>sw</sub> rises to 500 kHz: P<sub>sw</sub> → 4.8 W while P<sub>cond</sub> is unchanged; that is the entire argument for GaN (page 9) at high frequency.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE2 — Gate Drive: Current, Time and Driver Power</div>
+      <div class="eqn">
+        FET: Q<sub>g(tot)</sub> = 60 nC at V<sub>gs</sub> = 12 V, of which Q<sub>gd</sub> (Miller) = 25 nC.<br>
+        Driver: 2 A peak source/sink.<br><br>
+        Miller-plateau crossing time: t ≈ Q<sub>gd</sub>/I<sub>g</sub> = 25n/2 = <b>12.5 ns</b> — this sets the V-I crossover speed.<br>
+        Total charge time: t ≈ Q<sub>g</sub>/I<sub>g</sub> = 60n/2 = <b>30 ns</b>.<br>
+        Driver average power: P = Q<sub>g</sub>·V<sub>gs</sub>·f<sub>sw</sub> = 60n × 12 × 100k = <b>72 mW</b> (dissipated in R<sub>g</sub> + driver, not the FET).
+      </div>
+      <p class="lead"><b>Discussion:</b> gate power is tiny but gate <em>current</em> is what buys fast edges — the plateau is crossed at constant current, so halving R<sub>g</sub> (or doubling driver current) halves switching time and thus P<sub>sw</sub>. The limit is ringing and dV/dt-induced turn-on (page 7): speed is traded against EMI and shoot-through immunity, which is why real designs use separate turn-on/turn-off gate resistors.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE3 — The Thermal Chain: Will It Survive?</div>
+      <div class="eqn">
+        P = 12 W in a TO-247. RθJC = 0.9 K/W, insulating pad RθCS = 0.5 K/W, heatsink RθSA = 2.4 K/W. Ambient 45 °C.<br><br>
+        Tj = T<sub>a</sub> + P·(RθJC + RθCS + RθSA) = 45 + 12 × 3.8 = 45 + 45.6 = <b>90.6 °C</b> ✓ (limit 150–175 °C)<br><br>
+        Largest allowed heatsink for Tj ≤ 125 °C:&nbsp; RθSA ≤ (125 − 45)/12 − 0.9 − 0.5 = <b>5.27 K/W</b>
+      </div>
+      <p class="lead"><b>Discussion:</b> the chain is series resistance arithmetic (→ A41 thermal imaging sees exactly these gradients). Note the design habit: solve <em>backwards</em> from the Tj you'll accept (with derating — running at 90 °C instead of 150 °C roughly squares the lifetime multiplier) to the heatsink you must buy. The pad's 0.5 K/W matters: a cheap dry mounting can add 1–2 K/W and silently eat the whole margin.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE4 — Dead-Time &amp; Body-Diode Loss in a Half-Bridge</div>
+      <div class="eqn">
+        Synchronous buck, I = 10 A, f<sub>sw</sub> = 100 kHz, dead-time t<sub>d</sub> = 100 ns per edge (2 edges/cycle).<br>
+        Body diode V<sub>f</sub> = 0.8 V.<br><br>
+        P<sub>dt</sub> = V<sub>f</sub> · I · (2·t<sub>d</sub>) · f<sub>sw</sub> = 0.8 × 10 × 200n × 100k = <b>0.16 W</b><br>
+        …plus reverse-recovery loss each time the diode is force-commutated: P<sub>rr</sub> = Q<sub>rr</sub>·V<sub>bus</sub>·f<sub>sw</sub> = 150n × 48 × 100k = <b>0.72 W</b>
+      </div>
+      <p class="lead"><b>Discussion:</b> the recovery term dwarfs the conduction term — which is why bridges either add a parallel Schottky, choose FETs with fast body diodes, or move to SiC (Q<sub>rr</sub> ≈ 0). Dead-time itself is a two-sided tax: too little risks shoot-through, too much grows this loss and distorts inverter output (→ A08 VFD, A38 EV inverter). Adaptive dead-time control exists precisely to walk this line.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 12 · MSc PACK ===== -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 / 14 · MSc Practice</span>
+    <h2 class="page-title">Problem Set</h2>
+    <p class="page-sub">Ten problems. Attempt first — the reveal is the marking scheme.</p>
+
+    <div class="card quiz">
+      <div class="label">Problems 1–10</div>
+
+      <p class="quiz-q">P1: A FET with Rds(on) = 5 mΩ @25 °C runs at Tj = 125 °C (tempco ≈ +0.4%/°C). Compute the hot resistance and the conduction-loss increase.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> ΔT = 100 °C → factor ≈ 1 + 0.004×100 = 1.4 (datasheets show ~1.4–1.6 from the normalized curve). R<sub>hot</sub> ≈ 7 mΩ; conduction loss rises 40% at the same current. Always read the normalized Rds(on)–Tj curve, not just the 25 °C headline.</span></div>
+
+      <p class="quiz-q">P2: Two identical FETs share 40 A in parallel. One runs 15 °C hotter. Explain quantitatively why the system is stable anyway.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> The hotter FET's Rds(on) is ≈ 6% higher (0.4%/°C × 15), so its current share falls until heating equalizes — negative feedback via the positive tempco. Caveat: this balances <em>conduction</em>, not switching; dynamic sharing needs symmetric gate loops and layout.</span></div>
+
+      <p class="quiz-q">P3: Estimate the dV/dt-induced gate bump: Cgd = 50 pF, Cgs = 1.2 nF, bus edge 20 V/ns, gate held low through Rg = 4.7 Ω. Does a 3 V-threshold FET false-turn-on?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Injected current ≈ Cgd·dV/dt = 50p × 20G = 1 A; bump ≈ I·Rg = 4.7 V &gt; 3 V threshold → yes, it can conduct briefly (shoot-through stress). Fixes: lower Rg for turn-off path, negative gate rail, Miller-clamp driver pin, or slower edge. The capacitive divider Cgd/(Cgd+Cgs) alone gives 20 V×(50/1250) ≈ 0.8 V — the resistive path, not the divider, is the danger.</span></div>
+
+      <p class="quiz-q">P4: A datasheet SOA shows a DC line at (100 V, 2 A) for Tc = 25 °C. Why can you NOT run 100 V·2 A continuously at Tc = 80 °C — and what's the derating method?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> SOA curves are drawn for 25 °C case; the thermal-limit segments scale with available ΔT = Tj(max)−Tc. At 80 °C the allowed power falls by (150−80)/(150−25) ≈ 56% → ~1.1 A at 100 V. Some modern FETs also derate the DC line further for Spirito instability (hot-spotting in linear mode) — check the note under the SOA graph.</span></div>
+
+      <p class="quiz-q">P5: Avalanche: a 60 V FET switches off 8 A through 50 µH of stray+load inductance with no clamp. Compute E<sub>av</sub> and compare to a 15 mJ single-pulse rating.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> E = ½LI² = 0.5 × 50µ × 64 = <b>1.6 mJ</b> — inside the 15 mJ single-pulse rating, so a rare event survives. But repetitive avalanche at f<sub>sw</sub> would dump 1.6 mJ × f<sub>sw</sub> = 160 W at 100 kHz — instantly fatal. Rule: avalanche ratings buy fault tolerance, never a working clamp; add the snubber/TVS.</span></div>
+
+      <p class="quiz-q">P6: Synchronous rectification: replacing a Schottky (Vf = 0.45 V) with a 4 mΩ FET at 20 A. Compute both losses and the crossover current where the diode wins.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Diode: 0.45 × 20 = 9 W. FET: 20² × 0.004 = 1.6 W — 5.6× better. Crossover where I·Vf = I²·R → I = Vf/R = 0.45/0.004 = 112 A; below that the FET always wins (at 4 mΩ). This linear-vs-quadratic contest is the whole case for synchronous rectification at low voltage.</span></div>
+
+      <p class="quiz-q">P7: Bootstrap supply: high-side gate needs Qg = 80 nC per cycle plus 0.1 mA leakage; allowed droop 0.5 V; max ON-time 20 µs. Size the bootstrap capacitor.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> ΔQ = Qg + I·t = 80n + 0.1m×20µ = 82 nC. C ≥ ΔQ/ΔV = 82n/0.5 = 164 nF → with ×5–10 practical margin, use ≈ 1 µF. Also check the 100% duty trap: the bootstrap only recharges when the low side conducts — a topology fact, not a capacitor fact (page 7).</span></div>
+
+      <p class="quiz-q">P8: Why do designs use a small series gate resistor split into R<sub>on</sub> (e.g. 10 Ω via diode) and R<sub>off</sub> (e.g. 2 Ω)?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Slow turn-ON limits dV/dt, EMI and recovery stress on the opposing body diode; fast turn-OFF holds the gate hard low against Miller injection (P3) and shrinks turn-off loss. Asymmetric needs → asymmetric resistance, implemented with an anti-parallel diode across part of Rg.</span></div>
+
+      <p class="quiz-q">P9: A 650 V SiC MOSFET replaces a 650 V Si IGBT in a 20 kHz, 400 V-bus welder inverter. Name the two loss mechanisms that shrink and the one drive requirement that tightens.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> (1) Switching loss: no IGBT tail current → per-cycle E<sub>sw</sub> drops several-fold; (2) low-load conduction: I²R beats the IGBT's ~1–2 V knee at partial current. Tightened: gate drive — SiC wants ~+15/−4 V with tight ringing control and strong Miller immunity; a recycled 0/+15 V Si driver gives marginal enhancement and dV/dt vulnerability.</span></div>
+
+      <p class="quiz-q">P10: Design check: a motor-drive FET sees 8 A continuous, 35 A stall for 2 s, 48 V bus with 15% ringing overshoot. Choose minimum voltage class and justify the current rating you'd actually buy.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Voltage: 48 × 1.15 ≈ 55 V transient → with the standard 80% derating rule choose ≥ 80 V (60 V is one ring away from avalanche). Current: the "100 A" headline is a 25 °C silicon limit; buy for thermals — check the 2 s stall against the transient thermal-impedance curve Zθ(2 s) and the package's continuous rating at your real Tc, typically landing 3–5× the continuous current, e.g. a 40–60 A-class device with the heatsink from WE3.</span></div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 13 · MSc PACK ===== -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 / 14 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">Where the formulas come from — and the seven datasheet traps examiners love.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 — Switching Loss ½·V·I·t·f</div>
+      <div class="eqn">
+        During a linearized transition of duration t<sub>s</sub>, voltage falls V→0 while current rises 0→I (or vice-versa):<br>
+        v(τ) = V(1 − τ/t<sub>s</sub>), &nbsp; i(τ) = I·τ/t<sub>s</sub><br><br>
+        E = ∫₀<sup>t_s</sup> v·i dτ = V·I ∫₀<sup>t_s</sup> (τ/t<sub>s</sub> − τ²/t<sub>s</sub>²) dτ = V·I·t<sub>s</sub>·(½ − ⅓) = <b>V·I·t<sub>s</sub>/6</b><br><br>
+        Engineering practice keeps the cruder bound E ≈ ½·V·I·t<sub>s</sub> per edge (triangle overlap) —<br>
+        conservative, and honest about non-linear real waveforms. Then P<sub>sw</sub> = E<sub>on+off</sub> · f<sub>sw</sub>.
+      </div>
+      <p class="lead"><b>Exam point:</b> know that the ⅙ comes from the double-ramp overlap integral and the ½ from the single-ramp triangle; quote whichever the question's waveform implies, and state the assumption. Hard-switching loss is <em>overlap area × frequency</em> — every soft-switching topology (ZVS/ZCS, → A28) is an attack on that overlap.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 — Square Law, and Where Rds(on) Comes From</div>
+      <div class="eqn">
+        Channel charge per area: Q = C<sub>ox</sub>(V<sub>gs</sub> − V<sub>th</sub> − v(x)); drift current: I = µ·Q·W·dv/dx.<br>
+        Integrating x: 0→L, v: 0→V<sub>ds</sub>:<br><br>
+        I<sub>D</sub> = µC<sub>ox</sub>(W/L)·[(V<sub>gs</sub>−V<sub>th</sub>)V<sub>ds</sub> − V<sub>ds</sub>²/2] &nbsp; (triode)<br>
+        Saturation at V<sub>ds</sub> = V<sub>gs</sub>−V<sub>th</sub>: &nbsp; I<sub>D</sub> = ½µC<sub>ox</sub>(W/L)(V<sub>gs</sub>−V<sub>th</sub>)² &nbsp; (square law)<br><br>
+        Deep triode (V<sub>ds</sub>→0): &nbsp; Rds(on) = 1/[µC<sub>ox</sub>(W/L)(V<sub>gs</sub>−V<sub>th</sub>)] + R<sub>drift</sub><br>
+        In high-voltage FETs R<sub>drift</sub> dominates and scales ≈ V<sub>BR</sub><sup>2.5</sup> (silicon limit) — the reason SiC/GaN exist.
+      </div>
+      <p class="lead"><b>Exam point:</b> the channel term explains why more V<sub>gs</sub> lowers Rds(on) with diminishing returns, while the drift term explains why a 650 V Si FET can't match a 60 V FET's resistance no matter the gate drive. The V<sub>BR</sub><sup>2.5</sup> scaling ("silicon limit") versus SiC's 10× critical field is the one-line justification for wide-bandgap devices (page 9).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 — The Miller Plateau from Charge Balance</div>
+      <div class="eqn">
+        At turn-on, once I<sub>D</sub> reaches its final value, V<sub>ds</sub> must fall. Falling V<sub>ds</sub> pulls charge<br>
+        through C<sub>gd</sub>: i<sub>Cgd</sub> = C<sub>gd</sub>·dV<sub>ds</sub>/dt. KCL at the gate node:<br><br>
+        I<sub>g</sub> = C<sub>gs</sub>·dV<sub>gs</sub>/dt + C<sub>gd</sub>·d(V<sub>gs</sub>−V<sub>ds</sub>)/dt<br><br>
+        If all of I<sub>g</sub> is consumed by the C<sub>gd</sub> term, dV<sub>gs</sub>/dt = 0 → V<sub>gs</sub> <b>plateaus</b> at the level<br>
+        just sustaining I<sub>D</sub> (from the square law), while &nbsp; dV<sub>ds</sub>/dt = −I<sub>g</sub>/C<sub>gd</sub>.<br><br>
+        Plateau duration: t = Q<sub>gd</sub>/I<sub>g</sub> — gate current sets slew rate; C<sub>gd</sub> (Crss) is the enemy.
+      </div>
+      <p class="lead"><b>Exam point:</b> the plateau isn't a mystery region — it's the gate driver funding the drain-voltage swing through the feedback capacitor. Everything practical follows: driver current ∝ speed, Crss minimization in device selection, Miller-clamp pins, and the dV/dt immunity problem of P3 (same capacitor, opposite direction).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol Glossary</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Symbol</th><th>Meaning</th></tr>
+        <tr><td class="mono">Vth / Vgs(th)</td><td>Gate threshold — spec'd at ~250 µA, NOT the full-current switching level</td></tr>
+        <tr><td class="mono">Rds(on)</td><td>Drain-source ON resistance (channel + drift); strong function of Tj and Vgs</td></tr>
+        <tr><td class="mono">Qg, Qgs, Qgd</td><td>Total / gate-source / gate-drain (Miller) charge</td></tr>
+        <tr><td class="mono">Ciss, Coss, Crss</td><td>Input (Cgs+Cgd), output (Cds+Cgd), reverse-transfer (Cgd) capacitances</td></tr>
+        <tr><td class="mono">SOA, Zθ(t)</td><td>Safe operating area; transient thermal impedance for pulse ratings</td></tr>
+        <tr><td class="mono">EAS / Eav</td><td>Single-pulse avalanche energy rating</td></tr>
+        <tr><td class="mono">Qrr, trr</td><td>Body-diode reverse-recovery charge / time</td></tr>
+        <tr><td class="mono">gm / gfs</td><td>Transconductance dI<sub>D</sub>/dV<sub>gs</sub> in saturation</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven Datasheet &amp; Exam Traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>Rds(on) at 25 °C.</b> Multiply by the normalized-vs-Tj curve (~1.4–1.6× at 125 °C) before any loss claim.</span></li>
+        <li><span class="num">2</span><span><b>Vgs(th) is a µA spec.</b> A "2 V threshold" FET may need 8–10 V for full enhancement — read the I<sub>D</sub>–V<sub>gs</sub> transfer curve, and match logic-level parts to 5 V/3.3 V drives.</span></li>
+        <li><span class="num">3</span><span><b>The headline current is silicon-limited fantasy.</b> "195 A" TO-220 parts are bond-wire and thermally limited to a fraction of that; size from P = I²R and the thermal chain (WE3).</span></li>
+        <li><span class="num">4</span><span><b>Qg vs Ciss.</b> Switching time budgets use charge (Qg, Qgd), not small-signal capacitance — Ciss varies wildly with voltage; Qg integrates that honestly.</span></li>
+        <li><span class="num">5</span><span><b>SOA lines are 25 °C, single-pulse, and (for linear mode) Spirito-derated.</b> Repetitive pulses use Zθ(t); linear-mode use needs the DC line, not the 10 ms line.</span></li>
+        <li><span class="num">6</span><span><b>Body diode ≠ free Schottky.</b> Its Vf is higher and Qrr can dominate bridge loss (WE4) — check trr class before trusting synchronous topologies at high frequency.</span></li>
+        <li><span class="num">7</span><span><b>±20 V absolute gate rating means ±20 V including ringing.</b> A 15 V drive with 40% overshoot is already dead; check with a probe at the pin, tip-and-barrel grounding.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 14 · MSc PACK ===== -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 / 14 · MSc Practice</span>
+    <h2 class="page-title">Study &amp; Practice Path</h2>
+    <p class="page-sub">The canon, a hands-on ladder, and a self-check before you move on.</p>
+
+    <div class="card">
+      <div class="label">Reference Shelf</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Source</th><th>Use it for</th></tr>
+        <tr><td><b>Erickson &amp; Maksimović, <i>Fundamentals of Power Electronics</i></b></td><td>The MSc text — loss modelling, switching analysis, converter context for every page here.</td></tr>
+        <tr><td><b>Baliga, <i>Fundamentals of Power Semiconductor Devices</i></b></td><td>Device physics depth: drift-region design, the silicon limit, SiC/GaN theory.</td></tr>
+        <tr><td><b>SPICE for Power Electronics (Rashid) <i>(in your material folder)</i></b></td><td>Simulate every worked example — gate drive, switching waveforms, loss extraction.</td></tr>
+        <tr><td><b>Transformers &amp; Inductors for Power Electronics <i>(in your material folder)</i></b></td><td>The magnetics your converters wrap around these switches (pairs with A28/A32).</td></tr>
+        <tr><td><b>Infineon AN: "MOSFET Power Losses…" &amp; TI AN: "Fundamentals of MOSFET and IGBT Gate Driver Circuits" (SLUA618)</b></td><td>The two free app notes worth printing — industry-standard loss and drive design procedures.</td></tr>
+        <tr><td><b>Datasheets: IRFZ44N (classic), BSC0xx (modern OptiMOS), C3M SiC, EPC GaN</b></td><td>Read one of each generation side-by-side — watch Qg·Rds(on) figure-of-merit fall 100×.</td></tr>
+      </table></div>
+      <p class="cap">Related modules: <a href="A28_Switching_Power_Electronics_Deep_Dive.html" style="color:var(--accent-soft)">A28 Switching PE</a> · <a href="A08_VFD_Deep_Dive.html" style="color:var(--accent-soft)">A08 VFD</a> · <a href="A38_EV_Powertrain_Deep_Dive.html" style="color:var(--accent-soft)">A38 EV Powertrain</a> · <a href="A39_Battery_Cells_BMS_Deep_Dive.html" style="color:var(--accent-soft)">A39 BMS</a> · <a href="A41_Thermal_Imaging_Deep_Dive.html" style="color:var(--accent-soft)">A41 Thermal Imaging</a></p>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-On Ladder</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span>Take any TO-220 FET datasheet and extract: Rds(on) hot, Qg/Qgd, SOA DC line at your bus voltage, Zθ at 2 s. Write the five numbers from memory afterwards.</span></li>
+        <li><span class="num">2</span><span>Rebuild WE1's loss budget for your own bus voltage and frequency in a spreadsheet; add a f<sub>sw</sub> slider column and find where P<sub>sw</sub> = P<sub>cond</sub>.</span></li>
+        <li><span class="num">3</span><span>Simulate a gate-drive edge in SPICE (Rashid's book, material folder): watch the Miller plateau appear; halve Rg and measure the dV/dt change.</span></li>
+        <li><span class="num">4</span><span>Breadboard a low-side switch (logic-level FET + 24 V lamp/solenoid + flyback diode, → A36's output-stage circuit); scope Vgs and Vds on a real edge.</span></li>
+        <li><span class="num">5</span><span>Deliberately under-drive it (3.3 V on a standard FET) and thermal-image the result (→ A41) — feel "partially enhanced" as watts.</span></li>
+        <li><span class="num">6</span><span>Build/simulate a half-bridge with adjustable dead-time; find the shoot-through edge with a current probe, then measure body-diode conduction as you over-lengthen it.</span></li>
+        <li><span class="num">7</span><span>Do WE3 backwards on a real heatsink: measure its RθSA from a known power and two temperatures.</span></li>
+        <li><span class="num">8</span><span>Compare an Si and (datasheet-level) SiC design for the same 3 kW inverter leg: loss table, driver spec, cost — write the one-page recommendation an employer would actually read.</span></li>
+      </ul>
+    </div>
+
+    <div class="grid-2">
+      <div class="mini c-grn">
+        <h4>✅ You've mastered this module when…</h4>
+        <p>You can produce a defensible loss budget (conduction + switching + body-diode) from a datasheet alone, size the heatsink from the thermal chain, spec the gate driver from Qgd, and explain every derating you applied.</p>
+      </div>
+      <div class="mini c-blue">
+        <h4>🎓 MSc &amp; career context</h4>
+        <p>This page-set is the device half of power-electronics coursework; A28 is the topology half. Drives (A08), EV inverters (A38) and switch-mode supplies all interview on exactly these numbers — the Miller plateau question is a classic.</p>
+      </div>
+      <div class="mini c-amb">
+        <h4>🧠 Remember the four numbers</h4>
+        <p>Rds(on)×1.5 hot · ½VIt·f per edge · Tj = Ta + PΣRθ · t = Qgd/Ig. Four little formulas run the whole subject.</p>
+      </div>
+      <div class="mini c-pink">
+        <h4>🔗 Where next</h4>
+        <p>A28 for topologies these switches serve, A08/A38 for the inverters they power, A39 for the batteries behind the bus, and the queued Power Quality module for what all this switching does to the grid.</p>
+      </div>
+    </div>
+  </section>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"Gate voltage in, drain current out — and switching, not conduction, is what makes the heat."</p>
+    </div>
+
+    <div class="footer">
+      Advanced Deep Dive · Lesson A29 · MOSFETs<br>
+      Companion to Micro Card 29 · Industrial Engineering Micro-Learning Series<br>
+      Connects to: <a href="../29_MOSFETs.html" style="color:var(--accent-soft)">MOSFETs micro (29)</a> · <a href="A28_Switching_Power_Electronics_Deep_Dive.html" style="color:var(--accent-soft)">Switching & Power (A28)</a> · <a href="../08_VFD.html" style="color:var(--accent-soft)">VFD (8)</a>
+    </div>
+
+</div>
+
+<script>
+  /* Page 4 — conduction calculator */
+  const iS = document.getElementById('iSlider'), rS = document.getElementById('rSlider');
+  const iOut = document.getElementById('iOut'), rOut = document.getElementById('rOut'), condOut = document.getElementById('condOut');
+  function condUpdate(){
+    const I = +iS.value, R = +rS.value/1000; // R in ohms
+    iOut.textContent = I + ' A';
+    rOut.textContent = (R*1000).toFixed(0) + ' mΩ';
+    const P = I*I*R;
+    let note = P<5 ? 'cool — passive cooling likely fine' : P<25 ? 'warm — needs a heatsink' : 'hot — serious heatsink + airflow, or lower Rds(on)';
+    condOut.innerHTML = `Conduction loss (100% ON): P = I²·Rds(on) = <b>${P.toFixed(2)} W</b>\n→ ${note}`;
+  }
+  iS.addEventListener('input', condUpdate); rS.addEventListener('input', condUpdate); condUpdate();
+
+  /* Page 6 — loss split vs frequency */
+  const fS = document.getElementById('fSlider');
+  const fOut = document.getElementById('fOut'), segCond = document.getElementById('segCond'), segSw = document.getElementById('segSw'), lossOut = document.getElementById('lossOut');
+  function lossUpdate(){
+    const f = +fS.value; // kHz
+    fOut.textContent = f + ' kHz';
+    const Pcond = 4.0;                 // fixed-ish conduction watts (toy)
+    const Psw = 0.06 * f;             // grows with frequency
+    const tot = Pcond + Psw;
+    const cPct = Pcond/tot*100, sPct = Psw/tot*100;
+    segCond.style.width = cPct + '%';
+    segSw.style.width = sPct + '%';
+    segCond.textContent = cPct>14 ? 'Conduction '+cPct.toFixed(0)+'%' : '';
+    segSw.textContent = sPct>14 ? 'Switching '+sPct.toFixed(0)+'%' : '';
+    let verdict = sPct>60 ? 'switching-dominated — drop fsw or use faster/wide-bandgap parts' : sPct>35 ? 'balanced — typical PWM drive' : 'conduction-dominated — Rds(on) is your enemy';
+    lossOut.innerHTML = `P_cond ≈ <b>${Pcond.toFixed(1)} W</b> · P_sw ≈ <b>${Psw.toFixed(2)} W</b> · total ≈ <b>${tot.toFixed(2)} W</b>\n→ ${verdict}`;
+  }
+  fS.addEventListener('input', lossUpdate); lossUpdate();
+</script>
+</body>
+</html>

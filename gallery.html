@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Project image and video gallery by Muditha Priyasad, Mechanical Design, Automation & R&D Engineer.">
+  <meta name="description" content="Project image and video gallery by Muditha Priyasad, Mechanical Design | Industrial Automation | R&D Engineer.">
   <title>Gallery | Muditha Priyasad — Engineering Portfolio</title>
-  <link rel="stylesheet" href="styles.css?v=20260721-moving-gallery-all">
+  <link rel="stylesheet" href="styles.css?v=20260809-ux-polish-v2">
+  <link rel="stylesheet" href="design-system.css?v=20260809-ux-polish-v2">
   <meta name="author" content="Muditha Priyasad">
   <meta name="keywords" content="Muditha Priyasad, Mechanical Engineer, Automation Engineer, SolidWorks, PLC, SCADA, machine design, Sri Lanka, industrial automation, 3D printing, CNC">
   <link rel="canonical" href="https://muditha96.github.io/gallery.html">
@@ -28,7 +29,7 @@
   "@context": "https://schema.org",
   "@type": "Person",
   "name": "Muditha Priyasad",
-  "jobTitle": "Mechanical Design, Automation & R&D Engineer",
+  "jobTitle": "Mechanical Design | Industrial Automation | R&D Engineer",
   "email": "mailto:muditha00@icloud.com",
   "address": { "@type": "PostalAddress", "addressCountry": "Sri Lanka" },
   "alumniOf": "University of Jaffna",
@@ -38,7 +39,7 @@
 }
 </script>
 </head>
-<body>
+<body class="gallery-page">
   <!-- Do not upload confidential engineering files to this public website. -->
   <!-- Public-safe portfolio: do not upload confidential company files, PLC programs, drawings or private customer data. -->
   <a class="skip-link" href="#main">Skip to content</a>
@@ -46,31 +47,51 @@
     <nav class="nav" aria-label="Primary navigation">
       <a class="brand" href="index.html" aria-label="Muditha Priyasad home">
         <span class="brand-mark" aria-hidden="true">MP</span>
-        <span class="brand-copy"><strong>Muditha Priyasad</strong><small>Mechanical Design, Automation & R&D Engineer</small></span>
+        <span class="brand-copy"><strong>Muditha Priyasad</strong><small>Mechanical Design | Industrial Automation | R&D Engineer</small></span>
       </a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu" aria-label="Open navigation menu"><span></span><span></span><span></span></button>
+      <!-- Fixed portfolio navigation: keep labels and order consistent on every main page. -->
       <ul class="nav-menu" id="nav-menu">
-        <li><a  href="index.html">Home</a></li>
-        <li><a class="active" href="projects.html">Projects</a></li>
-        <li><a  href="machines.html">Machines</a></li>
-        <li><a  href="skills.html">Skills &amp; Certs</a></li>
-        <li><a  href="cv-contact.html">Contact</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="projects.html">Projects</a></li>
+        <li><a href="machines.html">Machines</a></li>
+        <li><a href="skills.html">Skills &amp; Certs</a></li>
+        <li><a class="active" aria-current="page" href="gallery.html">Gallery</a></li>
+        <li><a href="cv-contact.html">CV &amp; Contact</a></li>
+        <li><a href="learning-lab.html">Learning Lab</a></li>
       </ul>
     </nav>
   </header>
   <main id="main" class="portfolio-shell">
 
-    <section class="page-hero compact-hero"><p class="eyebrow">Media Gallery</p><h1>Photos, videos and public-safe engineering evidence</h1><p>A collection of public-safe engineering evidence — machine photos, 3D printed parts, CAD work and testing. Confidential factory details are not shown.</p></section>
-    <section class="safe-panel"><h2>Media safety note</h2><p>This page uses selected, optimized public-safe images and one selected MP4. Raw MOV files, editable reports, confidential drawings and private source files should stay out of the public deploy folder.</p></section>
-    <section class="filter-bar" aria-label="Gallery filters"><button class="filter-btn active" data-filter="all">All</button><button class="filter-btn" data-filter="library">Full Image Library</button><button class="filter-btn" data-filter="image">Images</button><button class="filter-btn" data-filter="video">Videos</button><button class="filter-btn" data-filter="curated">Curated Media</button><button class="filter-btn" data-filter="machine">Machines</button><button class="filter-btn" data-filter="laser">Laser</button><button class="filter-btn" data-filter="training">Training</button><button class="filter-btn" data-filter="printing">3D Printing</button><button class="filter-btn" data-filter="automation">Automation</button><button class="filter-btn" data-filter="robotics">Robotics</button><button class="filter-btn" data-filter="cad">CAD</button><button class="filter-btn" data-filter="achievement">Achievements</button><button class="filter-btn" data-filter="personal">Personal</button></section>
-    <section class="gallery-grid" id="galleryGrid" data-render="gallery"><article class="gallery-item" data-category="image printing"><img src="assets/images/gallery/real-3d-printed-mechanism.jpg" alt="3D printed mechanism prototype" loading="lazy" decoding="async"><div><p class="eyebrow">image / printing</p><h3>3D Printed Mechanism</h3><p>Public-safe prototype image showing mechanical fit checks and iterative part development.</p></div></article>
+    <section class="page-hero compact-hero gallery-hero">
+      <p class="eyebrow">Engineering in Practice</p>
+      <h1>Project &amp; Exhibition Gallery</h1>
+      <p>Browse public-safe images by category. Select any image to view it at full size.</p>
+    </section>
+    <p class="gallery-safety-note"><strong>Privacy:</strong> Confidential drawings, PLC logic, customer information and production data are excluded.</p>
+    <section class="filter-bar gallery-filters" aria-label="Gallery image categories">
+      <button class="filter-btn active" data-filter="all" aria-pressed="true">All Images</button>
+      <button class="filter-btn" data-filter="project" aria-pressed="false">Projects</button>
+      <button class="filter-btn" data-filter="exhibition" aria-pressed="false">Exhibitions</button>
+      <button class="filter-btn" data-filter="machine" aria-pressed="false">Machine Builds</button>
+      <button class="filter-btn" data-filter="automation" aria-pressed="false">Automation</button>
+      <button class="filter-btn" data-filter="cad" aria-pressed="false">CAD &amp; Design</button>
+      <button class="filter-btn" data-filter="printing" aria-pressed="false">3D Printing</button>
+      <button class="filter-btn" data-filter="robotics" aria-pressed="false">Robotics</button>
+      <button class="filter-btn" data-filter="laser" aria-pressed="false">Laser Work</button>
+      <button class="filter-btn" data-filter="achievement" aria-pressed="false">Achievements</button>
+    </section>
+    <p class="gallery-count" data-filter-count="galleryGrid" aria-live="polite">Browse the available images by category.</p>
+    <section class="gallery-grid" id="galleryGrid" data-render="gallery"><article class="gallery-item" data-category="image curated automation machine"><img src="assets/images/gallery/curated/wire-stripping-machine.jpg" alt="Pneumatic wire stripping machine mechanism with cylinder and guides" loading="lazy" decoding="async"><div><p class="eyebrow">project / automation</p><h3>Pneumatic Wire Stripping Machine</h3><p>Public-safe photo of the pneumatic mechanism developed for a controlled, repeatable wire-stripping cycle.</p></div></article>
+<article class="gallery-item" data-category="image printing"><img src="assets/images/gallery/real-3d-printed-mechanism.jpg" alt="3D printed mechanism prototype" loading="lazy" decoding="async"><div><p class="eyebrow">image / printing</p><h3>3D Printed Mechanism</h3><p>Public-safe prototype image showing mechanical fit checks and iterative part development.</p></div></article>
 <article class="gallery-item" data-category="image machine"><img src="assets/images/gallery/real-laser-engraving-machine.jpg" alt="CNC laser engraving machine build" loading="lazy" decoding="async"><div><p class="eyebrow">image / machine</p><h3>CNC Laser Engraving Machine</h3><p>Personal machine build showing motion hardware, control layout and practical assembly work.</p></div></article>
 <article class="gallery-item" data-category="image machine"><img src="assets/images/gallery/real-laser-engraving-sample.jpg" alt="Laser engraving sample" loading="lazy" decoding="async"><div><p class="eyebrow">image / machine</p><h3>Laser Engraving Trial</h3><p>Public-safe test output from personal engraving experiments and process tuning.</p></div></article>
 <article class="gallery-item" data-category="image fixtures"><img src="assets/images/gallery/gallery-02.svg" alt="Fixture design diagram" loading="lazy" decoding="async"><div><p class="eyebrow">diagram / fixtures</p><h3>Fixture Design Diagram</h3><p>Generic diagram used for company-sensitive fixture work where real CAD data must stay private.</p></div></article>
 <article class="gallery-item" data-category="diagram automation"><img src="assets/images/gallery/gallery-01.svg" alt="Automation troubleshooting diagram" loading="lazy" decoding="async"><div><p class="eyebrow">diagram / automation</p><h3>Automation Troubleshooting</h3><p>Public-safe visual for PLC, sensor, pneumatic and mechanical fault-isolation workflows.</p></div></article>
 <article class="gallery-item" data-category="diagram software"><img src="assets/images/gallery/gallery-05.svg" alt="Engineering workflow dashboard diagram" loading="lazy" decoding="async"><div><p class="eyebrow">diagram / software</p><h3>Engineering Workflow Dashboard</h3><p>Generic ERP/KPI workflow visual without company databases, source code or private screenshots.</p></div></article>
 <article class="gallery-item" data-category="diagram cad"><img src="assets/images/gallery/gallery-08.svg" alt="CAD concept render diagram" loading="lazy" decoding="async"><div><p class="eyebrow">diagram / CAD</p><h3>CAD Concept Renders</h3><p>Simplified visual language for machine concepts without exact drawings or dimensions.</p></div></article>
-<article class="gallery-item" data-category="image automation cad"><img src="assets/images/gallery/project-designs/combustion-chamber-scada.png" alt="Combustion chamber SCADA interface concept" loading="lazy" decoding="async"><div><p class="eyebrow">project / SCADA</p><h3>Combustion Chamber SCADA</h3><p>Control-interface concept showing combustion-process monitoring, status indication and operator control layout.</p></div></article>
+<article class="gallery-item" data-category="diagram automation"><img src="assets/images/gallery/gallery-01.svg" alt="Public-safe automation troubleshooting diagram" loading="lazy" decoding="async"><div><p class="eyebrow">project / SCADA</p><h3>Combustion Chamber SCADA</h3><p>Public-safe project reference retained without publishing the client-specific interface screens.</p></div></article>
 <article class="gallery-item" data-category="image cad fixtures robotics"><img src="assets/images/gallery/project-designs/gripper-cad.png" alt="Mechanical gripper CAD assembly" loading="lazy" decoding="async"><div><p class="eyebrow">project / mechanism</p><h3>Mechanical Gripper CAD</h3><p>CAD assembly study for a compact gripping mechanism, showing linkage layout and component integration.</p></div></article>
 <article class="gallery-item" data-category="image cad automation machine"><img src="assets/images/gallery/project-designs/liquid-filling-machine-cad.png" alt="Liquid filling machine CAD concept" loading="lazy" decoding="async"><div><p class="eyebrow">project / automation</p><h3>Liquid Filling Machine CAD</h3><p>Machine concept showing container positioning, multi-nozzle filling layout and production-flow thinking.</p></div></article>
 <article class="gallery-item" data-category="image cad machine"><img src="assets/images/gallery/project-designs/oil-drip-tray-cad.png" alt="Oil drip tray mechanism CAD concept" loading="lazy" decoding="async"><div><p class="eyebrow">project / machine design</p><h3>Oil Drip Tray Mechanism</h3><p>Mechanical concept developed to guide and collect process drips while supporting cleaner machine operation.</p></div></article>
@@ -82,8 +103,9 @@
     <p>&copy; <span id="year">2026</span> Muditha Priyasad. Engineering Portfolio.</p>
     <small>Selected project details are simplified to protect confidential industrial information.</small>
   </footer>
-  <script src="data/gallery-library.js?v=20260721-moving-gallery-all"></script>
-  <script src="data/portfolio-data.js?v=20260721-moving-gallery-all"></script>
-  <script src="script.js?v=20260721-moving-gallery-all"></script>
+  <script src="data/gallery-library.js?v=20260809-ux-polish-v2"></script>
+  <script src="data/project-image-library.js?v=20260809-ux-polish-v2"></script>
+  <script src="data/portfolio-data.js?v=20260809-ux-polish-v2"></script>
+  <script src="script.js?v=20260809-ux-polish-v2"></script>
 </body>
 </html>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Six Sigma DMAIC — Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --accent: #4ade80;
+    --accent-2: #60a5fa;
+    --accent-3: #fbbf24;
+    --accent-ss: #06b6d4;
+    --danger: #f87171;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.6; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 880px; margin: 0 auto; padding: 32px 28px 80px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 15px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 24px;
+    animation: fadeDown 0.7s ease;
+  }
+  .badge .dot {
+    width: 8px; height: 8px; background: var(--accent-ss);
+    border-radius: 50%; box-shadow: 0 0 12px var(--accent-ss);
+    animation: pulse 2s infinite;
+  }
+
+  h1 {
+    font-size: clamp(40px, 6vw, 64px); font-weight: 800;
+    letter-spacing: -0.02em; line-height: 1.05; margin-bottom: 16px;
+    animation: fadeUp 0.7s ease 0.1s both;
+  }
+  h1 .emoji { font-size: 0.85em; margin-right: 8px; }
+
+  .subtitle {
+    font-size: clamp(18px, 2.2vw, 22px); color: var(--text-dim);
+    margin-bottom: 40px;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 24px; padding: 36px 32px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.7s ease both;
+  }
+  .card.delay-1 { animation-delay: 0.3s; }
+  .card.delay-2 { animation-delay: 0.45s; }
+  .card.delay-3 { animation-delay: 0.6s; }
+  .card.delay-4 { animation-delay: 0.75s; }
+  .card.delay-5 { animation-delay: 0.9s; }
+
+  .label {
+    font-size: 14px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent-ss); margin-bottom: 14px;
+  }
+
+  .definition {
+    font-size: clamp(22px, 2.8vw, 28px);
+    font-weight: 500; line-height: 1.45;
+  }
+
+  /* DMAIC FLOW */
+  .dmaic-flow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .phase {
+    background: var(--card-2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+  }
+  .phase .icon { font-size: 24px; display: block; margin-bottom: 4px; }
+  .phase .letter {
+    font-family: ui-monospace, monospace;
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--accent-ss);
+    line-height: 1;
+  }
+  .phase .name { font-size: 11px; color: var(--text-dim); font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .phase.active {
+    background: var(--accent-ss);
+    border-color: var(--accent-ss);
+    box-shadow: 0 0 18px rgba(6,182,212,0.5);
+  }
+  .phase.active .letter, .phase.active .name { color: var(--bg); }
+
+  .phase-detail {
+    background: var(--card-2);
+    border-left: 4px solid var(--accent-ss);
+    border-radius: 12px;
+    padding: 22px 22px;
+    margin-top: 16px;
+  }
+  .phase-detail h3 { color: var(--accent-ss); font-size: 20px; margin-bottom: 8px; }
+  .phase-detail p { font-size: 16px; color: var(--text-dim); line-height: 1.55; }
+  .phase-detail .tools {
+    margin-top: 10px; font-size: 14px; color: var(--text);
+  }
+  .phase-detail .tools b { color: var(--accent-ss); }
+
+  /* SIGMA LEVEL VIZ */
+  .sigma-viz {
+    background: var(--card-2);
+    border-radius: 14px;
+    padding: 22px;
+  }
+  .sigma-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 110px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .sigma-row:last-child { border-bottom: none; }
+  .sigma-name {
+    font-family: ui-monospace, monospace;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent-ss);
+  }
+  .sigma-bar {
+    background: var(--card);
+    height: 18px;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .sigma-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-ss), var(--accent));
+    border-radius: 6px;
+    animation: barGrow 1.2s ease forwards;
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+  .sigma-dpmo {
+    font-family: ui-monospace, monospace;
+    font-size: 14px;
+    color: var(--text-dim);
+    text-align: right;
+  }
+
+  /* KEY FACTS */
+  .facts { list-style: none; display: grid; gap: 16px; }
+  .facts li {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--card-2); padding: 18px 22px;
+    border-radius: 14px; font-size: 19px;
+    border-left: 4px solid var(--accent-ss);
+    transition: transform 0.3s ease;
+  }
+  .facts li:hover { transform: translateX(6px); }
+  .facts li .check {
+    width: 28px; height: 28px;
+    background: var(--accent-ss); color: var(--bg);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; flex-shrink: 0;
+  }
+
+  /* EXAMPLE */
+  .example {
+    background: linear-gradient(135deg, rgba(6,182,212,0.1), rgba(74,222,128,0.05));
+    border-left: 4px solid var(--accent-ss);
+  }
+  .example .icon-large { font-size: 48px; margin-bottom: 12px; }
+  .example p { font-size: 20px; line-height: 1.55; }
+
+  /* MEMORY HOOK */
+  .memory {
+    background: linear-gradient(135deg, #06b6d4, #155e75);
+    color: #fff; text-align: center;
+    padding: 40px 28px; border: none;
+  }
+  .memory .label { color: rgba(255,255,255,0.85); }
+  .memory .quote {
+    font-size: clamp(26px, 3.5vw, 36px);
+    font-weight: 800; letter-spacing: -0.01em;
+  }
+
+  /* QUIZ */
+  .quiz { background: var(--card); border: 2px dashed var(--accent-ss); }
+  .quiz .label { color: var(--accent-ss); }
+  .quiz-q { font-size: 22px; font-weight: 500; margin-bottom: 20px; }
+  .quiz-answer {
+    background: var(--card-2); padding: 18px;
+    border-radius: 12px; font-size: 18px;
+    color: var(--text-dim); cursor: pointer; user-select: none;
+    transition: all 0.3s ease;
+  }
+  .quiz-answer .hidden { opacity: 0; transition: opacity 0.4s ease; }
+  .quiz-answer.revealed .hidden { opacity: 1; }
+  .quiz-answer.revealed {
+    background: rgba(6,182,212,0.1); color: var(--text);
+    border: 1px solid var(--accent-ss);
+  }
+  .quiz-answer .tap {
+    display: block; text-align: center;
+    color: var(--accent-ss); font-weight: 600;
+  }
+  .quiz-answer.revealed .tap { display: none; }
+
+  .footer {
+    text-align: center; color: var(--text-dim);
+    font-size: 14px; margin-top: 40px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown { from {opacity:0; transform: translateY(-16px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+  @keyframes barGrow { to { transform: scaleX(1); } }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 48px 40px 100px; }
+    .card { padding: 44px 40px; }
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 24px 18px 60px; }
+    .card { padding: 28px 22px; border-radius: 20px; }
+    .phase .name { font-size: 9px; }
+    .sigma-row { grid-template-columns: 60px 1fr 80px; gap: 8px; }
+    .sigma-name { font-size: 15px; }
+    .sigma-dpmo { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="badge">
+    <span class="dot"></span>
+    <span>Lesson 27 · Manufacturing</span>
+  </div>
+
+  <h1><span class="emoji">📊</span>Six Sigma DMAIC</h1>
+  <p class="subtitle">Data-driven defect elimination — 3.4 defects per million.</p>
+
+  <!-- DEFINITION -->
+  <div class="card delay-1">
+    <div class="label">Quick Definition</div>
+    <p class="definition">
+      Six Sigma is a <strong>statistical method</strong> to reduce process variation. DMAIC is its 5-phase roadmap: <strong>D</strong>efine, <strong>M</strong>easure, <strong>A</strong>nalyze, <strong>I</strong>mprove, <strong>C</strong>ontrol.
+    </p>
+  </div>
+
+  <!-- DMAIC FLOW INTERACTIVE -->
+  <div class="card delay-2">
+    <div class="label">The 5 Phases — Tap to Explore</div>
+    <div class="dmaic-flow">
+      <div class="phase active" data-p="d"><span class="icon">🎯</span><div class="letter">D</div><div class="name">Define</div></div>
+      <div class="phase"        data-p="m"><span class="icon">📏</span><div class="letter">M</div><div class="name">Measure</div></div>
+      <div class="phase"        data-p="a"><span class="icon">🔬</span><div class="letter">A</div><div class="name">Analyze</div></div>
+      <div class="phase"        data-p="i"><span class="icon">🚀</span><div class="letter">I</div><div class="name">Improve</div></div>
+      <div class="phase"        data-p="c"><span class="icon">🛡️</span><div class="letter">C</div><div class="name">Control</div></div>
+    </div>
+
+    <div class="phase-detail" id="detail">
+      <h3>🎯 D · DEFINE</h3>
+      <p>Clearly state the problem, customer, goal, and scope. Charter the project so everyone knows what success looks like.</p>
+      <div class="tools">Tools: <b>Project Charter · SIPOC · Voice of Customer (VoC) · CTQ tree</b></div>
+    </div>
+  </div>
+
+  <!-- SIGMA LEVEL CHART -->
+  <div class="card delay-3">
+    <div class="label">What "Six Sigma" Quality Actually Means</div>
+    <div class="sigma-viz">
+      <div class="sigma-row">
+        <div class="sigma-name">2σ</div>
+        <div class="sigma-bar"><div class="sigma-fill" style="width: 30%;"></div></div>
+        <div class="sigma-dpmo">308,538 DPMO</div>
+      </div>
+      <div class="sigma-row">
+        <div class="sigma-name">3σ</div>
+        <div class="sigma-bar"><div class="sigma-fill" style="width: 55%;"></div></div>
+        <div class="sigma-dpmo">66,807 DPMO</div>
+      </div>
+      <div class="sigma-row">
+        <div class="sigma-name">4σ</div>
+        <div class="sigma-bar"><div class="sigma-fill" style="width: 75%;"></div></div>
+        <div class="sigma-dpmo">6,210 DPMO</div>
+      </div>
+      <div class="sigma-row">
+        <div class="sigma-name">5σ</div>
+        <div class="sigma-bar"><div class="sigma-fill" style="width: 92%;"></div></div>
+        <div class="sigma-dpmo">233 DPMO</div>
+      </div>
+      <div class="sigma-row">
+        <div class="sigma-name">6σ</div>
+        <div class="sigma-bar"><div class="sigma-fill" style="width: 100%;"></div></div>
+        <div class="sigma-dpmo">3.4 DPMO</div>
+      </div>
+      <div style="margin-top: 14px; font-size: 14px; color: var(--text-dim); font-style: italic;">
+        DPMO = Defects Per Million Opportunities. Most plants run at 3–4σ. World-class &amp; aerospace: 6σ.
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY FACTS -->
+  <div class="card delay-3">
+    <div class="label">Key Facts</div>
+    <ul class="facts">
+      <li><span class="check">✓</span> Born at Motorola (1986); scaled by GE under Jack Welch</li>
+      <li><span class="check">✓</span> Belts: Yellow → Green → Black → Master Black Belt</li>
+      <li><span class="check">✓</span> Heavy use of statistics: SPC, ANOVA, regression, DOE</li>
+      <li><span class="check">✓</span> DMADV variant for designing new processes (Design)</li>
+      <li><span class="check">✓</span> Pairs with Lean → "Lean Six Sigma"</li>
+    </ul>
+  </div>
+
+  <!-- EXAMPLE -->
+  <div class="card example delay-4">
+    <div class="label">Real Industrial Example</div>
+    <div class="icon-large">🔧</div>
+    <p>
+      A <strong>fastener supplier</strong> runs DMAIC: thread reject rate cut from 4.2% → 0.18%. Saves $1.2M/yr in scrap + warranty claims. Sigma level jumps from 3.2σ to 4.7σ.
+    </p>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="card quiz delay-5">
+    <div class="label">Quick Check</div>
+    <p class="quiz-q">Q: How is DMAIC different from a simple 5-Why analysis?</p>
+    <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+      <span class="tap">Tap to reveal answer ↓</span>
+      <span class="hidden">
+        <strong>A:</strong> 5 Whys is fast & qualitative — opinions chained together. DMAIC is statistical & rigorous — every step demands data, hypothesis tests, and a Control plan to lock the gain in place. Use 5 Whys for daily issues; DMAIC for chronic, $$$$ problems.
+      </span>
+    </div>
+  </div>
+
+  <!-- MEMORY HOOK -->
+  <div class="card memory delay-5">
+    <div class="label">Memory Hook</div>
+    <p class="quote">"DMAIC = Define, Measure, Analyze, Improve, Control."</p>
+  </div>
+
+  <div class="footer">
+    Lesson 27 of the Industrial Engineering Micro-Learning Series
+  </div>
+
+</div>
+
+<script>
+  const data = {
+    d: { ttl: '🎯 D · DEFINE',
+         text: 'Clearly state the problem, customer, goal, and scope. Charter the project so everyone knows what success looks like.',
+         tools: 'Tools: <b>Project Charter · SIPOC · Voice of Customer (VoC) · CTQ tree</b>' },
+    m: { ttl: '📏 M · MEASURE',
+         text: 'Quantify the current state. Validate the measurement system, collect baseline data, establish process capability (Cp / Cpk).',
+         tools: 'Tools: <b>MSA · Pareto · Histogram · Cpk · Run charts</b>' },
+    a: { ttl: '🔬 A · ANALYZE',
+         text: 'Find the real causes — not assumed ones. Use statistics to confirm what really drives variation.',
+         tools: 'Tools: <b>Fishbone · 5 Whys · Hypothesis tests · ANOVA · Regression</b>' },
+    i: { ttl: '🚀 I · IMPROVE',
+         text: 'Generate and test solutions. Optimize the process using designed experiments, then pilot before full rollout.',
+         tools: 'Tools: <b>DOE · Brainstorming · Poka-Yoke · Pilot trials</b>' },
+    c: { ttl: '🛡️ C · CONTROL',
+         text: 'Lock in the gain. Standardize, document, and monitor with control charts so the process doesn\'t drift back.',
+         tools: 'Tools: <b>SPC control charts · SOPs · Visual management · Audits</b>' }
+  };
+
+  const detail = document.getElementById('detail');
+  document.querySelectorAll('.phase').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('.phase').forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+      const d = data[p.dataset.p];
+      detail.innerHTML = `<h3>${d.ttl}</h3><p>${d.text}</p><div class="tools">${d.tools}</div>`;
+    });
+  });
+</script>
+</body>
+</html>

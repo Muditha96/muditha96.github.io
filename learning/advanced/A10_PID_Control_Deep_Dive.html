@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PID Control — Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #c084fc;       /* purple — matches micro card 10 PID theme */
+    --accent-soft: #d8b4fe;
+    --accent-2: #a3e635;     /* lime — the "linked to micro" colour */
+    --accent-3: #fbbf24;
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #34d399;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(192,132,252,0.14), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(163,230,53,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--bg); background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(192,132,252,0.35);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(192,132,252,0.12), rgba(163,230,53,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent-2);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-2); background: rgba(163,230,53,0.12); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-lime { border-top-color: var(--accent-2)!important; } .c-lime .big{color:var(--accent-2)}
+  .c-amb  { border-top-color: var(--accent-3)!important; } .c-amb .big{color:var(--accent-3)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  figure.photo { margin-top:16px; background:var(--card-2); border:1px solid var(--border); border-radius:16px; padding:10px; overflow:hidden; }
+  figure.photo img { width:100%; height:auto; display:block; border-radius:10px; }
+  figure.photo figcaption { font-size:12.5px; color:var(--text-dim); text-align:center; margin-top:10px; font-style:italic; padding:0 6px 4px; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .lang { background: var(--card-2); border-radius:14px; padding:18px; border-left:4px solid var(--accent); }
+  .lang .tag { font-family:ui-monospace,monospace; font-weight:800; font-size:13px; color:var(--accent); }
+  .lang h4 { font-size:16px; margin:4px 0 6px; }
+  .lang p { font-size:14px; color:var(--text-dim); }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)} .eqn .vb{color:var(--blue)} .eqn .vt{color:var(--teal)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .pro { background: linear-gradient(145deg, rgba(192,132,252,0.08), transparent); border:1px solid rgba(192,132,252,0.22); border-radius:14px; padding:16px; }
+  .pro .pt { font-weight:700; color:var(--accent); margin-bottom:6px; font-size:15px; }
+  .pro p { font-size:13.5px; color:var(--text-dim); }
+  .pro em { color:var(--accent-3); font-style:normal; font-weight:600; }
+
+  .term-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:14px; }
+  .term { background:var(--card-2); border-radius:16px; padding:20px 18px; text-align:center; border-top:4px solid var(--accent); }
+  .term .L { font-size:46px; font-weight:900; line-height:1; font-family:ui-monospace,monospace; }
+  .term h4 { font-size:15px; margin:10px 0 6px; }
+  .term p { font-size:13px; color:var(--text-dim); }
+  .term.p { border-top-color:var(--blue);} .term.p .L{color:var(--blue);text-shadow:0 0 22px rgba(96,165,250,.4);}
+  .term.i { border-top-color:var(--accent-3);} .term.i .L{color:var(--accent-3);text-shadow:0 0 22px rgba(251,191,36,.4);}
+  .term.d { border-top-color:var(--green);} .term.d .L{color:var(--green);text-shadow:0 0 22px rgba(52,211,153,.4);}
+
+  .memory { background: linear-gradient(135deg, var(--accent), #4c1d95); color: #f5f0ff; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(255,255,255,0.78); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(192,132,252,0.08); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo-row { display:flex; gap:18px; flex-wrap:wrap; align-items:center; justify-content:center; margin-top:8px; }
+  .slider-box { background:var(--card-2); border-radius:12px; padding:14px 18px; min-width:150px; }
+  .slider-box label { font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); display:block; margin-bottom:8px; }
+  .slider-box .val { font-family:ui-monospace,monospace; font-weight:800; color:var(--accent); font-size:18px; }
+  input[type=range]{ width:100%; accent-color:var(--accent); }
+  .preset-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
+  .preset-row button{background:var(--card-3);border:1px solid var(--accent);color:var(--accent-soft);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;}
+  .preset-row button:active{background:var(--accent);color:var(--bg);}
+  .verdict { text-align:center; margin-top:14px; font-family:ui-monospace,monospace; font-size:15px; color:var(--text-dim); }
+  .verdict strong{ color:var(--accent); }
+
+  @keyframes fadeUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.4);opacity:.65;} }
+  @media (max-width: 620px){ .grid-2,.grid-3,.fail-grid,.term-row{grid-template-columns:1fr;} .container{padding:26px 16px 70px;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Track · MSc-Level Deep Dive · ~10 pages</span></div>
+  <h1 class="hero"><span class="emoji">🎚️</span>PID Control</h1>
+  <p class="hero-sub">The single most-used control algorithm on Earth — from the error signal and three terms, to tuning rules, anti-windup, filtering, cascade &amp; feed-forward, and the discrete code that runs inside every PLC and drive.</p>
+
+  <div class="connect">
+    <span class="pill">↔ MICRO 10</span>
+    <span>This deep dive expands the 90-second card <a href="../10_PID_Control.html">“PID Control”</a>. The card gave you the hook — <em>P reacts now, I remembers, D predicts.</em> Here we derive each term, prove why it behaves that way, and turn it into working industrial code. It also underpins the loops you met in <a href="A09_Servo_Motion_Deep_Dive.html">A09 Servo</a> and <a href="A08_VFD_Deep_Dive.html">A08 VFD</a>.</span>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · The closed loop</a>
+    <a href="#p2">2 · The three terms</a>
+    <a href="#p3">3 · P term</a>
+    <a href="#p4">4 · I term &amp; windup</a>
+    <a href="#p5">5 · D term &amp; filtering</a>
+    <a href="#p6">6 · Tuning methods</a>
+    <a href="#p7">7 · Interactive tuner</a>
+    <a href="#p8">8 · Forms &amp; discrete code</a>
+    <a href="#p9">9 · Cascade &amp; feed-forward</a>
+    <a href="#p10">10 · Practice + recall</a>
+    <a href="#p11">11 · Worked examples</a>
+    <a href="#p12">12 · Problem set</a>
+    <a href="#p13">13 · Derivations &amp; traps</a>
+    <a href="#p14">14 · Study &amp; practice</a>
+  </div>
+
+  <!-- PAGE 1 -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 · Foundations</span>
+    <h2 class="page-title">The Closed Loop — Where PID Lives</h2>
+    <div class="card">
+      <div class="label">Precise Definition</div>
+      <p class="lead">A <span class="hl">PID controller</span> is a <strong>feedback algorithm</strong> that continuously computes an <em>error</em> — the difference between a desired setpoint and the measured process value — and drives an output that pushes that error toward zero, using three weighted responses to the <strong>present, past and predicted</strong> error.</p>
+      <p class="body">Every closed-loop control problem has the same five blocks. The PID is the <span class="hl2">controller</span> block; everything else is the machine it commands. Master this diagram and 90% of control engineering is naming which block is which.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 680 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Closed loop block diagram: setpoint, summing junction, PID controller, actuator, process, sensor feedback">
+          <defs><marker id="ar1" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#94a3b8"/></marker></defs>
+          <text x="14" y="60" fill="#a3e635" font-size="13" font-weight="700">Setpoint</text>
+          <text x="14" y="76" fill="#94a3b8" font-size="11">SP (r)</text>
+          <!-- summing junction -->
+          <circle cx="120" cy="60" r="18" fill="#1a2230" stroke="#c084fc" stroke-width="2"/>
+          <text x="120" y="65" fill="#f1f5f9" font-size="16" text-anchor="middle">Σ</text>
+          <text x="103" y="50" fill="#a3e635" font-size="13">+</text>
+          <text x="103" y="86" fill="#f87171" font-size="14">−</text>
+          <!-- PID -->
+          <rect x="180" y="38" width="120" height="44" rx="9" fill="#1a2230" stroke="#c084fc" stroke-width="2.5"/>
+          <text x="240" y="58" fill="#c084fc" font-size="15" font-weight="800" text-anchor="middle">PID</text>
+          <text x="240" y="74" fill="#94a3b8" font-size="10" text-anchor="middle">controller</text>
+          <!-- actuator -->
+          <rect x="340" y="38" width="110" height="44" rx="9" fill="#1a2230" stroke="#60a5fa" stroke-width="2"/>
+          <text x="395" y="58" fill="#60a5fa" font-size="13" font-weight="700" text-anchor="middle">Actuator</text>
+          <text x="395" y="74" fill="#94a3b8" font-size="10" text-anchor="middle">valve / drive</text>
+          <!-- process -->
+          <rect x="490" y="38" width="120" height="44" rx="9" fill="#232d3f" stroke="#2dd4bf" stroke-width="2"/>
+          <text x="550" y="58" fill="#2dd4bf" font-size="13" font-weight="700" text-anchor="middle">Process</text>
+          <text x="550" y="74" fill="#94a3b8" font-size="10" text-anchor="middle">the plant</text>
+          <!-- forward arrows -->
+          <g stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#ar1)">
+            <line x1="70" y1="60" x2="100" y2="60"/>
+            <line x1="138" y1="60" x2="178" y2="60"/>
+            <line x1="300" y1="60" x2="338" y2="60"/>
+            <line x1="450" y1="60" x2="488" y2="60"/>
+            <line x1="610" y1="60" x2="650" y2="60"/>
+          </g>
+          <text x="318" y="52" fill="#c084fc" font-size="11">u(t)</text>
+          <text x="628" y="52" fill="#2dd4bf" font-size="11">y(t)</text>
+          <!-- sensor / feedback -->
+          <rect x="300" y="160" width="120" height="40" rx="9" fill="#1a2230" stroke="#fbbf24" stroke-width="2"/>
+          <text x="360" y="184" fill="#fbbf24" font-size="13" font-weight="700" text-anchor="middle">Sensor</text>
+          <g stroke="#fbbf24" stroke-width="1.8" fill="none" marker-end="url(#ar1)">
+            <path d="M635 82 L635 180 L422 180"/>
+            <path d="M300 180 L120 180 L120 80"/>
+          </g>
+          <text x="470" y="150" fill="#fbbf24" font-size="11">measured value (PV)</text>
+          <text x="150" y="150" fill="#94a3b8" font-size="11">feedback path</text>
+        </svg>
+        <p class="cap">The summing junction makes the error <b>e = SP − PV</b>. The PID turns that error into the actuator command u(t). The loop never stops correcting.</p>
+      </div>
+      <p class="body" style="margin-top:14px">Two ideas decide everything that follows. <span class="hl">Error</span> <span class="mono">e(t) = SP − PV</span> is the only thing the controller sees. And <strong>feedback</strong> means the output you command changes the very measurement you read next — a self-correcting circle that can be made fast and stable, or made to oscillate, depending entirely on how you tune the three terms.</p>
+    </div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 · The Algorithm</span>
+    <h2 class="page-title">The Three Terms in One Equation</h2>
+    <div class="card">
+      <p class="body">The whole controller is one line of mathematics. Each term answers a different question about the error.</p>
+      <div class="eqn">u(t) = <b>Kp·e(t)</b>  +  <span class="v3">Ki·∫e(t)dt</span>  +  <span class="v2">Kd·de(t)/dt</span>
+         └─ <b>present</b> ──┘   └── <span class="v3">past</span> ──┘   └─ <span class="v2">future</span> ─┘
+            proportional        integral            derivative</div>
+      <div class="term-row">
+        <div class="term p"><div class="L">P</div><h4>Proportional · NOW</h4><p>Reacts to the error happening right now. Bigger error → bigger push. The muscle of the loop.</p></div>
+        <div class="term i"><div class="L">I</div><h4>Integral · PAST</h4><p>Accumulates error over time. Keeps pushing until the leftover error is gone. The memory.</p></div>
+        <div class="term d"><div class="L">D</div><h4>Derivative · FUTURE</h4><p>Reacts to how fast error is changing. Anticipates and brakes early. The crystal ball.</p></div>
+      </div>
+      <p class="body" style="margin-top:18px">This is the deep version of the micro-card hook <span class="hl">“P reacts now, I remembers, D predicts.”</span> The art is the three gains <span class="mono">Kp, Ki, Kd</span>. Get them right and the process is fast, accurate and stable. Get them wrong and you get sluggish response, permanent offset, or violent oscillation. Pages 3–5 take each term apart; Pages 6–7 set the gains.</p>
+      <div class="pro" style="margin-top:14px"><div class="pt">Why PID dominates industry</div><p>It needs <em>no mathematical model</em> of the process, works on almost any single-input/single-output loop, runs in a few lines of code, and is intuitive to tune by hand. An estimated <em>over 95% of all industrial control loops</em> — temperature, pressure, flow, level, speed, position — are PID or a simplified PI.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 · The Muscle</span>
+    <h2 class="page-title">The Proportional Term — and Why It Leaves Offset</h2>
+    <div class="card">
+      <p class="body">The P term outputs a correction <strong>proportional to the present error</strong>: <span class="mono">u_P = Kp·e</span>. Double the error, double the push. <span class="hl">Kp</span> is the loop's aggressiveness.</p>
+      <div class="grid-2" style="margin-top:8px">
+        <div class="mini c-blue"><h4>Low Kp</h4><p>Gentle, stable, but slow — and a large permanent gap to setpoint.</p></div>
+        <div class="mini c-org"><h4>High Kp</h4><p>Fast and tight, but overshoots and eventually oscillates as gain rises.</p></div>
+      </div>
+      <div class="label" style="margin-top:20px">The fatal flaw: steady-state offset (droop)</div>
+      <p class="body">A pure-P controller almost always settles <em>below</em> setpoint. The reason is simple and worth internalising: the actuator needs <strong>some</strong> output just to hold position against the load — but the P term can only produce output if an error <em>still exists.</em> So the loop must keep a small permanent error to generate the holding output. That residual gap is called <span class="hl">offset</span> or <em>droop</em>.</p>
+      <div class="eqn">To hold the load, actuator needs output <b>u_hold</b>.
+P-only output is <b>u = Kp·e</b>  →  steady state needs <b>e = u_hold / Kp ≠ 0</b>
+Bigger Kp → smaller offset, but never zero, and ringing arrives first.</div>
+      <p class="body" style="margin-top:6px"><strong>Process-control language:</strong> instead of Kp, the field often uses <span class="hl3">Proportional Band (PB)</span> = 100 / Kp (%). A 20% PB means the output swings full-scale over 20% of the measurement range — a high-gain, aggressive setting. The cure for offset is the Integral term, next.</p>
+
+      <div class="term-row" style="grid-template-columns:1fr 1fr;">
+        <div class="mini c-blue"><h4>Kp ≡ gain</h4><p>Controls / instrumentation use Kp directly. High Kp = aggressive.</p></div>
+        <div class="mini c-amb"><h4>PB ≡ 100/Kp</h4><p>Process industries use Proportional Band %. Low PB = aggressive.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 · The Memory</span>
+    <h2 class="page-title">The Integral Term &amp; the Windup Trap</h2>
+    <div class="card">
+      <p class="body">The I term sums error over time: <span class="mono">u_I = Ki·∫e dt</span>. As long as <em>any</em> error remains, the integral keeps growing and keeps adding output — so it <strong>drives steady-state offset to exactly zero.</strong> This is why almost every real loop is at least <span class="hl">PI</span>.</p>
+      <div class="eqn">Often written with <b>integral time Ti</b> (seconds/repeat):  Ki = Kp / Ti
+Small Ti → strong, fast integral action (and more overshoot)
+Large Ti → gentle, slow integral action</div>
+      <div class="label" style="margin-top:18px">Integral windup — the classic field failure</div>
+      <p class="body">Every real actuator <strong>saturates</strong>: a valve can only open 100%, a drive can only deliver peak torque. Suppose the setpoint jumps far away. The output pins at maximum, yet the error stays large, so the integral keeps <em>accumulating</em> a huge value it can never use. When the process finally reaches setpoint, the integral is so over-charged that the output stays slammed on — producing a big, slow overshoot while it “unwinds.”</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 660 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Windup vs anti-windup response curves">
+          <line x1="46" y1="20" x2="46" y2="186" stroke="#475569" stroke-width="1.5"/>
+          <line x1="46" y1="186" x2="640" y2="186" stroke="#475569" stroke-width="1.5"/>
+          <line x1="46" y1="70" x2="640" y2="70" stroke="#a3e635" stroke-width="1.5" stroke-dasharray="6 5"/>
+          <text x="52" y="64" fill="#a3e635" font-size="11">setpoint</text>
+          <!-- windup curve: big overshoot -->
+          <path d="M46 186 C 150 186 150 30 300 30 C 360 30 380 70 640 70" fill="none" stroke="#f87171" stroke-width="2.5"/>
+          <text x="300" y="24" fill="#f87171" font-size="12" font-weight="700">with windup → large overshoot</text>
+          <!-- anti-windup curve: clean -->
+          <path d="M46 186 C 170 186 200 72 320 71 C 430 70 470 70 640 70" fill="none" stroke="#34d399" stroke-width="2.5"/>
+          <text x="430" y="98" fill="#34d399" font-size="12" font-weight="700">anti-windup → clean settle</text>
+          <text x="520" y="206" fill="#64748b" font-size="11">time →</text>
+        </svg>
+        <p class="cap">Same gains, same setpoint step. The only difference is whether the integrator is protected during saturation.</p>
+      </div>
+      <ul class="tips" style="margin-top:16px">
+        <li><span class="num">1</span><div><b>Clamping</b> — stop integrating whenever the output is saturated. Simple, robust, the most common method in PLCs.</div></li>
+        <li><span class="num">2</span><div><b>Back-calculation</b> — feed the difference between commanded and actual (clamped) output back into the integrator to “bleed” it down at a tunable rate.</div></li>
+        <li><span class="num">3</span><div><b>Conditional integration</b> — only integrate when the error is within a sensible band near setpoint.</div></li>
+      </ul>
+      <div class="pro" style="margin-top:14px"><div class="pt">Rule for the floor</div><p>If a loop overshoots badly <em>only after a big setpoint change or a long startup</em>, suspect windup before you re-tune. A well-implemented anti-windup turns an ugly loop into a clean one without touching Kp or Ki.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 5 -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 · The Crystal Ball</span>
+    <h2 class="page-title">The Derivative Term, Noise &amp; Filtering</h2>
+    <div class="card">
+      <p class="body">The D term responds to the <strong>rate of change</strong> of error: <span class="mono">u_D = Kd·de/dt</span>. If error is shrinking fast, D <em>brakes early</em> — it adds damping, reduces overshoot, and lets you run higher Kp. It predicts where the error is heading and acts before it gets there.</p>
+      <div class="eqn">Often written with <b>derivative time Td</b> (seconds):  Kd = Kp · Td
+D contributes only during <span class="vt">change</span> — it is zero at steady state.</div>
+      <div class="label" style="margin-top:18px">Why D is feared: it amplifies noise</div>
+      <p class="body">Differentiation multiplies high-frequency content. A noisy sensor signal has small but very <em>fast</em> wiggles; <span class="mono">de/dt</span> turns those into large spikes that hammer the actuator. Three standard defences make D usable:</p>
+      <div class="grid-3" style="margin-top:12px">
+        <div class="mini c-teal"><h4>Derivative filter</h4><p>Low-pass the D term (filter coefficient N ≈ 8–20). The “real” PID is always PI-D-with-filter.</p></div>
+        <div class="mini c-purp"><h4>Derivative on PV</h4><p>Differentiate the measurement, not the error — so a setpoint step doesn't cause a violent “derivative kick.”</p></div>
+        <div class="mini c-org"><h4>Just use PI</h4><p>Many loops (flow, level, pressure) are noisy or fast enough that D hurts. PI is the workhorse; PID is for slow, clean loops.</p></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:18px">
+        <table>
+          <tr><th>Loop type</th><th>Typical form</th><th>Why</th></tr>
+          <tr><td><b>Flow</b></td><td>PI (P small, I fast)</td><td>Very noisy &amp; fast — D would amplify turbulence noise</td></tr>
+          <tr><td><b>Pressure / Level</b></td><td>PI</td><td>Fast and often noisy; integral removes offset</td></tr>
+          <tr><td><b>Temperature</b></td><td>PID</td><td>Slow, clean, large lag — D shines here, predicting overshoot</td></tr>
+          <tr><td><b>Motion / position</b></td><td>P + velocity-PI (cascade)</td><td>See A09 — D handled as velocity feedback</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 6 -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 · Setting the Gains</span>
+    <h2 class="page-title">Tuning Methods — From Ziegler–Nichols to Lambda</h2>
+    <div class="card">
+      <p class="body">Tuning means choosing <span class="mono">Kp, Ki, Kd</span> so the loop is fast <em>and</em> stable. There is no single right answer — it's a trade-off between speed, overshoot and robustness. Four practical approaches dominate.</p>
+
+      <div class="label" style="margin-top:8px">1 · Ziegler–Nichols (Ultimate Gain)</div>
+      <p class="body">The classic 1942 recipe. Set I and D to zero, raise Kp until the loop oscillates with constant amplitude — that's the <span class="hl3">ultimate gain Ku</span> at <span class="hl3">period Tu</span>. Then read the gains from a table:</p>
+      <div class="tbl-wrap" style="margin-top:10px">
+        <table>
+          <tr><th>Controller</th><th>Kp</th><th>Ti</th><th>Td</th></tr>
+          <tr><td><b>P</b></td><td>0.5·Ku</td><td>—</td><td>—</td></tr>
+          <tr><td><b>PI</b></td><td>0.45·Ku</td><td>Tu/1.2</td><td>—</td></tr>
+          <tr><td><b>PID</b></td><td>0.6·Ku</td><td>Tu/2</td><td>Tu/8</td></tr>
+        </table>
+      </div>
+      <p class="body" style="margin-top:8px"><em>Caveat:</em> Z–N is aggressive (≈25% overshoot, quarter-amplitude decay) and pushing a real plant into oscillation can be unsafe. It's a starting point, not a final answer.</p>
+
+      <div class="label" style="margin-top:18px">2 · Lambda / IMC tuning (model-based)</div>
+      <p class="body">Modern, gentle, robust. Bump-test the process to find three numbers — process gain <span class="mono">K</span>, time constant <span class="mono">τ</span>, dead time <span class="mono">θ</span> (the FOPDT model). Then pick a desired closed-loop speed <span class="hl">λ</span> and compute the gains. Larger λ = slower but more robust. Preferred where overshoot is unacceptable (most process plants).</p>
+      <div class="eqn">FOPDT model:  G(s) = <b>K·e^(−θs)</b> / (<vt>τ</vt>s + 1)
+Lambda PI:    Kp = <vt>τ</vt> / (K·(<b>λ</b>+θ))      Ti = <vt>τ</vt></div>
+
+      <div class="grid-2" style="margin-top:16px">
+        <div class="mini c-purp"><h4>3 · Auto-tune</h4><p>The controller injects a relay or step test and computes gains itself. Built into virtually every modern PLC, drive and smart loop controller.</p></div>
+        <div class="mini c-blue"><h4>4 · Manual / heuristic</h4><p>Raise Kp for speed → add I to kill offset → add a little D to tame overshoot. Slow loops: be patient, dead time bites.</p></div>
+      </div>
+      <div class="pro" style="margin-top:14px"><div class="pt">The enemy is dead time (θ)</div><p>Dead time — pure transport delay before the process even <em>starts</em> to respond — is what makes loops hard. A high θ/τ ratio forces low gains and slow tuning, because the controller is always acting on old information. When dead time dominates, a <em>Smith Predictor</em> or model-predictive control beats plain PID.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 7 — INTERACTIVE -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 · Active Recall</span>
+    <h2 class="page-title">Interactive — Tune a PID Loop</h2>
+    <div class="card">
+      <p class="body">Drag <span class="hl">Kp, Ki, Kd</span> and watch the step response of a process with lag and a little dead time. Goal: a <span class="hl2">fast rise, small overshoot, zero final offset, no sustained ringing.</span> Try the presets to feel each failure mode from Pages 3–6.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 640 230" xmlns="http://www.w3.org/2000/svg">
+          <line x1="50" y1="20" x2="50" y2="196" stroke="#475569" stroke-width="1.5"/>
+          <line x1="50" y1="196" x2="612" y2="196" stroke="#475569" stroke-width="1.5"/>
+          <line x1="50" y1="70" x2="612" y2="70" stroke="#a3e635" stroke-width="1.5" stroke-dasharray="6 5"/>
+          <text x="56" y="64" fill="#a3e635" font-size="11">setpoint</text>
+          <text x="16" y="200" fill="#64748b" font-size="11">0</text>
+          <polyline id="respCurve" fill="none" stroke="#c084fc" stroke-width="2.5" points=""/>
+          <text x="520" y="212" fill="#64748b" font-size="11">time →</text>
+          <text x="10" y="110" fill="#64748b" font-size="11" transform="rotate(-90 14 110)">process value</text>
+        </svg>
+        <div class="demo-row">
+          <div class="slider-box"><label>Kp · <span class="val" id="kpV">3.0</span></label><input type="range" id="kp" min="0" max="100" value="30"></div>
+          <div class="slider-box"><label>Ki · <span class="val" id="kiV">0.8</span></label><input type="range" id="ki" min="0" max="60" value="8"></div>
+          <div class="slider-box"><label>Kd · <span class="val" id="kdV">0.4</span></label><input type="range" id="kd" min="0" max="60" value="4"></div>
+        </div>
+        <div class="preset-row">
+          <button data-p="30,0,0">P-only (see offset)</button>
+          <button data-p="30,8,0">PI (offset gone)</button>
+          <button data-p="55,30,2">Too hot (ringing)</button>
+          <button data-p="34,9,6">Tuned PID</button>
+        </div>
+        <div class="verdict" id="verdict">Response: <strong>tuned</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 8 -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 · The Code</span>
+    <h2 class="page-title">Controller Forms &amp; the Discrete Implementation</h2>
+    <div class="card">
+      <p class="body">Two algebraically-different layouts of the same controller exist, and confusing them is a real tuning hazard.</p>
+      <div class="grid-2" style="margin-top:8px">
+        <div class="lang"><span class="tag">IDEAL / PARALLEL</span><h4>Kp, Ki, Kd independent</h4><p>u = Kp·e + Ki∫e + Kd·de/dt. Each gain acts alone. Common in textbooks &amp; many PLC function blocks.</p></div>
+        <div class="lang"><span class="tag">STANDARD / SERIES</span><h4>Kp scales all three</h4><p>u = Kp·(e + (1/Ti)∫e + Td·de/dt). Kp multiplies I and D too — change Kp and the others move with it. Common in process controllers.</p></div>
+      </div>
+      <div class="label" style="margin-top:18px">From calculus to code — the velocity (incremental) form</div>
+      <p class="body">A PLC or drive runs the loop at a fixed sample time <span class="mono">Δt</span> (the scan — recall <a href="A07_PLC_Deep_Dive.html" style="color:var(--accent-soft)">A07 PLC</a>). The integral becomes a running sum and the derivative a finite difference. The <em>velocity form</em> below computes the <strong>change</strong> in output each scan — it gives bumpless transfer and handles anti-windup naturally:</p>
+      <div class="eqn"><span class="vb">// runs every scan, period dt</span>
+e   = SP - PV
+P   = <b>Kp</b> * (e - e_prev)
+I   = <b>Ki</b> * e * dt
+D   = <b>Kd</b> * (PV_prev - PV) / dt   <span class="vb">// derivative on PV → no kick</span>
+du  = P + I + D
+out = out_prev + du
+out = clamp(out, OUT_MIN, OUT_MAX)   <span class="vb">// saturate → anti-windup</span>
+e_prev = e ;  PV_prev = PV ;  out_prev = out</div>
+      <ul class="tips" style="margin-top:16px">
+        <li><span class="num">1</span><div><b>Sample fast enough.</b> Rule of thumb: 10× faster than the loop's response. Too slow a scan = phantom lag and instability.</div></li>
+        <li><span class="num">2</span><div><b>Derivative on PV, not error.</b> Stops the setpoint-step “derivative kick” — standard in industrial blocks.</div></li>
+        <li><span class="num">3</span><div><b>Bumpless &amp; mode-aware.</b> On Auto→Manual→Auto switches, pre-load the integrator so the output doesn't jump.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PAGE 9 -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 · Beyond a Single Loop</span>
+    <h2 class="page-title">Cascade, Feed-Forward &amp; Where PID Connects</h2>
+    <div class="card">
+      <p class="body">Real machines chain and augment PID loops. Two structures appear everywhere and you already met them in the servo deep dive.</p>
+      <div class="label" style="margin-top:6px">Cascade control — a loop inside a loop</div>
+      <p class="body">An <span class="hl">outer (master)</span> loop controls the slow variable you care about; its output is the <em>setpoint</em> of an <span class="hl2">inner (slave)</span> loop that controls a fast variable. The inner loop crushes disturbances before they reach the outer one. This is exactly the position→velocity→current nest from <a href="A09_Servo_Motion_Deep_Dive.html" style="color:var(--accent-soft)">A09 Servo</a>.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 660 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cascade control: outer temperature loop sets inner flow loop setpoint">
+          <defs><marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#94a3b8"/></marker></defs>
+          <text x="14" y="60" fill="#a3e635" font-size="12">SP</text>
+          <rect x="50" y="38" width="130" height="44" rx="9" fill="#1a2230" stroke="#c084fc" stroke-width="2.2"/>
+          <text x="115" y="56" fill="#c084fc" font-size="13" font-weight="700" text-anchor="middle">Outer PID</text>
+          <text x="115" y="72" fill="#94a3b8" font-size="10" text-anchor="middle">temperature (slow)</text>
+          <rect x="240" y="38" width="130" height="44" rx="9" fill="#1a2230" stroke="#2dd4bf" stroke-width="2.2"/>
+          <text x="305" y="56" fill="#2dd4bf" font-size="13" font-weight="700" text-anchor="middle">Inner PID</text>
+          <text x="305" y="72" fill="#94a3b8" font-size="10" text-anchor="middle">steam flow (fast)</text>
+          <rect x="430" y="38" width="120" height="44" rx="9" fill="#232d3f" stroke="#60a5fa" stroke-width="2"/>
+          <text x="490" y="62" fill="#60a5fa" font-size="13" font-weight="700" text-anchor="middle">Valve→Plant</text>
+          <g stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#ar2)">
+            <line x1="30" y1="60" x2="48" y2="60"/>
+            <line x1="180" y1="60" x2="238" y2="60"/>
+            <line x1="370" y1="60" x2="428" y2="60"/>
+            <line x1="550" y1="60" x2="610" y2="60"/>
+          </g>
+          <text x="188" y="52" fill="#c084fc" font-size="10">flow SP</text>
+          <g stroke="#fbbf24" stroke-width="1.6" fill="none" marker-end="url(#ar2)">
+            <path d="M600 82 L600 130 L305 130 L305 84"/>
+            <path d="M305 130 L115 130 L115 84"/>
+          </g>
+          <text x="360" y="124" fill="#2dd4bf" font-size="10">fast flow feedback</text>
+          <text x="150" y="148" fill="#fbbf24" font-size="10">slow temperature feedback</text>
+        </svg>
+        <p class="cap">A pressure spike in the steam header is caught by the fast inner flow loop long before it can move the temperature — the outer loop barely notices.</p>
+      </div>
+      <div class="label" style="margin-top:18px">Feed-forward — don't wait for the error</div>
+      <p class="body">PID is <em>reactive</em> — it only acts after an error appears. <span class="hl3">Feed-forward</span> measures a known disturbance (or the command itself) and adds a calculated correction <em>before</em> the error happens. PID then only mops up the small leftover. In motion it's torque feed-forward; in a heat exchanger it's measuring inlet flow and pre-positioning the valve. Feed-forward + PID is the high-performance combination.</p>
+      <div class="grid-3" style="margin-top:8px">
+        <div class="mini c-pink"><h4>Drives / VFD (A08)</h4><p>PI speed &amp; current loops regulate motor speed and torque.</p></div>
+        <div class="mini c-purp"><h4>Servo (A09)</h4><p>Cascaded P-PI-PI position/velocity/current — pure PID inside.</p></div>
+        <div class="mini c-teal"><h4>Process (A14)</h4><p>SCADA/DCS run thousands of temperature, flow &amp; level PIDs.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 10 -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 · Engineering Practice</span>
+    <h2 class="page-title">Failures, Real Example &amp; Quick Check</h2>
+    <div class="card">
+      <div class="label">What actually goes wrong on the floor</div>
+      <div class="fail-grid" style="margin-top:6px">
+        <div class="fail"><div class="ft">⚠️ Permanent offset</div><p>Pure-P or integral disabled/too slow. Add or speed up integral action (raise Ki / lower Ti).</p></div>
+        <div class="fail"><div class="ft">⚠️ Big overshoot after a step</div><p>Integral windup during actuator saturation. Enable clamping or back-calculation anti-windup.</p></div>
+        <div class="fail"><div class="ft">⚠️ Buzzy, jittery output</div><p>Derivative amplifying sensor noise. Filter D, take derivative on PV, or drop to PI.</p></div>
+        <div class="fail"><div class="ft">⚠️ Slow rolling oscillation</div><p>Gains too high for the dead time, or scan too slow. Lower Kp/Ki; check sample time vs lag.</p></div>
+      </div>
+
+      <div class="label" style="margin-top:22px">Real Industrial Example — extrusion temperature control</div>
+      <p class="body">A plastic <strong>extruder barrel</strong> must hold each heating zone to ±1 °C. Temperature is slow, clean and full of lag — the textbook home for full <span class="hl">PID</span>. A band heater is the actuator (it saturates at 0–100% duty, so <em>anti-windup</em> is mandatory during warm-up), an RTD is the sensor (see <a href="A11_Industrial_Sensors_Deep_Dive.html" style="color:var(--accent-soft)">A11 Sensors</a>), and the loop runs in a PLC at a fixed scan (<a href="A07_PLC_Deep_Dive.html" style="color:var(--accent-soft)">A07</a>). The PLC's <em>auto-tune</em> does a relay test on startup, derivative-on-PV stops a kick when the recipe setpoint changes, and feed-forward from screw speed pre-heats the zone before the cold pellets arrive. Every term on this page is doing exactly one job.</p>
+
+      <div class="stage" style="margin-top:16px">
+        <svg class="illus" viewBox="0 0 660 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Comparison of P, PI and PID step responses against setpoint">
+          <line x1="50" y1="18" x2="50" y2="206" stroke="#475569" stroke-width="1.5"/>
+          <line x1="50" y1="206" x2="630" y2="206" stroke="#475569" stroke-width="1.5"/>
+          <line x1="50" y1="62" x2="630" y2="62" stroke="#a3e635" stroke-width="1.5" stroke-dasharray="6 5"/>
+          <text x="56" y="56" fill="#a3e635" font-size="11">setpoint</text>
+          <text x="14" y="210" fill="#64748b" font-size="11">0</text>
+          <!-- P only: settles below setpoint (offset) -->
+          <path d="M50 206 C 140 206 150 96 300 96 C 430 96 520 96 630 96" fill="none" stroke="#60a5fa" stroke-width="2.5"/>
+          <text x="500" y="112" fill="#60a5fa" font-size="12" font-weight="700">P only · offset ↓</text>
+          <!-- PI: reaches setpoint, slight overshoot -->
+          <path d="M50 206 C 150 206 165 40 300 56 C 400 66 460 62 630 62" fill="none" stroke="#fbbf24" stroke-width="2.5"/>
+          <text x="150" y="36" fill="#fbbf24" font-size="12" font-weight="700">PI · zero offset, overshoot</text>
+          <!-- PID: fast, damped -->
+          <path d="M50 206 C 150 206 200 64 300 62 C 430 60 500 62 630 62" fill="none" stroke="#c084fc" stroke-width="3"/>
+          <text x="430" y="48" fill="#c084fc" font-size="12" font-weight="700">PID · fast &amp; damped</text>
+          <text x="530" y="226" fill="#64748b" font-size="11">time →</text>
+          <text x="14" y="120" fill="#64748b" font-size="11" transform="rotate(-90 18 120)">process value</text>
+        </svg>
+        <p class="cap">Same process, same setpoint step. <b>P</b> (blue) leaves permanent offset; adding <b>I</b> (amber) erases offset but overshoots; adding filtered <b>D</b> (purple) damps it for a fast, clean settle.</p>
+      </div>
+
+      <div class="card quiz" style="margin-top:18px">
+        <div class="label">Quick Check</div>
+        <p class="quiz-q">A temperature loop holds setpoint perfectly during normal running, but every cold startup it <b>overshoots by 15 °C</b> and takes minutes to settle. The gains are otherwise fine. Name the cause and the fix — and say which term is responsible.</p>
+        <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+          <span class="tap">▸ Tap to reveal answer</span>
+          <div class="hidden"><b>Cause:</b> integral <b>windup</b>. During the long cold start the heater is saturated at 100% while a large error persists, so the <b>integral term</b> accumulates a huge value it can't use. When the barrel finally reaches setpoint the over-charged integrator keeps the heater slammed on, causing the overshoot while it unwinds. <b>Fix:</b> enable anti-windup — clamp (stop integrating) or back-calculate the integrator while the output is saturated. No re-tuning of Kp/Ki needed.</div>
+        </div>
+      </div>
+
+      <div class="card memory" style="margin-top:18px">
+        <div class="label">Memory Hook</div>
+        <div class="quote">“P pushes, I erases offset, D damps — clamp the I, filter the D.”</div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===== PAGE 11 · MSC PRACTICE PACK ===== -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 · Worked Examples</span>
+    <h2 class="page-title">Worked Examples — Full Solutions</h2>
+    <p class="page-sub">Four exam-grade tuning and analysis problems, solved line by line. Attempt each before revealing your eyes down the page.</p>
+
+    <div class="card">
+      <div class="label">WE-1 · Ziegler-Nichols closed-loop (ultimate) tuning</div>
+      <p class="body"><strong>Problem.</strong> With I and D off, a temperature loop first sustains constant-amplitude oscillation at K<sub>p</sub> = K<sub>u</sub> = 4.8, period P<sub>u</sub> = 110 s. Compute classic Z-N PID settings, and a conservative alternative.</p>
+      <div class="eqn"><b>Classic Z-N (PID):</b>  Kp = 0.6·Ku = <b>2.88</b>
+   Ti = Pu/2 = <b>55 s</b>   (Ki = Kp/Ti = 0.052 s⁻¹)
+   Td = Pu/8 = <b>13.8 s</b> (Kd = Kp·Td = 39.7)
+
+<b>Some-overshoot variant:</b> Kp = 0.33·Ku = 1.58,  Ti = Pu/2,  Td = Pu/3
+<b>PI only (noisy PV):</b>     Kp = 0.45·Ku = 2.16,  Ti = Pu/1.2 = 91.7 s</div>
+      <p class="body"><strong>Discussion.</strong> Z-N targets quarter-amplitude damping — aggressive, ~25 % overshoot. On processes where overshoot hurts (temperature with overshoot-sensitive product, level near trip points) start from the conservative row, or use IMC (WE-2). Always sanity-check: does P<sub>u</sub> ≈ 110 s square with the physics? A loop that oscillates at ~2 min has dead time + lag of tens of seconds — believable for temperature.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-2 · Step-test → FOPDT fit → IMC (lambda) tuning</div>
+      <p class="body"><strong>Problem.</strong> Open-loop step: output moved 10 %, PV (flow-jacketed reactor temp) eventually rose 8 °C on a 0–100 °C span. PV started moving after 20 s and reached 63.2 % of its final change 150 s after it started moving. Tune a PI controller for a smooth, robust response (λ = 3θ).</p>
+      <div class="eqn"><b>Step 1 — FOPDT model:</b>
+K = Δ%PV/Δ%OUT = (8/100×100%)/10% = <b>0.8</b> (dimensionless)
+θ (dead time) = <b>20 s</b> ,  τ (time constant) = <b>150 s</b>
+
+<b>Step 2 — IMC/lambda PI rules:</b>  choose λ = 3θ = 60 s
+Kc = τ / (K·(λ+θ)) = 150/(0.8×80) = <b>2.34</b>
+Ti = min(τ, 4(λ+θ)) → Ti = τ = <b>150 s</b></div>
+      <p class="body"><strong>Discussion.</strong> λ is your one honest knob: λ = θ is fast/fragile, λ = 3θ is the robust default, λ = 5θ+ for critical loops. Note the Skogestad SIMC alternative gives Kc = τ/(K·2θ)·½ →&nbsp;same order. If the model is poor (τ, θ within ±30 %), IMC with λ ≥ 3θ still behaves — that robustness is why the method owns process industry tuning.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-3 · One scan of the discrete velocity-form PID</div>
+      <p class="body"><strong>Problem.</strong> Velocity form, Ts = 0.1 s, Kp = 2.0, Ti = 5 s, Td = 0.5 s (derivative on PV, no filter for simplicity). Setpoint 50.0. Samples: PV[k−2] = 47.0, PV[k−1] = 47.6, PV[k] = 48.4. Previous output u[k−1] = 62.0 %. Compute u[k].</p>
+      <div class="eqn">e[k] = 50−48.4 = 1.6 ,  e[k−1] = 50−47.6 = 2.4
+Δu_P = Kp·(e[k]−e[k−1]) = 2.0·(1.6−2.4) = <b>−1.60</b>
+Δu_I = Kp·(Ts/Ti)·e[k] = 2.0·(0.1/5)·1.6 = <b>+0.064</b>
+Δu_D = −Kp·(Td/Ts)·(PV[k]−2PV[k−1]+PV[k−2])
+     = −2.0·(0.5/0.1)·(48.4−95.2+47.0) = −10·0.2 = <b>−2.00</b>
+u[k] = 62.0 −1.60 +0.064 −2.00 = <b>58.46 %</b></div>
+      <p class="body"><strong>Discussion.</strong> The PV is rising fast toward setpoint, so P and D <em>reduce</em> drive while I still nudges up — exactly the damping behaviour you want approaching target. Velocity form's gift: no integrator register to wind up, and bumpless transfer is free because u[k] builds on the actual previous output.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-4 · Proportional-only offset — predict it before you see it</div>
+      <p class="body"><strong>Problem.</strong> P-only level loop: process gain K = 1.5 (fraction PV per fraction OUT), Kp = 2.0. After a setpoint step ΔSP = 10 %, what steady-state offset remains? What Kp halves it, and what is the catch?</p>
+      <div class="eqn">Closed loop steady state:  e_ss = ΔSP/(1+Kp·K)
+e_ss = 10 %/(1+2.0×1.5) = 10/4 = <b>2.5 %</b>
+Halve it → need 1+KpK = 8 → Kp = 7/1.5 = <b>4.67</b>
+<b>Catch:</b> ×2.3 the gain slashes phase/gain margins — oscillation risk. The honest
+fix for offset is integral action, not gain escalation. (Surge-tank levels often
+WANT offset: P-only "averaging level control" absorbs flow swings deliberately.)</div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 12 ===== -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 · Problem Set</span>
+    <h2 class="page-title">Problem Set — Test Yourself</h2>
+    <p class="page-sub">Ten problems from definition to design. Paper first, then tap. Target 8/10.</p>
+
+    <div class="card quiz">
+      <div class="label">P1 · Units</div>
+      <p class="quiz-q">A vendor manual says "Proportional Band 25 %". What Kp is that, and why do vendors still use PB?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">▸ Tap to reveal answer</span>
+        <div class="hidden">Kp = 100/PB = <b>4.0</b>. PB is the % of span the error must traverse to swing the output full-scale — intuitive for operators ("narrow band = twitchy"). Also check Ti units: minutes/repeat vs seconds vs repeats/min differ across vendors and have caused real oscillation incidents on "identical" settings.</div></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P2 · Term identification</div>
+      <p class="quiz-q">A loop responds to a setpoint step with a sharp output spike that instantly decays, then a ramp. Which terms produced which feature, and what tells you D is on error rather than PV?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">▸ Tap to reveal answer</span>
+        <div class="hidden">Spike = <b>derivative kick</b> (D differentiating the setpoint step), decay then ramp = P step + <b>I ramp</b>. A kick on <em>setpoint change</em> (not disturbance) is the signature of D-on-error; derivative-on-PV removes it because SP steps don't pass through the PV path.</div></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P3 · Relay autotune</div>
+      <p class="quiz-q">A relay (on-off) test with output amplitude d = 10 % produces PV oscillation amplitude a = 2.5 % at period 80 s. Find Ku and Pu, and Z-N PI settings.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">▸ Tap to reveal answer</span>
+        <div class="hidden">Ku = 4d/(πa) = 40/(π·2.5) = <b>5.09</b>; Pu = <b>80 s</b> (read directly). PI: Kp = 0.45·Ku = 2.29, Ti = Pu/1.2 = 66.7 s. This is exactly what a PLC "autotune" button does — a controlled relay experiment plus these formulas.</div></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P4 · Sample time</div>
+      <p class="quiz-q">Process time constant τ = 2 s, dead time 0.3 s. Your PLC task runs PID every 500 ms. Acceptable? State the rule and the failure mode.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">▸ Tap to reveal answer</span>
+        <div class="hidden">Rule of thumb Ts ≤ τ/10 (and ≤ θ/2): need ≤ 0.2 s (and ≤ 0.15 s). 500 ms is <b>too slow</b> — added effective dead time ≈ Ts/2 erodes phase margin; the loop hunts and tuning "won't hold". Move the loop to a 100 ms task or a faster controller.</div></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P5 · Windup arithmetic</div>
+      <p class="quiz-q">Heater saturated at 100 % for 120 s with a constant error of 8 % (Kp = 2, Ti = 30 s, no anti-windup). How much surplus output has the integrator stored, and what does it mean physically?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">▸ Tap to reveal answer</span>
+        <div class="hidden">Integral contribution grows by Kp·(1/Ti)·e·t = 2×(1/30)×8×120 = <b>64 %</b> of output span beyond what saturation could deliver. After PV reaches setpoint, the loop must "burn off" that 64 % by integrating negative error — i.e. a guaranteed, prolonged overshoot. Clamping the integrator during saturation stores ~0.</div></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P6 · Filtered derivative</div>
+      <p class="quiz-q">Why is pure derivative unusable on a real 4–20 mA signal, and what does the filter constant N ≈ 8–20 in Td/N actually set?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">▸ Tap to reveal answer</span>
+        <div class="hidden">Differentiation multiplies each noise frequency ω by ω — high-frequency sensor noise dominates and slams the actuator. The practical D term is Td·s/(1+Td·s/N): a differentiator that rolls off above N/Td rad/s. N sets the max derivative gain (= Kp·N). Small N = smooth but weak D; large N = crisp but noisy. 10 is the classic default.</div></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P7 · Cascade design</div>
+      <p class="quiz-q">Furnace outlet temperature (slow) cascades to fuel flow (fast). State the two conditions that make cascade worth it, and which loop you tune first.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">▸ Tap to reveal answer</span>
+        <div class="hidden">(1) Inner variable responds ≥ 3–5× faster than the outer; (2) the major disturbances (fuel pressure swings) hit the <em>inner</em> variable, so the fast loop kills them before the temperature ever sees them. Tune <b>inner first</b> (outer in manual), then the outer treating the closed inner loop as its actuator.</div></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P8 · Feed-forward sizing</div>
+      <p class="quiz-q">Cold feed to a heated tank doubles its flow. Feedback alone reacts only after temperature sags. What signal and what static gain make an ideal feed-forward, and why keep the PID at all?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">▸ Tap to reveal answer</span>
+        <div class="hidden">Measure feed flow (the disturbance); FF gain = (disturbance path gain)/(actuator path gain) — the heater move that exactly cancels the load change, applied instantly. PID stays to trim what FF gets wrong (model error, unmeasured disturbances). FF does the predictable 90 %; feedback guarantees the last 10 %.</div></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P9 · Diagnosis from a trend</div>
+      <p class="quiz-q">A flow loop's PV oscillates continuously at fixed amplitude and period even with the controller in MANUAL. Retune, yes or no — and what is it?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">▸ Tap to reveal answer</span>
+        <div class="hidden"><b>No retune.</b> Oscillation surviving manual mode is not the controller — it's the process/actuator: classically <b>valve stiction</b> (stick-slip limit cycle) or an upstream interacting loop. Stiction signature: square-ish PV, sawtooth OUT in auto. Fix the valve (positioner/repack); no gain setting cures mechanics.</div></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P10 · Design problem</div>
+      <p class="quiz-q">Specify the full controller for an extruder zone: PV = RTD via 0.5 s-lag transmitter, τ ≈ 180 s, θ ≈ 15 s, heater 0–100 % (saturates on warm-up), setpoint changed per recipe several times a day. Choose: P/PI/PID, D on what, anti-windup, sample time, tuning method, λ.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">▸ Tap to reveal answer</span>
+        <div class="hidden"><b>Full PID</b> (slow clean thermal PV earns D). <b>D on PV</b> with N≈10 (recipe steps must not kick). <b>Anti-windup mandatory</b> (clamping or back-calculation) for saturated warm-ups. Ts ≈ 1 s (≪ τ/10 = 18 s, and ≤ θ/2). Step-test → FOPDT → <b>IMC</b>: λ = 3θ = 45 s → Kc = 180/(K·60), Ti = 180 s, Td ≈ θ/2 ≈ 7 s. Add setpoint ramping between recipes and you've reproduced page 10's real example from specifications alone.</div></div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 13 ===== -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 · Derivations &amp; Traps</span>
+    <h2 class="page-title">Key Derivations, Forms &amp; Exam Traps</h2>
+    <p class="page-sub">What an MSc examiner asks you to produce, and the conversions that break real plants.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 · Steady-state offset of a P-only loop</div>
+      <div class="eqn">Loop: u = Kp·e ,  PV = K·u (statics),  e = SP − PV
+e = SP − K·Kp·e   ⇒   e(1 + KpK) = SP
+<b>e_ss = SP/(1 + Kp·K)</b>  — never zero for finite Kp  ∎
+With integral action, u keeps changing while e≠0, so the only equilibrium is e = 0:
+that one sentence IS the derivation of why I erases offset.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 · Relay test → Ku (describing function sketch)</div>
+      <div class="eqn">Relay of amplitude d switching on error sign ≈ square wave into the process.
+Fundamental of a square wave: (4d/π)·sin(ωt). At sustained oscillation the
+process attenuates this to PV amplitude a, phase −180°.
+Equivalent gain of the relay = output fundamental / input amplitude:
+<b>N(a) = 4d/(π·a)  =  Ku</b> ,  oscillation period = <b>Pu</b>  ∎
+One safe, bounded experiment replaces gain-cranking to instability — why every
+autotuner uses it (Åström–Hägglund, 1984).</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 · Velocity form from the position form</div>
+      <div class="eqn">Position (backward Euler):
+u[k] = Kp·e[k] + Kp(Ts/Ti)·Σe[i] + Kp(Td/Ts)·(e[k]−e[k−1])
+Write u[k−1], subtract:
+<b>Δu[k] = Kp(e[k]−e[k−1]) + Kp(Ts/Ti)e[k] + Kp(Td/Ts)(e[k]−2e[k−1]+e[k−2])</b>
+u[k] = u[k−1] + Δu[k]  ∎
+The Σ register vanishes → windup immunity + bumpless auto/manual transfer,
+at the cost of needing e[k−2]. Swap e→−PV in the P and D differences for
+kick-free setpoint handling.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Forms &amp; conversions — the compatibility table</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Form</th><th>Law</th><th>Convert to standard</th></tr>
+        <tr><td><b>Standard (ISA / non-interacting)</b></td><td class="mono">Kp·(1 + 1/(Ti·s) + Td·s)</td><td>—</td></tr>
+        <tr><td><b>Parallel (independent gains)</b></td><td class="mono">Kp + Ki/s + Kd·s</td><td class="mono">Ti = Kp/Ki · Td = Kd/Kp</td></tr>
+        <tr><td><b>Series (interacting / "classical")</b></td><td class="mono">K'(1+1/(Ti'·s))(1+Td'·s)</td><td class="mono">F = 1+Td'/Ti': Kp = K'F · Ti = Ti'F · Td = Td'/F</td></tr>
+      </table></div>
+      <p class="body">Typing series-form numbers into a parallel-form controller detunes or destabilizes the loop with "the same settings". Identify the vendor's form <em>first</em> — it is on one line of the manual and it is the most skipped line in industry.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The seven exam &amp; plant traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Ti units chaos:</strong> s vs min vs repeats/min. A Ti of "5" can differ by ×60 between controllers.</span></li>
+        <li><span class="num">2</span><span><strong>PB vs gain:</strong> PB % = 100/Kp — "increase the band" means <em>lower</em> gain.</span></li>
+        <li><span class="num">3</span><span><strong>D on error vs PV:</strong> setpoint kicks come from D (and P) acting on SP steps. Production loops: D always on PV, often P too (2-DOF).</span></li>
+        <li><span class="num">4</span><span><strong>Direct vs reverse acting:</strong> get it backwards and feedback becomes feed-forward into the rail. Check: PV above SP — should OUT rise or fall?</span></li>
+        <li><span class="num">5</span><span><strong>Z-N ≠ universal:</strong> it assumes oscillation is acceptable and targets QAD. Never relay-test a reactor near safety limits without approval.</span></li>
+        <li><span class="num">6</span><span><strong>Retuning a mechanical problem:</strong> stiction, hysteresis, oversized valves and noisy transmitters mimic bad tuning. Manual-mode test first (P9).</span></li>
+        <li><span class="num">7</span><span><strong>Scan-time creep:</strong> moving a tuned loop to a slower task silently adds Ts/2 dead time — the "nothing changed but it oscillates" classic.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 14 ===== -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 · Study &amp; Practice</span>
+    <h2 class="page-title">Further Study &amp; Hands-On Practice Path</h2>
+    <p class="page-sub">The canonical control shelf, then practice you can run tonight with free tools.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf (in reading order)</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Resource</th><th>What it gives you</th></tr>
+        <tr><td><b>Åström &amp; Hägglund — <i>PID Controllers: Theory, Design, and Tuning</i> (2nd ed.)</b></td><td>THE PID book: every form, windup scheme, autotuner and their derivations. MSc core.</td></tr>
+        <tr><td><b>Åström &amp; Murray — <i>Feedback Systems</i></b> (free PDF online)</td><td>Rigorous but readable control theory grounding: stability, margins, sensitivity — the "why" under every rule here.</td></tr>
+        <tr><td><b>Skogestad — "Simple analytic rules for model reduction and PID tuning" (J. Process Control, 2003)</b></td><td>The SIMC paper: half-rule model reduction + tuning rules used across process industry. Short, practical, free preprints exist.</td></tr>
+        <tr><td><b>Ogata — <i>Modern Control Engineering</i></b></td><td>Classical analysis toolset (root locus, Bode) when you outgrow rules of thumb.</td></tr>
+        <tr><td><b>Shinskey — <i>Process Control Systems</i></b></td><td>The process-industry wisdom layer: loop interactions, valves, real dynamics.</td></tr>
+        <tr><td><b>APMonitor / TCLab (BYU)</b></td><td>$40 physical thermal lab + free Python courseware — real PID on real hardware at your desk.</td></tr>
+        <tr><td><b>Your PLC vendor's PID instruction doc (e.g. Siemens PID_Compact, Rockwell PIDE)</b></td><td>The exact form, units and anti-windup your plant actually runs — read against page 8.</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder — 8 exercises</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Spreadsheet plant.</strong> Build the page-7 simulator yourself in a spreadsheet: FOPDT plant (one lag line + delay column) + discrete PID. Nothing teaches the algorithm faster than implementing it in 20 rows.</span></li>
+        <li><span class="num">2</span><span><strong>Break it on purpose.</strong> In your sim: disable anti-windup and saturate; put D on error and step the SP; multiply Ts by 10. Screenshot each pathology — you now recognise them on plant trends.</span></li>
+        <li><span class="num">3</span><span><strong>Step-test discipline.</strong> Fit K, τ, θ from a step response by hand (63.2 % method), then with the half-rule. Tune via IMC λ = θ, 3θ, 5θ and compare responses.</span></li>
+        <li><span class="num">4</span><span><strong>Relay experiment.</strong> Implement the relay test in the sim; verify Ku = 4d/(πa) against the gain that actually sustains oscillation.</span></li>
+        <li><span class="num">5</span><span><strong>TCLab or kettle rig.</strong> Run a real thermal loop end-to-end: step test → model → IMC tune → disturbance test (blow on the sensor). Log and report like a commissioning engineer.</span></li>
+        <li><span class="num">6</span><span><strong>PLC autotune audit.</strong> On a test rig or simulator PLC, run autotune, then extract the gains and reverse-engineer which rule family it used (compare to Z-N/IMC predictions).</span></li>
+        <li><span class="num">7</span><span><strong>Cascade build.</strong> Add an inner flow loop to your sim (fast lag) with pressure disturbances; demonstrate ≥ 5× disturbance rejection vs single loop.</span></li>
+        <li><span class="num">8</span><span><strong>Plant loop autopsy.</strong> Pick one real oscillating loop at work: manual-mode test, stiction check, form/units check, then (and only then) retune. Write the one-page before/after report.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment — you have mastered this module when you can…</div>
+      <div class="grid-2">
+        <div class="mini c-blue"><h4>Theory</h4><p>Derive P-only offset, the velocity form, and relay Ku = 4d/(πa); explain each term's job in one sentence each.</p></div>
+        <div class="mini c-amb"><h4>Tuning</h4><p>Take a step test, fit FOPDT, and produce defensible Z-N, IMC(λ) and SIMC settings — and say when each is appropriate.</p></div>
+        <div class="mini c-teal"><h4>Implementation</h4><p>Write discrete PID (both forms) with anti-windup, D-on-PV and a filter; choose Ts from τ and θ.</p></div>
+        <div class="mini c-purp"><h4>Plant craft</h4><p>Diagnose windup, kick, stiction and scan-creep from trends alone; design cascade + feed-forward and tune them in the right order.</p></div>
+      </div>
+    </div>
+  </section>
+
+
+    <div class="footer">
+      Advanced Micro Learning · A10 PID Control · companion to Micro 10<br>
+      Underpins A08 (VFD), A09 (Servo) &amp; A14 (SCADA) · next: A12 Pneumatics<br>
+      Optimized for iPad Pro 11″ M4 · keratoconus-friendly · self-contained HTML
+    </div>
+
+</div>
+
+<script>
+  // ---- Interactive PID step response (illustrative 1st-order-plus-deadtime sim) ----
+  const kp=document.getElementById('kp'), ki=document.getElementById('ki'), kd=document.getElementById('kd');
+  const kpV=document.getElementById('kpV'), kiV=document.getElementById('kiV'), kdV=document.getElementById('kdV');
+  const curve=document.getElementById('respCurve'), verdict=document.getElementById('verdict');
+
+  function sim(){
+    const Kp=+kp.value/10, Ki=+ki.value/10, Kd=+kd.value/10;
+    kpV.textContent=Kp.toFixed(1); kiV.textContent=Ki.toFixed(1); kdV.textContent=Kd.toFixed(1);
+    const dt=0.10, target=1, N=170, dead=6;     // dead-time steps
+    const tau=1.4;                               // process lag
+    let pv=0, integ=0, ePrev=0, pvPrev=0, maxV=0, lastErr=1, crossings=0;
+    const buf=[]; const pts=[];
+    for(let i=0;i<N;i++){
+      const e=target-pv;
+      integ += e*dt;
+      // clamp anti-windup so the demo stays representative
+      const rawD=(pvPrev - pv)/dt;
+      let u=Kp*e + Ki*integ + Kd*rawD;
+      if(u>3){u=3; integ-=e*dt;} if(u<-3){u=-3; integ-=e*dt;}
+      buf.push(u);
+      const uEff = i>=dead ? buf[i-dead] : 0;   // transport delay
+      // first-order plant: pv moves toward uEff with time constant tau
+      pv += (uEff - pv)*(dt/tau);
+      pvPrev=pv; ePrev=e;
+      if(pv>maxV) maxV=pv;
+      if((e<0)!==(lastErr<0)) crossings++; lastErr=e;
+      const x=50 + (i/(N-1))*560;
+      const y=196 - pv*126;
+      pts.push(x.toFixed(1)+','+Math.max(8,Math.min(210,y)).toFixed(1));
+    }
+    curve.setAttribute('points', pts.join(' '));
+    const overshoot=Math.max(0,(maxV-1)*100);
+    const finalErr=Math.abs(target-pv)*100;
+    let v, col;
+    if(crossings>9 || maxV>2.0){ v='unstable / ringing'; col='#f87171'; }
+    else if(Ki<0.05 && finalErr>4){ v='offset '+finalErr.toFixed(0)+'% — add I'; col='#60a5fa'; }
+    else if(overshoot>30){ v='big overshoot ('+overshoot.toFixed(0)+'%)'; col='#fb923c'; }
+    else if(overshoot>12){ v='lively, slight overshoot ('+overshoot.toFixed(0)+'%)'; col='#fbbf24'; }
+    else if(maxV<0.82){ v='sluggish — raise Kp'; col='#60a5fa'; }
+    else { v='tuned — fast, no offset, well-damped'; col='#a3e635'; }
+    verdict.innerHTML='Response: <strong style="color:'+col+'">'+v+'</strong>';
+    curve.setAttribute('stroke', col);
+  }
+  [kp,ki,kd].forEach(s=>s.addEventListener('input',sim));
+  document.querySelectorAll('.preset-row button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const [a,c,d]=b.dataset.p.split(',').map(Number);
+      kp.value=a; ki.value=c; kd.value=d; sim();
+    });
+  });
+  sim();
+
+  document.querySelectorAll('.toc a, .back').forEach(a=>{
+    a.addEventListener('click',e=>{
+      const href=a.getAttribute('href');
+      if(href && href.startsWith('#')){ e.preventDefault(); document.querySelector(href).scrollIntoView({behavior:'smooth'}); }
+    });
+  });
+</script>
+
+<!-- ===== AUTO-ANIM: universal reveal-on-scroll SVG animation (self-contained, reduced-motion aware) ===== -->
+<style>
+  @media (prefers-reduced-motion: no-preference){
+    svg.illus [data-anim]{ opacity:0; }
+    svg.illus.anim-in [data-anim]{ animation: aaFade .55s ease forwards; }
+    svg.illus.anim-in [data-anim-draw]{ animation: aaDraw .9s ease forwards; }
+    @keyframes aaFade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+    @keyframes aaDraw{ from{stroke-dashoffset:var(--aaLen);} to{stroke-dashoffset:0;} }
+  }
+</style>
+<script>
+(function(){
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  function prep(svg){
+    var step=0;
+    svg.querySelectorAll('line, path, polyline').forEach(function(el){
+      var sw = el.getAttribute('stroke') || (el.style && el.style.stroke);
+      if(!sw || sw==='none') return;
+      var len;
+      try { len = (el.getTotalLength && el.getTotalLength()) || 0; } catch(e){ len = 0; }
+      if(len>0 && len<5000){
+        el.style.strokeDasharray = len; el.style.strokeDashoffset = len;
+        el.style.setProperty('--aaLen', len);
+        el.setAttribute('data-anim-draw','');
+        el.style.animationDelay = (0.05 + step*0.05).toFixed(2)+'s';
+        step++;
+      }
+    });
+    svg.querySelectorAll('text, circle, rect, ellipse, polygon, use, image').forEach(function(el){
+      el.setAttribute('data-anim','');
+      el.style.animationDelay = (0.05 + (step++)*0.03).toFixed(2)+'s';
+    });
+  }
+  var svgs = document.querySelectorAll('svg.illus');
+  svgs.forEach(prep);
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){ en.target.classList.add('anim-in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.18 });
+  svgs.forEach(function(s){ io.observe(s); });
+})();
+</script>
+</body>
+</html>

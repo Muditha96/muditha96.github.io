@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Domestic Wiring &amp; Consumer Units · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #fbbf24;       /* live amber */
+    --accent-soft: #fde68a;
+    --accent-2: #60a5fa;     /* neutral blue */
+    --accent-3: #4ade80;     /* earth green */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(251,191,36,0.12), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(96,165,250,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(251,191,36,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(251,191,36,0.14), rgba(96,165,250,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(251,191,36,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-2)!important; } .c-sky .big{color:var(--accent-2)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #fbbf24, #b45309); color: #271603; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(39,22,3,0.75); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(251,191,36,0.10); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:90px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Electrical Wiring &amp; Installation · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🏠</span>Domestic Wiring &amp; Consumer Units</h1>
+  <p class="hero-sub">From the service head to the last socket: earthing systems, the consumer unit and its protective devices, ring and radial circuits, cable sizing and voltage drop, earth-fault loop mathematics, bonding and bathroom zones — the full IEC 60364 / BS 7671 logic of a safe installation.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>No micro card yet — a full advanced module. Related:</span>
+    <a href="A30_Three_Phase_Power_Deep_Dive.html">A30 Three-Phase →</a>
+    <a href="A28_Switching_Power_Electronics_Deep_Dive.html">A28 Relays &amp; Contactors →</a>
+    <a href="A32_Transformers_Deep_Dive.html">A32 Transformers →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · Supply to Socket</a>
+    <a href="#p2">2 · Earthing Systems</a>
+    <a href="#p3">3 · The Consumer Unit</a>
+    <a href="#p4">4 · MCBs</a>
+    <a href="#p5">5 · RCDs &amp; Shock</a>
+    <a href="#p6">6 · Circuit Design</a>
+    <a href="#p7">7 · Cable Sizing &amp; VD</a>
+    <a href="#p8">8 · Zs &amp; Disconnection</a>
+    <a href="#p9">9 · Bonding, Zones, Testing</a>
+    <a href="#p10">10 · Recap &amp; Quiz</a>
+    <a href="#p11">11 · Worked Examples</a>
+    <a href="#p12">12 · Problem Set</a>
+    <a href="#p13">13 · Derivations &amp; Traps</a>
+    <a href="#p14">14 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ============ PAGE 1 ============ -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 14 · Foundations</span>
+    <h2 class="page-title">From the Street to the Socket</h2>
+    <p class="page-sub">One line diagram explains every house: origin, protection, distribution, final circuits.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead">A domestic installation is a <span class="hl">tree</span>: one origin (the supply), one trunk (the consumer unit), and branches (final circuits) — every branch protected against <span class="hl2">overload</span>, <span class="hl2">short circuit</span> and <span class="hl3">earth fault</span> at its root.</p>
+      <p class="body">The rulebooks: <strong>IEC 60364</strong> internationally, implemented as <strong>BS 7671</strong> (UK &amp; Sri Lanka&#39;s SLS 1080 lineage), NEC in North America. This module speaks IEC/BS: 230 V line-to-neutral, 50 Hz, brown = line, blue = neutral, green/yellow = protective earth (CPC). The engineering logic transfers to every code even where the numbers differ.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The supply chain</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="arw" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#94a3b8"/></marker></defs>
+          <g text-anchor="middle" font-size="12">
+            <rect x="20" y="70" width="95" height="70" rx="10" fill="#232d3f" stroke="#60a5fa"/>
+            <text x="67" y="100" fill="#93c5fd" font-weight="700">DNO cable</text>
+            <text x="67" y="118" fill="#64748b" font-size="10.5">street main</text>
+            <rect x="145" y="70" width="95" height="70" rx="10" fill="#232d3f" stroke="#f87171"/>
+            <text x="192" y="96" fill="#fca5a5" font-weight="700">Service head</text>
+            <text x="192" y="113" fill="#64748b" font-size="10.5">sealed cut-out</text>
+            <text x="192" y="128" fill="#64748b" font-size="10.5">60–100 A fuse</text>
+            <rect x="270" y="70" width="90" height="70" rx="10" fill="#232d3f" stroke="#94a3b8"/>
+            <text x="315" y="100" fill="#e2e8f0" font-weight="700">Meter</text>
+            <text x="315" y="118" fill="#64748b" font-size="10.5">tails 25 mm²</text>
+            <rect x="390" y="55" width="130" height="100" rx="10" fill="#232d3f" stroke="#fbbf24" stroke-width="2"/>
+            <text x="455" y="83" fill="#fde68a" font-weight="800">CONSUMER</text>
+            <text x="455" y="100" fill="#fde68a" font-weight="800">UNIT</text>
+            <text x="455" y="120" fill="#64748b" font-size="10.5">main switch · RCDs</text>
+            <text x="455" y="135" fill="#64748b" font-size="10.5">MCBs / RCBOs · SPD</text>
+            <rect x="550" y="25" width="130" height="38" rx="8" fill="#1a2230" stroke="#4ade80"/>
+            <text x="615" y="48" fill="#86efac" font-size="11.5">lighting circuits 6 A</text>
+            <rect x="550" y="75" width="130" height="38" rx="8" fill="#1a2230" stroke="#fbbf24"/>
+            <text x="615" y="98" fill="#fde68a" font-size="11.5">socket circuits 20–32 A</text>
+            <rect x="550" y="125" width="130" height="38" rx="8" fill="#1a2230" stroke="#fb923c"/>
+            <text x="615" y="148" fill="#fdba74" font-size="11.5">cooker · shower · EV</text>
+            <rect x="550" y="175" width="130" height="38" rx="8" fill="#1a2230" stroke="#60a5fa"/>
+            <text x="615" y="198" fill="#93c5fd" font-size="11.5">smoke alarms · boiler</text>
+            <line x1="115" y1="105" x2="145" y2="105" stroke="#94a3b8" stroke-width="2" marker-end="url(#arw)"/>
+            <line x1="240" y1="105" x2="270" y2="105" stroke="#94a3b8" stroke-width="2" marker-end="url(#arw)"/>
+            <line x1="360" y1="105" x2="390" y2="105" stroke="#94a3b8" stroke-width="2" marker-end="url(#arw)"/>
+            <line x1="520" y1="90" x2="550" y2="44" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arw)"/>
+            <line x1="520" y1="100" x2="550" y2="94" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arw)"/>
+            <line x1="520" y1="110" x2="550" y2="144" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arw)"/>
+            <line x1="520" y1="120" x2="550" y2="194" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arw)"/>
+            <text x="192" y="170" fill="#f87171" font-size="10.5">DNO property — never cut the seals</text>
+          </g>
+          <text x="350" y="237" fill="#94a3b8" font-size="12.5" text-anchor="middle">everything upstream of the meter belongs to the network operator; everything downstream is the installation — and the regulations</text>
+        </svg>
+        <div class="cap">The domestic supply chain. The service-head fuse (60–100 A) is the installation&#39;s upstream guarantee: it caps the energy any downstream fault can draw, and it is the reason meter tails may run short distances unprotected.</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">230 V</div><h4>Line–neutral</h4><p>Single-phase domestic standard (400 V line-line where three-phase enters — → A30).</p></div>
+      <div class="mini c-sky"><div class="big">L·N·E</div><h4>Three conductors</h4><p>Brown line, blue neutral, green/yellow CPC — the CPC carries current ONLY during a fault.</p></div>
+      <div class="mini c-grn"><div class="big">3 evils</div><h4>Overload · short · earth fault</h4><p>Every protective device in the CU exists for one (or two) of these three.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 ============ -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 14 · Earthing</span>
+    <h2 class="page-title">Earthing Systems — TN-S, TN-C-S, TT</h2>
+    <p class="page-sub">The fault current must get home. The earthing system is the road it takes — and its quality decides everything downstream.</p>
+
+    <div class="card">
+      <div class="label">Why earthing exists</div>
+      <p class="lead">When a live conductor touches a metal case, the case rises toward 230 V. Earthing gives the fault current a <span class="hl3">low-impedance path back to the transformer</span>, making it LARGE — large enough to trip protection fast, before a person becomes the alternative path.</p>
+      <p class="body">Counter-intuitive but central: <strong>a good earth makes fault currents bigger on purpose.</strong> Protection speed depends on fault size; fault size depends on loop impedance; loop impedance starts with the earthing system.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The three systems</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="11.5" text-anchor="middle">
+            <rect x="20" y="20" width="210" height="240" rx="12" fill="#11161f" stroke="#334155"/>
+            <text x="125" y="44" fill="#4ade80" font-size="13" font-weight="800">TN-S</text>
+            <text x="125" y="60" fill="#64748b" font-size="10.5">separate earth all the way</text>
+            <rect x="40" y="75" width="60" height="40" rx="6" fill="#232d3f" stroke="#94a3b8"/>
+            <text x="70" y="99" fill="#e2e8f0" font-size="10.5">Tx ⏚</text>
+            <line x1="100" y1="85" x2="210" y2="85" stroke="#fbbf24" stroke-width="2.5"/>
+            <text x="205" y="79" fill="#fde68a" font-size="10">L</text>
+            <line x1="100" y1="95" x2="210" y2="95" stroke="#60a5fa" stroke-width="2.5"/>
+            <text x="205" y="110" fill="#93c5fd" font-size="10">N</text>
+            <line x1="100" y1="108" x2="210" y2="108" stroke="#4ade80" stroke-width="2.5"/>
+            <text x="205" y="123" fill="#86efac" font-size="10">PE</text>
+            <text x="125" y="160" fill="#94a3b8" font-size="10.5">cable sheath / 5th core</text>
+            <text x="125" y="185" fill="#e2e8f0" font-weight="700">Ze ≤ 0.8 Ω typ.</text>
+            <text x="125" y="215" fill="#64748b" font-size="10">older urban networks</text>
+            <rect x="245" y="20" width="210" height="240" rx="12" fill="#11161f" stroke="#fbbf24"/>
+            <text x="350" y="44" fill="#fde68a" font-size="13" font-weight="800">TN-C-S (PME)</text>
+            <text x="350" y="60" fill="#64748b" font-size="10.5">combined PEN, split at intake</text>
+            <rect x="265" y="75" width="60" height="40" rx="6" fill="#232d3f" stroke="#94a3b8"/>
+            <text x="295" y="99" fill="#e2e8f0" font-size="10.5">Tx ⏚</text>
+            <line x1="325" y1="85" x2="435" y2="85" stroke="#fbbf24" stroke-width="2.5"/>
+            <text x="430" y="79" fill="#fde68a" font-size="10">L</text>
+            <line x1="325" y1="100" x2="390" y2="100" stroke="#94a3b8" stroke-width="3.5"/>
+            <text x="357" y="115" fill="#cbd5e1" font-size="10">PEN</text>
+            <line x1="390" y1="100" x2="435" y2="92" stroke="#60a5fa" stroke-width="2.5"/>
+            <line x1="390" y1="100" x2="435" y2="112" stroke="#4ade80" stroke-width="2.5"/>
+            <text x="350" y="185" fill="#e2e8f0" font-weight="700">Ze ≤ 0.35 Ω typ.</text>
+            <text x="350" y="207" fill="#f87171" font-size="10">lost PEN = cases rise live —</text>
+            <text x="350" y="221" fill="#f87171" font-size="10">extra bonding rules, EV caveats</text>
+            <rect x="470" y="20" width="210" height="240" rx="12" fill="#11161f" stroke="#334155"/>
+            <text x="575" y="44" fill="#7dd3fc" font-size="13" font-weight="800">TT</text>
+            <text x="575" y="60" fill="#64748b" font-size="10.5">your own earth rod</text>
+            <rect x="490" y="75" width="60" height="40" rx="6" fill="#232d3f" stroke="#94a3b8"/>
+            <text x="520" y="99" fill="#e2e8f0" font-size="10.5">Tx ⏚</text>
+            <line x1="550" y1="85" x2="660" y2="85" stroke="#fbbf24" stroke-width="2.5"/>
+            <text x="655" y="79" fill="#fde68a" font-size="10">L</text>
+            <line x1="550" y1="97" x2="660" y2="97" stroke="#60a5fa" stroke-width="2.5"/>
+            <text x="655" y="111" fill="#93c5fd" font-size="10">N</text>
+            <line x1="615" y1="130" x2="615" y2="160" stroke="#4ade80" stroke-width="3"/>
+            <path d="M 600 160 h 30 M 605 167 h 20 M 610 174 h 10" stroke="#4ade80" stroke-width="2.5" fill="none"/>
+            <text x="617" y="125" fill="#86efac" font-size="10">rod ⏚</text>
+            <text x="575" y="200" fill="#e2e8f0" font-weight="700">Ze = 10–200 Ω</text>
+            <text x="575" y="222" fill="#f87171" font-size="10">MCB can&#39;t clear earth faults —</text>
+            <text x="575" y="236" fill="#f87171" font-size="10">RCD protection is MANDATORY</text>
+          </g>
+        </svg>
+        <div class="cap">Ze = external loop impedance, measured at the origin. TT&#39;s tens-of-ohms rod means an earth fault draws only a few amps — invisible to an MCB, lethal without an RCD. The earthing system dictates the protection strategy.</div>
+      </div>
+      <p class="body"><strong>The TT arithmetic that decides everything:</strong> with a 100 Ω rod, an earth fault draws 230/100 = 2.3 A. A 32 A breaker sees nothing wrong — forever. Only a 30 mA RCD (trips at 0.03 A) can protect this installation. Meanwhile TN-C-S&#39;s single wire carrying combined neutral+earth (PEN) is superbly low-impedance — until it breaks: a <span class="hl">lost PEN</span> puts load current through every bonded pipe and case, the reason PME earths are forbidden for some outdoor/EV/caravan supplies without extra measures.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 ============ -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 14 · The Hub</span>
+    <h2 class="page-title">Consumer Unit Anatomy</h2>
+    <p class="page-sub">Main switch → residual protection → circuit protection → busbar: energy flows left to right, responsibility flows with it.</p>
+
+    <div class="card">
+      <div class="label">Inside the enclosure</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+          <rect x="25" y="30" width="650" height="180" rx="14" fill="#11161f" stroke="#94a3b8" stroke-width="2"/>
+          <g text-anchor="middle" font-size="11">
+            <rect x="45" y="60" width="70" height="90" rx="8" fill="#f87171" opacity="0.85"/>
+            <text x="80" y="95" fill="#0b0f14" font-weight="800" font-size="12">MAIN</text>
+            <text x="80" y="110" fill="#0b0f14" font-weight="800" font-size="12">100 A</text>
+            <text x="80" y="170" fill="#fca5a5" font-size="10.5">double-pole isolator</text>
+            <rect x="130" y="60" width="55" height="90" rx="8" fill="#c084fc" opacity="0.85"/>
+            <text x="157" y="95" fill="#0b0f14" font-weight="800" font-size="11">SPD</text>
+            <text x="157" y="110" fill="#0b0f14" font-size="10">T2</text>
+            <text x="157" y="170" fill="#d8b4fe" font-size="10.5">surge protection</text>
+            <rect x="200" y="60" width="70" height="90" rx="8" fill="#38bdf8" opacity="0.85"/>
+            <text x="235" y="90" fill="#0b0f14" font-weight="800" font-size="11">RCD A</text>
+            <text x="235" y="105" fill="#0b0f14" font-size="10">30 mA</text>
+            <text x="235" y="120" fill="#0b0f14" font-size="10">Type A</text>
+            <text x="235" y="170" fill="#7dd3fc" font-size="10.5">protects bank 1</text>
+            <g>
+              <rect x="285" y="60" width="34" height="90" rx="6" fill="#fbbf24"/>
+              <text x="302" y="100" fill="#0b0f14" font-weight="800">B6</text>
+              <rect x="325" y="60" width="34" height="90" rx="6" fill="#fbbf24"/>
+              <text x="342" y="100" fill="#0b0f14" font-weight="800">B32</text>
+              <rect x="365" y="60" width="34" height="90" rx="6" fill="#fbbf24"/>
+              <text x="382" y="100" fill="#0b0f14" font-weight="800">B40</text>
+            </g>
+            <rect x="415" y="60" width="70" height="90" rx="8" fill="#38bdf8" opacity="0.85"/>
+            <text x="450" y="90" fill="#0b0f14" font-weight="800" font-size="11">RCD B</text>
+            <text x="450" y="105" fill="#0b0f14" font-size="10">30 mA</text>
+            <text x="450" y="120" fill="#0b0f14" font-size="10">Type A</text>
+            <text x="450" y="170" fill="#7dd3fc" font-size="10.5">protects bank 2</text>
+            <g>
+              <rect x="500" y="60" width="34" height="90" rx="6" fill="#fbbf24"/>
+              <text x="517" y="100" fill="#0b0f14" font-weight="800">B6</text>
+              <rect x="540" y="60" width="34" height="90" rx="6" fill="#fbbf24"/>
+              <text x="557" y="100" fill="#0b0f14" font-weight="800">B20</text>
+              <rect x="580" y="60" width="34" height="90" rx="6" fill="#fbbf24"/>
+              <text x="597" y="100" fill="#0b0f14" font-weight="800">B32</text>
+            </g>
+            <line x1="285" y1="195" x2="614" y2="195" stroke="#fbbf24" stroke-width="4"/>
+            <text x="450" y="187" fill="#fde68a" font-size="10.5">busbar</text>
+          </g>
+          <text x="350" y="240" fill="#94a3b8" font-size="12.5" text-anchor="middle">split-load board: two RCDs each guard a bank of MCBs — lighting up + sockets down on OPPOSITE banks, so one trip never darkens the whole house</text>
+        </svg>
+        <div class="cap">A dual-RCD split-load consumer unit. The alternative — an RCBO per circuit — costs more and isolates faults to a single circuit: the modern default for new work.</div>
+      </div>
+      <p class="body"><strong>Design logic worth memorising:</strong> interleave circuits so upstairs lights and downstairs sockets share an RCD (a tripped socket fault never leaves you on a dark staircase); smoke-alarm and freezer circuits prefer their own RCBO; the SPD (surge protective device, now standard in BS 7671 Amd 2) clamps transients from switching and lightning before they reach electronics; metal enclosures are required (fire containment) with amendment-era boards.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-red"><div class="big">DP</div><h4>Main switch</h4><p>Breaks line AND neutral — the one guaranteed dead-making device in the house.</p></div>
+      <div class="mini c-sky"><div class="big">RCBO</div><h4>MCB + RCD in one</h4><p>Per-circuit residual protection: a fault trips one way, not half the board.</p></div>
+      <div class="mini c-purp"><div class="big">SPD</div><h4>Surge protection</h4><p>MOV-based clamp diverting kV transients to earth — sacrificial, with an end-of-life flag.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 ============ -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 14 · Overcurrent</span>
+    <h2 class="page-title">MCBs — The Thermal-Magnetic Gatekeeper</h2>
+    <p class="page-sub">Two trip mechanisms in one lever: a slow bimetal for overload, a fast solenoid for short circuit.</p>
+
+    <div class="card">
+      <div class="label">How it trips</div>
+      <p class="lead">An MCB carries two detectors in series: a <span class="hl">bimetal strip</span> heated by load current (minutes at small overloads — I²t thermal memory) and a <span class="hl2">magnetic solenoid</span> that fires in milliseconds when current exceeds its instantaneous threshold.</p>
+      <div class="eqn">instantaneous (magnetic) trip bands, multiples of rating In:
+<b>Type B : 3–5 × In</b>     homes — low inrush loads
+<b>Type C : 5–10 × In</b>    motors, discharge lighting (→ A28)
+<b>Type D : 10–20 × In</b>   transformers, welders, high inrush
+
+breaking capacity: domestic MCBs rated <b>6 kA</b> (Icn) — must exceed
+the prospective fault current at the board</div>
+      <p class="body">Type choice is an inrush problem, not a load problem: a compressor that draws 7×In for 100 ms holds a Type C in but nuisance-trips a Type B. The price of C: it needs <strong>twice the fault current</strong> of B to trip instantly — which halves the allowed loop impedance (page 8). Choosing C "to be safe" can silently make an installation non-compliant.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The time-current curve</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg">
+          <line x1="70" y1="20" x2="70" y2="240" stroke="#334155" stroke-width="2"/>
+          <line x1="70" y1="240" x2="670" y2="240" stroke="#334155" stroke-width="2"/>
+          <text x="368" y="270" fill="#94a3b8" font-size="13" text-anchor="middle">current, multiples of In (log) →</text>
+          <text x="40" y="130" fill="#94a3b8" font-size="13" transform="rotate(-90 40 130)" text-anchor="middle">trip time (log)</text>
+          <text x="62" y="35" fill="#64748b" font-size="11" text-anchor="end">1 h</text>
+          <text x="62" y="130" fill="#64748b" font-size="11" text-anchor="end">1 s</text>
+          <text x="62" y="235" fill="#64748b" font-size="11" text-anchor="end">10 ms</text>
+          <path d="M 110 30 Q 200 60 260 110 Q 300 150 310 190" fill="none" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+          <text x="175" y="45" fill="#fde68a" font-size="12.5" font-weight="700">thermal region (overload)</text>
+          <line x1="310" y1="190" x2="330" y2="228" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+          <line x1="330" y1="228" x2="660" y2="228" stroke="#f87171" stroke-width="4" stroke-linecap="round"/>
+          <text x="490" y="215" fill="#fca5a5" font-size="12.5" font-weight="700">magnetic region — &lt;10 ms, any higher current</text>
+          <line x1="330" y1="240" x2="330" y2="60" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="6 5"/>
+          <text x="330" y="52" fill="#86efac" font-size="12" text-anchor="middle">5×In (Type B upper)</text>
+          <text x="115" y="255" fill="#64748b" font-size="11">1×</text>
+          <text x="240" y="255" fill="#64748b" font-size="11">3×</text>
+          <text x="330" y="255" fill="#64748b" font-size="11">5×</text>
+          <text x="500" y="255" fill="#64748b" font-size="11">10×</text>
+        </svg>
+        <div class="cap">The B-curve: minutes at 1.5×In, seconds at 3×, guaranteed instantaneous beyond 5×. Compliance calculations always use the WORST-case corner — 5×In for Type B — because a real breaker may sit anywhere in its band.</div>
+      </div>
+      <p class="body"><strong>MCB ≠ RCD, permanently:</strong> the MCB answers overload and short circuit (amps to kiloamps). It is numerically blind to a 30 mA shock current — three orders of magnitude below its senses. The two devices answer different questions, which is why the RCBO merges them rather than either replacing the other.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">1.45×</div><h4>Overload rule</h4><p>The device must operate at ≤1.45×Iz of the cable it protects — In ≤ Iz closes the coordination chain Ib ≤ In ≤ Iz.</p></div>
+      <div class="mini c-red"><div class="big">6 kA</div><h4>Breaking capacity</h4><p>The maximum fault the MCB can interrupt without failing — verify against measured PSCC at the origin.</p></div>
+      <div class="mini c-sky"><div class="big">I²t</div><h4>Energy let-through</h4><p>What the cable must survive during clearance — the adiabatic check on page 8.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 ============ -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 14 · Shock Protection</span>
+    <h2 class="page-title">RCDs — Physics of the 30 mA Guardian</h2>
+    <p class="page-sub">A current-balance transformer that notices when electrons leave home and don&#39;t come back.</p>
+
+    <div class="card">
+      <div class="label">The core-balance principle</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="230" cy="120" r="70" fill="none" stroke="#94a3b8" stroke-width="14" opacity="0.5"/>
+          <text x="230" y="35" fill="#94a3b8" font-size="12" text-anchor="middle">toroidal core</text>
+          <line x1="120" y1="105" x2="340" y2="105" stroke="#fbbf24" stroke-width="4"/>
+          <text x="128" y="96" fill="#fde68a" font-size="12" font-weight="700">L →  I_L</text>
+          <line x1="340" y1="138" x2="120" y2="138" stroke="#60a5fa" stroke-width="4"/>
+          <text x="128" y="158" fill="#93c5fd" font-size="12" font-weight="700">N ←  I_N</text>
+          <path d="M 275 173 q 30 40 70 40 l 60 0" fill="none" stroke="#c084fc" stroke-width="2.5"/>
+          <rect x="405" y="196" width="120" height="36" rx="8" fill="#232d3f" stroke="#c084fc"/>
+          <text x="465" y="219" fill="#d8b4fe" font-size="12" text-anchor="middle">sense coil → trip</text>
+          <g text-anchor="middle" font-size="12.5">
+            <rect x="430" y="55" width="240" height="100" rx="12" fill="#11161f" stroke="#334155"/>
+            <text x="550" y="80" fill="#e2e8f0" font-weight="700">balance: I_L − I_N = 0 → flux = 0</text>
+            <text x="550" y="105" fill="#f87171" font-weight="700">fault: 30 mA leaks via earth/person</text>
+            <text x="550" y="130" fill="#fde68a">ΔI ≠ 0 → core flux → coil EMF → TRIP ≤ 40 ms</text>
+          </g>
+          <path d="M 300 120 q 40 60 20 110" fill="none" stroke="#f87171" stroke-width="2.5" stroke-dasharray="6 4"/>
+          <text x="330" y="243" fill="#fca5a5" font-size="12">leakage path (person / insulation fault)</text>
+        </svg>
+        <div class="cap">Line and neutral thread the same magnetic core in opposite directions. Equal currents cancel; any imbalance — current escaping via a person or damaged insulation — leaves net flux that induces the trip. The RCD measures what is MISSING.</div>
+      </div>
+      <div class="eqn">why 30 mA / 40 ms — IEC 60479 physiology:
+~0.5–2 mA  perception      ·   ~10 mA  muscular "let-go" limit
+~30–50 mA  ventricular fibrillation risk grows with time
+<b>30 mA · ≤40 ms @ 5×IΔn</b> sits below the fibrillation charge threshold</div>
+      <p class="body"><strong>Types matter now:</strong> Type AC (sinusoidal only) is effectively obsolete; <span class="hl">Type A</span> (+ pulsating DC — required for anything with a rectifier: LED drivers, induction hobs, chargers) is the domestic default; Type F for frequency-mixing (inverter drives); <span class="hl">Type B</span> for smooth DC leakage — EV chargers and PV inverters, whose DC can quietly <em>blind</em> an upstream Type AC core by saturating it. A modern house with an EV point is a mixed-type design exercise, not a habit.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">30 mA</div><h4>Additional protection</h4><p>Sockets, mobile equipment, bathrooms — the human-shock tier.</p></div>
+      <div class="mini c-sky"><div class="big">100–300</div><h4>mA · fire tier</h4><p>Upstream time-delayed (S-type) RCDs catch smouldering insulation faults and keep discrimination.</p></div>
+      <div class="mini c-red"><div class="big">T</div><h4>Test quarterly</h4><p>The T button exercises the mechanism; an electrician&#39;s ramp test verifies ≤40 ms at 5×IΔn.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 ============ -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 14 · Circuits</span>
+    <h2 class="page-title">Circuit Design — Ring, Radial, Dedicated</h2>
+    <p class="page-sub">Each circuit is a sized promise: conductor, protective device and load agree before the plaster goes on.</p>
+
+    <div class="card">
+      <div class="label">Ring vs radial — the classic pair</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="11.5" text-anchor="middle">
+            <rect x="30" y="25" width="310" height="190" rx="12" fill="#11161f" stroke="#fbbf24"/>
+            <text x="185" y="50" fill="#fde68a" font-size="13" font-weight="800">RING FINAL · 32 A · 2.5 mm²</text>
+            <rect x="55" y="75" width="46" height="30" rx="6" fill="#232d3f" stroke="#fbbf24"/>
+            <text x="78" y="94" fill="#fde68a" font-size="10">CU</text>
+            <path d="M 101 82 H 180 Q 300 82 300 130 Q 300 178 180 178 Q 101 178 101 98" fill="none" stroke="#fbbf24" stroke-width="3"/>
+            <g fill="#232d3f" stroke="#94a3b8">
+              <rect x="160" y="72" width="26" height="20" rx="4"/>
+              <rect x="240" y="76" width="26" height="20" rx="4"/>
+              <rect x="284" y="120" width="26" height="20" rx="4"/>
+              <rect x="240" y="168" width="26" height="20" rx="4"/>
+              <rect x="160" y="168" width="26" height="20" rx="4"/>
+            </g>
+            <text x="185" y="207" fill="#64748b" font-size="10.5">two paths share every load — cable rated ~27 A carries a 32 A circuit</text>
+            <rect x="360" y="25" width="310" height="190" rx="12" fill="#11161f" stroke="#60a5fa"/>
+            <text x="515" y="50" fill="#93c5fd" font-size="13" font-weight="800">RADIAL · 20 A (2.5) or 32 A (4 mm²)</text>
+            <rect x="385" y="75" width="46" height="30" rx="6" fill="#232d3f" stroke="#60a5fa"/>
+            <text x="408" y="94" fill="#93c5fd" font-size="10">CU</text>
+            <path d="M 431 90 H 640" fill="none" stroke="#60a5fa" stroke-width="3"/>
+            <g fill="#232d3f" stroke="#94a3b8">
+              <rect x="470" y="80" width="26" height="20" rx="4"/>
+              <rect x="530" y="80" width="26" height="20" rx="4"/>
+              <rect x="590" y="80" width="26" height="20" rx="4"/>
+            </g>
+            <text x="515" y="135" fill="#64748b" font-size="10.5">one path, simple to test, no hidden-break failure mode</text>
+            <text x="515" y="160" fill="#64748b" font-size="10.5">the international norm — rings are a UK/SL peculiarity</text>
+          </g>
+          <text x="350" y="240" fill="#94a3b8" font-size="12.5" text-anchor="middle">the ring&#39;s dark side: one broken leg turns it into two overloaded radials — and everything still works, silently, until it doesn&#39;t</text>
+        </svg>
+        <div class="cap">The ring shares current between two legs (hence 2.5 mm² on a 32 A device); its r1+rn+r2 cross-connect test exists precisely because a broken ring is invisible in service. Radials trade copper for testability.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">The standard circuit schedule</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Circuit</th><th>Device</th><th>Cable (T&amp;E Cu)</th><th>Notes</th></tr>
+        <tr><td><b>Lighting</b></td><td>B6</td><td>1.0/1.5 mm²</td><td>Max ~10 points; 3% VD limit</td></tr>
+        <tr><td><b>Ring final sockets</b></td><td>B32</td><td>2.5 mm² (both legs)</td><td>≤100 m² floor area; spurs ≤ sockets on ring</td></tr>
+        <tr><td><b>Radial sockets</b></td><td>B20 / B32</td><td>2.5 / 4 mm²</td><td>20 A ≤ 50 m²; 32 A ≤ 75 m²</td></tr>
+        <tr><td><b>Cooker</b></td><td>B32/B40</td><td>6/10 mm²</td><td>Diversity applied: 10 A + 30% remainder (+5 A socket)</td></tr>
+        <tr><td><b>Shower 9.5 kW</b></td><td>B40/B45</td><td>10 mm²</td><td>NO diversity — full load, full duration</td></tr>
+        <tr><td><b>EV charger 7.4 kW</b></td><td>B40 + Type A/B RCD</td><td>6/10 mm²</td><td>Dedicated; PME restrictions; load-management aware</td></tr>
+        <tr><td><b>Immersion / boiler / alarms</b></td><td>B16 / B6</td><td>2.5 / 1.5 mm²</td><td>Own circuit so RCD trips elsewhere don&#39;t kill them</td></tr>
+      </table></div>
+      <p class="body"><strong>Diversity is the licence to be finite:</strong> not everything runs at once, so the service fuse survives a house whose circuit ratings sum to 3× its rating. But diversity is a statistical argument — it is <em>never</em> applied to a shower or EV charger, which genuinely draw full current for tens of minutes. Knowing where diversity is forbidden is the mark of a designer over a table-follower.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">🧪 Interactive — maximum-demand estimator</div>
+      <div class="demo">
+        <div class="demo-row"><span>Lighting total</span><b><span id="dLtV">800</span> W</b></div>
+        <input type="range" id="dLtR" min="200" max="3000" step="100" value="800">
+        <div class="demo-row"><span>Socket circuits (ring equivalents)</span><b><span id="dSkV">2</span></b></div>
+        <input type="range" id="dSkR" min="1" max="5" step="1" value="2">
+        <div class="demo-row"><span>Cooker rating</span><b><span id="dCkV">7.2</span> kW</b></div>
+        <input type="range" id="dCkR" min="0" max="15" step="0.2" value="7.2">
+        <div class="demo-row"><span>Shower rating</span><b><span id="dShV">9.5</span> kW</b></div>
+        <input type="range" id="dShR" min="0" max="12" step="0.5" value="9.5">
+        <div class="demo-out" id="dmOut"></div>
+      </div>
+      <p class="body">Simplified IET On-Site-Guide method: lighting at 66%, first ring 100% + 40% for others, cooker 10 A + 30% of remainder, shower at 100% (no diversity). Watch the shower dominate — it is why an 80 A service fuse still copes with a "160 A" house.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 7 ============ -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 14 · Cables</span>
+    <h2 class="page-title">Cable Sizing &amp; Voltage Drop</h2>
+    <p class="page-sub">A cable is sized four times: for load, for heat, for volt drop, and for fault survival. The biggest answer wins.</p>
+
+    <div class="card">
+      <div class="label">The coordination chain</div>
+      <div class="eqn"><b>Ib ≤ In ≤ Iz</b>
+Ib = design current (load) · In = device rating · Iz = cable capacity INSTALLED
+
+Iz = It × Ca × Cg × Ci × Cf     derating for:
+  Ca ambient temp · Cg grouping · Ci thermal insulation · Cf device type
+
+2.5 mm² T&amp;E: ~27 A clipped direct → <b>~13.5 A buried in insulation</b> (Ci 0.5!)</div>
+      <p class="body">Derating is where paper designs die: the same 2.5 mm² that comfortably carries 27 A on a wall loses HALF its rating inside loft insulation. Method of installation (reference methods A–F) is not bureaucracy — it is the thermal boundary condition of the conductor. When in doubt, size up: copper is cheaper than a rewire.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Voltage drop</div>
+      <div class="eqn">VD = (mV/A/m) × Ib × L / 1000     limits: <b>3% lighting (6.9 V) · 5% power (11.5 V)</b>
+
+mV/A/m (Cu, single-phase): 1.0→44 · 1.5→29 · 2.5→18 · 4→11 · 6→7.3 · 10→4.4 · 16→2.8</div>
+      <div class="demo">
+        <div class="label" style="margin-bottom:8px">🧪 Interactive — voltage-drop checker</div>
+        <div class="seg" id="csaSeg">
+          <button data-c="44">1.0</button>
+          <button data-c="29">1.5</button>
+          <button class="on" data-c="18">2.5</button>
+          <button data-c="11">4.0</button>
+          <button data-c="7.3">6.0</button>
+          <button data-c="4.4">10</button>
+        </div>
+        <div class="demo-row"><span>Design current Ib</span><b><span id="vdiV">20</span> A</b></div>
+        <input type="range" id="vdiR" min="2" max="50" step="1" value="20">
+        <div class="demo-row"><span>Route length</span><b><span id="vdlV">25</span> m</b></div>
+        <input type="range" id="vdlR" min="5" max="80" step="1" value="25">
+        <div class="seg" id="vdTypeSeg">
+          <button class="on" data-l="5">Power · 5%</button>
+          <button data-l="3">Lighting · 3%</button>
+        </div>
+        <div class="demo-out" id="vdOut"></div>
+      </div>
+      <p class="body">Long runs flip the sizing driver: a garden-office feed passes every current check at 4 mm² yet fails volt-drop at 40 m — the cable is then sized by millivolts, not amps. Undervoltage is not cosmetic: motors overheat, LEDs flicker, and the shower runs cool exactly when fully loaded.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Cable families in the fabric</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Cable</th><th>Where</th><th>Note</th></tr>
+        <tr><td><b>Flat twin &amp; earth (6242Y)</b></td><td>Interior fixed wiring</td><td>PVC 70 °C; CPC one size down; not for outdoors/UV</td></tr>
+        <tr><td><b>SWA (steel wire armoured)</b></td><td>Underground, outbuildings</td><td>Armour may serve as CPC if sized; gland = the termination skill</td></tr>
+        <tr><td><b>LSZH variants</b></td><td>Escape routes, flats</td><td>Low smoke zero halogen — fire-safety driven</td></tr>
+        <tr><td><b>Flex (318-Y etc.)</b></td><td>Appliances, pendants</td><td>Never buried as fixed wiring</td></tr>
+        <tr><td><b>Cat-safe zones</b></td><td>—</td><td>Cables run horizontal/vertical from accessories or ≥50 mm deep, else earthed mechanical protection / RCD</td></tr>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 8 ============ -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 14 · Fault Math</span>
+    <h2 class="page-title">Earth-Fault Loop &amp; Disconnection Times</h2>
+    <p class="page-sub">Zs = Ze + R1 + R2 — five characters that decide whether protection is real or decorative.</p>
+
+    <div class="card">
+      <div class="label">The loop</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" text-anchor="middle">
+            <rect x="30" y="70" width="90" height="80" rx="10" fill="#232d3f" stroke="#94a3b8"/>
+            <text x="75" y="105" fill="#e2e8f0" font-weight="700">Tx</text>
+            <text x="75" y="125" fill="#64748b" font-size="10.5">source ⏚</text>
+            <rect x="290" y="70" width="90" height="80" rx="10" fill="#232d3f" stroke="#fbbf24"/>
+            <text x="335" y="100" fill="#fde68a" font-weight="700">CU</text>
+            <text x="335" y="120" fill="#64748b" font-size="10.5">MCB in circuit</text>
+            <rect x="550" y="70" width="110" height="80" rx="10" fill="#232d3f" stroke="#f87171" stroke-width="2"/>
+            <text x="605" y="100" fill="#fca5a5" font-weight="700">FAULT</text>
+            <text x="605" y="120" fill="#64748b" font-size="10.5">L touches case</text>
+            <line x1="120" y1="85" x2="290" y2="85" stroke="#fbbf24" stroke-width="3"/>
+            <text x="205" y="77" fill="#fde68a" font-size="11">supply L — inside Ze</text>
+            <line x1="380" y1="85" x2="550" y2="85" stroke="#fbbf24" stroke-width="3"/>
+            <text x="465" y="77" fill="#fde68a" font-size="11">circuit L — R1</text>
+            <line x1="550" y1="135" x2="380" y2="135" stroke="#4ade80" stroke-width="3"/>
+            <text x="465" y="157" fill="#86efac" font-size="11">CPC back — R2</text>
+            <line x1="290" y1="135" x2="120" y2="135" stroke="#4ade80" stroke-width="3"/>
+            <text x="205" y="157" fill="#86efac" font-size="11">earthing conductor — inside Ze</text>
+            <text x="350" y="205" fill="#e2e8f0" font-size="14" font-weight="700">Zs = Ze + (R1 + R2)   →   If = 230 / Zs</text>
+          </g>
+        </svg>
+        <div class="cap">The earth-fault loop: out on the line conductor, back on the CPC. Ze is the network&#39;s share (measured at the origin); R1+R2 is yours (line + CPC resistance of the circuit). Small Zs ⇒ big fault current ⇒ fast trip.</div>
+      </div>
+      <div class="eqn">disconnection required (230 V TN): <b>0.4 s</b> final circuits ≤63 A · 5 s distribution
+Type B trips instantly at 5×In  ⇒  need If ≥ 5×In
+
+<b>Zs(max) = Cmin × 230 / (5 × In)</b>    (Cmin = 0.95)
+B16→2.73 Ω · B20→2.19 · <b>B32→1.37</b> · B40→1.09 · Type C: halve them</div>
+      <div class="demo">
+        <div class="label" style="margin-bottom:8px">🧪 Interactive — Zs compliance checker</div>
+        <div class="seg" id="mcbSeg">
+          <button data-i="16">B16</button>
+          <button data-i="20">B20</button>
+          <button class="on" data-i="32">B32</button>
+          <button data-i="40">B40</button>
+          <button data-i="-32">C32</button>
+        </div>
+        <div class="demo-row"><span>Ze (external)</span><b><span id="zeV">0.35</span> Ω</b></div>
+        <input type="range" id="zeR" min="0.05" max="1.5" step="0.05" value="0.35">
+        <div class="demo-row"><span>R1 + R2 (circuit)</span><b><span id="rrV">0.60</span> Ω</b></div>
+        <input type="range" id="rrR" min="0.05" max="2.5" step="0.05" value="0.6">
+        <div class="demo-out" id="zsOut"></div>
+      </div>
+      <p class="body"><strong>When Zs cannot comply</strong> (long circuit, TT system), the 30 mA RCD becomes the disconnection device: it needs Zs only below 230/0.03 ≈ 7.6 kΩ — trivially met by any rod. That single fact is the whole logic of TT design.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The adiabatic check — cable survival</div>
+      <div class="eqn"><b>S ≥ √(I²·t) / k</b>   minimum CPC area to survive the fault
+k = 115 (PVC/Cu conductor) · I = fault current · t = disconnection time
+
+example: If 242 A · t 0.4 s → S = √(242²×0.4)/115 = <b>1.33 mm²</b>
+⇒ the 1.5 mm² CPC in 2.5 mm² T&amp;E survives — barely, and by design</div>
+      <p class="body">The adiabatic equation assumes no heat escapes during the fault (hence the name) — conservative and simple. It is why T&amp;E&#39;s reduced CPC is legitimate <em>only when</em> disconnection is fast: slow clearance (high Zs) and a skinny CPC is the combination that melts insulation and starts fires.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 9 ============ -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 14 · Practice</span>
+    <h2 class="page-title">Bonding, Bathroom Zones &amp; Safe Isolation</h2>
+    <p class="page-sub">Equipotential thinking, water-and-electricity geometry, and the ritual that keeps electricians alive.</p>
+
+    <div class="card">
+      <div class="label">Bonding ≠ earthing</div>
+      <p class="lead">Earthing clears faults; <span class="hl3">bonding equalises potential</span>. Main protective bonding (10 mm²) ties incoming metallic services — water, gas — to the main earthing terminal so that during any fault, everything a person can touch rises and falls <em>together</em>.</p>
+      <p class="body">A person is only shocked by a <strong>difference</strong> in potential. Bonding does not make pipes "safe" — it makes them equal. Supplementary bonding in bathrooms became largely unnecessary once 30 mA RCDs covered all circuits — a nice example of one protective philosophy (fast disconnection) retiring another (local equipotential zones), with the regulations tracking the physics.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Bathroom zones</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Zone</th><th>Where</th><th>Equipment rule</th></tr>
+        <tr><td><b>0</b></td><td>Inside the bath/shower tray</td><td>SELV 12 V max, IPX7</td></tr>
+        <tr><td><b>1</b></td><td>Above bath to 2.25 m</td><td>IPX4; 30 mA RCD; suitable fixed equipment</td></tr>
+        <tr><td><b>2</b></td><td>0.6 m beyond zone 1</td><td>IPX4; shaver units (isolating Tx) allowed</td></tr>
+        <tr><td><b>Outside</b></td><td>Beyond zone 2</td><td>Sockets allowed (30 mA RCD) — ≥3 m from bath edge under BS 7671</td></tr>
+      </table></div>
+      <p class="body">The zones encode one idea: <strong>wet skin drops body resistance from ~1000+ Ω toward 200 Ω</strong>, turning a survivable contact into a fatal one. Distance and IP ratings substitute for the resistance the water removed.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Safe isolation — the non-negotiable ritual</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Identify</strong> the circuit and its isolation point; agree it with anyone else affected.</div></li>
+        <li><span class="num">2</span><div><strong>Isolate and lock off</strong> — padlock + retained key + warning tag. Switching off is not isolation.</div></li>
+        <li><span class="num">3</span><div><strong>Prove the tester</strong> on a known live source (proving unit).</div></li>
+        <li><span class="num">4</span><div><strong>Test dead</strong> — L-N, L-E, N-E at the point of work with a two-pole voltage tester (never a neon screwdriver, never a multimeter on the wrong range).</div></li>
+        <li><span class="num">5</span><div><strong>Re-prove the tester</strong> on the live source — the tester might have died between steps 3 and 4. Prove-test-prove, every time, forever.</div></li>
+      </ul>
+      <p class="body"><strong>Verification sequence after work</strong> (dead → live): continuity of CPCs and ring legs (r1, rn, r2), insulation resistance ≥ 1 MΩ at 500 V DC, polarity, then Ze/Zs, PSCC and RCD trip times — recorded on the certificate. Testing is not admin: every line traps a specific installation error before it meets a human.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 10 ============ -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 14 · Consolidate</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Quiz</h2>
+    <p class="page-sub">Eight ideas, six real-world failure patterns, six checks.</p>
+
+    <div class="card">
+      <div class="label">Eight ideas that carry the module</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>The earthing system dictates the protection strategy</strong> — TT means RCDs or nothing.</div></li>
+        <li><span class="num">2</span><div><strong>Ib ≤ In ≤ Iz</strong> — load, device, installed cable, in that order, with derating honest.</div></li>
+        <li><span class="num">3</span><div><strong>MCB type = inrush class</strong>; choosing C over B halves your allowed Zs.</div></li>
+        <li><span class="num">4</span><div><strong>The RCD measures what is missing</strong> — 30 mA, ≤40 ms, and the Type letter must match the load&#39;s electronics.</div></li>
+        <li><span class="num">5</span><div><strong>Rings share, radials tell the truth</strong> — a broken ring leg is invisible in service.</div></li>
+        <li><span class="num">6</span><div><strong>VD = mV/A/m × Ib × L/1000</strong> against 3%/5% — long runs are sized by millivolts.</div></li>
+        <li><span class="num">7</span><div><strong>Zs = Ze + R1+R2; Zs ≤ 0.95×230/(5In)</strong> for a Type B — the compliance heartbeat.</div></li>
+        <li><span class="num">8</span><div><strong>Prove-test-prove</strong> — the isolation ritual outranks every clever calculation.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Six classic failure patterns</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">⚠️ Broken ring leg</div><p>Everything works; one leg carries all current and cooks. Caught only by the r1+rn+r2 cross-connect test — the reason periodic inspection exists.</p></div>
+        <div class="fail"><div class="ft">⚠️ Borrowed neutral</div><p>Two circuits sharing a neutral (old lighting practice): RCBOs trip mysteriously, and isolating one circuit leaves a live-fed neutral in the "dead" one.</p></div>
+        <div class="fail"><div class="ft">⚠️ Loose neutral terminal</div><p>Arcing at a screw terminal → heat → carbonised insulation → fire risk, with no overcurrent for any breaker to see. Thermal imaging (A41) finds it; torque screwdrivers prevent it.</p></div>
+        <div class="fail"><div class="ft">⚠️ Wrong RCD type</div><p>EV charger or PV inverter DC leakage saturates a Type AC core — the RCD sits blind while "protected". Type A/B selection is a safety calculation, not a catalogue preference.</p></div>
+        <div class="fail"><div class="ft">⚠️ DIY spur chains</div><p>Spur off a spur off a ring: one 2.5 mm² leg feeding a heater row. The ring&#39;s maths assumed one spur per point — chains defeat it.</p></div>
+        <div class="fail"><div class="ft">⚠️ Lost PME neutral</div><p>Network PEN break: every bonded pipe carries diverted load current; touch voltage appears between "earthed" metal and true earth. The reason PME has special rules outdoors.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 1</div>
+      <p class="quiz-q">A TT installation has a 120 Ω earth rod. Why can&#39;t a B32 MCB provide earth-fault protection, and what does?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Fault current = 230/120 ≈ <strong>1.9 A</strong> — a B32 needs 160 A (5×32) to trip instantly and would never operate at 1.9 A. A <strong>30 mA RCD</strong> trips at 0.03 A, needing only Zs &lt; ~7.6 kΩ. On TT systems the RCD IS the earth-fault protection.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 2</div>
+      <p class="quiz-q">Why does a ring final use 2.5 mm² cable on a 32 A breaker when 2.5 mm² is only rated ~27 A?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">The ring gives every load <strong>two parallel paths</strong>; current splits between legs, so neither normally exceeds its rating (worst case ~⅔ of load near one end). The design is legitimate ONLY while the ring is intact — a broken leg silently converts it into two overloaded 27 A radials on a 32 A device, which is why the ring continuity test is mandatory.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 3</div>
+      <p class="quiz-q">Ze = 0.35 Ω, R1+R2 = 0.85 Ω, device B32. Compliant?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Zs = 1.20 Ω ≤ 1.37 Ω (B32 max) → <strong>compliant</strong>, with margin 0.17 Ω. Fault current = 230/1.20 ≈ 192 A ≥ 160 A needed for instantaneous trip. On a C32 (max 0.68 Ω) the same circuit would FAIL.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 4</div>
+      <p class="quiz-q">Which loads make a Type AC RCD unsafe, and why?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Loads leaking <strong>DC or pulsating DC</strong> — EV chargers, PV inverters, VFDs, some appliances with rectifier front-ends. DC pre-magnetises (saturates) the toroid, so a subsequent AC fault produces too little flux change to trip: the RCD is present but <strong>blind</strong>. Type A handles pulsating DC; Type B handles smooth DC.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 5</div>
+      <p class="quiz-q">A 2.5 mm² radial (18 mV/A/m) runs 38 m to a workshop drawing 18 A. Volt-drop verdict?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">VD = 18 × 18 × 38 / 1000 = <strong>12.3 V = 5.4%</strong> — exceeds the 5% (11.5 V) limit. Upsize to 4 mm² (11 mV/A/m): VD = 7.5 V = 3.3% ✓. Long runs are sized by volt-drop, not ampacity.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 6</div>
+      <p class="quiz-q">In safe isolation, why prove the tester twice?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Because a dead tester reads 0 V on a LIVE circuit. Proving before confirms the tester works; testing dead gives the reading; <strong>re-proving after confirms the tester survived</strong> the measurement — otherwise "0 V" might mean a blown tester fuse, not a dead circuit. Prove-test-prove converts a measurement into evidence.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 11 ============ -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 / 14 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade numericals, solved step by step.</p>
+
+    <div class="card">
+      <div class="label">Worked Example 1 — Sizing a 9.5 kW shower circuit</div>
+      <p class="body"><b>Given:</b> 9.5 kW shower, 230 V, 18 m route clipped direct (no derating), T&amp;E cable. Select device and cable; verify volt drop.</p>
+      <div class="eqn">Ib = 9500/230 = <b>41.3 A</b>  (no diversity — showers run flat out)
+device: In ≥ Ib → <b>B45</b> (or B40 if measured load ≤40 A)
+cable: Iz ≥ In → 10 mm² T&amp;E (Iz ≈ 64 A clipped) ✓  6 mm² (47 A) also ≥45 but margin thin — 10 mm² is the norm
+VD = 4.4 × 41.3 × 18/1000 = <b>3.3 V = 1.4%</b> ≤ 5% ✓</div>
+      <p class="body"><em>Discussion:</em> the chain ran Ib → In → Iz in order, then VD. Note what was NOT done: no diversity (continuous load), no undersizing "because it&#39;s only a shower". A 30 mA RCD (Type A) covers the circuit; the isolator pull-cord in the bathroom gives local isolation. If the route had passed through insulation, Iz would collapse and 10 mm² becomes mandatory rather than comfortable.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 2 — Ring final continuity (r1 + rn + r2)</div>
+      <p class="body"><b>Given:</b> ring measurements at the CU: r1 (L–L ends) = 0.52 Ω, rn (N–N) = 0.52 Ω, r2 (CPC–CPC) = 0.86 Ω. Predict the expected (R1+R2) at every socket and explain the test.</p>
+      <div class="eqn">cross-connect method: join L of one leg to CPC of the other (both ways),
+measure at each socket: reading should be ≈ constant =
+<b>(r1 + r2)/4 = (0.52 + 0.86)/4 = 0.35 Ω</b>  at every socket
+
+a socket reading ≈ (r1+r2)/4 everywhere → ring intact
+readings RISING toward one end → that leg is broken (it&#39;s a radial now)</div>
+      <p class="body"><em>Discussion:</em> the ÷4 comes from two half-rings in parallel: each parallel pair is (r/2 ∥ r/2)... precisely, at any socket the two paths sum to r1+r2 and their parallel combination is maximised mid-ring at (r1+r2)/4. The near-constant reading is the fingerprint of an intact ring — the only routine test that catches the "everything still works" broken-leg failure. r2/r1 = 0.86/0.52 = 1.65 ≈ the 2.5/1.5 mm² CSA ratio ✓ — a built-in sanity check.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 3 — Full Zs compliance check</div>
+      <p class="body"><b>Given:</b> TN-C-S supply, Ze = 0.30 Ω. A 28 m radial in 2.5/1.5 mm² T&amp;E (r1+r2 = 19.51 mΩ/m at 20 °C, ×1.2 for operating temperature) on a B20. Verify disconnection.</p>
+      <div class="eqn">R1+R2 = 19.51 × 28 × 1.2 / 1000 = <b>0.656 Ω</b>
+Zs = 0.30 + 0.656 = <b>0.96 Ω</b>
+Zs(max) B20 = 0.95×230/(5×20) = <b>2.19 Ω</b>   →  0.96 ≤ 2.19 ✓ PASS
+If = 230/0.96 ≈ 240 A  (≥ 100 A needed)  → trips &lt;10 ms</div>
+      <p class="body"><em>Discussion:</em> the ×1.2 multiplier converts table resistance (20 °C) to conductor operating temperature (70 °C PVC) — omitting it is the classic way paper passes and reality fails. Margin here is generous; the same circuit at 70 m would give Zs = 1.94 Ω, still passing a B20 but failing a C20 (1.09 Ω) — device curve choice consumes loop budget.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 4 — Adiabatic verification of a CPC</div>
+      <p class="body"><b>Given:</b> the circuit above (Zs = 0.96 Ω, 1.5 mm² CPC, k = 115). Confirm the CPC survives the earth fault.</p>
+      <div class="eqn">If = 230/0.96 = 240 A
+B20 magnetic trip at 240 A → t ≈ 0.01 s (instantaneous)
+S_min = √(I²t)/k = √(240² × 0.01)/115 = 24.0/115 = <b>0.21 mm²</b>
+1.5 mm² ≥ 0.21 mm²  →  ✓ SURVIVES with huge margin</div>
+      <p class="body"><em>Discussion:</em> fast disconnection is what makes small CPCs viable — the energy let-through I²t at 10 ms is tiny. Rerun the numbers with a sluggish 0.4 s clearance and S_min rises √40 ≈ 6.3× to 1.34 mm²: the margin nearly vanishes. The adiabatic check, loop impedance and device curve are one coupled system — change any one and re-verify the others.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 ============ -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 / 14 · MSc Practice</span>
+    <h2 class="page-title">Problem Set — 10 Questions</h2>
+    <p class="page-sub">Work each one before revealing — the coordination chain and the loop equation answer everything.</p>
+
+    <div class="card quiz">
+      <div class="label">Problem 1</div>
+      <p class="quiz-q">A 7.2 kW cooker at 230 V: design current before diversity, and after (10 A + 30% remainder)?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Full: 7200/230 = <strong>31.3 A</strong>. Diversity: 10 + 0.3×(31.3−10) = 10 + 6.4 = <strong>16.4 A</strong> (add 5 A if the unit has a socket → 21.4 A). A B32 on 6 mm² is the standard answer.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 2</div>
+      <p class="quiz-q">Why is diversity forbidden for the shower but expected for the cooker?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Diversity models statistically intermittent loads. A cooker cycles thermostatically with rings on/off — average ≪ peak. A shower element runs at <strong>100% duty for the whole use</strong>; its average IS its peak. Diversity applied to continuous loads is just under-sizing with paperwork.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 3</div>
+      <p class="quiz-q">2.5 mm² T&amp;E rated 27 A clipped direct runs 3 m through loft insulation (Ci = 0.5). New Iz, and consequence for a ring?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Iz = 27 × 0.5 = <strong>13.5 A</strong>. Even with the ring&#39;s current-sharing this is below the ~20 A a leg can see — the insulated section becomes the thermal weak link. Fix: route around insulation, derate the circuit, or upsize the cable through that section.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 4</div>
+      <p class="quiz-q">Max Zs for a C40 device (Cmin = 0.95)?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Type C trips at 10×In: Zs = 0.95×230/(10×40) = <strong>0.55 Ω</strong>. Compare B40&#39;s 1.09 Ω — the C-curve halves the loop budget, often forcing bigger cable purely for fault-loop reasons.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 5</div>
+      <p class="quiz-q">An RCD trips at 22 mA on a ramp test and holds 250 ms at 1×IΔn on older equipment. Pass?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Ramp 22 mA is within the 50–100% of IΔn window (15–30 mA) ✓. At 1×IΔn the limit is ≤300 ms → 250 ms ✓ <strong>PASS</strong>; the ≤40 ms requirement applies at 5×IΔn (150 mA). Knowing which limit belongs to which multiple is a standard exam trap.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 6</div>
+      <p class="quiz-q">Insulation resistance test: what voltage and minimum value for a 230 V circuit, and what must you do first?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>500 V DC, ≥ 1 MΩ</strong> (L+N together to E for a quick global check). First: disconnect or protect voltage-sensitive equipment (SPDs, dimmers, boiler electronics, smart devices) — the test voltage that proves the cable kills the electronics.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 7</div>
+      <p class="quiz-q">A garden office needs 32 A at 45 m. Check 4 mm² (11 mV/A/m) and 6 mm² (7.3) against 5%.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">4 mm²: 11×32×45/1000 = <strong>15.8 V = 6.9%</strong> ✗. 6 mm²: 7.3×32×45/1000 = <strong>10.5 V = 4.6%</strong> ✓. Volt-drop, not ampacity, sizes this SWA run — and a sub-board at the office restarts the VD budget for its final circuits.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 8</div>
+      <p class="quiz-q">Why must main bonding conductors connect gas/water pipes NEAR their point of entry?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">The pipe is an <strong>extraneous-conductive-part</strong> — it can import true-earth potential from outside. Bonding at entry clamps the whole internal pipework to the installation&#39;s earth potential before it runs anywhere touchable; bonded mid-run, the entry section can still sit at a different potential during a fault (especially under PME lost-neutral conditions).</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 9</div>
+      <p class="quiz-q">During isolation you measure L-N: 0 V, L-E: 0 V, N-E: 0 V — but the proving unit now shows your tester dead. Status of the circuit?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Unknown — treat as LIVE.</strong> A tester that fails the re-prove invalidates every reading it just gave (a blown internal fuse reads 0 V on anything). Replace/repair the tester, prove it, and repeat all three dead tests. This exact scenario is why prove-test-prove exists.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 10</div>
+      <p class="quiz-q">An EV charger install on a PME (TN-C-S) supply: name the two special hazards and the standard mitigations.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">(1) <strong>Lost PEN</strong>: the car body (outdoors, on true earth) could rise to dangerous touch voltage → use a charger with open-PEN detection/disconnection, or convert the circuit to TT with its own rod. (2) <strong>DC leakage blinding the RCD</strong> → Type A + 6 mA DC detection (built into most chargers) or Type B RCD. Both are checkbox items on a modern EV certificate.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 ============ -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 / 14 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">Where Zs(max), the adiabatic equation and the ring&#39;s ÷4 come from.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 — maximum Zs from the disconnection requirement</div>
+      <div class="eqn">requirement: disconnect in 0.4 s ⇒ use the device&#39;s INSTANTANEOUS region
+Type B guaranteed instantaneous at 5×In  ⇒  need If ≥ 5·In
+If = Cmin·U₀/Zs  ⇒  Cmin·U₀/Zs ≥ 5·In
+<b>Zs ≤ Cmin·U₀/(5·In)</b>       Cmin = 0.95 covers supply-voltage sag
+
+same logic: Type C → 10·In · Type D → 20·In · RCD → IΔn (tiny ⇒ Zs huge)</div>
+      <p class="body"><em>Why it matters:</em> every max-Zs table row is this one line evaluated. Derive it once and you can reconstruct the whole table in an exam, handle non-standard voltages, and explain why an RCD rescues any loop an MCB cannot clear.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 — the adiabatic equation</div>
+      <div class="eqn">assume all fault heat stays in the conductor (no time to escape):
+energy in = I²·R·t   with R ∝ 1/S ;  allowed temperature rise fixes
+allowable energy per mm² → material constant k
+
+I²·t = k²·S²   ⇒   <b>S = √(I²t)/k</b>
+k: 115 (PVC/Cu) · 143 (XLPE/Cu) · 76 (PVC/Al)</div>
+      <p class="body"><em>Why it matters:</em> it exposes the coupling — I comes from Zs, t from the device curve at that I. Faster disconnection (lower Zs, B-curve) slashes I²t and legitimises T&amp;E&#39;s reduced CPC; anything that slows clearance re-opens the check. The same equation sizes earthing conductors and SWA armour used as CPC.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 — the ring&#39;s (r1+r2)/4</div>
+      <div class="eqn">socket at fraction x around the ring; two paths to the CU:
+path A = x·(r1+r2) · path B = (1−x)·(r1+r2)      (after cross-connection)
+parallel: R(x) = (r1+r2)·x(1−x)
+maximum at x = ½ : R = (r1+r2)/4    — and nearly flat around it
+
+broken leg ⇒ single path ⇒ R rises linearly to r1+r2 at the far end</div>
+      <p class="body"><em>Why it matters:</em> the flat x(1−x) profile is why an intact ring reads "the same everywhere" and a broken one reads a ramp — the test interprets a parabola. It also yields the worst-case (R1+R2) for Zs verification of a ring: measured maximum ≈ (r1+r2)/4.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol glossary</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Symbol / term</th><th>Meaning</th><th>Unit</th></tr>
+        <tr><td class="mono">Ib · In · Iz</td><td>Design current · device rating · installed cable capacity</td><td>A</td></tr>
+        <tr><td class="mono">Ze · Zs · R1+R2</td><td>External loop · total loop · circuit line+CPC resistance</td><td>Ω</td></tr>
+        <tr><td class="mono">PSCC / PEFC</td><td>Prospective short-circuit / earth-fault current</td><td>kA</td></tr>
+        <tr><td class="mono">IΔn</td><td>RCD rated residual operating current</td><td>mA</td></tr>
+        <tr><td class="mono">CPC · PEN</td><td>Circuit protective conductor · combined PE+N (PME)</td><td>—</td></tr>
+        <tr><td class="mono">mV/A/m</td><td>Tabulated volt-drop per amp per metre</td><td>mV</td></tr>
+        <tr><td class="mono">Ca Cg Ci Cf</td><td>Derating factors: ambient, grouping, insulation, device</td><td>—</td></tr>
+        <tr><td class="mono">k · S</td><td>Adiabatic material constant · conductor CSA</td><td>— · mm²</td></tr>
+        <tr><td class="mono">Cmin</td><td>Minimum voltage factor 0.95</td><td>—</td></tr>
+        <tr><td class="mono">SELV · IP·X</td><td>Safety extra-low voltage · ingress protection rating</td><td>—</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven exam &amp; field traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Table resistance is 20 °C.</strong> Multiply r1+r2 by ~1.2 for operating temperature before any Zs verdict — cold measurements flatter the loop.</div></li>
+        <li><span class="num">2</span><div><strong>RCD ≠ overload protection.</strong> A 30 mA RCD happily passes 80 A forever; an MCB is numerically blind to 30 mA. Each device answers only its own question.</div></li>
+        <li><span class="num">3</span><div><strong>Type C "for reliability" halves max Zs.</strong> Curve upgrades are loop-impedance decisions, not preferences.</div></li>
+        <li><span class="num">4</span><div><strong>Neutral is a live conductor.</strong> It carries load current at earth-ish potential — a borrowed or broken neutral bites precisely because people treat it as safe.</div></li>
+        <li><span class="num">5</span><div><strong>The 40 ms limit belongs to 5×IΔn.</strong> At 1×IΔn the allowance is 300 ms — quoting 40 ms against a 1× test fails good RCDs on paper.</div></li>
+        <li><span class="num">6</span><div><strong>VD limits differ: 3% lighting, 5% power</strong> — and both are from the ORIGIN, so a sub-main&#39;s drop eats the final circuit&#39;s budget.</div></li>
+        <li><span class="num">7</span><div><strong>IR testing fries electronics.</strong> 500 V DC through an SPD, dimmer or boiler PCB is a warranty claim — disconnect first, and record that you did.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 ============ -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 / 14 · MSc Practice</span>
+    <h2 class="page-title">Study &amp; Practice Path</h2>
+    <p class="page-sub">The canon, a hands-on ladder, and an honest self-check.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Resource</th><th>What it gives you</th><th>Level</th></tr>
+        <tr><td><b>BS 7671:2018+A2</b> (IET Wiring Regulations)</td><td>The rulebook — definitions, tables, the 0.4 s/Zs machinery</td><td>Standard</td></tr>
+        <tr><td><b>IET On-Site Guide</b></td><td>The pocket distillation: standard circuits, tables, diversity — what electricians actually carry</td><td>Core</td></tr>
+        <tr><td><b>IET Guidance Note 1 (Selection) &amp; 3 (Inspection &amp; Testing)</b></td><td>Design depth and the full test-sequence discipline</td><td>MSc</td></tr>
+        <tr><td><b>IEC 60364 series</b></td><td>The international parent standard — transferable logic worldwide</td><td>Standard</td></tr>
+        <tr><td><b>Scaddan</b> — <i>Electrical Installation Work</i></td><td>The teaching text: worked examples from Part 1 to design level</td><td>Core</td></tr>
+        <tr><td><b>IEC 60479</b></td><td>Effects of current on humans — the physiology behind 30 mA/40 ms</td><td>Reference</td></tr>
+        <tr><td><b>Manufacturer design guides</b> (Hager/Schneider/ABB CU catalogues)</td><td>Real device curves, discrimination tables, SPD selection</td><td>Practice</td></tr>
+        <tr><td><b>Sri Lanka: SLS 1080 / CEB wiring requirements</b></td><td>Local implementation details layered on the BS 7671 skeleton</td><td>Local</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder — eight exercises</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Map your own board.</strong> Open (visually!) your consumer unit: identify main switch, RCD banks/RCBOs, each circuit&#39;s device type and rating; draw the schedule.</div></li>
+        <li><span class="num">2</span><div><strong>Identify your earthing system</strong> from the service head arrangement (sheath connection? PEN split? rod?) and note the implications for RCD dependence.</div></li>
+        <li><span class="num">3</span><div><strong>Zs table from scratch.</strong> Derive max Zs for B6–B40 and C6–C40 with the one-line formula; check against the published table.</div></li>
+        <li><span class="num">4</span><div><strong>Design a circuit on paper.</strong> Garage supply: pick load, do Ib→In→Iz with honest derating, VD at length, Zs prediction, adiabatic check — full chain, one page.</div></li>
+        <li><span class="num">5</span><div><strong>Ring math rehearsal.</strong> With three resistors as legs, compute r1+rn+r2 predictions, then the ÷4 figure-eight readings — before ever touching a real ring.</div></li>
+        <li><span class="num">6</span><div><strong>Watch (or perform under supervision) the test sequence</strong> on one circuit: continuity, IR, polarity, Zs, RCD times — and fill in a model certificate.</div></li>
+        <li><span class="num">7</span><div><strong>Practise prove-test-prove</strong> with a two-pole tester and proving unit until the ritual is automatic — muscle memory is the deliverable.</div></li>
+        <li><span class="num">8</span><div><strong>Audit one failure mode.</strong> Find (in photos or the field) one example of the page-10 gallery — spur chains, loose neutrals, wrong RCD type — and write the fix.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment — can you…?</div>
+      <div class="grid-2">
+        <div class="mini"><div class="big">◔</div><h4>Recall</h4><p>Write Ib≤In≤Iz, Zs=Ze+R1+R2, Zs(max)=0.95·230/(5In), S=√(I²t)/k and the three earthing systems from memory.</p></div>
+        <div class="mini c-sky"><div class="big">◑</div><h4>Apply</h4><p>Size any domestic circuit end-to-end (device, cable, VD, Zs, adiabatic) with honest derating factors.</p></div>
+        <div class="mini c-purp"><div class="big">◕</div><h4>Diagnose</h4><p>Read a test certificate and spot the broken ring, the cold-resistance flattery, or the wrong RCD type from the numbers alone.</p></div>
+        <div class="mini c-grn"><div class="big">●</div><h4>Judge</h4><p>Defend TT-vs-PME decisions for an EV install, and explain to a non-engineer why the RCD type letter is a safety issue.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="card memory">
+    <div class="label">Memory Hook</div>
+    <p class="quote">"Ib ≤ In ≤ Iz sizes it · Zs trips it · the RCD saves you · prove-test-prove keeps you alive."</p>
+  </div>
+
+  <div class="footer">
+    <p><strong>A44 · Domestic Wiring &amp; Consumer Units — Advanced Deep Dive</strong></p>
+    <p>Companion modules: <a href="A30_Three_Phase_Power_Deep_Dive.html" style="color:var(--accent-soft)">A30 Three-Phase</a> · <a href="A28_Switching_Power_Electronics_Deep_Dive.html" style="color:var(--accent-soft)">A28 Relays</a> · <a href="A32_Transformers_Deep_Dive.html" style="color:var(--accent-soft)">A32 Transformers</a> · <a href="A41_Thermal_Imaging_Deep_Dive.html" style="color:var(--accent-soft)">A41 Thermal Imaging</a></p>
+    <p>Micro Learning · Advanced Library · optimised for iPad Pro 11&Prime; · dark, high-contrast, keratoconus-friendly</p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // Maximum demand estimator
+  var dLtR=document.getElementById('dLtR'), dSkR=document.getElementById('dSkR'), dCkR=document.getElementById('dCkR'), dShR=document.getElementById('dShR');
+  function dm(){
+    var lt=+dLtR.value, sk=+dSkR.value, ck=+dCkR.value, sh=+dShR.value;
+    document.getElementById('dLtV').textContent=lt;
+    document.getElementById('dSkV').textContent=sk;
+    document.getElementById('dCkV').textContent=ck.toFixed(1);
+    document.getElementById('dShV').textContent=sh.toFixed(1);
+    var iLt=lt*0.66/230;
+    var iSk=32+(sk-1)*32*0.4;
+    var ickFull=ck*1000/230;
+    var iCk=ck>0?Math.min(ickFull,10+0.3*Math.max(ickFull-10,0)):0;
+    var iSh=sh*1000/230;
+    var tot=iLt+iSk+iCk+iSh;
+    document.getElementById('dmOut').innerHTML=
+      'lighting 66%: <b>'+iLt.toFixed(1)+' A</b> · sockets: <b>'+iSk.toFixed(1)+' A</b><br>'+
+      'cooker (diversified '+(ck>0?ickFull.toFixed(1):0)+'→): <b>'+iCk.toFixed(1)+' A</b> · shower (100%): <b>'+iSh.toFixed(1)+' A</b><br>'+
+      'estimated maximum demand ≈ <b>'+tot.toFixed(0)+' A</b> — '+(tot<=80?'within an 80 A service ✓':'<span style="color:#f87171">exceeds an 80 A service — load management / three-phase talk needed</span>');
+  }
+  [dLtR,dSkR,dCkR,dShR].forEach(function(r){r.addEventListener('input',dm);}); dm();
+
+  // Voltage drop checker
+  var mvam=18, vdLim=5;
+  var csaSeg=document.getElementById('csaSeg'), vdTypeSeg=document.getElementById('vdTypeSeg');
+  var vdiR=document.getElementById('vdiR'), vdlR=document.getElementById('vdlR');
+  csaSeg.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    csaSeg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); mvam=+b.dataset.c; vd();
+  });
+  vdTypeSeg.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    vdTypeSeg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); vdLim=+b.dataset.l; vd();
+  });
+  function vd(){
+    var i=+vdiR.value, L=+vdlR.value;
+    document.getElementById('vdiV').textContent=i;
+    document.getElementById('vdlV').textContent=L;
+    var v=mvam*i*L/1000, pct=v/230*100, lim=vdLim/100*230;
+    document.getElementById('vdOut').innerHTML=
+      'VD = '+mvam+' × '+i+' × '+L+' / 1000 = <b>'+v.toFixed(1)+' V</b> = <b>'+pct.toFixed(1)+'%</b><br>'+
+      'limit '+vdLim+'% = '+lim.toFixed(1)+' V → '+(v<=lim?'<b style="color:#4ade80">PASS ✓</b>':'<b style="color:#f87171">FAIL — upsize the cable</b>');
+  }
+  vdiR.addEventListener('input',vd); vdlR.addEventListener('input',vd); vd();
+
+  // Zs compliance checker
+  var inR=32, mult=5;
+  var mcbSeg=document.getElementById('mcbSeg'), zeR=document.getElementById('zeR'), rrR=document.getElementById('rrR');
+  mcbSeg.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    mcbSeg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on');
+    var v=+b.dataset.i;
+    if(v<0){inR=-v; mult=10;} else {inR=v; mult=5;}
+    zs();
+  });
+  function zs(){
+    var ze=+zeR.value, rr=+rrR.value;
+    document.getElementById('zeV').textContent=ze.toFixed(2);
+    document.getElementById('rrV').textContent=rr.toFixed(2);
+    var zsv=ze+rr;
+    var zmax=0.95*230/(mult*inR);
+    var ifc=230/zsv;
+    document.getElementById('zsOut').innerHTML=
+      'Zs = '+ze.toFixed(2)+' + '+rr.toFixed(2)+' = <b>'+zsv.toFixed(2)+' Ω</b> · fault current ≈ <b>'+ifc.toFixed(0)+' A</b><br>'+
+      'Zs(max) for '+(mult===5?'B':'C')+inR+' = 0.95×230/('+mult+'×'+inR+') = <b>'+zmax.toFixed(2)+' Ω</b><br>'+
+      (zsv<=zmax?'<b style="color:#4ade80">COMPLIANT ✓</b> margin '+(zmax-zsv).toFixed(2)+' Ω':'<b style="color:#f87171">NON-COMPLIANT — reduce loop (bigger CPC / shorter run) or rely on RCD for disconnection</b>');
+  }
+  zeR.addEventListener('input',zs); rrR.addEventListener('input',zs); zs();
+})();
+</script>
+</body>
+</html>

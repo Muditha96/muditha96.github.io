@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PID Control — Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --accent: #4ade80;
+    --accent-2: #60a5fa;
+    --accent-3: #fbbf24;
+    --accent-pid: #c084fc;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 32px 28px 80px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 15px;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+    animation: fadeDown 0.7s ease;
+  }
+  .badge .dot {
+    width: 8px; height: 8px;
+    background: var(--accent-pid);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--accent-pid);
+    animation: pulse 2s infinite;
+  }
+
+  h1 {
+    font-size: clamp(40px, 6vw, 64px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin-bottom: 16px;
+    animation: fadeUp 0.7s ease 0.1s both;
+  }
+  h1 .emoji { font-size: 0.85em; margin-right: 8px; }
+
+  .subtitle {
+    font-size: clamp(18px, 2.2vw, 22px);
+    color: var(--text-dim);
+    margin-bottom: 40px;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 36px 32px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.7s ease both;
+  }
+  .card.delay-1 { animation-delay: 0.3s; }
+  .card.delay-2 { animation-delay: 0.45s; }
+  .card.delay-3 { animation-delay: 0.6s; }
+  .card.delay-4 { animation-delay: 0.75s; }
+  .card.delay-5 { animation-delay: 0.9s; }
+
+  .label {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-pid);
+    margin-bottom: 14px;
+  }
+
+  .definition {
+    font-size: clamp(22px, 2.8vw, 28px);
+    font-weight: 500;
+    line-height: 1.45;
+  }
+
+  /* THREE TERMS */
+  .terms {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .term-card {
+    background: var(--card-2);
+    border-radius: 16px;
+    padding: 22px 16px;
+    text-align: center;
+    border-top: 4px solid var(--accent-pid);
+    position: relative;
+    overflow: hidden;
+  }
+  .term-card .big-letter {
+    font-size: 56px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent-pid);
+    text-shadow: 0 0 20px rgba(192,132,252,0.4);
+  }
+  .term-card .name { font-size: 15px; font-weight: 700; margin-top: 6px; }
+  .term-card .sub  { font-size: 13px; color: var(--text-dim); margin-top: 4px; line-height: 1.4; }
+  .term-card.p { border-color: var(--accent-2); }
+  .term-card.p .big-letter { color: var(--accent-2); text-shadow: 0 0 20px rgba(96,165,250,0.4); }
+  .term-card.i { border-color: var(--accent-3); }
+  .term-card.i .big-letter { color: var(--accent-3); text-shadow: 0 0 20px rgba(251,191,36,0.4); }
+  .term-card.d { border-color: var(--accent); }
+  .term-card.d .big-letter { color: var(--accent); text-shadow: 0 0 20px rgba(74,222,128,0.4); }
+
+  /* INTERACTIVE CHART */
+  .chart-card { padding-bottom: 28px; }
+  canvas { width: 100%; height: 260px; display: block; background: var(--card-2); border-radius: 14px; }
+  .gain-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .gain-group {
+    background: var(--card-2);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+  .gain-group label {
+    font-size: 13px;
+    color: var(--text-dim);
+    display: block;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .gain-group .val {
+    font-family: ui-monospace, monospace;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent-pid);
+    margin-bottom: 8px;
+  }
+  .gain-group input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: var(--card);
+    border-radius: 4px;
+  }
+  .gain-group input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px; height: 20px;
+    background: var(--accent-pid);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--accent-pid);
+  }
+  .preset-row {
+    display: flex; gap: 10px; margin-top: 12px;
+    justify-content: center; flex-wrap: wrap;
+  }
+  .preset-row button {
+    background: var(--card-2);
+    border: 1px solid var(--accent-pid);
+    color: var(--accent-pid);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .preset-row button:active { background: var(--accent-pid); color: var(--bg); }
+
+  /* KEY FACTS */
+  .facts { list-style: none; display: grid; gap: 16px; }
+  .facts li {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--card-2); padding: 18px 22px;
+    border-radius: 14px; font-size: 19px;
+    border-left: 4px solid var(--accent-pid);
+    transition: transform 0.3s ease;
+  }
+  .facts li:hover { transform: translateX(6px); }
+  .facts li .check {
+    width: 28px; height: 28px;
+    background: var(--accent-pid); color: var(--bg);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; flex-shrink: 0;
+  }
+
+  /* EXAMPLE */
+  .example {
+    background: linear-gradient(135deg, rgba(192,132,252,0.1), rgba(74,222,128,0.05));
+    border-left: 4px solid var(--accent-pid);
+  }
+  .example .icon-large { font-size: 48px; margin-bottom: 12px; }
+  .example p { font-size: 20px; line-height: 1.55; }
+
+  /* MEMORY HOOK */
+  .memory {
+    background: linear-gradient(135deg, #c084fc, #9333ea);
+    color: #fff; text-align: center;
+    padding: 40px 28px; border: none;
+  }
+  .memory .label { color: rgba(255,255,255,0.85); }
+  .memory .quote {
+    font-size: clamp(26px, 3.5vw, 36px);
+    font-weight: 800; letter-spacing: -0.01em;
+  }
+
+  /* QUIZ */
+  .quiz { background: var(--card); border: 2px dashed var(--accent-pid); }
+  .quiz .label { color: var(--accent-pid); }
+  .quiz-q { font-size: 22px; font-weight: 500; margin-bottom: 20px; }
+  .quiz-answer {
+    background: var(--card-2); padding: 18px;
+    border-radius: 12px; font-size: 18px;
+    color: var(--text-dim); cursor: pointer; user-select: none;
+    transition: all 0.3s ease;
+  }
+  .quiz-answer .hidden { opacity: 0; transition: opacity 0.4s ease; }
+  .quiz-answer.revealed .hidden { opacity: 1; }
+  .quiz-answer.revealed {
+    background: rgba(192,132,252,0.1); color: var(--text);
+    border: 1px solid var(--accent-pid);
+  }
+  .quiz-answer .tap {
+    display: block; text-align: center;
+    color: var(--accent-pid); font-weight: 600;
+  }
+  .quiz-answer.revealed .tap { display: none; }
+
+  .footer {
+    text-align: center; color: var(--text-dim);
+    font-size: 14px; margin-top: 40px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown { from {opacity:0; transform: translateY(-16px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 48px 40px 100px; }
+    .card { padding: 44px 40px; }
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 24px 18px 60px; }
+    .card { padding: 28px 22px; border-radius: 20px; }
+    .terms { grid-template-columns: 1fr; }
+    .gain-controls { grid-template-columns: 1fr; }
+    canvas { height: 220px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="badge">
+    <span class="dot"></span>
+    <span>Lesson 10 · Industrial Automation</span>
+  </div>
+
+  <h1><span class="emoji">🎚️</span>PID Control</h1>
+  <p class="subtitle">The control law behind every stable closed-loop system.</p>
+
+  <!-- DEFINITION -->
+  <div class="card delay-1">
+    <div class="label">Quick Definition</div>
+    <p class="definition">
+      PID is a control algorithm that calculates error (setpoint − actual) and combines three terms — <strong>P</strong>roportional, <strong>I</strong>ntegral, and <strong>D</strong>erivative — to drive the system to its target smoothly.
+    </p>
+  </div>
+
+  <!-- THREE TERMS -->
+  <div class="card delay-2">
+    <div class="label">The Three Terms</div>
+    <div class="terms">
+      <div class="term-card p">
+        <div class="big-letter">P</div>
+        <div class="name">Proportional</div>
+        <div class="sub">Reacts to <em>current</em> error. Bigger error → bigger push.</div>
+      </div>
+      <div class="term-card i">
+        <div class="big-letter">I</div>
+        <div class="name">Integral</div>
+        <div class="sub">Removes <em>steady-state</em> error by summing past errors.</div>
+      </div>
+      <div class="term-card d">
+        <div class="big-letter">D</div>
+        <div class="name">Derivative</div>
+        <div class="sub">Dampens <em>fast changes</em> — anticipates future error.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERACTIVE PID SIM -->
+  <div class="card chart-card delay-3">
+    <div class="label">Try It — Tune the PID</div>
+    <canvas id="chart" width="800" height="260"></canvas>
+    <div class="gain-controls">
+      <div class="gain-group">
+        <label>P Gain</label>
+        <div class="val" id="vKp">1.0</div>
+        <input type="range" id="kp" min="0" max="5" step="0.1" value="1">
+      </div>
+      <div class="gain-group">
+        <label>I Gain</label>
+        <div class="val" id="vKi">0.1</div>
+        <input type="range" id="ki" min="0" max="2" step="0.05" value="0.1">
+      </div>
+      <div class="gain-group">
+        <label>D Gain</label>
+        <div class="val" id="vKd">0.05</div>
+        <input type="range" id="kd" min="0" max="1" step="0.01" value="0.05">
+      </div>
+    </div>
+    <div class="preset-row">
+      <button data-p="0.5"  data-i="0"   data-d="0">P only (slow)</button>
+      <button data-p="3"    data-i="0"   data-d="0">P only (oscillate)</button>
+      <button data-p="1.2"  data-i="0.3" data-d="0.15">Balanced</button>
+    </div>
+  </div>
+
+  <!-- KEY FACTS -->
+  <div class="card delay-3">
+    <div class="label">Key Facts</div>
+    <ul class="facts">
+      <li><span class="check">✓</span> Used in temperature, pressure, flow, motion & level control</li>
+      <li><span class="check">✓</span> Tuning methods: Ziegler-Nichols, Cohen-Coon, auto-tune</li>
+      <li><span class="check">✓</span> Too much P → oscillation; too much I → overshoot</li>
+      <li><span class="check">✓</span> Output = Kp·e + Ki·∫e dt + Kd·(de/dt)</li>
+      <li><span class="check">✓</span> Built into every PLC, drive, and process controller</li>
+    </ul>
+  </div>
+
+  <!-- EXAMPLE -->
+  <div class="card example delay-4">
+    <div class="label">Real Industrial Example</div>
+    <div class="icon-large">🔥</div>
+    <p>
+      A <strong>plastic injection mould heater</strong> uses PID to hold barrel temperature at 240 °C ± 1 °C — preventing burnt material on the hot side and unmelted pellets on the cold side.
+    </p>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="card quiz delay-5">
+    <div class="label">Quick Check</div>
+    <p class="quiz-q">Q: A heater is stuck 3 °C below setpoint forever. Which PID term fixes it?</p>
+    <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+      <span class="tap">Tap to reveal answer ↓</span>
+      <span class="hidden">
+        <strong>A:</strong> <strong>I (Integral)</strong>. It accumulates the persistent error until the output rises enough to close the gap. P alone leaves a steady-state offset.
+      </span>
+    </div>
+  </div>
+
+  <!-- MEMORY HOOK -->
+  <div class="card memory delay-5">
+    <div class="label">Memory Hook</div>
+    <p class="quote">"P reacts now, I remembers, D predicts."</p>
+  </div>
+
+  <div class="footer">
+    Lesson 10 of the Industrial Engineering Micro-Learning Series
+  </div>
+
+</div>
+
+<script>
+  const canvas = document.getElementById('chart');
+  const ctx = canvas.getContext('2d');
+
+  const kpEl = document.getElementById('kp');
+  const kiEl = document.getElementById('ki');
+  const kdEl = document.getElementById('kd');
+  const vKp = document.getElementById('vKp');
+  const vKi = document.getElementById('vKi');
+  const vKd = document.getElementById('vKd');
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width  = canvas.offsetWidth * dpr;
+    canvas.height = canvas.offsetHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function simulate(Kp, Ki, Kd) {
+    // Simple first-order plant: dx/dt = (u - x) / tau
+    const setpoint = 1.0;
+    const dt = 0.05;
+    const steps = 200;
+    const tau = 0.6;
+    let x = 0, integral = 0, prevErr = setpoint - x;
+    const series = [];
+    for (let i = 0; i < steps; i++) {
+      const err = setpoint - x;
+      integral += err * dt;
+      const deriv = (err - prevErr) / dt;
+      prevErr = err;
+      let u = Kp*err + Ki*integral + Kd*deriv;
+      // Clamp output
+      u = Math.max(-5, Math.min(5, u));
+      x += dt * (u - x) / tau;
+      series.push(x);
+    }
+    return series;
+  }
+
+  function draw() {
+    const Kp = parseFloat(kpEl.value);
+    const Ki = parseFloat(kiEl.value);
+    const Kd = parseFloat(kdEl.value);
+    vKp.textContent = Kp.toFixed(1);
+    vKi.textContent = Ki.toFixed(2);
+    vKd.textContent = Kd.toFixed(2);
+
+    const W = canvas.offsetWidth;
+    const H = canvas.offsetHeight;
+    ctx.clearRect(0, 0, W, H);
+
+    // Background grid
+    ctx.strokeStyle = 'rgba(148,163,184,0.15)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = (H - 30) * i / 4 + 15;
+      ctx.beginPath(); ctx.moveTo(40, y); ctx.lineTo(W - 10, y); ctx.stroke();
+    }
+
+    // Setpoint line
+    const yZero = H - 30;
+    const ySet  = 25;
+    ctx.setLineDash([6, 4]);
+    ctx.strokeStyle = '#4ade80';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(40, ySet); ctx.lineTo(W - 10, ySet); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#4ade80';
+    ctx.font = '12px -apple-system, sans-serif';
+    ctx.fillText('Setpoint', W - 70, ySet - 6);
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('0', 22, yZero + 4);
+    ctx.fillText('1', 22, ySet + 4);
+
+    // Plot
+    const series = simulate(Kp, Ki, Kd);
+    ctx.strokeStyle = '#c084fc';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    series.forEach((v, i) => {
+      const x = 40 + (W - 50) * i / (series.length - 1);
+      // Map y: v ∈ [~ -0.5 ... 2] → screen
+      const y = yZero - (v / 1.0) * (yZero - ySet);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Glow
+    ctx.shadowColor = '#c084fc';
+    ctx.shadowBlur = 12;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  [kpEl, kiEl, kdEl].forEach(el => el.addEventListener('input', draw));
+
+  document.querySelectorAll('.preset-row button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      kpEl.value = btn.dataset.p;
+      kiEl.value = btn.dataset.i;
+      kdEl.value = btn.dataset.d;
+      draw();
+    });
+  });
+
+  draw();
+</script>
+</body>
+</html>

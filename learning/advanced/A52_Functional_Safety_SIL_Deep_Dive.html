@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Functional Safety &amp; SIL (IEC 61511) · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #f43f5e;       /* safety rose-red */
+    --accent-soft: #fecdd3;
+    --accent-2: #fbbf24;      /* hazard amber */
+    --accent-3: #38bdf8;      /* logic sky */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(244,63,94,0.13), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(56,189,248,0.06), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(244,63,94,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(244,63,94,0.14), rgba(56,189,248,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(244,63,94,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-3)!important; } .c-sky .big{color:var(--accent-3)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #f43f5e, #881337); color: #fff1f2; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(255,241,242,0.8); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(244,63,94,0.10); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:70px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Process Safety &amp; Reliability · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🛡️</span>Functional Safety &amp; SIL</h1>
+  <p class="hero-sub">The engineering of last resort: how IEC 61511 turns "this must not happen" into layers of protection, safety instrumented functions with measurable failure probabilities, SIL targets set by LOPA, PFD arithmetic with proof-test intervals and voting architectures, and a lifecycle that treats safety as something you <em>maintain</em>, not something you buy.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>A full advanced module. Related:</span>
+    <a href="A35_Cobot_Safety_Deep_Dive.html">A35 Machinery Safety →</a>
+    <a href="A50_Instrumentation_Calibration_PID_Deep_Dive.html">A50 Instrumentation →</a>
+    <a href="A07_PLC_Deep_Dive.html">A07 PLC →</a>
+    <a href="A14_SCADA_HMI_Deep_Dive.html">A14 SCADA →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · Layers of Protection</a>
+    <a href="#p2">2 · The Safety Lifecycle</a>
+    <a href="#p3">3 · SIL &amp; PFD Bands</a>
+    <a href="#p4">4 · Anatomy of a SIF</a>
+    <a href="#p5">5 · LOPA</a>
+    <a href="#p6">6 · Failure-Rate Math</a>
+    <a href="#p7">7 · Voting Architectures</a>
+    <a href="#p8">8 · Hardware Constraints</a>
+    <a href="#p9">9 · Proof Testing</a>
+    <a href="#p10">10 · The Logic Solver</a>
+    <a href="#p11">11 · Process ↔ Machinery</a>
+    <a href="#p12">12 · Recap &amp; Quiz</a>
+    <a href="#p13">13 · Worked Examples</a>
+    <a href="#p14">14 · Problem Set</a>
+    <a href="#p15">15 · Derivations &amp; Traps</a>
+    <a href="#p16">16 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ============ PAGE 1 ============ -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 16 · Foundations</span>
+    <h2 class="page-title">Functional Safety &amp; the Onion of Protection</h2>
+    <p class="page-sub">Safety achieved by a function that actively does something — measured, engineered, and never assumed.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead"><span class="hl">Functional safety</span> is the part of overall safety that depends on a system <em>actively performing a function</em> in response to a dangerous condition — a high-pressure trip closing a valve, a gas detector starting shutdown. Its unit of delivery is the <span class="hl2">Safety Instrumented Function (SIF)</span>; the system that hosts SIFs is the <span class="hl3">Safety Instrumented System (SIS)</span>. Its core discipline: <strong>quantified risk reduction</strong> — every claim has a number, and every number has evidence.</p>
+      <p class="body">Two standards rule. <strong>IEC 61508</strong> is the parent — how to <em>build</em> safety-related equipment (used by device manufacturers). <strong>IEC 61511</strong> is the process-sector child — how to <em>apply</em> that equipment in refineries, chemical plants, power stations and factories (used by you). Machinery has its own dialect (ISO 13849 / IEC 62061 — the A35 world); Page 11 builds the bridge.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The onion — independent layers</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" text-anchor="middle" font-weight="600">
+            <ellipse cx="350" cy="150" rx="330" ry="140" fill="none" stroke="#f87171" stroke-width="2.5"/>
+            <ellipse cx="350" cy="150" rx="272" ry="115" fill="none" stroke="#fb923c" stroke-width="2.5"/>
+            <ellipse cx="350" cy="150" rx="214" ry="90" fill="none" stroke="#fbbf24" stroke-width="2.5"/>
+            <ellipse cx="350" cy="150" rx="156" ry="65" fill="none" stroke="#f43f5e" stroke-width="3"/>
+            <ellipse cx="350" cy="150" rx="100" ry="42" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+            <ellipse cx="350" cy="150" rx="52" ry="22" fill="#232d3f" stroke="#4ade80" stroke-width="2.5"/>
+            <text x="350" y="147" fill="#86efac" font-size="11">PROCESS</text>
+            <text x="350" y="162" fill="#94a3b8" font-size="9.5">design it safe first</text>
+            <text x="350" y="99" fill="#7dd3fc" font-size="11">BPCS control &amp; alarms → A10/A50</text>
+            <text x="350" y="72" fill="#fecdd3" font-size="11.5">SIS — the SIF trips (this module)</text>
+            <text x="350" y="47" fill="#fde68a" font-size="11">Relief valves · rupture discs (mechanical)</text>
+            <text x="350" y="22" fill="#fdba74" font-size="11">Dikes · bunds (passive mitigation)</text>
+            <text x="350" y="288" fill="#fca5a5" font-size="11">Emergency response (last, weakest)</text>
+            <text x="115" y="150" fill="#94a3b8" font-size="10.5" transform="rotate(-90 115 150)">prevention ← </text>
+            <text x="592" y="150" fill="#94a3b8" font-size="10.5" transform="rotate(90 592 150)">→ mitigation</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Defence in depth: each layer is <em>independent</em> — a failure that defeats one must not defeat another. The SIS is one ring, not the whole onion.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">BPCS vs SIS — the great separation</div>
+      <div class="grid-2">
+        <div class="mini c-sky"><h4>BPCS (control system)</h4><p>Keeps the process <em>at setpoint</em> — PID loops (A10), operators, SCADA (A14). Active all day, fails often, tuned for production. May claim at most modest risk-reduction credit.</p></div>
+        <div class="mini"><h4>SIS (safety system)</h4><p>Does <em>nothing</em> for months, then must work on demand. Separate sensors, separate logic solver, separate final elements. Its whole design centres on one number: the probability it fails when called.</p></div>
+      </div>
+      <p class="body" style="margin-top:14px">Separation is doctrine (IEC 61511-1): a common transmitter or a shared valve means a single failure removes two layers at once. The plant that "saves money" by tripping from the control transmitter has one layer wearing two hats — and the onion has a hole.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A plant proposes using the BPCS level transmitter both for control and for the high-level trip "since it's already there". Give the two distinct arguments against, in 61511 language.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">(1) <b>Independence:</b> the most likely initiating event for high level is failure of that very transmitter (control loop drives the valve wrong). The "protection" then shares the initiating cause — its risk-reduction credit is zero exactly when needed. (2) <b>Separation/claim limits:</b> 61511 caps risk reduction claimed for BPCS functions (max RRF 10 per function, and the BPCS is not built, proof-tested or access-controlled to SIS rigor). Fit a dedicated trip transmitter; diversity (different technology) buys extra common-cause immunity.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 ============ -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 16 · The Frame</span>
+    <h2 class="page-title">The Safety Lifecycle — Cradle to Decommissioning</h2>
+    <p class="page-sub">61511's deepest idea: SIL is not a purchase, it's a lifecycle property that decays without maintenance.</p>
+
+    <div class="card">
+      <div class="label">The wheel</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="arR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#fecdd3"/></marker></defs>
+          <g font-size="12" text-anchor="middle" font-weight="600">
+            <rect x="20" y="40" width="200" height="200" rx="16" fill="#11161f" stroke="#fbbf24" stroke-width="2.5"/>
+            <text x="120" y="66" fill="#fde68a">ANALYSIS</text>
+            <text x="120" y="94" fill="#cbd5e1" font-size="11">Hazard &amp; risk assessment</text>
+            <text x="120" y="114" fill="#cbd5e1" font-size="11">(HAZOP → scenarios)</text>
+            <text x="120" y="140" fill="#cbd5e1" font-size="11">Allocate layers → LOPA</text>
+            <text x="120" y="166" fill="#cbd5e1" font-size="11">SIL targets per SIF</text>
+            <text x="120" y="196" fill="#fecdd3" font-size="11">Safety Requirements</text>
+            <text x="120" y="214" fill="#fecdd3" font-size="11">Specification (SRS)</text>
+            <rect x="250" y="40" width="200" height="200" rx="16" fill="#11161f" stroke="#f43f5e" stroke-width="2.5"/>
+            <text x="350" y="66" fill="#fecdd3">REALISATION</text>
+            <text x="350" y="94" fill="#cbd5e1" font-size="11">Design SIF: sensor,</text>
+            <text x="350" y="114" fill="#cbd5e1" font-size="11">logic solver, final element</text>
+            <text x="350" y="140" fill="#cbd5e1" font-size="11">Verify PFD, architecture,</text>
+            <text x="350" y="160" fill="#cbd5e1" font-size="11">systematic capability</text>
+            <text x="350" y="190" fill="#fecdd3" font-size="11">Install · commission ·</text>
+            <text x="350" y="208" fill="#fecdd3" font-size="11">validate against SRS</text>
+            <rect x="480" y="40" width="200" height="200" rx="16" fill="#11161f" stroke="#38bdf8" stroke-width="2.5"/>
+            <text x="580" y="66" fill="#7dd3fc">OPERATION</text>
+            <text x="580" y="94" fill="#cbd5e1" font-size="11">Proof tests on schedule</text>
+            <text x="580" y="114" fill="#cbd5e1" font-size="11">Bypass control · MOC</text>
+            <text x="580" y="140" fill="#cbd5e1" font-size="11">Record real demands &amp;</text>
+            <text x="580" y="160" fill="#cbd5e1" font-size="11">failures → feedback λ</text>
+            <text x="580" y="190" fill="#fecdd3" font-size="11">Audit · modify ·</text>
+            <text x="580" y="208" fill="#fecdd3" font-size="11">decommission</text>
+            <line x1="220" y1="140" x2="246" y2="140" stroke="#fecdd3" stroke-width="2.5" marker-end="url(#arR)"/>
+            <line x1="450" y1="140" x2="476" y2="140" stroke="#fecdd3" stroke-width="2.5" marker-end="url(#arR)"/>
+            <path d="M 580 240 C 580 268 120 268 120 244" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arR)"/>
+            <text x="350" y="262" fill="#94a3b8" font-size="10.5">operating experience feeds the next analysis — the wheel turns for 30 years</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Three phases, sixteen clauses, one rule: every phase produces evidence the next phase consumes. Skip a phase and the SIL claim is folklore.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Where SIFs come from — HAZOP feeds LOPA</div>
+      <p class="body">A <span class="hl2">HAZOP</span> walks the P&amp;ID (A50's language) node by node with guidewords — <em>no flow, more pressure, reverse, other than</em> — and surfaces <strong>scenarios</strong>: initiating cause → consequence. Most are handled by design or the BPCS. The dangerous residue — "reactor overpressure → vessel rupture" — needs quantified protection: those scenarios flow into <span class="hl">LOPA</span> (Page 5), which decides how much risk reduction is still missing after every non-SIS layer has been credited. That missing factor becomes a <strong>SIL target for a new SIF</strong>.</p>
+      <div class="eqn"><b>Chain of custody:</b> HAZOP scenario → LOPA gap → SIL target → SRS entry → designed SIF
+→ verified PFD<span class="v2">avg</span> → validated installation → proof-tested for life
+Each arrow is a document. <span class="v3">The SRS is the contract</span>: what the SIF must do, how fast,
+what the safe state is, its SIL, its test interval — before anyone picks hardware.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Roles you'll play</div>
+      <div class="grid-3">
+        <div class="mini c-amb"><h4>Analysis engineer</h4><p>HAZOP scribe/leader, LOPA facilitator — decides what protection is <em>needed</em>.</p></div>
+        <div class="mini"><h4>SIS designer</h4><p>Turns SRS lines into architectures and PFD budgets — this module's core math.</p></div>
+        <div class="mini c-sky"><h4>Maintenance owner</h4><p>Runs proof tests, guards bypasses, logs demands — where SIL is kept or quietly lost.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">Why does 61511 insist the SRS be written <em>before</em> hardware selection, and name three things a good SRS states per SIF.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Because hardware chosen first becomes the requirement ("we have 2 transmitters, so 1oo2 it is") — design justifying itself, the classic systematic failure. The SRS fixes the target independently: per SIF it states (any three of) the <b>process safe state</b>, the <b>trip setpoint and logic</b>, the required <b>SIL / RRF</b>, the <b>response time</b> (process safety time!), the <b>demand mode</b>, <b>proof-test interval</b> assumptions, bypass and reset philosophy, and action on fault detection. Every PFD calc on Pages 6–9 silently assumes an SRS line exists.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 ============ -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 16 · The Currency</span>
+    <h2 class="page-title">SIL, PFD<sub>avg</sub> &amp; Risk-Reduction Factor</h2>
+    <p class="page-sub">Four bands of trustworthiness, each an order of magnitude apart. SIL is a property of the whole loop — never of a device.</p>
+
+    <div class="card">
+      <div class="label">The bands</div>
+      <p class="lead">A <span class="hl">Safety Integrity Level</span> quantifies how reliably a SIF performs on demand. For <span class="hl2">low-demand</span> functions (called &lt; once/year — most process trips) the measure is <span class="mono">PFD<sub>avg</sub></span>, the average probability the function is dead when the demand arrives. Its inverse is the <span class="hl3">risk-reduction factor RRF</span>.</p>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>SIL</th><th>PFD<sub>avg</sub> (low demand)</th><th>RRF = 1/PFD</th><th>PFH (high demand), h⁻¹</th><th>Feel</th></tr>
+          <tr><td><b>SIL 1</b></td><td>10⁻² – 10⁻¹</td><td>10 – 100</td><td>10⁻⁶ – 10⁻⁵</td><td>Good industrial practice, done properly</td></tr>
+          <tr><td><b>SIL 2</b></td><td>10⁻³ – 10⁻²</td><td>100 – 1 000</td><td>10⁻⁷ – 10⁻⁶</td><td>Serious engineering: redundancy or excellent devices + testing</td></tr>
+          <tr><td><b>SIL 3</b></td><td>10⁻⁴ – 10⁻³</td><td>1 000 – 10 000</td><td>10⁻⁸ – 10⁻⁷</td><td>Voting architectures, tight proof tests, certified devices</td></tr>
+          <tr><td><b>SIL 4</b></td><td>10⁻⁵ – 10⁻⁴</td><td>10 000 – 100 000</td><td>10⁻⁹ – 10⁻⁸</td><td>Rare in process plants — redesign the process instead</td></tr>
+        </table>
+      </div>
+      <p class="body"><strong>Demand modes matter:</strong> a function called less than once a year lives in the PFD<sub>avg</sub> column; called more often (or acting continuously, like a burner-management flame monitor or a machine's safety function — A35's PL world) it lives in the <span class="mono">PFH</span> (dangerous failures per hour) column. Using the wrong column is a classic audit finding: a valve tripped weekly by a batch sequence is <em>not</em> low demand — each start is a demand, and the proof-test-interval math of Page 6 no longer applies as written.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive · from required risk reduction to SIL</div>
+      <div class="demo">
+        <div class="demo-row"><span>Unmitigated event frequency (per year)</span><b>10^<span id="s1f">-1</span> /yr</b></div>
+        <input type="range" id="s1fR" min="-3" max="0" step="1" value="-1">
+        <div class="demo-row"><span>Tolerable frequency for this consequence (per year)</span><b>10^<span id="s1t">-4</span> /yr</b></div>
+        <input type="range" id="s1tR" min="-6" max="-2" step="1" value="-4">
+        <div class="demo-out" id="s1out"></div>
+      </div>
+      <p class="cap">Required RRF = unmitigated ÷ tolerable. The SIL band is read from the table — and if it says SIL 3+, first ask whether other layers (or a better process) can shrink the gap.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Three truths about SIL</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>SIL belongs to the SIF, not the device.</strong> A "SIL 3 transmitter" is marketing shorthand for "suitable for use in a SIL 3 loop" — the loop's PFD is the sum of sensor + logic + final element, and the valve usually dominates.</span></li>
+        <li><span class="num">2</span><span><strong>Each SIL step is 10× harder.</strong> Not 10% more paperwork — an order of magnitude less permitted failure, pushing you from single devices (SIL 1) to redundancy and rigorous testing (SIL 3).</span></li>
+        <li><span class="num">3</span><span><strong>SIL has two dimensions:</strong> the random-failure math (PFD, this module's arithmetic) and <em>systematic capability</em> (design process quality — Page 8). A perfect PFD calc on a badly specified function still fails: you'll compute precisely how rarely it does the wrong thing reliably.</span></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A SIF achieves PFD<sub>avg</sub> = 4×10⁻³. State its SIL band, its RRF, and what it means physically if the hazardous demand arrives once every 10 years.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">4×10⁻³ sits in 10⁻³–10⁻² → <b>SIL 2</b> band. RRF = 1/0.004 = <b>250</b>. Physically: demands at 0.1/yr × 0.004 dead-on-arrival probability → the protected event leaks through at ~4×10⁻⁴/yr — once per 2 500 years on average. Whether that's tolerable is the LOPA target's decision (Page 5), not the SIF's — the SIF only delivers the 250× discount.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 ============ -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 16 · The Unit</span>
+    <h2 class="page-title">Anatomy of a SIF</h2>
+    <p class="page-sub">Sensor, logic solver, final element — three subsystems, one PFD budget, and a safe state that must be reachable by losing power.</p>
+
+    <div class="card">
+      <div class="label">The chain</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="arS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#fecdd3"/></marker></defs>
+          <g font-size="12" text-anchor="middle" font-weight="600">
+            <rect x="20" y="55" width="180" height="80" rx="12" fill="#232d3f" stroke="#38bdf8" stroke-width="2.5"/>
+            <text x="110" y="80" fill="#7dd3fc">SENSOR(S)</text>
+            <text x="110" y="100" fill="#94a3b8" font-size="10.5">trip transmitter · switch</text>
+            <text x="110" y="118" fill="#94a3b8" font-size="10.5">PT / TT / LT / flame eye</text>
+            <rect x="260" y="55" width="180" height="80" rx="12" fill="#f43f5e"/>
+            <text x="350" y="80" fill="#0b0f14">LOGIC SOLVER</text>
+            <text x="350" y="100" fill="#7f1d1d" font-size="10.5">safety PLC · relay logic</text>
+            <text x="350" y="118" fill="#7f1d1d" font-size="10.5">votes, times, decides</text>
+            <rect x="500" y="55" width="180" height="80" rx="12" fill="#232d3f" stroke="#fbbf24" stroke-width="2.5"/>
+            <text x="590" y="80" fill="#fde68a">FINAL ELEMENT(S)</text>
+            <text x="590" y="100" fill="#94a3b8" font-size="10.5">ESD valve + solenoid</text>
+            <text x="590" y="118" fill="#94a3b8" font-size="10.5">breaker · contactor (A51)</text>
+            <line x1="200" y1="95" x2="256" y2="95" stroke="#fecdd3" stroke-width="2.5" marker-end="url(#arS)"/>
+            <line x1="440" y1="95" x2="496" y2="95" stroke="#fecdd3" stroke-width="2.5" marker-end="url(#arS)"/>
+            <text x="110" y="170" fill="#7dd3fc" font-size="11">PFD share ≈ 35%</text>
+            <text x="350" y="170" fill="#fecdd3" font-size="11">PFD share ≈ 15%</text>
+            <text x="590" y="170" fill="#fde68a" font-size="11">PFD share ≈ 50% — the valve dominates</text>
+            <text x="350" y="205" fill="#94a3b8" font-size="10.5">typical PFD budget split — the mechanical end moves, sticks, and corrodes; electronics mostly just sit</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">A SIF is only as good as its weakest subsystem — and the weakest is usually the one with moving parts in dirty process fluid.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">De-energise to trip — the polarity of safety</div>
+      <p class="lead">The SIS convention: the healthy state holds energy — solenoid energised, valve held open against a spring, contactor closed (A51). A trip, a cut cable, a dead PSU, a fire in the marshalling cabinet — all <span class="hl">remove energy → spring drives the process to the safe state</span>. Failures reveal themselves as trips, not as hidden dead protection.</p>
+      <div class="eqn"><b>De-energise-to-trip:</b> broken wire = spurious trip = <span class="v3">annoying but safe</span>
+<b>Energise-to-trip:</b>    broken wire = silent loss of protection = <span class="v2">dangerous undetected</span>
+Energise-to-trip is allowed (61511 permits it with line monitoring + fault alarms),
+but it must be justified — e.g. tripping would itself create a hazard (fire pump!).</div>
+      <p class="body">The same polarity logic drives the wiring craft of A46 (NC stop contacts, monitored lines) and A35 (positively-opened contacts). Safety engineering keeps rediscovering one idea: <strong>arrange the physics so entropy votes for the safe state.</strong></p>
+    </div>
+
+    <div class="card">
+      <div class="label">SIF ≠ alarm ≠ interlock — vocabulary discipline</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Thing</th><th>Acts through</th><th>Risk credit</th><th>Owned by</th></tr>
+          <tr><td><b>Control loop</b></td><td>BPCS, continuous (A10)</td><td>Its failure often <em>initiates</em> the scenario</td><td>Operations</td></tr>
+          <tr><td><b>Alarm + operator</b></td><td>Human in the loop (ISA-18.2)</td><td>Max ~10× — only if time, clarity and training are proven</td><td>Operations</td></tr>
+          <tr><td><b>Process interlock</b></td><td>BPCS logic, permissives</td><td>Limited (BPCS claim cap)</td><td>Controls team</td></tr>
+          <tr><td><b>SIF</b></td><td>SIS — separate chain</td><td>10–10 000× per its verified SIL</td><td>The safety lifecycle</td></tr>
+          <tr><td><b>Relief valve</b></td><td>Pure mechanics</td><td>Typically 100× — no wires to fail</td><td>Mechanical integrity</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">An ESD valve's solenoid loses its 24 V supply during maintenance and the plant trips, costing four hours of production. The maintenance manager wants the trip circuit made energise-to-act "so a blown fuse can't shut us down again". Frame the correct reply.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">That spurious trip was the system <b>proving its dangerous-failure coverage</b>: any failure that removes energy is converted into a visible, safe event. Flipping to energise-to-trip converts the same fuse failure into <b>silent loss of protection</b> — the plant would run unprotected until the next proof test (months), which is precisely the PFD the SIL calculation forbids. The legitimate fixes: better fuse coordination and PSU redundancy (attack spurious-trip <em>causes</em>), or a 2oo3 sensor architecture (Page 7) that tolerates single faults without tripping — buying availability without selling safety.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 ============ -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 16 · Setting the Target</span>
+    <h2 class="page-title">LOPA — Layer of Protection Analysis</h2>
+    <p class="page-sub">Order-of-magnitude bookkeeping: multiply the initiating frequency by each independent layer's failure probability, and see what's still missing.</p>
+
+    <div class="card">
+      <div class="label">The method</div>
+      <p class="lead">For each HAZOP scenario, <span class="hl">LOPA</span> computes: <span class="mono">mitigated frequency = f<sub>initiating</sub> × Π PFD<sub>IPL</sub></span>. If the result still exceeds the tolerable target, the gap must be closed — usually by a SIF whose required PFD <em>is</em> the gap. An <span class="hl2">IPL (Independent Protection Layer)</span> must be: <strong>independent</strong> of the initiating cause and of other IPLs, <strong>specific</strong> to the consequence, <strong>dependable</strong> (auditable PFD), and <strong>auditable</strong> in service.</p>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Typical initiating events</th><th>Frequency /yr</th><th>Typical IPLs</th><th>PFD credit</th></tr>
+          <tr><td>BPCS loop failure</td><td>10⁻¹</td><td>BPCS trip (different loop)</td><td>10⁻¹ (max one credit)</td></tr>
+          <tr><td>Operator error (routine task)</td><td>10⁻¹ – 10⁻²</td><td>Alarm + trained operator response</td><td>10⁻¹</td></tr>
+          <tr><td>Pump seal / hose failure</td><td>10⁻¹ – 10⁻²</td><td>Relief valve (clean service)</td><td>10⁻²</td></tr>
+          <tr><td>Cooling water failure</td><td>10⁻¹</td><td>Dike / bund (containment)</td><td>10⁻²</td></tr>
+          <tr><td>Full-bore pipe rupture</td><td>10⁻⁵ – 10⁻⁶</td><td>SIF</td><td>per SIL target</td></tr>
+        </table>
+      </div>
+      <p class="body">Generic numbers (CCPS tables) — plants tune them with their own data. The discipline is the <em>independence test</em>: a level alarm on the same transmitter as the initiating control loop earns <strong>zero</strong>, however loudly it annunciates.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">One scenario, drawn</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="arL" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker></defs>
+          <g font-size="11.5" text-anchor="middle" font-weight="600">
+            <rect x="15" y="60" width="120" height="70" rx="12" fill="#232d3f" stroke="#f87171" stroke-width="2.5"/>
+            <text x="75" y="86" fill="#fca5a5">Loop failure</text>
+            <text x="75" y="104" fill="#94a3b8" font-size="10">overfills tank</text>
+            <text x="75" y="120" fill="#fde68a" font-size="10.5">10⁻¹ /yr</text>
+            <rect x="165" y="60" width="120" height="70" rx="12" fill="#232d3f" stroke="#fbbf24" stroke-width="2.5"/>
+            <text x="225" y="86" fill="#fde68a">Hi-level alarm</text>
+            <text x="225" y="104" fill="#94a3b8" font-size="10">operator responds</text>
+            <text x="225" y="120" fill="#fde68a" font-size="10.5">× 10⁻¹</text>
+            <rect x="315" y="60" width="120" height="70" rx="12" fill="#232d3f" stroke="#38bdf8" stroke-width="2.5"/>
+            <text x="375" y="86" fill="#7dd3fc">Dike</text>
+            <text x="375" y="104" fill="#94a3b8" font-size="10">contains spill</text>
+            <text x="375" y="120" fill="#fde68a" font-size="10.5">× 10⁻²</text>
+            <rect x="465" y="60" width="120" height="70" rx="12" fill="#11161f" stroke="#f43f5e" stroke-width="3" stroke-dasharray="7 5"/>
+            <text x="525" y="86" fill="#fecdd3">SIF ?</text>
+            <text x="525" y="104" fill="#94a3b8" font-size="10">the gap to close</text>
+            <text x="525" y="120" fill="#fecdd3" font-size="10.5">× PFD = ?</text>
+            <rect x="615" y="60" width="70" height="70" rx="12" fill="#232d3f" stroke="#4ade80" stroke-width="2.5"/>
+            <text x="650" y="92" fill="#86efac" font-size="10.5">target</text>
+            <text x="650" y="110" fill="#86efac" font-size="10.5">10⁻⁵/yr</text>
+            <line x1="135" y1="95" x2="161" y2="95" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arL)"/>
+            <line x1="285" y1="95" x2="311" y2="95" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arL)"/>
+            <line x1="435" y1="95" x2="461" y2="95" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arL)"/>
+            <line x1="585" y1="95" x2="611" y2="95" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arL)"/>
+            <text x="350" y="175" fill="#94a3b8" font-size="11">10⁻¹ × 10⁻¹ × 10⁻² = 10⁻⁴ /yr — still 10× above target → SIF needs PFD ≤ 10⁻¹ → SIL 1</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Multiply along the chain; the residual gap is the SIF's job description. Here a modest SIL 1 closes it — LOPA prevents over-engineering as often as under.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive · LOPA calculator</div>
+      <div class="demo">
+        <div class="demo-row"><span>Initiating event frequency</span><b>10^<span id="s2f">-1</span> /yr</b></div>
+        <input type="range" id="s2fR" min="-3" max="0" step="1" value="-1">
+        <div class="demo-row"><span>Independent protection layers (tap to credit)</span></div>
+        <div class="seg" id="s2seg">
+          <button data-p="1">Alarm+operator ×0.1</button>
+          <button data-p="1" data-b="bpcs">BPCS trip ×0.1</button>
+          <button data-p="2">Relief valve ×0.01</button>
+          <button data-p="2" data-b="dike">Dike ×0.01</button>
+        </div>
+        <div class="demo-row"><span>Tolerable frequency</span><b>10^<span id="s2t">-5</span> /yr</b></div>
+        <input type="range" id="s2tR" min="-6" max="-3" step="1" value="-5">
+        <div class="demo-out" id="s2out"></div>
+      </div>
+      <p class="cap">Every credited layer must pass the independence test against the initiating cause AND the other layers — the calculator can't check that; the analyst must.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">In the tank scenario above, the "alarm + operator" credit assumed 20 minutes between alarm and overflow. A debottlenecking project doubles the feed pump. What must LOPA do, and what commonly goes wrong instead?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Doubling feed halves the response window to ~10 min. If that's below the demonstrated operator-response time (detect, diagnose, walk, act — typically 10–20+ min), the alarm IPL's ×0.1 credit is <b>void</b> → mitigated frequency rises 10× → the SIF target tightens by one SIL band. This is <b>Management of Change</b>: process changes silently invalidate LOPA credits. What goes wrong: the pump is swapped as a "mechanical like-for-like" job, no MOC review touches the LOPA sheet, and the plant runs for years with a SIL 1 SIF doing a SIL 2 job.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 ============ -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 16 · The Arithmetic</span>
+    <h2 class="page-title">Failure Rates, λ<sub>DU</sub> &amp; the PFD Integral</h2>
+    <p class="page-sub">Four ways to fail, one that matters most: dangerous and undetected — the failure that waits for the demand.</p>
+
+    <div class="card">
+      <div class="label">The four-way split</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" text-anchor="middle" font-weight="600">
+            <rect x="270" y="15" width="160" height="44" rx="12" fill="#f43f5e"/>
+            <text x="350" y="34" fill="#0b0f14">failure rate λ</text>
+            <text x="350" y="50" fill="#7f1d1d" font-size="10.5">failures per hour (FIT = 10⁻⁹/h)</text>
+            <line x1="350" y1="59" x2="350" y2="76" stroke="#fecdd3" stroke-width="2"/>
+            <line x1="180" y1="76" x2="520" y2="76" stroke="#fecdd3" stroke-width="2"/>
+            <line x1="180" y1="76" x2="180" y2="92" stroke="#fecdd3" stroke-width="2"/>
+            <line x1="520" y1="76" x2="520" y2="92" stroke="#fecdd3" stroke-width="2"/>
+            <rect x="90" y="92" width="180" height="50" rx="10" fill="#232d3f" stroke="#4ade80" stroke-width="2"/>
+            <text x="180" y="113" fill="#86efac">SAFE (λ<tspan font-size="9" dy="3">S</tspan><tspan dy="-3">)</tspan></text>
+            <text x="180" y="131" fill="#94a3b8" font-size="10.5">fails toward trip — spurious</text>
+            <rect x="430" y="92" width="180" height="50" rx="10" fill="#232d3f" stroke="#f87171" stroke-width="2"/>
+            <text x="520" y="113" fill="#fca5a5">DANGEROUS (λ<tspan font-size="9" dy="3">D</tspan><tspan dy="-3">)</tspan></text>
+            <text x="520" y="131" fill="#94a3b8" font-size="10.5">fails toward no-protection</text>
+            <line x1="520" y1="142" x2="520" y2="158" stroke="#fca5a5" stroke-width="2"/>
+            <line x1="430" y1="158" x2="610" y2="158" stroke="#fca5a5" stroke-width="2"/>
+            <line x1="430" y1="158" x2="430" y2="172" stroke="#fca5a5" stroke-width="2"/>
+            <line x1="610" y1="158" x2="610" y2="172" stroke="#fca5a5" stroke-width="2"/>
+            <rect x="345" y="172" width="170" height="52" rx="10" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+            <text x="430" y="192" fill="#7dd3fc">λ<tspan font-size="9" dy="3">DD</tspan><tspan dy="-3"> detected</tspan></text>
+            <text x="430" y="211" fill="#94a3b8" font-size="10.5">diagnostics catch it in seconds</text>
+            <rect x="530" y="172" width="160" height="52" rx="10" fill="#11161f" stroke="#f43f5e" stroke-width="3"/>
+            <text x="610" y="192" fill="#fecdd3">λ<tspan font-size="9" dy="3">DU</tspan><tspan dy="-3"> undetected</tspan></text>
+            <text x="610" y="211" fill="#fecdd3" font-size="10.5">waits for demand or proof test</text>
+            <text x="180" y="200" fill="#94a3b8" font-size="11">Diagnostic coverage DC = λ<tspan font-size="8" dy="2">DD</tspan><tspan dy="-2">/λ</tspan><tspan font-size="8" dy="2">D</tspan></text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Diagnostics convert dangerous-undetected into dangerous-detected — a detected fault alarms and can be repaired in hours instead of hiding for months. That conversion is why smart transmitters carry safety pedigrees.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The central formula</div>
+      <div class="eqn">A dangerous-undetected fault can occur any time in the proof-test interval TI
+and sits hidden until the NEXT test. Average downtime = TI/2.
+<b>PFD<span class="v2">avg</span> (1oo1) ≈ λ<span class="v3">DU</span> · TI / 2</b>            (+ λ<span class="v3">DD</span>·MTTR — usually negligible)
+Example: λ<span class="v3">DU</span> = 5×10⁻⁷/h (500 FIT), TI = 1 year = 8760 h
+  PFD<span class="v2">avg</span> = 5×10⁻⁷ × 8760/2 = <b>2.2×10⁻³</b> → SIL 2 band, RRF ≈ 455
+Halve the test interval → halve the PFD. <span class="v2">Proof testing is a design variable.</span></div>
+      <p class="body">Sources of λ: certified device reports (FMEDA), industry databases (OREDA, exida), or the site's own history ("prior use"). All assume the <strong>useful-life plateau</strong> of the bathtub curve — a valve at year 25 is off the plateau, and no formula rescues an ancient actuator. Also note the <span class="hl2">mission-time fine print</span>: certificates quote a useful life (often 10–15 years); beyond it, replace or re-justify.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Spurious trips — the other ledger</div>
+      <p class="body">λ<sub>S</sub> buys you nuisance shutdowns: <span class="mono">MTTF<sub>spurious</sub> ≈ 1/λ<sub>S</sub></span> for 1oo1. Every spurious trip costs production, flares product, and — the subtle danger — <strong>erodes belief</strong>: a plant that sees weekly false trips starts bypassing. Safety and availability trade against each other through architecture (Page 7): 1oo2 halves PFD but doubles spurious-trip rate; 2oo2 does the reverse; 2oo3 buys both at the price of three devices. The best SIS engineers argue about spurious rates as fiercely as PFD.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A transmitter datasheet claims λ<sub>D</sub> = 800 FIT with DC = 90%. With a 2-year proof test, what PFD does it contribute in 1oo1 — and what does the 90% actually buy?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">λ<sub>DU</sub> = (1−0.9) × 800 = 80 FIT = 8×10⁻⁸/h. TI = 17 520 h → PFD ≈ 8×10⁻⁸ × 17520/2 = <b>7×10⁻⁴</b> — SIL 3 territory for this subsystem. The 90% DC moved 720 FIT into the <em>detected</em> column: those faults annunciate within seconds and are repaired in hours (their PFD contribution λ<sub>DD</sub>×MTTR ≈ 720×10⁻⁹×24 ≈ 1.7×10⁻⁵, negligible). Without diagnostics the same device would give 7×10⁻³ — ten times worse. Diagnostics are a 10× PFD lever that costs firmware, not iron.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 7 ============ -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 16 · Redundancy</span>
+    <h2 class="page-title">Voting Architectures &amp; Common Cause</h2>
+    <p class="page-sub">MooN: M must agree out of N installed. The alphabet of redundancy — and the β that quietly rules it.</p>
+
+    <div class="card">
+      <div class="label">The architecture menu</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Scheme</th><th>Trips when</th><th>PFD<sub>avg</sub> (ideal)</th><th>Spurious rate</th><th>Character</th></tr>
+          <tr><td><b>1oo1</b></td><td>the device says trip</td><td>λ<sub>DU</sub>TI/2</td><td>λ<sub>S</sub></td><td>The baseline</td></tr>
+          <tr><td><b>1oo2</b></td><td>either says trip</td><td>(λ<sub>DU</sub>TI)²/3</td><td>2λ<sub>S</sub></td><td>Much safer, twice as jumpy</td></tr>
+          <tr><td><b>2oo2</b></td><td>both say trip</td><td>λ<sub>DU</sub>TI</td><td>(λ<sub>S</sub>TI-scale)²</td><td>Available, <em>less</em> safe than 1oo1</td></tr>
+          <tr><td><b>2oo3</b></td><td>any two agree</td><td>(λ<sub>DU</sub>TI)²</td><td>low</td><td>Safety AND availability — the classic</td></tr>
+          <tr><td><b>1oo2D</b></td><td>either, diagnostics arbitrate</td><td>≈1oo2 with 2oo2 availability</td><td>low</td><td>Modern safety-PLC internals</td></tr>
+        </table>
+      </div>
+      <p class="body">Read 2oo2 carefully: it exists to <em>stop spurious trips</em> (both must vote), and it <strong>doubles</strong> the dangerous failure probability — choosing it "for reliability" while thinking "safety" is a real and recurring design error.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">2oo3, drawn</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="arV" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7dd3fc"/></marker></defs>
+          <g font-size="12" text-anchor="middle" font-weight="600">
+            <rect x="30" y="20" width="130" height="46" rx="10" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+            <text x="95" y="48" fill="#7dd3fc">PT-A</text>
+            <rect x="30" y="82" width="130" height="46" rx="10" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+            <text x="95" y="110" fill="#7dd3fc">PT-B</text>
+            <rect x="30" y="144" width="130" height="46" rx="10" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+            <text x="95" y="172" fill="#7dd3fc">PT-C</text>
+            <rect x="280" y="70" width="180" height="70" rx="12" fill="#f43f5e"/>
+            <text x="370" y="99" fill="#0b0f14">VOTER 2oo3</text>
+            <text x="370" y="120" fill="#7f1d1d" font-size="10.5">AB + BC + CA</text>
+            <line x1="160" y1="43" x2="276" y2="90" stroke="#7dd3fc" stroke-width="2" marker-end="url(#arV)"/>
+            <line x1="160" y1="105" x2="276" y2="105" stroke="#7dd3fc" stroke-width="2" marker-end="url(#arV)"/>
+            <line x1="160" y1="167" x2="276" y2="122" stroke="#7dd3fc" stroke-width="2" marker-end="url(#arV)"/>
+            <rect x="530" y="70" width="150" height="70" rx="12" fill="#232d3f" stroke="#fbbf24" stroke-width="2.5"/>
+            <text x="605" y="99" fill="#fde68a">TRIP</text>
+            <text x="605" y="120" fill="#94a3b8" font-size="10.5">valve / breaker</text>
+            <line x1="460" y1="105" x2="526" y2="105" stroke="#fecdd3" stroke-width="2.5" marker-end="url(#arV)"/>
+            <text x="370" y="188" fill="#94a3b8" font-size="10.5">one transmitter fails high → outvoted (no spurious trip) · one fails dead → other two still trip (safe)</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Three measurements, majority rule: single failures in either direction are survived. The price: three taps, three devices, and honest comparison diagnostics between them.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Common cause — the β factor</div>
+      <div class="eqn">Redundancy assumes independence. Reality: shared tap lines freeze together,
+one contractor miscalibrates all three, one firmware bug lives in every unit.
+Model: a fraction <b>β</b> of dangerous failures hit ALL channels at once (typical 2–10%).
+<b>PFD<span class="v2">1oo2</span> ≈ (λ<span class="v3">DU</span>TI)²/3  +  β·λ<span class="v3">DU</span>·TI/2</b>
+With λ<span class="v3">DU</span>TI = 4×10⁻³ and β = 5%:  independent term 5.3×10⁻⁶, <span class="v2">common-cause term 1×10⁻⁴</span>
+→ the β term is ~20× larger. <b>Beyond 1oo2, β — not more hardware — sets your PFD.</b></div>
+      <p class="body">Buying a third transmitter improves the (λTI)² term that no longer matters. Reducing β does: <strong>diversity</strong> (different measurement principles — echoes A50's radar+fork rule), separate taps and impulse lines, different calibration crews, staggered proof tests. The 61508 β-factor checklist scores exactly these. This is also A07/A35's lesson wearing process clothes: the common-cause ceiling is organisational as much as technical.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive · architecture PFD calculator</div>
+      <div class="demo">
+        <div class="demo-row"><span>Architecture</span></div>
+        <div class="seg" id="s3seg">
+          <button data-a="1oo1" class="on">1oo1</button>
+          <button data-a="1oo2">1oo2</button>
+          <button data-a="2oo2">2oo2</button>
+          <button data-a="2oo3">2oo3</button>
+        </div>
+        <div class="demo-row"><span>λ<sub>DU</sub> per channel</span><b><span id="s3l">500</span> FIT</b></div>
+        <input type="range" id="s3lR" min="50" max="2000" step="50" value="500">
+        <div class="demo-row"><span>Proof-test interval</span><b><span id="s3ti">12</span> months</b></div>
+        <input type="range" id="s3tiR" min="3" max="60" step="3" value="12">
+        <div class="demo-row"><span>β common-cause fraction</span><b><span id="s3b">5</span> %</b></div>
+        <input type="range" id="s3bR" min="0" max="20" step="1" value="5">
+        <div class="demo-out" id="s3out"></div>
+      </div>
+      <p class="cap">Watch the β term take over as you add redundancy — then watch a shorter proof test beat another channel.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A design review proposes upgrading a trip from 1oo2 to 1oo3 transmitters (same tap, same model, same calibrators) to reach SIL 3. Why will the calculated improvement be largely fictional?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">With shared tap, model and calibration, β is at the high end (~10%). The 1oo2 PFD is already dominated by β·λ<sub>DU</sub>TI/2 — a term the third transmitter <b>does not touch</b> (a plugged common tap blinds all three identically). The honest paths to SIL 3: reduce β (separate taps, diverse technology — e.g. one DP + one radar, A50), shorten TI, raise DC, or attack the final element, which probably dominates the loop PFD anyway (Page 4's 50%). Redundancy multiplies independence; it cannot create it.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 8 ============ -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 16 · The Guard Rails</span>
+    <h2 class="page-title">Hardware Constraints &amp; Systematic Capability</h2>
+    <p class="page-sub">PFD arithmetic alone can't authorise a SIL claim — the standard adds structural minimums and a design-quality dimension the math can't see.</p>
+
+    <div class="card">
+      <div class="label">Why constraints exist</div>
+      <p class="lead">Failure-rate data is uncertain — optimistic FMEDA numbers could "prove" SIL 3 with a single cheap device. So the standards cap what architecture may claim regardless of arithmetic: <span class="hl">hardware fault tolerance (HFT)</span> — how many dangerous faults the subsystem survives — sets a ceiling on SIL. HFT 0 = single device; HFT 1 = survives one fault (1oo2, 2oo3); HFT 2 = survives two (1oo3, 2oo4).</p>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Claim ceiling (61511 route)</th><th>HFT 0</th><th>HFT 1</th><th>HFT 2</th></tr>
+          <tr><td><b>Typical field device, good prior use</b></td><td>SIL 1</td><td>SIL 2</td><td>SIL 3</td></tr>
+          <tr><td><b>Certified device w/ high SFF / diagnostics</b></td><td>SIL 2</td><td>SIL 3</td><td>SIL 4</td></tr>
+        </table>
+      </div>
+      <p class="body">The 61508 original ties the ceiling to <span class="hl2">SFF (Safe Failure Fraction)</span> — the share of all failures that are either safe or detected — via Route 1H tables; Route 2H (and 61511's simplified table) leans on field-proven reliability data instead. The engineering intuition survives every table revision: <strong>a single unmonitored device may not carry a high SIL alone, however good its datasheet claims.</strong></p>
+    </div>
+
+    <div class="card">
+      <div class="label">Systematic capability — the second dimension</div>
+      <div class="eqn">Random hardware failures → PFD arithmetic (Pages 6–7) — <span class="v3">quantifiable</span>
+Systematic failures → design/spec/software errors — <span class="v2">NOT random, NOT in the math</span>
+  wrong setpoint in the SRS · firmware bug · wrong material for the fluid ·
+  calibration procedure that zeros the wrong range (A50) · copy-paste logic error
+Defence: <b>SC ratings (SC 1–4)</b> earned by development-process rigor (61508 audits),
+plus lifecycle discipline — reviews, validation against the SRS, MOC.</div>
+      <p class="body">A device certificate therefore has two halves: the FMEDA numbers (random) and the <span class="hl">systematic capability</span> (SC N — fit for use in SIL N loops). Both must meet the target. And no certificate covers <em>your</em> application errors — which is why validation (does the installed function actually close the right valve in the required time, from the real sensor?) is a lifecycle stage, not a paperwork checkbox.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Reading a safety certificate without being fooled</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Check the boundary:</strong> "SIL 2 capable" for the transmitter <em>electronics</em> may exclude the impulse line, manifold and process seal — the parts that actually plug (A50's slopes and manifolds).</span></li>
+        <li><span class="num">2</span><span><strong>Check λ<sub>DU</sub> at your conditions:</strong> FMEDA assumes a mission profile; a corrosive, vibrating, 60 °C installation is not the lab.</span></li>
+        <li><span class="num">3</span><span><strong>Check useful life:</strong> certificates commonly assume 10–15 years and a functioning proof-test regime at the stated coverage — miss either and the numbers are void.</span></li>
+        <li><span class="num">4</span><span><strong>Check the fine print on diagnostics:</strong> claimed DC often requires the diagnostic outputs to be actually wired and acted on (fault relay → maintenance alarm). An unwired fault contact contributes zero DC.</span></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A vendor offers a "SIL 3 certified" solenoid valve and suggests a single one (1oo1) will make your SIL 3 trip. Two reasons the offer fails as stated?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">(1) <b>Architectural constraint:</b> SIL 3 with HFT 0 requires the top row of exceptions (very high SFF certified route) — for final elements with mechanical dominant failures this is rarely granted; expect HFT 1 (e.g. dual solenoids / 1oo2 valves) for SIL 3. (2) <b>SIL is the loop's:</b> even if the solenoid alone could claim it, the SIF's PFD budget includes sensor + logic + the process valve and actuator the solenoid pilots — the certificate covers one link. "SIL 3 certified" means "eligible as a component", not "instant SIL 3".</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 9 ============ -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 16 · Keeping It</span>
+    <h2 class="page-title">Proof Testing — Where SIL Lives or Dies</h2>
+    <p class="page-sub">The PFD formula contains TI because someone promised to test. Every skipped or shallow test quietly rewrites the SIL claim.</p>
+
+    <div class="card">
+      <div class="label">The deal you signed</div>
+      <p class="lead">PFD<sub>avg</sub> = λ<sub>DU</sub>TI/2 assumes that at every interval TI, a <span class="hl">proof test finds and repairs all dangerous-undetected faults</span> — resetting the clock. The test is therefore part of the SIF: interval, procedure, and coverage were fixed in the SRS. Change any of them and you have changed the SIL — usually without noticing.</p>
+      <div class="eqn"><b>Imperfect testing:</b> real tests catch only a fraction PTC (proof-test coverage).
+PFD<span class="v2">avg</span> ≈ PTC·λ<span class="v3">DU</span>·TI/2  +  (1−PTC)·λ<span class="v3">DU</span>·MT/2
+   (MT = mission time to a REAL full test — overhaul or replacement, maybe 10+ yr)
+PTC 100%, TI 1 yr:            PFD = 2.2×10⁻³      (500 FIT example)
+PTC 70%,  TI 1 yr, MT 10 yr:  PFD = 1.5×10⁻³ + 6.6×10⁻³ = <b>8.1×10⁻³</b> — nearly 4× worse,
+and the uncovered 30% climbs relentlessly for a decade. <span class="v2">Coverage beats frequency.</span></div>
+      <p class="body">What limits coverage? The classic: exercising the trip <em>relay</em> but not the valve; stroking the valve <em>unloaded</em> when the dangerous failure is "won't move against process pressure"; simulating the signal downstream of the very impulse line that plugs (A50 again). A proof test that doesn't challenge the dominant λ<sub>DU</sub> mechanisms is theatre.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Partial stroke testing — buying PFD without a shutdown</div>
+      <p class="body">Big ESD valves can't be fully closed while the plant runs — so <span class="hl2">PST</span> moves the valve 10–20% and confirms it breaks away and responds. That catches stuck stems and dead actuators (a large share of λ<sub>DU</sub>) <em>between</em> full tests, effectively acting as a diagnostic with its own coverage (~50–70% of valve faults). The full-closure test still happens at turnarounds — PST stretches the interval it can safely wait. Modern positioners automate PST and log signatures; a drifting breakaway torque trend is condition monitoring for your last line of defence (kin to A42's philosophy).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Operate-phase discipline</div>
+      <div class="grid-2">
+        <div class="mini c-amb"><h4>Bypass control</h4><p>Every bypass logged, time-limited, risk-assessed, alarmed, and physically minimised. A SIF in bypass is a LOPA layer that doesn't exist — the plant is running on fewer rings of the onion.</p></div>
+        <div class="mini"><h4>Demand recording</h4><p>Every real trip is a free proof test AND a datum: demands more frequent than the LOPA assumed (once/10 yr?) mean the analysis — and possibly the demand mode — is wrong. Investigate the initiator, don't celebrate the save.</p></div>
+        <div class="mini c-sky"><h4>Failure feedback</h4><p>Found-failed proof tests update the site's λ<sub>DU</sub> evidence. Three found-dead solenoids in five years is data screaming louder than any FMEDA.</p></div>
+        <div class="mini c-grn"><h4>MOC everywhere</h4><p>New impeller, new fluid, new setpoint, new firmware — each re-opens the LOPA/SRS question (Page 5's pump story). The lifecycle wheel must actually turn.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A site "improves" proof testing by doubling frequency (6-month instead of annual) but keeps a procedure that only injects a signal at the logic solver input. Why is the SIL claim now further from reality, not closer?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">The injected-signal test covers only the logic solver and output wiring — a small slice of λ<sub>DU</sub> (Page 4: the valve owns ~50%, the sensor ~35%). Testing that slice twice as often polishes the already-shiny part while the sensor impulse line and the valve stem — the dominant hidden failures — go unchallenged for the whole mission time. The paperwork now shows comforting "tests passed" at double rate, deepening false confidence. Fix: redesign the <b>procedure</b> for end-to-end coverage (real process stimulus or manifold-level injection + actual valve stroke), then choose the interval the PFD budget needs.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 10 ============ -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 16 · The Brain</span>
+    <h2 class="page-title">The Logic Solver — Safety PLCs &amp; Implementation Craft</h2>
+    <p class="page-sub">Why a safety PLC is not a careful ordinary PLC, and how the application program becomes the most dangerous component.</p>
+
+    <div class="card">
+      <div class="label">Safety PLC vs standard PLC (A07's sibling)</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Property</th><th>Standard PLC (A07)</th><th>Safety PLC</th></tr>
+          <tr><td><b>Internal architecture</b></td><td>Single channel</td><td>1oo2D / 2oo3 CPUs, comparators, watchdogs</td></tr>
+          <tr><td><b>Self-diagnostics</b></td><td>Basic (RAM, watchdog)</td><td>Continuous: memory, CPU cross-check, I/O line monitoring, pulse-tested outputs</td></tr>
+          <tr><td><b>On internal fault</b></td><td>Whatever happens</td><td>Defined: outputs driven to de-energised safe state</td></tr>
+          <tr><td><b>Certification</b></td><td>None needed</td><td>TÜV/exida assessed to 61508 (SC 3 typical)</td></tr>
+          <tr><td><b>Programming</b></td><td>Full IEC 61131-3 (A45)</td><td>Restricted: certified function blocks, limited language subset (LVL), locked compiler</td></tr>
+          <tr><td><b>Modification</b></td><td>Online edits routine</td><td>Access-controlled, forced-variable alarms, MOC-gated</td></tr>
+        </table>
+      </div>
+      <p class="body">The restrictions are the feature: 61511 pushes application logic toward a <span class="hl3">Limited Variability Language</span> — cause-and-effect matrices and certified blocks — because <strong>systematic software error is the logic solver's real threat</strong>, and expressiveness is where systematic errors breed. A cause-and-effect matrix that operations can read <em>is</em> a safety mechanism.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Implementation craft — where 61511 meets the panel</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Physical separation from the BPCS:</strong> separate cabinets or clearly segregated sections (A46 discipline), separate power feeds, no shared barriers or marshalling that lets one fault cross layers.</span></li>
+        <li><span class="num">2</span><span><strong>Fail-safe I/O wiring:</strong> NC/de-energise conventions, line monitoring (detect open AND short — the A35 trick), pulse-tested digital outputs that catch a welded interposing relay (mirror contacts, A51).</span></li>
+        <li><span class="num">3</span><span><strong>Communication ≠ trip path:</strong> the SIS may <em>report</em> to SCADA (A14) and accept <em>resets</em>, but writes from the BPCS side must be structurally unable to defeat a trip (read-only gateways, hardwired critical commands). Cyber follows: the SIS is Purdue's most protected zone (A33's OT security inverted-CIA logic).</span></li>
+            <li><span class="num">4</span><span><strong>Response time budget:</strong> sensor lag (A50's τ) + scan + logic + valve stroke must beat the <em>process safety time</em> — the interval from deviation to unrecoverable. Half the PST is the design habit.</span></li>
+        <li><span class="num">5</span><span><strong>Trip setpoint placement:</strong> far enough from the operating envelope to avoid spurious trips, early enough to leave stroke time — a three-way negotiation between operations, LOPA and valve dynamics.</span></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">Why do safety PLCs pulse-test their digital outputs (brief microsecond off-pulses while "on"), and what failure would otherwise wait silently?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">An output transistor (or interposing relay contact) can fail <b>shorted/welded in the ON state</b> — the classic dangerous-undetected failure: everything looks normal, the solenoid stays energised, but the channel can no longer de-energise on demand. The micro-pulse briefly commands OFF and verifies the line actually drops (too fast for the solenoid to react); a stuck output fails the check and raises a fault → λ<sub>DU</sub> becomes λ<sub>DD</sub>. It's the same philosophy as EDM reading mirror contacts in A35/A51 — never trust an actuator you haven't recently seen obey an OFF command.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 11 ============ -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 / 16 · The Bridge</span>
+    <h2 class="page-title">Process ↔ Machinery — SIL, PL and Where Each Rules</h2>
+    <p class="page-sub">Same physics, two dialects: 61511 for the plant's process trips, ISO 13849/IEC 62061 for the machine guarding you met in A35.</p>
+
+    <div class="card">
+      <div class="label">The rosetta table</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Concept</th><th>Process world (61511)</th><th>Machinery world (13849 / 62061)</th></tr>
+          <tr><td><b>Unit of function</b></td><td>SIF</td><td>Safety function (e.g. door → stop)</td></tr>
+          <tr><td><b>Integrity measure</b></td><td>SIL 1–4 via PFD<sub>avg</sub> (low demand)</td><td>PL a–e via PFH<sub>D</sub>; 62061 uses SIL 1–3</td></tr>
+          <tr><td><b>Rough equivalence</b></td><td>SIL 1 / SIL 2 / SIL 3</td><td>PL c / PL d / PL e</td></tr>
+          <tr><td><b>Demand mode</b></td><td>Mostly low demand (rare trips)</td><td>High demand / continuous (doors open daily)</td></tr>
+          <tr><td><b>Architecture language</b></td><td>1oo2, 2oo3, HFT</td><td>Categories B–4 (A35's dual-channel = Cat 3)</td></tr>
+          <tr><td><b>Common-cause guard</b></td><td>β factor</td><td>CCF score ≥ 65 points</td></tr>
+          <tr><td><b>Target setting</b></td><td>HAZOP + LOPA</td><td>Risk graph S/F/P (13849 Annex A)</td></tr>
+          <tr><td><b>Proof test analogue</b></td><td>Scheduled proof tests</td><td>Frequent demands self-reveal faults + diagnostics (DC)</td></tr>
+        </table>
+      </div>
+      <p class="body">The demand-mode row explains the deepest difference: a machine door guard is exercised daily — faults surface fast, so the math centres on <span class="mono">PFH</span> and diagnostic coverage. A process trip sleeps for years — faults hide, so the math centres on <span class="mono">λ<sub>DU</sub>·TI/2</span> and proof tests. Same components, opposite failure-revelation economics.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Who rules where — and the border cases</div>
+      <div class="grid-2">
+        <div class="mini"><h4>61511 territory</h4><p>Reactor trips, tank overfill, furnace/burner management (with its own child standard), compressor protection, HIPPS replacing relief capacity.</p></div>
+        <div class="mini c-sky"><h4>13849/62061 territory</h4><p>Guard doors, light curtains, two-hand controls, robot cells (A35), press brakes — the E-stop chains of A46/A51.</p></div>
+        <div class="mini c-amb"><h4>Border: packaged machines in plants</h4><p>A centrifuge in a chemical plant: its own guarding is machinery-law; its process trip (overspeed on hazardous fluid) may be a SIF in the plant's LOPA. One machine, two frameworks, document both.</p></div>
+        <div class="mini c-purp"><h4>Border: burners &amp; furnaces</h4><p>BMS logic (EN 50156 / NFPA 85) blends both: high-demand flame supervision + low-demand trips. The demand-mode question must be answered per function, not per cabinet.</p></div>
+      </div>
+      <p class="body" style="margin-top:14px">For the automation engineer the payoff is fluency: you will sit in one meeting where "PL d, Cat 3, EDM" is spoken (A35) and another where "SIL 2, 1oo2, β 5%" is spoken — and you now know they are the same four ideas: <strong>quantified target, redundancy, diagnostics, common-cause discipline.</strong></p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A packaging line's light curtain (opened ~50×/day) and a solvent tank's high-level trip (demand maybe once in 10 years) both "need SIL 2 / PL d". Why would designing the tank trip like the light curtain — relying on its diagnostics and skipping proof tests — be dangerous?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">The light curtain's safety is <b>self-revealing</b>: 50 demands/day exercise the whole channel; a dangerous fault is discovered within hours by failure-to-clear or by DC, so PFH math with diagnostics suffices. The tank trip gets <b>no natural exercise</b>: a stuck valve or plugged tap sits invisible precisely because demands never come — its integrity depends almost entirely on λ<sub>DU</sub>·TI/2, i.e. on the proof-test contract. Skip the tests and PFD grows linearly with elapsed time toward certainty-of-failure. Demand mode isn't paperwork taxonomy — it decides <em>which physics keeps you honest</em>.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 ============ -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 / 16 · Consolidate</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Final Quiz</h2>
+    <p class="page-sub">Eight ideas, six ways real plants lose their SIL, five questions.</p>
+
+    <div class="card">
+      <div class="label">The eight ideas</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Safety is layered and independent:</strong> the SIS is one ring of the onion; sharing hardware between rings punches holes through several at once.</span></li>
+        <li><span class="num">2</span><span><strong>SIL is a lifecycle property of a SIF</strong> — set by LOPA, written in the SRS, built in realisation, and kept alive by proof tests and MOC. Never a device sticker.</span></li>
+        <li><span class="num">3</span><span><strong>The currency is PFD<sub>avg</sub> (low demand) or PFH (high demand)</strong> — bands a decade apart; picking the wrong column invalidates everything downstream.</span></li>
+        <li><span class="num">4</span><span><strong>λ<sub>DU</sub>·TI/2 is the heartbeat:</strong> dangerous-undetected failures accumulate between proof tests. Diagnostics shrink λ<sub>DU</sub>; testing resets its clock.</span></li>
+        <li><span class="num">5</span><span><strong>Architectures vote:</strong> 1oo2 for safety, 2oo2 for availability, 2oo3 for both — and β common-cause sets the real ceiling beyond 1oo2.</span></li>
+        <li><span class="num">6</span><span><strong>De-energise to trip:</strong> arrange the physics so lost energy = safe state; energise-to-trip demands line monitoring and justification.</span></li>
+        <li><span class="num">7</span><span><strong>Systematic failures don't obey the math:</strong> SRS errors, software bugs and wrong materials need process rigor (SC, validation, LVL), not more redundancy.</span></li>
+        <li><span class="num">8</span><span><strong>The final element dominates:</strong> ~half the loop PFD is the valve; PST, dual solenoids and honest full-stroke tests are where SIL is really bought.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">How plants lose their SIL</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">🔓 The eternal bypass</div><p>A trip bypassed for startup… still bypassed in week 6. The LOPA layer exists on paper only. Cure: alarmed, time-limited, logged bypasses reviewed daily — and counted as incidents when overdue.</p></div>
+        <div class="fail"><div class="ft">🎭 Proof-test theatre</div><p>Signal injected at the solver, valve never stroked against pressure, tap never challenged. Coverage ~30% while the record says "pass". PFD quietly triples (WE 4 does the math).</p></div>
+        <div class="fail"><div class="ft">👯 Common cause uncounted</div><p>Three identical transmitters, one tap, one calibrator, β ≈ 10% — the third device is decoration. Diversity and separation, not multiplication.</p></div>
+        <div class="fail"><div class="ft">📈 Demand-rate drift</div><p>LOPA assumed a demand per decade; the aging BPCS now initiates yearly. Each save is logged as success while the SIF burns through its probability budget 10× faster than designed.</p></div>
+        <div class="fail"><div class="ft">✏️ MOC bypass surgery</div><p>Bigger pump, new solvent, raised setpoint — installed as "minor works", LOPA sheet untouched (Page 5's story). The SRS now describes a plant that no longer exists.</p></div>
+        <div class="fail"><div class="ft">🧟 Zombie hardware</div><p>Devices past certificate useful life, actuators off the bathtub plateau, obsolete logic solver with no spares — λ figures from the FMEDA no longer describe the iron on the pipe.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final quiz 1</div>
+      <p class="quiz-q">Rank where each belongs: PFD<sub>avg</sub> or PFH — (a) reactor high-pressure trip demanded ~once/15 yr; (b) burner flame supervision; (c) batch-reactor charge interlock exercised every batch (3/day).</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">(a) <b>Low demand → PFD<sub>avg</sub></b> — classic sleeping trip, proof-test economics. (b) <b>Continuous → PFH</b> — the function IS the control of the hazard; a dangerous failure is immediately hazardous. (c) <b>High demand → PFH</b> — 1000+ demands/yr means faults are revealed by demands themselves faster than any proof test; treating it as low-demand PFD would flatter it absurdly.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final quiz 2</div>
+      <p class="quiz-q">Your 1oo1 SIF computes PFD = 3×10⁻³ but the target is SIL 2 with RRF ≥ 500 (PFD ≤ 2×10⁻³). Name the four levers, cheapest first.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">(1) <b>Shorten TI</b> (test every 8 months: 3×10⁻³ × 8/12 = 2×10⁻³ ✓) — paperwork and labour, no capex. (2) <b>Raise proof-test coverage / add PST</b> — attacks the dominant valve term. (3) <b>Better device / higher DC</b> — swap for lower λ<sub>DU</sub>. (4) <b>Architecture</b> — 1oo2 the weakest subsystem (mind β). In practice you check which subsystem owns the budget first (usually the final element) and pull these levers there — a 1oo2 on the transmitter when the valve owns 70% of PFD is spending money where the problem isn't.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final quiz 3</div>
+      <p class="quiz-q">Why does 61511 cap the risk-reduction credit of the BPCS at RRF 10 — even for a beautifully engineered control loop?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Because the BPCS is not built or operated to safety-lifecycle rigor: no SRS, no verified PFD, unrestricted online changes (A07 forces/edits), shared components across functions, no proof-test regime, and it is often <em>itself the initiating cause</em>. A claim beyond 10 would rest on evidence the BPCS lifecycle simply doesn't generate. Need more? Build it as a SIF in the SIS, where the evidence machine exists.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final quiz 4</div>
+      <p class="quiz-q">A 2oo3 pressure trip shows one transmitter in fault alarm for two weeks. Operations says "still 2oo2, we're fine." What has actually happened to safety and availability?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Degraded 2oo3→2oo2 means: <b>safety worsened</b> (2oo2 needs BOTH remaining channels healthy to trip; its PFD is ~λ<sub>DU</sub>TI — an order worse than 2oo3) and <b>spurious immunity relies on both too</b>. The standard's answer: a declared <b>degraded-mode policy with a repair-time clock</b> (MTTR assumptions in the PFD calc — often 72 h): repair within it, or take the compensating measure/trip. Two weeks of "still fine" means the loop has silently been running a full SIL band below its claim.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final quiz 5</div>
+      <p class="quiz-q">Explain to a plant manager, in three sentences without jargon, why the SIS that "never does anything" justifies its maintenance budget.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">"The trip system is insurance we've sized mathematically: it only has to work on the one day in ten years everything else has already failed. Its whole value lives in the probability it works that day — and that probability is bought with the testing and discipline you're funding, decaying automatically when we stop. Cutting its maintenance doesn't save money; it silently cancels the policy while we keep paying the premium in false confidence."</span>
+      </div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory hook</div>
+      <p class="quote">"HAZOP finds it, LOPA sizes it, the SIF closes it — and the proof test keeps the promise."</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 ============ -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 / 16 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade problems, solved in full.</p>
+
+    <div class="card">
+      <div class="label">WE 1 · LOPA to SIL target</div>
+      <p class="body"><strong>Scenario: BPCS loop failure overfills a solvent tank (f = 10⁻¹/yr). Consequence: large spill with ignition potential; tolerable frequency 10⁻⁵/yr. Credited IPLs: independent hi-level alarm with proven 25-min response (×0.1) and a bund (×0.01). Size the SIF.</strong></p>
+      <div class="eqn">Mitigated (before SIF) = 10⁻¹ × 10⁻¹ × 10⁻² = <b>10⁻⁴ /yr</b>
+Gap to target = 10⁻⁴ / 10⁻⁵ = <b>10× short</b>
+→ SIF required PFD ≤ 10⁻¹ … i.e. RRF ≥ 10 → <b>SIL 1</b>
+If the consequence review had set 10⁻⁶/yr (fatality potential):
+gap = 100× → PFD ≤ 10⁻² → <b>SIL 2</b> — one decade of consequence = one SIL.</div>
+      <p class="body"><em>Discussion:</em> notice what LOPA prevented: a reflexive "make it SIL 3" gold-plate. Also notice the fragility — the alarm credit dies if response time or independence fails (Page 5), instantly promoting the SIF to SIL 2. Targets inherit every assumption upstream.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 2 · Loop PFD budget (1oo1 everywhere)</div>
+      <p class="body"><strong>A SIL 2 trip: transmitter λ<sub>DU</sub> = 500 FIT, certified logic solver PFD = 1×10⁻⁴, valve+solenoid λ<sub>DU</sub> = 1500 FIT. Annual proof test (TI = 8760 h). Verify the claim.</strong></p>
+      <div class="eqn">Sensor: 5×10⁻⁷ × 8760/2 = 2.19×10⁻³
+Logic:  1.0×10⁻⁴ (vendor-calculated, incl. its own testing regime)
+Valve:  1.5×10⁻⁶ × 8760/2 = 6.57×10⁻³
+<b>Loop PFD = 8.9×10⁻³</b> → inside 10⁻³–10⁻² → <b>SIL 2 band ✓ (barely; RRF ≈ 113)</b>
+Shares: valve 74%, sensor 25%, logic 1% — <span class="v2">the valve owns this loop</span>.</div>
+      <p class="body"><em>Discussion:</em> "SIL 2 achieved" is true but fragile — RRF 113 vs the band floor of 100 leaves no margin for imperfect testing (WE 4!). The efficient upgrades attack the 74%: PST on the valve, dual solenoids, or 6-month valve-only tests. Upgrading the transmitter would polish 25% of the problem.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 3 · 1oo2 with common cause</div>
+      <p class="body"><strong>Two transmitters, each λ<sub>DU</sub> = 500 FIT, TI = 1 yr, β = 10% (same tap, same model). Compute PFD and show what β costs; then with β = 2% (separate taps, diverse models).</strong></p>
+      <div class="eqn">x = λ<span class="v3">DU</span>·TI = 5×10⁻⁷ × 8760 = 4.38×10⁻³
+Independent term: x²/3 = (4.38×10⁻³)²/3 = 6.4×10⁻⁶
+β term: β·x/2 = 0.10 × 4.38×10⁻³/2 = 2.19×10⁻⁴
+<b>PFD ≈ 2.25×10⁻⁴</b> — the β term is <b>34×</b> the independent term
+With β = 2%:  6.4×10⁻⁶ + 4.4×10⁻⁵ = <b>5.0×10⁻⁵</b> — 4.5× better, bought with layout &amp; diversity, not hardware</div>
+      <p class="body"><em>Discussion:</em> the redundant pair without common-cause discipline delivers 2.2×10⁻⁴ (SIL 3 band) — but a naive engineer computing only x²/3 would claim 6.4×10⁻⁶ (SIL 4!), off by 34×. Every serious SIL verification therefore documents its β and the checklist score behind it.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 4 · Imperfect proof testing</div>
+      <p class="body"><strong>A valve subsystem: λ<sub>DU</sub> = 800 FIT, annual test with PTC = 60% (unloaded stroke only), full test only at 12-yr turnaround. Compute the honest PFD; then with PST raising effective coverage to 90%.</strong></p>
+      <div class="eqn">Perfect-test illusion: λTI/2 = 8×10⁻⁷×8760/2 = 3.5×10⁻³
+Honest: PTC·λTI/2 + (1−PTC)·λ·MT/2
+  = 0.6×3.5×10⁻³ + 0.4×8×10⁻⁷×(12×8760)/2
+  = 2.1×10⁻³ + 1.68×10⁻² = <b>1.9×10⁻²</b> → below SIL 1! The uncovered 40% ruins everything.
+With PST (PTC→0.9): 0.9×3.5×10⁻³ + 0.1×8×10⁻⁷×52560 = 3.2×10⁻³+4.2×10⁻³ = <b>7.4×10⁻³</b> → SIL 2 ✓</div>
+      <p class="body"><em>Discussion:</em> coverage beats frequency (compare: doubling test frequency at PTC 60% only improves the first term — total ~1.8×10⁻², still failing). This single calculation is the strongest argument for partial-stroke testing ever written, and it's three lines long.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 ============ -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 / 16 · MSc Practice</span>
+    <h2 class="page-title">Problem Set</h2>
+    <p class="page-sub">Ten problems. Work each before revealing — the reveal is the marking scheme.</p>
+
+    <div class="card quiz">
+      <div class="label">Problem 1</div>
+      <p class="quiz-q">A LOPA requires RRF 800 from a SIF. State the SIL and the PFD<sub>avg</sub> ceiling.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">RRF 800 → PFD ≤ 1/800 = 1.25×10⁻³ → inside 10⁻³–10⁻² is SIL 2… careful: 1.25×10⁻³ IS in the SIL 2 band (10⁻³ ≤ PFD &lt; 10⁻²), so <b>SIL 2</b> with a verified PFD ≤ 1.25×10⁻³ — tighter than the band floor. The SIL label alone is not the requirement; the RRF is.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 2</div>
+      <p class="quiz-q">λ<sub>DU</sub> = 300 FIT, TI = 2 yr, 1oo1. PFD<sub>avg</sub>? Which SIL band?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">PFD = 3×10⁻⁷ × 17 520/2 = <b>2.6×10⁻³</b> → SIL 2 band (RRF ≈ 380). Note 2 years doubled the 1-yr figure — TI is linear in the formula.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 3</div>
+      <p class="quiz-q">Why can a high-level <em>alarm</em> and the high-level <em>trip</em> never share one transmitter if both are LOPA-credited?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">IPLs must be independent <b>of each other</b>, not just of the initiating cause: one plugged tap or failed sensor deletes both credits simultaneously, so the multiplication f×0.1×PFD<sub>SIF</sub> is a fiction — the joint failure probability is the single transmitter's, not the product. Credit one, or fit separate devices (ideally diverse — A50's level-tech table).</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 4</div>
+      <p class="quiz-q">A plant replaces a 1oo1 trip valve with 2oo2 (both must act) "to improve safety". Evaluate.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">Backwards: 2oo2 <b>doubles</b> dangerous failure exposure (PFD ≈ λ<sub>DU</sub>TI — both valves must be healthy for the trip to succeed… no: for 2oo2-to-act, EITHER failing dangerous kills the function → PFD ≈ 2×(λTI/2) = λTI). It halves spurious trips — that's its actual purpose. For safety, valves in <b>series each capable of isolation (1oo2)</b>: PFD drops to (λTI)²/3 + β term. Direction of redundancy must match direction of failure you fear.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 5</div>
+      <p class="quiz-q">Halving TI vs adding an identical second sensor in 1oo2 (β = 10%): which improves PFD more, starting from λ<sub>DU</sub>TI = 4×10⁻³ (1oo1 PFD 2×10⁻³)?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">Halve TI: PFD → 1×10⁻³ (2× better, free-ish). 1oo2 @ β 10%: (4×10⁻³)²/3 + 0.1×2×10⁻³ = 5×10⁻⁶ + 2×10⁻⁴ ≈ <b>2×10⁻⁴</b> (10× better — but β-limited). So the second sensor wins on PFD; the shorter TI wins on cost and also improves the valve/logic terms that redundant sensors don't touch. Exam answer: state both, note β cap and that loop-level thinking decides.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 6</div>
+      <p class="quiz-q">Give two legitimate reasons a SIF might be designed energise-to-trip, and the two compensations 61511 expects.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">Reasons: (1) the tripped state itself creates hazard on spurious activation — fire-water pumps, some depressurising systems; (2) extreme spurious-trip cost with demonstrated intolerable consequences (flare capacity, thermal shock). Compensations: <b>line/circuit monitoring</b> (open- and short-circuit detection so loss of the trip path annunciates ≈ converting λ<sub>DU</sub>→λ<sub>DD</sub>) and <b>secure energy</b> (monitored redundant power, alarmed). Plus the justification lives in the SRS, not in folklore.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 7</div>
+      <p class="quiz-q">A safety PLC shows three variables forced for eight months (A07's forces trap). Frame the finding in 61511 terms.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">A force is an unauthorised <b>bypass of a safety function</b> outside MOC and bypass procedure: the as-running application program no longer matches the validated SRS logic — a live systematic failure. Findings: which SIFs are defeated (LOPA layers gone), duration exposure (8 months of unprotected operation), procedure breach (bypass log, alarms, authorisation). Actions: remove under controlled conditions, incident-report the exposure, audit why force alarms didn't escalate.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 8</div>
+      <p class="quiz-q">List six items every SRS entry must contain for one SIF (there are ~a dozen; six earn the marks).</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">Any six of: the process hazard addressed; <b>safe state</b>; trip setpoint(s) &amp; logic (incl. voting); required <b>SIL / RRF</b> and demand mode; required <b>response time</b> vs process safety time; proof-test interval &amp; coverage assumptions; bypass/override philosophy; reset behaviour (manual, conditions); action on detected fault (trip or alarm+timer); spurious-trip constraints; environmental/materials requirements; interfaces to BPCS/HMI.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 9</div>
+      <p class="quiz-q">Your 2oo3 sensor group's proof tests are all done on the same day by the same tech with the same calibrator. Which parameter did the scheme just inflate, and what's the fix?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>β</b> — the common-cause fraction now includes calibration-induced simultaneous mis-setting (a systematic common cause: one wrong reference propagates to all three, A50's traceability nightmare). Fixes: <b>stagger</b> tests across the interval (also flattens the PFD sawtooth), rotate technicians/equipment, and compare as-found values between channels as a cross-check — disagreement between "identical" channels is free diagnostics.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 10</div>
+      <p class="quiz-q">A machine builder claims "PL e, therefore SIL 3" for a guard function reused as a process trip on a solvent reactor. Give the two-step audit response.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">(1) <b>Demand-mode audit:</b> PL e was earned in high-demand math (PFH, exercised daily, self-revealing faults). As a process trip it may sleep for years — its integrity now hangs on proof tests it was never assigned; the PFD<sub>avg</sub> must be computed fresh with λ<sub>DU</sub> and a real TI (Page 11's lesson). (2) <b>Lifecycle audit:</b> a 61511 SIF needs an SRS entry, LOPA-derived target, validation and an operate-phase regime — a machinery DoC doesn't supply these. The hardware may well be capable; the <em>claim</em> must be rebuilt in the process dialect.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 15 ============ -->
+  <section class="page" id="p15">
+    <span class="page-tag">Page 15 / 16 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">Three derivations worth owning, the symbols, and the seven classic traps.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 · PFD<sub>avg</sub> = λ<sub>DU</sub>TI/2 from first principles</div>
+      <div class="eqn">Unavailability at time t after a perfect test: probability a DU fault
+has occurred and not been found:  U(t) = 1 − e^(−λ<span class="v3">DU</span>t) ≈ λ<span class="v3">DU</span>t   (λt ≪ 1)
+Average over the interval [0, TI]:
+  PFD<span class="v2">avg</span> = (1/TI) ∫₀^TI λ<span class="v3">DU</span>t dt = (1/TI)·λ<span class="v3">DU</span>·TI²/2 = <b>λ<span class="v3">DU</span>·TI/2</b>  ∎
+The sawtooth picture: U(t) climbs linearly, resets at each test —
+the average is half the peak. Staggered redundant tests flatten the peaks.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 · 1oo2 independent term (λTI)²/3</div>
+      <div class="eqn">Both channels must be dead: U<span class="v2">1oo2</span>(t) = (λ<span class="v3">DU</span>t)² (independent faults)
+  PFD<span class="v2">avg</span> = (1/TI) ∫₀^TI (λ<span class="v3">DU</span>t)² dt = (λ<span class="v3">DU</span>)²·TI²/3 = <b>(λ<span class="v3">DU</span>TI)²/3</b>  ∎
+Add common cause: a β-fraction behaves as a single 1oo1 channel:
+  <b>PFD<span class="v2">1oo2</span> ≈ (λ<span class="v3">DU</span>TI)²/3 + β·λ<span class="v3">DU</span>TI/2</b>
+Sanity habit: with λTI ~ 10⁻³–10⁻², (λTI)² is 10⁻⁶–10⁻⁴ —
+so ANY β above ~1% dominates. Write the β term first in exams.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 · LOPA algebra &amp; SIL allocation</div>
+      <div class="eqn">f<span class="v2">mitigated</span> = f<span class="v3">init</span> · Π<span class="v3">i</span> PFD<span class="v3">IPL,i</span>       target: f<span class="v2">mitigated</span> · PFD<span class="v3">SIF</span> ≤ f<span class="v2">tol</span>
+→ PFD<span class="v3">SIF</span> ≤ f<span class="v2">tol</span> / (f<span class="v3">init</span>·Π PFD<span class="v3">IPL</span>)      RRF<span class="v3">SIF</span> = 1/PFD<span class="v3">SIF</span>
+In decade bookkeeping (all values 10^−n): required decades
+  n<span class="v3">SIF</span> = (n<span class="v2">tol</span>) − (n<span class="v3">init</span> + Σ n<span class="v3">IPL</span>)  → SIL = n<span class="v3">SIF</span> (1 decade per SIL)
+This is why LOPA sheets are integer arithmetic — and why a lost
+IPL credit promotes the SIF by exactly one SIL.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol glossary</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Symbol</th><th>Meaning</th><th>Typical value</th></tr>
+          <tr><td class="mono">PFD<sub>avg</sub></td><td>Average probability of failure on demand</td><td>10⁻⁵–10⁻¹ by SIL</td></tr>
+          <tr><td class="mono">PFH</td><td>Dangerous failures per hour (high demand)</td><td>10⁻⁹–10⁻⁵ /h</td></tr>
+          <tr><td class="mono">RRF</td><td>Risk-reduction factor = 1/PFD</td><td>10–10⁵</td></tr>
+          <tr><td class="mono">λ<sub>DU</sub>/λ<sub>DD</sub>/λ<sub>S</sub></td><td>Dangerous undetected / detected / safe failure rates</td><td>10–2000 FIT</td></tr>
+          <tr><td class="mono">FIT</td><td>Failures in 10⁹ hours</td><td>1 FIT = 10⁻⁹/h</td></tr>
+          <tr><td class="mono">DC / SFF</td><td>Diagnostic coverage / safe failure fraction</td><td>60–99%</td></tr>
+          <tr><td class="mono">TI / PTC / MT</td><td>Proof-test interval / coverage / mission time</td><td>0.5–5 yr / 50–99% / 10–15 yr</td></tr>
+          <tr><td class="mono">HFT / MooN / β</td><td>Fault tolerance / voting / common-cause fraction</td><td>0–2 / 1oo2, 2oo3 / 1–10%</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven exam &amp; field traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>"SIL-rated device" ≠ SIL-rated loop.</strong> SIL belongs to the SIF; a certificate makes a component eligible, nothing more.</span></li>
+        <li><span class="num">2</span><span><strong>2oo2 is an availability scheme.</strong> It doubles dangerous exposure. Match the voting direction to the failure you fear.</span></li>
+        <li><span class="num">3</span><span><strong>Demand mode decides the column.</strong> Weekly-exercised functions don't get PFD<sub>avg</sub> credit maths; sleeping trips don't get self-revealing-fault credit.</span></li>
+        <li><span class="num">4</span><span><strong>β eats redundancy.</strong> Beyond 1oo2, common cause — not channel count — bounds PFD. Write the β term first.</span></li>
+        <li><span class="num">5</span><span><strong>Proof-test coverage beats frequency.</strong> An untested failure mode accrues PFD over mission time, not test interval (WE 4).</span></li>
+        <li><span class="num">6</span><span><strong>BPCS credit caps at 10 — once.</strong> And never when the BPCS is the initiator. Double-counting the control system is LOPA's cardinal sin.</span></li>
+        <li><span class="num">7</span><span><strong>The certificate boundary and useful life are load-bearing.</strong> Electronics-only FMEDAs, lab mission profiles and 10-year lifetimes quietly exclude your actual installation.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 16 ============ -->
+  <section class="page" id="p16">
+    <span class="page-tag">Page 16 / 16 · Study &amp; Practice</span>
+    <h2 class="page-title">Study Path &amp; Practice Ladder</h2>
+    <p class="page-sub">The canon, the desk exercises, and an honest self-check.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Resource</th><th>What it gives you</th></tr>
+          <tr><td><b>IEC 61511 (parts 1–3)</b></td><td>The process-sector law: lifecycle, SRS, verification — part 3 is worked SIL-determination methods</td></tr>
+          <tr><td><b>IEC 61508 (esp. parts 2, 6)</b></td><td>The parent: architectures, SFF/HFT routes, PFD formula annexes with worked tables</td></tr>
+          <tr><td><b>CCPS, <i>Layer of Protection Analysis</i></b></td><td>The LOPA book — IPL rules, credit tables, worked scenarios</td></tr>
+          <tr><td><b>Gruhn &amp; Cheddie, <i>Safety Instrumented Systems</i></b></td><td>The friendly full-course text (ISA) — lifecycle to hardware</td></tr>
+          <tr><td><b>Goble, <i>Control Systems Safety Evaluation &amp; Reliability</i></b></td><td>The reliability math done properly — Markov models beyond this module's algebra</td></tr>
+          <tr><td><b>Marszal &amp; Scharpf, <i>Safety Integrity Level Selection</i></b></td><td>Target-setting methods compared: risk graphs, matrices, LOPA</td></tr>
+          <tr><td><b>ISA TR84.00.02 / exida SERH</b></td><td>PFD calculation techniques / the failure-rate data handbook</td></tr>
+          <tr><td><b>A35 · A50 · A07 · A46</b></td><td>The neighbours: machinery dialect, the instruments, the logic, the panel craft</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder — eight exercises</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span>Take any P&amp;ID you know (or A50's examples) and run a mini-HAZOP on one node: guidewords, causes, consequences. Find the scenario that deserves a SIF.</span></li>
+        <li><span class="num">2</span><span>Build a LOPA sheet for it in a spreadsheet: initiating frequency, IPL credits with justification notes, target, resulting SIL. Defend each credit's independence in writing.</span></li>
+        <li><span class="num">3</span><span>Write the SRS entry for that SIF — safe state, setpoint, response time, SIL, TI. One page, complete enough that a stranger could design from it.</span></li>
+        <li><span class="num">4</span><span>Verify a 1oo1 design against it: pick plausible λ<sub>DU</sub> values (exida-style), compute the loop PFD, and identify which subsystem owns the budget.</span></li>
+        <li><span class="num">5</span><span>Upgrade the weakest subsystem three ways (shorter TI, higher DC, 1oo2 with β) and rank the PFD gain per dollar — the Page 7 demo as a spreadsheet.</span></li>
+        <li><span class="num">6</span><span>Write the proof-test procedure and honestly estimate its coverage: list λ<sub>DU</sub> mechanisms and tick which the procedure actually challenges (WE 4's discipline).</span></li>
+        <li><span class="num">7</span><span>Translate one machinery function from A35 (light curtain → stop, PL d) into 61511 vocabulary and back — demand mode, target, architecture, diagnostics.</span></li>
+        <li><span class="num">8</span><span>Audit a real or imagined bypass log: for each bypass, name the LOPA layer disabled and the compensating measure that should have existed.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment — can you…</div>
+      <div class="grid-2">
+        <div class="mini"><h4>Explain</h4><p>…why PFD<sub>avg</sub> = λ<sub>DU</sub>TI/2, from the sawtooth picture, and what imperfect coverage does to it?</p></div>
+        <div class="mini c-sky"><h4>Determine</h4><p>…a SIL target from a LOPA chain, and defend every IPL credit's independence?</p></div>
+        <div class="mini c-grn"><h4>Design</h4><p>…a voting architecture with an honest β, and say which subsystem owns the loop's PFD budget?</p></div>
+        <div class="mini c-amb"><h4>Sustain</h4><p>…the claim through operations — proof tests with real coverage, bypass discipline, MOC, demand recording?</p></div>
+      </div>
+    </div>
+
+    <div class="card memory" style="background: linear-gradient(135deg, #1a2230, #232d3f); border:1px solid var(--border);">
+      <div class="label" style="color:var(--accent-soft)">Where next</div>
+      <p class="body" style="color:var(--text-dim)">The alarms that LOPA credits (and floods that void them) → Alarm Management ISA-18.2 (coming to this category). The machinery dialect → <a href="A35_Cobot_Safety_Deep_Dive.html" style="color:var(--accent-soft)">A35</a>. The instruments whose λ you just used → <a href="A50_Instrumentation_Calibration_PID_Deep_Dive.html" style="color:var(--accent-soft)">A50</a>. The logic solver's civilian cousin → <a href="A07_PLC_Deep_Dive.html" style="color:var(--accent-soft)">A07</a>. The OT-security zone the SIS lives in → <a href="A33_Industry_4_5_Deep_Dive.html" style="color:var(--accent-soft)">A33</a>.</p>
+    </div>
+  </section>
+
+  <div class="footer">
+    Micro Learning · Advanced Deep Dive A52 — Functional Safety &amp; SIL (IEC 61511)<br>
+    ◆ Standalone module · related: <a href="A35_Cobot_Safety_Deep_Dive.html" style="color:var(--accent-soft)">A35 Machinery Safety</a> · <a href="A50_Instrumentation_Calibration_PID_Deep_Dive.html" style="color:var(--accent-soft)">A50 Instrumentation</a> · <a href="A07_PLC_Deep_Dive.html" style="color:var(--accent-soft)">A07 PLC</a> · <a href="A14_SCADA_HMI_Deep_Dive.html" style="color:var(--accent-soft)">A14 SCADA</a> · <a href="A46_Control_Panel_Wiring_Deep_Dive.html" style="color:var(--accent-soft)">A46 Panel Wiring</a><br>
+    Keratoconus-friendly · dark · large type · iPad Pro 11 optimised
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // ---- S1: required RRF → SIL ----
+  var fR=document.getElementById('s1fR'), tR=document.getElementById('s1tR');
+  function silBand(rrfExp){
+    if(rrfExp<=1) return ['<b style="color:#4ade80">No SIF required</b> — other layers or RRF ≤ 10; consider alarm/BPCS measures',''];
+    if(rrfExp<=2) return ['<b>SIL 1</b> (RRF 10–100)','single good device, disciplined testing'];
+    if(rrfExp<=3) return ['<b>SIL 2</b> (RRF 100–1 000)','quality devices + diagnostics, or redundancy'];
+    if(rrfExp<=4) return ['<b>SIL 3</b> (RRF 1 000–10 000)','voting architecture, tight proof tests, low β'];
+    return ['<b style="color:#f87171">SIL 4 territory</b>','61511 says: redesign the process instead'];
+  }
+  function s1(){
+    var f=+fR.value, t=+tR.value;
+    document.getElementById('s1f').textContent=f;
+    document.getElementById('s1t').textContent=t;
+    var gap=f-t; // decades of reduction required
+    var band=silBand(gap);
+    document.getElementById('s1out').innerHTML=
+      'required RRF = 10^'+f+' / 10^'+t+' = <b>10^'+gap+'</b> ('+(gap<=0?'≤1':('%s').replace('%s',Math.pow(10,gap).toLocaleString()))+'×)<br>'+
+      band[0]+(band[1]?'<br>'+band[1]:'');
+  }
+  [fR,tR].forEach(function(r){r.addEventListener('input',s1);}); s1();
+
+  // ---- S2: LOPA calculator (toggle IPLs) ----
+  var f2R=document.getElementById('s2fR'), t2R=document.getElementById('s2tR'), seg2=document.getElementById('s2seg');
+  seg2.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    b.classList.toggle('on'); s2();
+  });
+  function s2(){
+    var f=+f2R.value, t=+t2R.value;
+    document.getElementById('s2f').textContent=f;
+    document.getElementById('s2t').textContent=t;
+    var cred=0, names=[];
+    seg2.querySelectorAll('button.on').forEach(function(b){ cred+=+b.dataset.p; names.push(b.textContent.split(' ×')[0]); });
+    var mit=f-cred;
+    var gap=mit-t;
+    var out='mitigated = 10^'+f+' × 10^-'+cred+' = <b>10^'+mit+' /yr</b> (IPLs: '+(names.length?names.join(', '):'none')+')<br>';
+    if(gap<=0){ out+='<b style="color:#4ade80">Target met — no SIF required ✓</b> (margin 10^'+(-gap)+')'; }
+    else{
+      var band=silBand(gap);
+      out+='gap = 10^'+gap+' → SIF needs PFD ≤ 10^-'+gap+' → '+band[0];
+    }
+    document.getElementById('s2out').innerHTML=out;
+  }
+  [f2R,t2R].forEach(function(r){r.addEventListener('input',s2);}); s2();
+
+  // ---- S3: architecture PFD ----
+  var arch='1oo1';
+  var lR=document.getElementById('s3lR'), tiR=document.getElementById('s3tiR'), bR=document.getElementById('s3bR'), seg3=document.getElementById('s3seg');
+  seg3.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    seg3.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); arch=b.dataset.a; s3();
+  });
+  function fmt(x){ return x.toExponential(1).replace('e-','×10⁻').replace('e+','×10'); }
+  function s3(){
+    var fit=+lR.value, mo=+tiR.value, beta=+bR.value/100;
+    document.getElementById('s3l').textContent=fit;
+    document.getElementById('s3ti').textContent=mo;
+    document.getElementById('s3b').textContent=(beta*100).toFixed(0);
+    var lam=fit*1e-9, TI=mo*730, x=lam*TI;
+    var pfd, note='';
+    if(arch==='1oo1'){ pfd=x/2; note='baseline — spurious rate 1×λS'; }
+    else if(arch==='1oo2'){ var ind=x*x/3, cc=beta*x/2; pfd=ind+cc;
+      note='independent '+fmt(ind)+' + β·term '+fmt(cc)+(cc>ind?' — <b>β dominates</b>':''); }
+    else if(arch==='2oo2'){ pfd=x; note='<b style="color:#fbbf24">⚠ availability scheme</b> — dangerous exposure DOUBLED vs 1oo1'; }
+    else { var ind3=x*x, cc3=beta*x/2; pfd=ind3+cc3;
+      note='independent '+fmt(ind3)+' + β·term '+fmt(cc3)+(cc3>ind3?' — <b>β dominates</b>':'')+' · survives 1 fault both ways'; }
+    var sil = pfd<1e-4?'SIL 4 band':pfd<1e-3?'SIL 3 band':pfd<1e-2?'SIL 2 band':pfd<1e-1?'SIL 1 band':'<b style="color:#f87171">below SIL 1</b>';
+    document.getElementById('s3out').innerHTML=
+      'λ·TI = '+fit+' FIT × '+TI.toFixed(0)+' h = '+fmt(x)+'<br>'+
+      arch+' → PFD<sub>avg</sub> ≈ <b>'+fmt(pfd)+'</b> → '+sil+' (RRF ≈ '+Math.round(1/pfd).toLocaleString()+')<br>'+note;
+  }
+  [lR,tiR,bR].forEach(function(r){r.addEventListener('input',s3);}); s3();
+})();
+</script>
+</body>
+</html>

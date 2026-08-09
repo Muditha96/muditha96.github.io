@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Automotive &amp; EV Powertrain Engineering · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #ef4444;       /* red — the automotive theme */
+    --accent-soft: #fca5a5;
+    --accent-2: #38bdf8;     /* sky */
+    --accent-3: #4ade80;     /* green */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(239,68,68,0.14), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(56,189,248,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(239,68,68,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(239,68,68,0.16), rgba(56,189,248,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(239,68,68,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-2)!important; } .c-sky .big{color:var(--accent-2)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #ef4444, #b91c1c); color: #2e0707; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(46,7,7,0.75); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; color:#fff5f5; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(239,68,68,0.12); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:110px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Automotive Engineering · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🚗</span>Automotive &amp; EV Powertrain</h1>
+  <p class="hero-sub">From tractive-effort physics to the 800 V battery pack: how an electric vehicle turns stored chemistry into wheel torque — road-load equations, PMSM traction motors, SiC inverters, Li-ion cells, BMS, charging, thermal management and the ISO 26262 software that arbitrates it all.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>No micro card yet — a full advanced module. Related:</span>
+    <a href="A04_CAN_Bus_Deep_Dive.html">A04 CAN Bus →</a>
+    <a href="A29_MOSFETs_Deep_Dive.html">A29 MOSFETs →</a>
+    <a href="A30_Three_Phase_Power_Deep_Dive.html">A30 Three-Phase →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · Powertrain Architectures</a>
+    <a href="#p2">2 · Road-Load Physics</a>
+    <a href="#p3">3 · Traction Motors</a>
+    <a href="#p4">4 · Inverter &amp; Regen</a>
+    <a href="#p5">5 · Battery Cells &amp; Pack</a>
+    <a href="#p6">6 · BMS &amp; Charging</a>
+    <a href="#p7">7 · Drivetrain &amp; e-Axle</a>
+    <a href="#p8">8 · Thermal Management</a>
+    <a href="#p9">9 · Networks &amp; Safety</a>
+    <a href="#p10">10 · Recap, Faults &amp; Quiz</a>
+  </div>
+
+  <!-- ===== PAGE 1 ===== -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 10</span>
+    <h2 class="page-title">One Job, Five Architectures</h2>
+    <p class="page-sub">Every powertrain answers the same question — how do I get stored energy to the tyre contact patch? — with a different energy path.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead">A <span class="hl">powertrain</span> is everything between the energy store and the driven wheels: the <span class="hl2">converter</span> (engine or motor), the <span class="hl2">transmission</span>, and the <span class="hl3">control system</span> that decides how much torque to deliver, when, and from where.</p>
+      <p class="body">An internal-combustion (ICE) powertrain stores energy as fuel (~12,000 Wh/kg) but converts it at only <strong>~25–35 % tank-to-wheel efficiency</strong>, needs a multi-speed gearbox because the engine only makes usable torque in a narrow rev band, and cannot recover braking energy. A battery-electric (BEV) powertrain stores far less energy per kilogram (~150–260 Wh/kg at cell level) but converts it at <strong>~77–90 % battery-to-wheel efficiency</strong>, makes full torque from 0 rpm — so one fixed gear ratio is enough — and pumps braking energy back into the pack. The engineering trade is therefore <span class="hl">energy density vs conversion efficiency</span>, and everything on the next nine pages flows from it.</p>
+      <p class="body">Between the two extremes sits the hybrid spectrum: micro/mild hybrids (48 V belt starter-generator that assists and harvests), full hybrids (power-split e-CVT, engine and motor blend torque), plug-in hybrids (bigger pack, 50–100 km electric range), range-extended EVs (engine only generates electricity), and fuel-cell EVs (H₂ stack generates, a small buffer battery handles transients).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The electrification spectrum</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g1a" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#fb923c" stop-opacity="0.85"/>
+            <stop offset="0.5" stop-color="#fbbf24" stop-opacity="0.85"/>
+            <stop offset="1" stop-color="#4ade80" stop-opacity="0.85"/>
+          </linearGradient>
+          <linearGradient id="g1b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fb923c" stop-opacity="0.30"/><stop offset="1" stop-color="#fb923c" stop-opacity="0.05"/></linearGradient>
+          <linearGradient id="g1c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbbf24" stop-opacity="0.30"/><stop offset="1" stop-color="#fbbf24" stop-opacity="0.05"/></linearGradient>
+          <linearGradient id="g1d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.30"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.05"/></linearGradient>
+          <linearGradient id="g1e" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity="0.32"/><stop offset="1" stop-color="#4ade80" stop-opacity="0.05"/></linearGradient>
+          <linearGradient id="g1f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c084fc" stop-opacity="0.30"/><stop offset="1" stop-color="#c084fc" stop-opacity="0.05"/></linearGradient>
+        </defs>
+        <rect x="40" y="30" width="680" height="10" rx="5" fill="url(#g1a)"/>
+        <text x="40" y="20" fill="#fb923c" font-size="11.5" font-weight="700">100% fuel</text>
+        <text x="720" y="20" text-anchor="end" fill="#4ade80" font-size="11.5" font-weight="700">100% electric</text>
+
+        <rect x="40" y="60" width="120" height="120" rx="12" fill="url(#g1b)" stroke="#fb923c" stroke-width="1.6"/>
+        <text x="100" y="85" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">ICE</text>
+        <text x="100" y="105" text-anchor="middle" fill="#94a3b8" font-size="10.5">engine + gearbox</text>
+        <text x="100" y="122" text-anchor="middle" fill="#94a3b8" font-size="10.5">~30% efficient</text>
+        <text x="100" y="139" text-anchor="middle" fill="#94a3b8" font-size="10.5">no recuperation</text>
+        <text x="100" y="163" text-anchor="middle" fill="#fb923c" font-size="10.5" font-weight="700">0 kWh pack</text>
+
+        <rect x="180" y="60" width="120" height="120" rx="12" fill="url(#g1c)" stroke="#fbbf24" stroke-width="1.6"/>
+        <text x="240" y="85" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="800">MHEV 48V</text>
+        <text x="240" y="105" text-anchor="middle" fill="#94a3b8" font-size="10.5">belt starter-gen</text>
+        <text x="240" y="122" text-anchor="middle" fill="#94a3b8" font-size="10.5">assist + harvest</text>
+        <text x="240" y="139" text-anchor="middle" fill="#94a3b8" font-size="10.5">no EV driving</text>
+        <text x="240" y="163" text-anchor="middle" fill="#fbbf24" font-size="10.5" font-weight="700">~0.5 kWh</text>
+
+        <rect x="320" y="60" width="120" height="120" rx="12" fill="url(#g1c)" stroke="#fbbf24" stroke-width="1.6"/>
+        <text x="380" y="85" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="800">HEV / PHEV</text>
+        <text x="380" y="105" text-anchor="middle" fill="#94a3b8" font-size="10.5">power-split e-CVT</text>
+        <text x="380" y="122" text-anchor="middle" fill="#94a3b8" font-size="10.5">blended torque</text>
+        <text x="380" y="139" text-anchor="middle" fill="#94a3b8" font-size="10.5">PHEV: 50-100 km EV</text>
+        <text x="380" y="163" text-anchor="middle" fill="#fbbf24" font-size="10.5" font-weight="700">1–20 kWh</text>
+
+        <rect x="460" y="60" width="120" height="120" rx="12" fill="url(#g1e)" stroke="#4ade80" stroke-width="1.8"/>
+        <text x="520" y="85" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">BEV</text>
+        <text x="520" y="105" text-anchor="middle" fill="#94a3b8" font-size="10.5">battery + inverter</text>
+        <text x="520" y="122" text-anchor="middle" fill="#94a3b8" font-size="10.5">+ motor, 1 gear</text>
+        <text x="520" y="139" text-anchor="middle" fill="#94a3b8" font-size="10.5">~77-90% efficient</text>
+        <text x="520" y="163" text-anchor="middle" fill="#4ade80" font-size="10.5" font-weight="700">40–120 kWh</text>
+
+        <rect x="600" y="60" width="120" height="120" rx="12" fill="url(#g1f)" stroke="#c084fc" stroke-width="1.6"/>
+        <text x="660" y="85" text-anchor="middle" fill="#c084fc" font-size="13" font-weight="800">FCEV</text>
+        <text x="660" y="105" text-anchor="middle" fill="#94a3b8" font-size="10.5">H₂ stack generates</text>
+        <text x="660" y="122" text-anchor="middle" fill="#94a3b8" font-size="10.5">buffer battery</text>
+        <text x="660" y="139" text-anchor="middle" fill="#94a3b8" font-size="10.5">3-5 min refuel</text>
+        <text x="660" y="163" text-anchor="middle" fill="#c084fc" font-size="10.5" font-weight="700">~1.5 kWh + 5 kg H₂</text>
+
+        <rect x="40" y="205" width="680" height="100" rx="14" fill="url(#g1d)" stroke="#38bdf8" stroke-width="1.6"/>
+        <text x="380" y="232" text-anchor="middle" fill="#7dd3fc" font-size="12.5" font-weight="800">THE BEV ENERGY PATH — what this module walks through</text>
+        <text x="80" y="262" fill="#4ade80" font-size="11.5" font-weight="700">Battery pack</text>
+        <text x="80" y="280" fill="#94a3b8" font-size="10">p.5–6 · DC 400/800 V</text>
+        <text x="230" y="262" fill="#fca5a5" font-size="11.5" font-weight="700">→ Inverter</text>
+        <text x="230" y="280" fill="#94a3b8" font-size="10">p.4 · DC→3φ AC</text>
+        <text x="360" y="262" fill="#7dd3fc" font-size="11.5" font-weight="700">→ Motor</text>
+        <text x="360" y="280" fill="#94a3b8" font-size="10">p.3 · AC→torque</text>
+        <text x="480" y="262" fill="#fbbf24" font-size="11.5" font-weight="700">→ Reduction gear</text>
+        <text x="480" y="280" fill="#94a3b8" font-size="10">p.7 · ~9:1 + diff</text>
+        <text x="630" y="262" fill="#c084fc" font-size="11.5" font-weight="700">→ Wheels</text>
+        <text x="630" y="280" fill="#94a3b8" font-size="10">p.2 · road load</text>
+      </svg>
+      </div>
+      <p class="cap">Electrification is a spectrum, not a switch. The BEV path — battery → inverter → motor → single-speed gear → wheels — is the spine of this module.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Why the industry flipped</div>
+      <div class="grid-3">
+        <div class="mini c-grn"><h4>Efficiency</h4><p class="big">~3×</p><p>Battery-to-wheel ~77–90 % vs tank-to-wheel ~25–35 %. Physics, not fashion.</p></div>
+        <div class="mini c-sky"><h4>Parts count</h4><p class="big">−90 %</p><p>~20 moving powertrain parts vs ~2,000. No oil, clutch, exhaust, valvetrain.</p></div>
+        <div class="mini c-amb"><h4>Torque at 0 rpm</h4><p class="big">100 %</p><p>Full torque from standstill — no clutch slip, no turbo lag, one gear ratio.</p></div>
+      </div>
+      <p class="body">The catch: <strong>energy storage</strong>. Petrol carries ~12,000 Wh/kg; a Li-ion pack delivers ~150–180 Wh/kg at pack level — roughly a 70× gap. EV engineering is the art of living well inside that gap: minimise the load (p.2), maximise conversion efficiency (p.3–4), and manage the battery like the precious, fragile asset it is (p.5–6, 8).</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 2 ===== -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 10</span>
+    <h2 class="page-title">Road-Load Physics — What the Motor Must Beat</h2>
+    <p class="page-sub">Four forces stand between the vehicle and constant speed. Add them up and you have sized the powertrain.</p>
+
+    <div class="card">
+      <div class="label">The tractive-effort equation</div>
+      <p class="lead">At any instant the motor must supply force equal to <span class="hl">rolling resistance + aerodynamic drag + grade + inertia</span>. Everything in vehicle design — mass, shape, tyres — is a term in this one equation.</p>
+      <div class="eqn"><b>F_tractive</b> = <span class="v3">C_rr·m·g</span> + <span class="v2">½·ρ·C_d·A·v²</span> + m·g·sin θ + (m + m_rot)·a
+
+P_wheel = F_tractive · v          P_battery = P_wheel / η_drivetrain
+
+<span class="v3">rolling</span>: C_rr ≈ 0.007–0.012 (EV tyres low-RR)   <span class="v2">aero</span>: ρ=1.2 kg/m³, C_d·A ≈ 0.5–0.8 m²
+grade: sin θ (θ = slope)                      inertia: m_rot ≈ +3–5 % effective mass</div>
+      <p class="body"><strong>Worked example</strong> — 2,000 kg SUV, C_rr = 0.010, C_d·A = 0.58 m², flat road, steady 100 km/h (27.8 m/s): rolling = 0.010 × 2000 × 9.81 = <span class="hl3">196 N</span>; aero = 0.5 × 1.2 × 0.58 × 27.8² = <span class="hl2">269 N</span>. Total 465 N → P_wheel = 465 × 27.8 ≈ <strong>12.9 kW</strong>; at 85 % drivetrain efficiency ≈ <strong>15.2 kW electric ≈ 152 Wh/km</strong>. Note aero already dominates at 100 km/h — and it grows with <em>v²</em>, so consumption per km grows roughly with v². This is why motorway range is always worse than city range: in the city, speeds are low <em>and</em> regen recovers the inertia term.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Where the energy goes vs speed</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g2a" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.45"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.10"/></linearGradient>
+          <linearGradient id="g2b" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#4ade80" stop-opacity="0.45"/><stop offset="1" stop-color="#4ade80" stop-opacity="0.12"/></linearGradient>
+        </defs>
+        <line x1="70" y1="250" x2="720" y2="250" stroke="#334155" stroke-width="1.5"/>
+        <line x1="70" y1="250" x2="70" y2="30" stroke="#334155" stroke-width="1.5"/>
+        <text x="720" y="272" text-anchor="end" fill="#94a3b8" font-size="12">speed →</text>
+        <text x="40" y="40" fill="#94a3b8" font-size="12" transform="rotate(-90 40 40) translate(-190 0)">power →</text>
+
+        <!-- rolling: linear in v -->
+        <path d="M 70 250 L 700 190" fill="none" stroke="#4ade80" stroke-width="3"/>
+        <path d="M 70 250 L 700 190 L 700 250 Z" fill="url(#g2b)"/>
+        <!-- aero: cubic in v (power) -->
+        <path d="M 70 250 C 300 245, 480 200, 700 45" fill="none" stroke="#38bdf8" stroke-width="3"/>
+        <path d="M 70 250 C 300 245, 480 200, 700 45 L 700 250 Z" fill="url(#g2a)" opacity="0.7"/>
+
+        <text x="600" y="215" fill="#4ade80" font-size="12.5" font-weight="700">rolling power ∝ v</text>
+        <text x="520" y="95" fill="#7dd3fc" font-size="12.5" font-weight="700">aero power ∝ v³</text>
+
+        <line x1="390" y1="250" x2="390" y2="60" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <text x="390" y="48" text-anchor="middle" fill="#fca5a5" font-size="11.5" font-weight="700">~70–80 km/h: aero overtakes rolling</text>
+
+        <text x="150" y="285" fill="#64748b" font-size="11">city: inertia + rolling dominate → regen wins big</text>
+        <text x="530" y="285" fill="#64748b" font-size="11">motorway: aero dominates → shape &amp; speed win</text>
+      </svg>
+      </div>
+      <p class="cap">Aerodynamic power grows with v³ (force ∝ v², power = F·v). Above ~75 km/h drag is the main enemy; below it, mass and tyres are.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — size your own EV</div>
+      <p class="body">Drag the sliders: steady-speed power and consumption update from the road-load equation (flat road, ρ = 1.2 kg/m³, η = 85 %).</p>
+      <div class="demo">
+        <div class="demo-row"><span>Speed</span><b id="d1vT">100 km/h</b></div>
+        <input type="range" id="d1v" min="30" max="160" step="5" value="100">
+        <div class="demo-row"><span>Vehicle mass</span><b id="d1mT">2000 kg</b></div>
+        <input type="range" id="d1m" min="1200" max="2800" step="50" value="2000">
+        <div class="demo-row"><span>Drag area C_d·A</span><b id="d1aT">0.58 m²</b></div>
+        <input type="range" id="d1a" min="40" max="100" step="2" value="58">
+        <div class="demo-row"><span>Rolling coefficient C_rr</span><b id="d1rT">0.010</b></div>
+        <input type="range" id="d1r" min="6" max="14" step="1" value="10">
+        <div class="demo-out" id="d1out"></div>
+      </div>
+      <p class="cap">Notice: +10 km/h near motorway speed costs far more than +200 kg of mass. Speed is the biggest range lever the driver holds.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 3 ===== -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 10</span>
+    <h2 class="page-title">Traction Motors — Torque From Standstill</h2>
+    <p class="page-sub">The EV motor is a three-phase AC machine (→ A30) run backwards and forwards a thousand times a minute by its inverter.</p>
+
+    <div class="card">
+      <div class="label">The torque–speed envelope</div>
+      <p class="lead">Every traction motor has two regions: <span class="hl">constant torque</span> below base speed (current-limited) and <span class="hl2">constant power</span> above it (voltage-limited, field weakening). The corner point is <span class="hl3">base speed</span>.</p>
+      <div class="eqn">Below base speed:  T = T_max (current limit)      P = T·ω  rises linearly
+Above base speed:  P = P_max (voltage limit)      T = <b>P_max / ω</b>  falls as 1/ω
+
+Field weakening: inject negative d-axis current → weakens magnet flux →
+back-EMF stays under DC-link voltage → motor keeps spinning faster (2–4× base speed)</div>
+      <p class="body">This envelope is why an EV needs no gearbox: the motor itself behaves like an infinitely variable transmission. A typical traction PMSM makes <strong>constant ~300 Nm from 0 to ~5,000 rpm</strong>, then constant ~150 kW up to ~16,000 rpm. Compare an ICE: near-zero torque below 1,200 rpm, usable band maybe 2,000–6,000 rpm — hence five to ten gears.</p>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 290" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="240" x2="720" y2="240" stroke="#334155" stroke-width="1.5"/>
+        <line x1="70" y1="240" x2="70" y2="30" stroke="#334155" stroke-width="1.5"/>
+        <text x="720" y="262" text-anchor="end" fill="#94a3b8" font-size="12">motor speed →</text>
+        <!-- torque -->
+        <path d="M 70 70 L 330 70 C 420 70 480 130 700 205" fill="none" stroke="#ef4444" stroke-width="3.5"/>
+        <text x="150" y="58" fill="#fca5a5" font-size="12.5" font-weight="800">TORQUE — flat then 1/ω</text>
+        <!-- power -->
+        <path d="M 70 240 L 330 105 L 700 105" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-dasharray="7 5"/>
+        <text x="480" y="92" fill="#7dd3fc" font-size="12.5" font-weight="800">POWER — ramp then flat</text>
+        <line x1="330" y1="240" x2="330" y2="45" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <text x="330" y="36" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="700">base speed</text>
+        <text x="195" y="228" text-anchor="middle" fill="#94a3b8" font-size="11.5">constant torque (current limit)</text>
+        <text x="520" y="228" text-anchor="middle" fill="#94a3b8" font-size="11.5">constant power — field weakening (voltage limit)</text>
+      </svg>
+      </div>
+      <p class="cap">One machine covers the whole car envelope: launch torque at 0 rpm, motorway power at 16,000 rpm. The inverter's d–q current control does the shaping.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The three machines that matter</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Machine</th><th>Rotor</th><th>Peak efficiency</th><th>Strengths</th><th>Watch-outs</th><th>Used by</th></tr>
+        <tr><td><b>PMSM / IPM</b> (permanent-magnet synchronous, interior magnets)</td><td>NdFeB magnets buried in steel</td><td class="mono">~96–97 %</td><td>Highest torque density; reluctance + magnet torque; best part-load efficiency</td><td>Rare-earth cost; back-EMF at speed (uncontrolled generator fault); magnets demagnetise if overheated</td><td>Most EVs — Tesla (rear), Hyundai/Kia, BYD</td></tr>
+        <tr><td><b>Induction</b> (asynchronous, → A30 p.7)</td><td>Copper/alu squirrel cage</td><td class="mono">~93–95 %</td><td>No magnets, cheap, robust; can be de-energised (freewheels with zero drag) — ideal secondary axle</td><td>Rotor I²R heat; lower part-load efficiency; needs slip</td><td>Tesla front units, Audi e-tron</td></tr>
+        <tr><td><b>EESM / WRSM</b> (externally-excited synchronous)</td><td>Copper field winding + slip rings or rotary transformer</td><td class="mono">~94–96 %</td><td>Zero rare earths; flux fully controllable (efficient field weakening)</td><td>Rotor excitation adds loss and complexity</td><td>BMW iX/i4, Renault Zoe/Megane</td></tr>
+      </table></div>
+      <p class="body">Trend: <strong>hairpin windings</strong> (rectangular wire, higher slot fill), <strong>oil-spray cooling</strong> directly on end-windings (→ p.8), and 800 V designs that halve current for the same power. Motor speeds keep climbing (20,000+ rpm) because power = torque × speed and torque costs copper and magnets, while speed only costs gear ratio (→ p.7).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Why torque is really current</div>
+      <div class="grid-3">
+        <div class="mini c-red"><h4>Torque</h4><p class="big">T ∝ I_q</p><p>Quadrature current makes torque. The accelerator pedal is a current request.</p></div>
+        <div class="mini c-sky"><h4>Speed</h4><p class="big">V-limited</p><p>Back-EMF rises with rpm until it meets the DC-link voltage — that's base speed.</p></div>
+        <div class="mini c-purp"><h4>Flux</h4><p class="big">−I_d</p><p>Negative d-axis current bucks the magnet flux to buy more speed: field weakening.</p></div>
+      </div>
+      <p class="body">The inverter runs <strong>field-oriented control (FOC)</strong>: measure rotor angle (resolver), transform the three phase currents into the rotating d–q frame, close two PI loops (→ A10) on I_d and I_q at ~10 kHz, transform back, and generate PWM. The motor becomes, in software, a DC motor with two knobs — one for torque, one for flux.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 4 ===== -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 10</span>
+    <h2 class="page-title">The Inverter — and Getting Energy Back</h2>
+    <p class="page-sub">Six switches stand between the pack and the motor (→ A29, A30). They work in both directions — that's regen.</p>
+
+    <div class="card">
+      <div class="label">Traction inverter anatomy</div>
+      <p class="lead">The inverter chops DC-link voltage into three PWM phase voltages tens of thousands of times per second. Torque direction and power direction are set purely by <span class="hl">switching timing</span> — the same hardware motors and regenerates.</p>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g4a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity="0.30"/><stop offset="1" stop-color="#4ade80" stop-opacity="0.05"/></linearGradient>
+          <linearGradient id="g4b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef4444" stop-opacity="0.28"/><stop offset="1" stop-color="#ef4444" stop-opacity="0.05"/></linearGradient>
+          <linearGradient id="g4c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.28"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.05"/></linearGradient>
+        </defs>
+        <!-- battery -->
+        <rect x="30" y="90" width="130" height="120" rx="12" fill="url(#g4a)" stroke="#4ade80" stroke-width="1.8"/>
+        <text x="95" y="118" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">PACK</text>
+        <text x="95" y="138" text-anchor="middle" fill="#94a3b8" font-size="10.5">400 / 800 V DC</text>
+        <text x="95" y="156" text-anchor="middle" fill="#94a3b8" font-size="10.5">+ DC-link caps</text>
+        <text x="95" y="174" text-anchor="middle" fill="#94a3b8" font-size="10.5">+ contactors, fuse</text>
+        <!-- inverter -->
+        <rect x="220" y="60" width="220" height="180" rx="14" fill="url(#g4b)" stroke="#ef4444" stroke-width="2"/>
+        <text x="330" y="86" text-anchor="middle" fill="#fca5a5" font-size="13" font-weight="800">INVERTER — 6 × SiC MOSFET</text>
+        <!-- three half bridges -->
+        <g stroke="#fca5a5" stroke-width="1.6" fill="none">
+          <line x1="265" y1="105" x2="265" y2="215"/><line x1="330" y1="105" x2="330" y2="215"/><line x1="395" y1="105" x2="395" y2="215"/>
+        </g>
+        <g fill="#2b3650" stroke="#fca5a5" stroke-width="1.4">
+          <rect x="250" y="115" width="30" height="26" rx="5"/><rect x="250" y="175" width="30" height="26" rx="5"/>
+          <rect x="315" y="115" width="30" height="26" rx="5"/><rect x="315" y="175" width="30" height="26" rx="5"/>
+          <rect x="380" y="115" width="30" height="26" rx="5"/><rect x="380" y="175" width="30" height="26" rx="5"/>
+        </g>
+        <text x="265" y="132" text-anchor="middle" fill="#f1f5f9" font-size="9.5" font-weight="700">HI</text>
+        <text x="265" y="192" text-anchor="middle" fill="#f1f5f9" font-size="9.5" font-weight="700">LO</text>
+        <text x="330" y="132" text-anchor="middle" fill="#f1f5f9" font-size="9.5" font-weight="700">HI</text>
+        <text x="330" y="192" text-anchor="middle" fill="#f1f5f9" font-size="9.5" font-weight="700">LO</text>
+        <text x="395" y="132" text-anchor="middle" fill="#f1f5f9" font-size="9.5" font-weight="700">HI</text>
+        <text x="395" y="192" text-anchor="middle" fill="#f1f5f9" font-size="9.5" font-weight="700">LO</text>
+        <text x="330" y="232" text-anchor="middle" fill="#94a3b8" font-size="10">SVPWM ~10–24 kHz · dead-time · FOC @ 10 kHz</text>
+        <!-- motor -->
+        <circle cx="560" cy="150" r="58" fill="url(#g4c)" stroke="#38bdf8" stroke-width="2"/>
+        <text x="560" y="145" text-anchor="middle" fill="#7dd3fc" font-size="13" font-weight="800">PMSM</text>
+        <text x="560" y="165" text-anchor="middle" fill="#94a3b8" font-size="10.5">3φ AC · 0–16 krpm</text>
+        <!-- arrows -->
+        <path d="M 165 130 H 215" stroke="#4ade80" stroke-width="3" marker-end="url(#arr4a)"/>
+        <path d="M 215 175 H 165" stroke="#fbbf24" stroke-width="3" marker-end="url(#arr4b)"/>
+        <path d="M 445 130 H 497" stroke="#4ade80" stroke-width="3" marker-end="url(#arr4a)"/>
+        <path d="M 497 175 H 445" stroke="#fbbf24" stroke-width="3" marker-end="url(#arr4b)"/>
+        <defs>
+          <marker id="arr4a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#4ade80"/></marker>
+          <marker id="arr4b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#fbbf24"/></marker>
+        </defs>
+        <text x="190" y="118" text-anchor="middle" fill="#4ade80" font-size="10.5" font-weight="700">drive</text>
+        <text x="190" y="196" text-anchor="middle" fill="#fbbf24" font-size="10.5" font-weight="700">regen</text>
+        <text x="471" y="118" text-anchor="middle" fill="#4ade80" font-size="10.5" font-weight="700">motor</text>
+        <text x="471" y="196" text-anchor="middle" fill="#fbbf24" font-size="10.5" font-weight="700">generate</text>
+        <text x="380" y="282" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">Same six switches, both directions. Slow the rotor below synchronous → power flows pack-ward. This is a VFD (→ A08) with a battery for a DC link.</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Why SiC took over — and the 800 V logic</div>
+      <p class="body">Traction inverters moved from Si IGBTs to <strong>SiC MOSFETs</strong> (→ A29 p.9): SiC switches faster with far lower switching energy, has no IGBT knee voltage at light load, and tolerates higher junction temperatures. Real-world payoff is <strong>~3–8 % more range</strong>, mostly at part load where cars actually drive. Doubling the pack to <strong>800 V halves current for the same power</strong>: I²R losses in cables and windings drop ~4×, cables get thinner and lighter, and 350 kW charging becomes possible without absurd connector currents. The price: every component must be rated 1,000 V+, and creepage/clearance distances grow.</p>
+      <div class="eqn">P_loss(conduction) = I²·R_ds(on)      P_loss(switching) = (E_on+E_off)·f_sw
+800 V vs 400 V at same power → I halves → conduction loss ÷4 → thinner busbars</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Regenerative braking — the free-energy loop</div>
+      <p class="body">Lift off (or press brake): the VCU requests <strong>negative torque</strong>. The inverter shifts phase so the machine generates; kinetic energy ½mv² flows back through the DC link into the pack. Typical recovery is <strong>60–70 % of braking energy</strong> — city driving regains 15–30 % of total consumption. Friction brakes remain for hard stops, low speed (&lt;~8 km/h regen fades), a full pack (nowhere to put the charge — BMS limits regen when cold or full), and failure back-up. <strong>Brake blending</strong> software mixes regen and friction seamlessly on one pedal — the hardest calibration job in the chassis; one-pedal driving is simply an aggressive regen map.</p>
+      <div class="grid-3">
+        <div class="mini c-grn"><h4>Recovered</h4><p class="big">60–70 %</p><p>of braking energy back to the pack (city cycles).</p></div>
+        <div class="mini c-amb"><h4>Regen limit</h4><p class="big">cold/full</p><p>BMS caps charge current when pack is cold or near 100 % SoC.</p></div>
+        <div class="mini c-red"><h4>Brake wear</h4><p class="big">~2×+ life</p><p>Friction brakes on EVs rust before they wear — a real maintenance quirk.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 5 ===== -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 10</span>
+    <h2 class="page-title">The Battery — Cell, Module, Pack</h2>
+    <p class="page-sub">The most expensive, heaviest, most safety-critical component in the car. Everything else is designed around it.</p>
+
+    <div class="card">
+      <div class="label">Inside a lithium-ion cell</div>
+      <p class="lead">A Li-ion cell is a <span class="hl">rocking-chair</span>: lithium ions shuttle between a graphite anode and a metal-oxide cathode through a liquid electrolyte, across a micro-porous separator. <span class="hl2">Discharge</span> = ions to cathode, electrons through your motor. <span class="hl3">Charge</span> = pushed back.</p>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g5a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#64748b" stop-opacity="0.45"/><stop offset="1" stop-color="#64748b" stop-opacity="0.10"/></linearGradient>
+          <linearGradient id="g5b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.40"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.08"/></linearGradient>
+          <linearGradient id="g5c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef4444" stop-opacity="0.40"/><stop offset="1" stop-color="#ef4444" stop-opacity="0.08"/></linearGradient>
+        </defs>
+        <!-- anode -->
+        <rect x="60" y="50" width="180" height="170" rx="10" fill="url(#g5b)" stroke="#38bdf8" stroke-width="1.8"/>
+        <text x="150" y="78" text-anchor="middle" fill="#7dd3fc" font-size="13" font-weight="800">ANODE −</text>
+        <text x="150" y="98" text-anchor="middle" fill="#94a3b8" font-size="10.5">graphite (or Si-blend)</text>
+        <text x="150" y="116" text-anchor="middle" fill="#94a3b8" font-size="10.5">Li⁺ intercalated in layers</text>
+        <text x="150" y="134" text-anchor="middle" fill="#94a3b8" font-size="10.5">Cu current collector</text>
+        <!-- separator -->
+        <rect x="255" y="50" width="40" height="170" rx="6" fill="url(#g5a)" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4 3"/>
+        <text x="275" y="140" text-anchor="middle" fill="#cbd5e1" font-size="10" font-weight="700" transform="rotate(-90 275 140)">SEPARATOR · µ-porous</text>
+        <!-- cathode -->
+        <rect x="310" y="50" width="180" height="170" rx="10" fill="url(#g5c)" stroke="#ef4444" stroke-width="1.8"/>
+        <text x="400" y="78" text-anchor="middle" fill="#fca5a5" font-size="13" font-weight="800">CATHODE +</text>
+        <text x="400" y="98" text-anchor="middle" fill="#94a3b8" font-size="10.5">NMC / LFP / NCA oxide</text>
+        <text x="400" y="116" text-anchor="middle" fill="#94a3b8" font-size="10.5">Li⁺ host lattice</text>
+        <text x="400" y="134" text-anchor="middle" fill="#94a3b8" font-size="10.5">Al current collector</text>
+        <!-- ions -->
+        <g fill="#fbbf24">
+          <circle cx="250" cy="165" r="5"/><circle cx="270" cy="185" r="5"/><circle cx="290" cy="165" r="5"/>
+        </g>
+        <path d="M 240 165 H 315" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arr5)"/>
+        <defs><marker id="arr5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#fbbf24"/></marker></defs>
+        <text x="277" y="210" text-anchor="middle" fill="#fbbf24" font-size="10.5" font-weight="700">Li⁺ (discharge →)</text>
+        <!-- external circuit -->
+        <path d="M 150 50 V 25 H 400 V 50" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+        <text x="275" y="18" text-anchor="middle" fill="#4ade80" font-size="11.5" font-weight="700">e⁻ through external circuit = your motor current</text>
+        <!-- right: numbers -->
+        <rect x="530" y="50" width="200" height="170" rx="12" fill="#11161f" stroke="#334155" stroke-width="1.4"/>
+        <text x="630" y="76" text-anchor="middle" fill="#fca5a5" font-size="12" font-weight="800">TYPICAL CELL NUMBERS</text>
+        <text x="545" y="102" fill="#cbd5e1" font-size="11">Nominal V: 3.2 (LFP) – 3.7 (NMC)</text>
+        <text x="545" y="124" fill="#cbd5e1" font-size="11">Window: ~2.5 – 4.2 V hard limits</text>
+        <text x="545" y="146" fill="#cbd5e1" font-size="11">Energy: 150–260 Wh/kg (cell)</text>
+        <text x="545" y="168" fill="#cbd5e1" font-size="11">Cycle life: 1,500–4,000+ (LFP best)</text>
+        <text x="545" y="190" fill="#cbd5e1" font-size="11">Formats: cylindrical / prismatic / pouch</text>
+        <text x="545" y="210" fill="#94a3b8" font-size="10" font-style="italic">4680 = 46 mm ⌀ × 80 mm cylinder</text>
+        <text x="380" y="262" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">Exceed 4.2 V, drop under ~2.5 V, charge below 0 °C, or pierce the separator — and the chemistry stops being your friend (→ p.8).</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Chemistry menu</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Chemistry</th><th>Cathode</th><th>Wh/kg (cell)</th><th>Cycle life</th><th>Thermal runaway onset</th><th>Character</th></tr>
+        <tr><td><b>NMC</b> (LiNiMnCoO₂)</td><td>Ni-Mn-Co, high-Ni trend (811)</td><td class="mono">200–260</td><td class="mono">1,000–2,000</td><td class="mono">~210 °C</td><td>Energy king — long-range cars; Co cost &amp; ethics pressure</td></tr>
+        <tr><td><b>LFP</b> (LiFePO₄)</td><td>Iron phosphate</td><td class="mono">150–190</td><td class="mono">3,000–4,000+</td><td class="mono">~270 °C, no O₂ release</td><td>Safe, cheap, cobalt-free, happy at 100 % SoC; heavier, weak cold performance</td></tr>
+        <tr><td><b>NCA</b> (LiNiCoAlO₂)</td><td>Ni-Co-Al</td><td class="mono">240–260</td><td class="mono">~1,000–1,500</td><td class="mono">~150–180 °C</td><td>Tesla's long-range cylinder chemistry; needs excellent BMS</td></tr>
+        <tr><td><b>Na-ion</b></td><td>Sodium layered oxide / PBA</td><td class="mono">100–160</td><td class="mono">3,000+</td><td class="mono">very tolerant</td><td>No lithium at all; city cars &amp; storage; cold-proof</td></tr>
+        <tr><td><b>Solid-state</b></td><td>Li-metal anode + solid electrolyte</td><td class="mono">350–500 (target)</td><td class="mono">TBD</td><td class="mono">no liquid to burn</td><td>The 2027–2030 prize: dendrites &amp; manufacturing still hard</td></tr>
+      </table></div>
+      <p class="body"><strong>Rule of thumb:</strong> LFP for standard-range and fleet (cycle life, cost, safety), high-Ni NMC/NCA for long-range flagships (energy density). Half the world's new EVs already ship LFP.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Cell → module → pack</div>
+      <div class="eqn">Series adds <b>voltage</b>:   96s × 3.7 V ≈ 355 V nominal (a "400 V" pack)
+                     198s × 3.7 V ≈ 733 V (an "800 V" pack)
+Parallel adds <b>capacity</b>: 4p × 50 Ah cells = 200 Ah
+Pack energy: E = V_nom · Ah = 355 V × 200 Ah ≈ <b>71 kWh</b>
+C-rate: I = C × Ah   →  2C on 200 Ah = 400 A  (3.5 kW/cell-group heat at 22 mΩ)</div>
+      <p class="body">Cells group into <strong>modules</strong> (with sense leads and cooling interfaces), modules into a <strong>pack</strong> with contactors, pre-charge resistor, fuse/pyro-fuse, current sensor, isolation monitor and the BMS. The structural trend is <strong>cell-to-pack (CTP)</strong> and <strong>cell-to-chassis</strong>: delete module housings, bond cells straight into a floor structure — 10–20 % more energy in the same volume, but repairability suffers. The pack floor also defines the car: low centre of gravity, stiff platform, and the "skateboard" architecture every dedicated EV platform uses.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 6 ===== -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 10</span>
+    <h2 class="page-title">BMS &amp; Charging — Guarding the Asset</h2>
+    <p class="page-sub">The battery management system is the pack's PLC, protection relay and accountant in one box.</p>
+
+    <div class="card">
+      <div class="label">What the BMS actually does</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Measure everything.</strong> Every series group's voltage (±1 mV class), pack current (shunt/Hall), dozens of temperatures, and isolation resistance between HV bus and chassis.</div></li>
+        <li><span class="num">2</span><div><strong>Estimate SoC &amp; SoH.</strong> State of charge = coulomb counting (∫I dt) continuously corrected against the open-circuit-voltage curve (plus Kalman filtering — flat OCV chemistries like LFP make this genuinely hard). State of health = capacity fade + resistance growth tracked over months.</div></li>
+        <li><span class="num">3</span><div><strong>Balance cells.</strong> The weakest series group caps the whole pack. Passive balancing bleeds high cells through resistors (~100 mA) near top of charge, keeping the string aligned.</div></li>
+        <li><span class="num">4</span><div><strong>Enforce limits.</strong> Charge/discharge current limits as a function of temperature and SoC (cold pack → tiny regen and slow charge; hot pack → derate). Below 0 °C charging graphite plates lithium metal — permanent damage — so the BMS simply refuses or heats first.</div></li>
+        <li><span class="num">5</span><div><strong>Protect and disconnect.</strong> Contactor control with pre-charge (never slam contactors into discharged DC-link caps), fuse coordination, crash-signal pyro-disconnect, and thermal-runaway detection (dV/dt + temperature + pressure vents).</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Charging — AC vs DC</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Mode</th><th>Where AC→DC happens</th><th>Typical power</th><th>100→80 % use case</th></tr>
+        <tr><td><b>AC Level 1/2</b> (home/work)</td><td><b>On-board charger (OBC)</b> in the car converts</td><td class="mono">2.3–22 kW</td><td>Overnight: 11 kW × 7 h ≈ 77 kWh — the everyday 90 %</td></tr>
+        <tr><td><b>DC fast (CCS/NACS)</b></td><td>Off-board station converts, feeds pack directly</td><td class="mono">50–350 kW</td><td>Road trips: 10→80 % in 18–30 min on 800 V cars</td></tr>
+        <tr><td><b>V2G / V2L</b></td><td>Bidirectional OBC or station</td><td class="mono">3–11 kW export</td><td>Car powers tools, home, or supports the grid</td></tr>
+      </table></div>
+      <p class="body">DC charging follows a <strong>charge curve</strong>, not a constant number: roughly constant current (near peak power) until ~50–60 % SoC, then tapering constant-voltage-ish region as cell voltage approaches 4.2 V, with the BMS shaving current further for temperature. That is why 10→80 % is quick and 80→100 % is slow — and why trip planners hop between 10 and 70 %. <strong>Preconditioning</strong> (heating the pack to ~30–40 °C on approach to a charger) can halve charge time in winter.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — DC fast-charge time</div>
+      <p class="body">Simple two-zone model: full station power up to 60 % SoC, linear taper to 20 % of peak at 100 %. Move the sliders.</p>
+      <div class="demo">
+        <div class="demo-row"><span>Pack size</span><b id="d2eT">75 kWh</b></div>
+        <input type="range" id="d2e" min="40" max="120" step="5" value="75">
+        <div class="demo-row"><span>Charger peak power</span><b id="d2pT">150 kW</b></div>
+        <input type="range" id="d2p" min="50" max="350" step="10" value="150">
+        <div class="demo-row"><span>Start SoC</span><b id="d2sT">10 %</b></div>
+        <input type="range" id="d2s" min="0" max="60" step="5" value="10">
+        <div class="demo-row"><span>End SoC</span><b id="d2fT">80 %</b></div>
+        <input type="range" id="d2f" min="50" max="100" step="5" value="80">
+        <div class="demo-out" id="d2out"></div>
+      </div>
+      <p class="cap">Watch 80→100 % cost nearly as much time as 10→80 %. The taper is chemistry, not a stingy operator.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 7 ===== -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 10</span>
+    <h2 class="page-title">Drivetrain — One Gear, Multiplied</h2>
+    <p class="page-sub">Motor torque is multiplied once, split by a differential, and delivered. The e-axle packages all of it in one casting.</p>
+
+    <div class="card">
+      <div class="label">Torque path &amp; the single-speed reducer</div>
+      <div class="eqn">T_wheel = T_motor · <b>G</b> · η_gear          ω_motor = ω_wheel · G
+F_traction = T_wheel / r_wheel          a = (F_traction − F_roadload) / m
+
+Example: 310 Nm × G 9.0 × 0.97 = <b>2,706 Nm</b> at the axle
+r = 0.35 m → F = 7,730 N → 2,000 kg → <b>a ≈ 3.8 m/s²</b> from standstill (0.39 g)</div>
+      <p class="body">A ratio around <strong>8–10 : 1</strong> (usually two helical stages) matches a 16,000 rpm motor to ~180 km/h. Why not two speeds? Because the motor's constant-power region already covers the envelope — a second gear buys a few percent efficiency at high speed for cost, mass and a shift event; only performance/towing outliers (Porsche Taycan rear axle) bother. The <strong>open differential</strong> splits torque equally while letting wheels run different speeds in corners; torque vectoring is done electrically — twin motors per axle or brake-based — rather than with clutch packs.</p>
+      <p class="body">The <strong>e-axle (3-in-1)</strong> integrates motor + inverter + reducer into one housing: shorter busbars, shared cooling, one assembly to bolt in. AWD EVs simply add a second e-axle and split torque in software, front/rear, in milliseconds — traction control at inverter speed (~100× faster than an ICE throttle) is why EVs launch so well.</p>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g7a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.32"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.06"/></linearGradient>
+          <linearGradient id="g7b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef4444" stop-opacity="0.30"/><stop offset="1" stop-color="#ef4444" stop-opacity="0.06"/></linearGradient>
+          <linearGradient id="g7c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbbf24" stop-opacity="0.32"/><stop offset="1" stop-color="#fbbf24" stop-opacity="0.06"/></linearGradient>
+        </defs>
+        <rect x="40" y="70" width="150" height="110" rx="12" fill="url(#g7b)" stroke="#ef4444" stroke-width="1.8"/>
+        <text x="115" y="100" text-anchor="middle" fill="#fca5a5" font-size="12.5" font-weight="800">INVERTER</text>
+        <text x="115" y="120" text-anchor="middle" fill="#94a3b8" font-size="10.5">SiC · FOC</text>
+        <text x="115" y="140" text-anchor="middle" fill="#94a3b8" font-size="10.5">DC in → 3φ out</text>
+        <rect x="220" y="70" width="150" height="110" rx="12" fill="url(#g7a)" stroke="#38bdf8" stroke-width="1.8"/>
+        <text x="295" y="100" text-anchor="middle" fill="#7dd3fc" font-size="12.5" font-weight="800">MOTOR</text>
+        <text x="295" y="120" text-anchor="middle" fill="#94a3b8" font-size="10.5">310 Nm · 16 krpm</text>
+        <text x="295" y="140" text-anchor="middle" fill="#94a3b8" font-size="10.5">oil-cooled hairpin</text>
+        <rect x="400" y="70" width="150" height="110" rx="12" fill="url(#g7c)" stroke="#fbbf24" stroke-width="1.8"/>
+        <text x="475" y="100" text-anchor="middle" fill="#fbbf24" font-size="12.5" font-weight="800">REDUCER + DIFF</text>
+        <text x="475" y="120" text-anchor="middle" fill="#94a3b8" font-size="10.5">2-stage helical 9:1</text>
+        <text x="475" y="140" text-anchor="middle" fill="#94a3b8" font-size="10.5">η ≈ 97 %</text>
+        <g stroke="#4ade80" stroke-width="3">
+          <line x1="550" y1="125" x2="620" y2="125"/>
+          <line x1="620" y1="60" x2="620" y2="190"/>
+        </g>
+        <circle cx="620" cy="52" r="26" fill="#11161f" stroke="#4ade80" stroke-width="2.5"/>
+        <circle cx="620" cy="198" r="26" fill="#11161f" stroke="#4ade80" stroke-width="2.5"/>
+        <text x="620" y="57" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="700">wheel</text>
+        <text x="620" y="203" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="700">wheel</text>
+        <path d="M 195 125 H 215" stroke="#94a3b8" stroke-width="2.5" marker-end="url(#arr7)"/>
+        <path d="M 375 125 H 395" stroke="#94a3b8" stroke-width="2.5" marker-end="url(#arr7)"/>
+        <defs><marker id="arr7" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+        <rect x="40" y="200" width="330" height="34" rx="8" fill="#11161f" stroke="#334155"/>
+        <text x="205" y="222" text-anchor="middle" fill="#94a3b8" font-size="11">e-axle "3-in-1": one casting, one coolant loop, one bolt-in unit</text>
+      </svg>
+      </div>
+      <p class="cap">Gear design details — involute geometry, helical overlap, bearing loads — are exactly the A20 Gears and A19 Bearings material applied at 16,000 rpm input speed (NVH: gear whine replaces engine noise).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — gearing &amp; launch</div>
+      <p class="body">Pick motor torque and gear ratio; see axle torque, launch acceleration (2,000 kg, r = 0.35 m) and motor rpm at 120 km/h. Note the trade: more ratio = more launch but the motor tops out sooner.</p>
+      <div class="demo">
+        <div class="demo-row"><span>Motor peak torque</span><b id="d3tT">310 Nm</b></div>
+        <input type="range" id="d3t" min="150" max="500" step="10" value="310">
+        <div class="demo-row"><span>Reduction ratio G</span><b id="d3gT">9.0 : 1</b></div>
+        <input type="range" id="d3g" min="50" max="140" step="5" value="90">
+        <div class="demo-row"><span>Motor max speed</span><b id="d3nT">16000 rpm</b></div>
+        <input type="range" id="d3n" min="10000" max="22000" step="500" value="16000">
+        <div class="demo-out" id="d3out"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 8 ===== -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 10</span>
+    <h2 class="page-title">Thermal Management — The Hidden Subsystem</h2>
+    <p class="page-sub">Every watt of loss on pages 3–7 becomes heat somewhere. Range in winter is won and lost here.</p>
+
+    <div class="card">
+      <div class="label">Three loops, one refrigerant heart</div>
+      <p class="lead">A modern EV runs <span class="hl">three coupled circuits</span> — battery loop (target 20–40 °C), powertrain loop (motor/inverter, tolerates 60–90 °C coolant), and cabin — tied together by a <span class="hl2">refrigerant circuit / heat pump</span> and multi-way valves that re-plumb the car in software.</p>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g8a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity="0.28"/><stop offset="1" stop-color="#4ade80" stop-opacity="0.05"/></linearGradient>
+          <linearGradient id="g8b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fb923c" stop-opacity="0.28"/><stop offset="1" stop-color="#fb923c" stop-opacity="0.05"/></linearGradient>
+          <linearGradient id="g8c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.28"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.05"/></linearGradient>
+        </defs>
+        <rect x="40" y="40" width="200" height="105" rx="12" fill="url(#g8a)" stroke="#4ade80" stroke-width="1.8"/>
+        <text x="140" y="66" text-anchor="middle" fill="#4ade80" font-size="12.5" font-weight="800">BATTERY LOOP</text>
+        <text x="140" y="88" text-anchor="middle" fill="#94a3b8" font-size="10.5">cold plates under cells</text>
+        <text x="140" y="106" text-anchor="middle" fill="#94a3b8" font-size="10.5">target 20–40 °C</text>
+        <text x="140" y="124" text-anchor="middle" fill="#94a3b8" font-size="10.5">PTC/plate heater for winter</text>
+        <rect x="40" y="165" width="200" height="105" rx="12" fill="url(#g8b)" stroke="#fb923c" stroke-width="1.8"/>
+        <text x="140" y="191" text-anchor="middle" fill="#fb923c" font-size="12.5" font-weight="800">POWERTRAIN LOOP</text>
+        <text x="140" y="213" text-anchor="middle" fill="#94a3b8" font-size="10.5">inverter → motor → radiator</text>
+        <text x="140" y="231" text-anchor="middle" fill="#94a3b8" font-size="10.5">oil spray inside motor,</text>
+        <text x="140" y="249" text-anchor="middle" fill="#94a3b8" font-size="10.5">water-glycol outside</text>
+        <rect x="520" y="40" width="200" height="105" rx="12" fill="url(#g8c)" stroke="#38bdf8" stroke-width="1.8"/>
+        <text x="620" y="66" text-anchor="middle" fill="#7dd3fc" font-size="12.5" font-weight="800">CABIN</text>
+        <text x="620" y="88" text-anchor="middle" fill="#94a3b8" font-size="10.5">HVAC — biggest winter</text>
+        <text x="620" y="106" text-anchor="middle" fill="#94a3b8" font-size="10.5">parasitic load (2–6 kW</text>
+        <text x="620" y="124" text-anchor="middle" fill="#94a3b8" font-size="10.5">resistive vs ~⅓ heat pump)</text>
+        <rect x="520" y="165" width="200" height="105" rx="12" fill="#11161f" stroke="#c084fc" stroke-width="1.8"/>
+        <text x="620" y="191" text-anchor="middle" fill="#c084fc" font-size="12.5" font-weight="800">RADIATOR / CHILLER</text>
+        <text x="620" y="213" text-anchor="middle" fill="#94a3b8" font-size="10.5">low-temp radiator + fans</text>
+        <text x="620" y="231" text-anchor="middle" fill="#94a3b8" font-size="10.5">chiller couples refrigerant</text>
+        <text x="620" y="249" text-anchor="middle" fill="#94a3b8" font-size="10.5">to coolant for fast-charge</text>
+        <rect x="300" y="105" width="180" height="100" rx="14" fill="#1a2230" stroke="#ef4444" stroke-width="2"/>
+        <text x="390" y="133" text-anchor="middle" fill="#fca5a5" font-size="12.5" font-weight="800">HEAT PUMP +</text>
+        <text x="390" y="151" text-anchor="middle" fill="#fca5a5" font-size="12.5" font-weight="800">MULTI-WAY VALVE</text>
+        <text x="390" y="173" text-anchor="middle" fill="#94a3b8" font-size="10.5">"octovalve" re-plumbs loops:</text>
+        <text x="390" y="191" text-anchor="middle" fill="#94a3b8" font-size="10.5">scavenge motor heat → cabin</text>
+        <g stroke="#64748b" stroke-width="2" fill="none" stroke-dasharray="5 4">
+          <path d="M 240 92 H 390 V 100"/>
+          <path d="M 240 217 H 390 V 210"/>
+          <path d="M 520 92 H 480 V 120"/>
+          <path d="M 520 217 H 480 V 200"/>
+        </g>
+        <text x="380" y="290" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">Software decides where heat goes: waste motor heat can warm the pack or the cabin instead of the radiator.</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Why temperature is destiny for the pack</div>
+      <div class="grid-3">
+        <div class="mini c-sky"><h4>Too cold</h4><p class="big">&lt; 0 °C</p><p>Li plating on charge; internal resistance up ~3×; regen and fast charge blocked until heated.</p></div>
+        <div class="mini c-grn"><h4>Sweet spot</h4><p class="big">20–40 °C</p><p>Full power, full regen, minimum ageing. The BMS fights to live here.</p></div>
+        <div class="mini c-red"><h4>Too hot</h4><p class="big">&gt; 45–60 °C</p><p>SEI growth accelerates ageing; sustained &gt;60 °C risks venting; runaway onset ~150–270 °C.</p></div>
+      </div>
+      <p class="body"><strong>Thermal runaway</strong> is the failure everyone designs against: one cell's exothermic decomposition heats its neighbour past onset, and the chain propagates. Defences stack: chemistry choice (LFP's higher onset and no oxygen release), cell spacing and aerogel/mica barriers, vent channels that route hot gas out of the pack, pressure/temperature sensors giving occupants a mandated 5-minute escape warning (GB 38031, UN GTR 20), and fast-charge derating long before limits. Failure analysis of a runaway is a proper RCA exercise (→ A25).</p>
+      <div class="eqn">Cell heat: Q̇ = I²·R_int + I·T·(dU/dT)   (ohmic + entropic)
+2C fast-charge on 200 Ah string, R_int 22 mΩ → I²R ≈ 3.5 kW just in cells
+→ chiller sized 6–10 kW so 350 kW charging doesn't cook the pack</div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 9 ===== -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 10</span>
+    <h2 class="page-title">Networks, Control &amp; Functional Safety</h2>
+    <p class="page-sub">A modern car is ~100 computers on wheels. The powertrain is orchestrated, arbitrated and guarded in software.</p>
+
+    <div class="card">
+      <div class="label">Who talks to whom</div>
+      <p class="lead">The <span class="hl">VCU (vehicle control unit)</span> reads the pedal, applies torque maps and traction logic, and sends torque requests to the inverter and current limits from the BMS — over <span class="hl2">CAN / CAN-FD</span> (→ A04), with automotive Ethernet climbing aboard for sensors and OTA.</p>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g9a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef4444" stop-opacity="0.30"/><stop offset="1" stop-color="#ef4444" stop-opacity="0.06"/></linearGradient>
+        </defs>
+        <rect x="290" y="30" width="180" height="70" rx="12" fill="url(#g9a)" stroke="#ef4444" stroke-width="2"/>
+        <text x="380" y="58" text-anchor="middle" fill="#fca5a5" font-size="13" font-weight="800">VCU</text>
+        <text x="380" y="80" text-anchor="middle" fill="#94a3b8" font-size="10.5">pedal map · torque arbitration · ASIL-D</text>
+        <line x1="60" y1="150" x2="700" y2="150" stroke="#fbbf24" stroke-width="4"/>
+        <text x="380" y="140" text-anchor="middle" fill="#fbbf24" font-size="11.5" font-weight="700">CAN-FD powertrain bus · 500 kbit–5 Mbit/s (→ A04)</text>
+        <line x1="380" y1="100" x2="380" y2="150" stroke="#fbbf24" stroke-width="2.5"/>
+        <g>
+          <rect x="60" y="180" width="130" height="66" rx="10" fill="#1a2230" stroke="#4ade80" stroke-width="1.6"/>
+          <text x="125" y="206" text-anchor="middle" fill="#4ade80" font-size="11.5" font-weight="800">BMS</text>
+          <text x="125" y="226" text-anchor="middle" fill="#94a3b8" font-size="10">SoC · current limits</text>
+          <rect x="220" y="180" width="130" height="66" rx="10" fill="#1a2230" stroke="#38bdf8" stroke-width="1.6"/>
+          <text x="285" y="206" text-anchor="middle" fill="#7dd3fc" font-size="11.5" font-weight="800">INVERTER</text>
+          <text x="285" y="226" text-anchor="middle" fill="#94a3b8" font-size="10">torque exec @ 10 kHz</text>
+          <rect x="380" y="180" width="130" height="66" rx="10" fill="#1a2230" stroke="#c084fc" stroke-width="1.6"/>
+          <text x="445" y="206" text-anchor="middle" fill="#c084fc" font-size="11.5" font-weight="800">OBC + DCDC</text>
+          <text x="445" y="226" text-anchor="middle" fill="#94a3b8" font-size="10">charging · 12 V rail</text>
+          <rect x="540" y="180" width="160" height="66" rx="10" fill="#1a2230" stroke="#fb923c" stroke-width="1.6"/>
+          <text x="620" y="206" text-anchor="middle" fill="#fb923c" font-size="11.5" font-weight="800">BRAKE / ESC</text>
+          <text x="620" y="226" text-anchor="middle" fill="#94a3b8" font-size="10">blending · ABS keeps regen honest</text>
+        </g>
+        <g stroke="#64748b" stroke-width="2">
+          <line x1="125" y1="180" x2="125" y2="150"/>
+          <line x1="285" y1="180" x2="285" y2="150"/>
+          <line x1="445" y1="180" x2="445" y2="150"/>
+          <line x1="620" y1="180" x2="620" y2="150"/>
+        </g>
+        <text x="380" y="270" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">Pedal → VCU torque request → inverter current loop → torque, in ~1–10 ms end to end. Zonal/domain architectures + automotive Ethernet are collapsing this into fewer, bigger ECUs (→ A33 thinking, on wheels).</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">ISO 26262 — functional safety on wheels</div>
+      <p class="body">Automotive functional safety mirrors the machinery world you know from A35, with its own vocabulary: hazards are rated by <strong>Severity × Exposure × Controllability</strong> into <strong>ASIL A–D</strong> (vs PL/SIL). Unintended acceleration and loss of braking are ASIL-D: dual-channel pedal sensors with plausibility checks, lockstep-core microcontrollers, independent torque-monitoring watchdogs that can open the contactors, and defined <strong>safe states</strong> (torque = 0, HV off). HV-specific safety adds isolation monitoring (≥100 Ω/V), pyro-fuses fired by the airbag ECU, and service disconnects. <strong>Cybersecurity</strong> (ISO/SAE 21434 + UN R155/R156) is now homologation-mandatory — an OTA-updatable powertrain is also an attack surface: signed firmware, secure boot, gateway firewalls between infotainment and the torque path.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>Concern</th><th>Machinery world (→ A35)</th><th>Automotive world</th></tr>
+        <tr><td>Risk grading</td><td class="mono">PLr a–e / SIL 1–3</td><td class="mono">ASIL A–D (S×E×C)</td></tr>
+        <tr><td>Core standard</td><td class="mono">ISO 13849 / IEC 62061</td><td class="mono">ISO 26262 (12 parts)</td></tr>
+        <tr><td>Safe state</td><td>STO — torque removed</td><td>Torque-0 request + contactor open</td></tr>
+        <tr><td>Architecture</td><td>Cat 3 dual channel</td><td>Lockstep cores, dual pedal sense, monitoring ECU</td></tr>
+        <tr><td>Security</td><td>IEC 62443</td><td class="mono">ISO/SAE 21434 · UN R155/156</td></tr>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 10 ===== -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 10</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Quiz</h2>
+    <p class="page-sub">The whole powertrain on one page — then prove it stuck.</p>
+
+    <div class="card">
+      <div class="label">Eight ideas to keep</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Everything is the road-load equation.</strong> C_rr·mg + ½ρC_dAv² + grade + inertia. Aero power grows with v³ — speed is the range killer.</div></li>
+        <li><span class="num">2</span><div><strong>EVs win on conversion, lose on storage.</strong> ~85 % battery-to-wheel vs ~30 % tank-to-wheel, against a 70× energy-density gap.</div></li>
+        <li><span class="num">3</span><div><strong>The motor is its own gearbox.</strong> Constant torque to base speed, constant power beyond via field weakening — one ratio suffices.</div></li>
+        <li><span class="num">4</span><div><strong>Torque is I_q.</strong> FOC turns an AC machine into two current knobs; the pedal is a current request executed at 10 kHz.</div></li>
+        <li><span class="num">5</span><div><strong>The inverter is bidirectional.</strong> Regen is the same six SiC switches with reversed power flow — 60–70 % of braking energy comes back.</div></li>
+        <li><span class="num">6</span><div><strong>The weakest cell is the pack.</strong> Series×parallel sets V×Ah; balancing, SoC estimation and limits are the BMS's whole life.</div></li>
+        <li><span class="num">7</span><div><strong>Temperature is destiny.</strong> 20–40 °C or the BMS derates you; below 0 °C charging plates lithium; runaway is designed against in layers.</div></li>
+        <li><span class="num">8</span><div><strong>Software arbitrates torque.</strong> VCU → CAN → inverter under ISO 26262 ASIL-D, with cybersecurity as a legal requirement.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Six classic failure modes</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">⚠️ Lithium plating</div><p>Fast-charging a cold pack deposits metallic Li on the anode: permanent capacity loss, dendrite risk. Symptom: sudden capacity drop after winter DC charging. Fix: preconditioning + BMS cold-charge limits.</p></div>
+        <div class="fail"><div class="ft">⚠️ Cell imbalance</div><p>One weak series group hits the 4.2 V ceiling first → charging stops early; hits the floor first → range vanishes. Symptom: shrinking usable window. Fix: balancing healthy? Replace the outlier group, not the pack.</p></div>
+        <div class="fail"><div class="ft">⚠️ Isolation fault</div><p>Coolant leak, chafed HV cable or moisture drops HV-to-chassis resistance; the isolation monitor flags it and the car may refuse to start or charge. Never a "clear and drive on" code — find the leak path.</p></div>
+        <div class="fail"><div class="ft">⚠️ Inverter power-stage failure</div><p>Shoot-through, bond-wire fatigue or a failed DC-link cap (→ A29 failures). Symptom: sudden torque loss, isolation trip, or a DTC pointing at one phase. IGBT/SiC modules fail short — fuses and pyro must clear.</p></div>
+        <div class="fail"><div class="ft">⚠️ Bearing currents &amp; gear whine</div><p>Fast PWM edges drive common-mode current through motor bearings → fluting (→ A19); high-rpm helical stages expose any micro-geometry error as whine. Fixes: shaft grounding ring, insulated bearing, gear micro-geometry.</p></div>
+        <div class="fail"><div class="ft">⚠️ Contactor / pre-charge damage</div><p>Closing main contactors into discharged DC-link caps welds them shut (inrush). Symptom: contactor won't open — a serious safety fault. The pre-charge resistor sequence exists precisely to prevent this.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 1</div>
+      <p class="quiz-q">Why does an EV need only one gear ratio while an ICE needs 5–10?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">The electric motor delivers full torque from 0 rpm (constant-torque region) and then constant power up to very high speed via field weakening — its usable band covers the whole vehicle envelope. An ICE only makes useful torque in a narrow rev band, so gears must keep it there.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 2</div>
+      <p class="quiz-q">A car doubles its speed from 60 to 120 km/h on a flat motorway. Roughly what happens to the aerodynamic <em>power</em> it must supply?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Aero force ∝ v², power = force × v ∝ v³ → about 8× the aerodynamic power (and roughly 4× the aero energy per km). This is why motorway consumption is dramatically worse than city consumption.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 3</div>
+      <p class="quiz-q">Why does DC fast charging slow down dramatically above ~80 % SoC?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Cell voltage approaches the 4.2 V ceiling, so the charger must taper current to avoid overvoltage (CC→CV transition); the BMS also limits current to prevent lithium plating. The last 20 % can take as long as the first 70 %.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 4</div>
+      <p class="quiz-q">Why must the BMS refuse (or pre-heat before) charging below 0 °C?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Below ~0 °C, intercalation into graphite is too slow, so lithium deposits as metal on the anode surface (plating) instead. It permanently destroys capacity and can grow dendrites that pierce the separator → internal short → thermal-runaway risk.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 5</div>
+      <p class="quiz-q">Same power, but the OEM moves from a 400 V to an 800 V pack. What happens to conduction losses in the cables, and why does charging benefit?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Current halves (P = V·I), so I²R conduction losses fall to one quarter for the same resistance — or cables can be much thinner. Charging at 350 kW becomes feasible at ~440 A instead of ~875 A, which connectors and cables can actually carry.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 6</div>
+      <p class="quiz-q">Regen suddenly feels weak on a frosty morning with a 95 % charged pack. Name the two reasons.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">(1) Cold pack: charge-current limit is tiny near/below 0 °C (plating risk), so the BMS caps regen. (2) Nearly full pack: there's nowhere to put the recovered energy near 100 % SoC. The car blends in friction braking to compensate.</span>
+      </div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"Battery is the tank, inverter is the throttle, motor is the engine — and the road-load equation sends the bill."</p>
+    </div>
+  </section>
+
+    <p class="footer">
+      Advanced Deep Dive A38 · Automotive &amp; EV Powertrain Engineering · Standalone module<br>
+      Related: <a href="A04_CAN_Bus_Deep_Dive.html" style="color:var(--accent-soft)">A04 CAN Bus</a> ·
+      <a href="A08_VFD_Deep_Dive.html" style="color:var(--accent-soft)">A08 VFD</a> ·
+      <a href="A29_MOSFETs_Deep_Dive.html" style="color:var(--accent-soft)">A29 MOSFETs</a> ·
+      <a href="A30_Three_Phase_Power_Deep_Dive.html" style="color:var(--accent-soft)">A30 Three-Phase</a> ·
+      <a href="A19_Bearings_Deep_Dive.html" style="color:var(--accent-soft)">A19 Bearings</a> ·
+      <a href="A20_Gears_Deep_Dive.html" style="color:var(--accent-soft)">A20 Gears</a><br>
+      Micro Learning · Advanced Library · optimised for iPad Pro 11″
+    </p>
+
+</div>
+
+<script>
+(function(){
+  // Demo 1 — road load
+  const d1v=document.getElementById('d1v'), d1m=document.getElementById('d1m'),
+        d1a=document.getElementById('d1a'), d1r=document.getElementById('d1r');
+  function up1(){
+    const vk=+d1v.value, m=+d1m.value, cda=+d1a.value/100, crr=+d1r.value/1000;
+    document.getElementById('d1vT').textContent=vk+' km/h';
+    document.getElementById('d1mT').textContent=m+' kg';
+    document.getElementById('d1aT').textContent=cda.toFixed(2)+' m²';
+    document.getElementById('d1rT').textContent=crr.toFixed(3);
+    const v=vk/3.6;
+    const Fr=crr*m*9.81, Fa=0.5*1.2*cda*v*v, F=Fr+Fa;
+    const Pw=F*v/1000, Pe=Pw/0.85, cons=Pe/vk*1000; // Wh/km
+    const range75=75000/ (cons); // km on 75kWh
+    document.getElementById('d1out').innerHTML=
+      'Rolling force: <b>'+Fr.toFixed(0)+' N</b> · Aero force: <b>'+Fa.toFixed(0)+' N</b><br>'+
+      'Wheel power: <b>'+Pw.toFixed(1)+' kW</b> → battery power @85%: <b>'+Pe.toFixed(1)+' kW</b><br>'+
+      'Consumption: <b>'+cons.toFixed(0)+' Wh/km</b> → 75 kWh pack range: <b>'+range75.toFixed(0)+' km</b>';
+  }
+  [d1v,d1m,d1a,d1r].forEach(el=>el.addEventListener('input',up1)); up1();
+
+  // Demo 2 — charge time (full power to 60%, linear taper to 20% of peak at 100%)
+  const d2e=document.getElementById('d2e'), d2p=document.getElementById('d2p'),
+        d2s=document.getElementById('d2s'), d2f=document.getElementById('d2f');
+  function pw(soc,P){ return soc<=60 ? P : P*(1-0.8*(soc-60)/40); }
+  function up2(){
+    let E=+d2e.value, P=+d2p.value, s=+d2s.value, f=+d2f.value;
+    if(f<=s){ f=s+5; d2f.value=f; }
+    document.getElementById('d2eT').textContent=E+' kWh';
+    document.getElementById('d2pT').textContent=P+' kW';
+    document.getElementById('d2sT').textContent=s+' %';
+    document.getElementById('d2fT').textContent=f+' %';
+    let t=0;
+    for(let x=s; x<f; x+=1){ const p=pw(x+0.5,P); t += (E*0.01)/p; }
+    const kwh=E*(f-s)/100, avg=kwh/t;
+    document.getElementById('d2out').innerHTML=
+      'Energy added: <b>'+kwh.toFixed(1)+' kWh</b><br>'+
+      'Charge time: <b>'+(t*60).toFixed(0)+' min</b> · average power: <b>'+avg.toFixed(0)+' kW</b><br>'+
+      (f>80?'<span style="color:#fbbf24">Above 80 % the taper dominates — trip planners unplug here.</span>':'Below the knee — you are getting near-peak power.');
+  }
+  [d2e,d2p,d2s,d2f].forEach(el=>el.addEventListener('input',up2)); up2();
+
+  // Demo 3 — gearing
+  const d3t=document.getElementById('d3t'), d3g=document.getElementById('d3g'), d3n=document.getElementById('d3n');
+  function up3(){
+    const T=+d3t.value, G=+d3g.value/10, N=+d3n.value;
+    document.getElementById('d3tT').textContent=T+' Nm';
+    document.getElementById('d3gT').textContent=G.toFixed(1)+' : 1';
+    document.getElementById('d3nT').textContent=N+' rpm';
+    const r=0.35, m=2000, eta=0.97;
+    const Tw=T*G*eta, F=Tw/r, a=F/m;
+    const vmax=(N/G)*2*Math.PI/60*r*3.6; // km/h
+    const rpm120=(120/3.6/r)*60/(2*Math.PI)*G;
+    document.getElementById('d3out').innerHTML=
+      'Axle torque: <b>'+Tw.toFixed(0)+' Nm</b> · tractive force: <b>'+F.toFixed(0)+' N</b><br>'+
+      'Launch acceleration: <b>'+a.toFixed(2)+' m/s²</b> ('+(a/9.81).toFixed(2)+' g, before grip limits)<br>'+
+      'Top speed (motor-limited): <b>'+vmax.toFixed(0)+' km/h</b> · motor at 120 km/h: <b>'+rpm120.toFixed(0)+' rpm</b>'+
+      (rpm120>N?'<br><span style="color:#f87171">Motor over-revs at 120 km/h — lower G or raise max rpm.</span>':'');
+  }
+  [d3t,d3g,d3n].forEach(el=>el.addEventListener('input',up3)); up3();
+})();
+</script>
+</body>
+</html>

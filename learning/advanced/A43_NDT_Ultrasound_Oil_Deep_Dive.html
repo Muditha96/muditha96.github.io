@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>NDT, Ultrasound &amp; Oil Analysis · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #fb923c;       /* inspection orange */
+    --accent-soft: #fdba74;
+    --accent-2: #a78bfa;     /* UV violet */
+    --accent-3: #38bdf8;     /* couplant sky */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(251,146,60,0.12), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(167,139,250,0.08), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(251,146,60,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(251,146,60,0.14), rgba(167,139,250,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(251,146,60,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-3)!important; } .c-sky .big{color:var(--accent-3)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #fb923c, #c2410c); color: #291103; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(41,17,3,0.75); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(251,146,60,0.10); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:110px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Thermal Imaging &amp; Condition Monitoring · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🔍</span>NDT, Ultrasound &amp; Oil Analysis</h1>
+  <p class="hero-sub">The rest of the condition-monitoring toolbox: ultrasonic physics from impedance to A-scan, airborne ultrasound for leaks and bearings, wall-thickness and flaw detection, oil analysis and wear-debris forensics, penetrant, magnetic particle, eddy current and radiography — and how to combine them into one programme.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>No micro card yet — a full advanced module. Related:</span>
+    <a href="A42_Vibration_Analysis_Deep_Dive.html">A42 Vibration →</a>
+    <a href="A41_Thermal_Imaging_Deep_Dive.html">A41 Thermal →</a>
+    <a href="A19_Bearings_Deep_Dive.html">A19 Bearings →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · The CM Toolbox</a>
+    <a href="#p2">2 · Ultrasonic Physics</a>
+    <a href="#p3">3 · Airborne Ultrasound</a>
+    <a href="#p4">4 · UT Thickness &amp; Flaws</a>
+    <a href="#p5">5 · Oil Analysis I</a>
+    <a href="#p6">6 · Oil Analysis II · Wear</a>
+    <a href="#p7">7 · PT &amp; MT</a>
+    <a href="#p8">8 · ET &amp; RT</a>
+    <a href="#p9">9 · Programme Design</a>
+    <a href="#p10">10 · Recap &amp; Quiz</a>
+    <a href="#p11">11 · Worked Examples</a>
+    <a href="#p12">12 · Problem Set</a>
+    <a href="#p13">13 · Derivations &amp; Traps</a>
+    <a href="#p14">14 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ============ PAGE 1 ============ -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 14 · Foundations</span>
+    <h2 class="page-title">The Condition-Monitoring &amp; NDT Toolbox</h2>
+    <p class="page-sub">Vibration hears, thermography sees, oil remembers, ultrasound whispers — and NDT proves.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead">Non-destructive testing (NDT) evaluates the integrity of a material, part or system <span class="hl">without impairing its future usefulness</span>. Condition monitoring applies the same idea to running machines: measure symptoms, infer health, act before failure.</p>
+      <p class="body">Two families share the toolbox. <strong>Machinery CM</strong> (vibration → <a href="A42_Vibration_Analysis_Deep_Dive.html" style="color:var(--accent-soft)">A42</a>, thermography → <a href="A41_Thermal_Imaging_Deep_Dive.html" style="color:var(--accent-soft)">A41</a>, oil, ultrasound) watches rotating equipment continuously or on routes. <strong>Structural NDT</strong> (UT, PT, MT, ET, RT) inspects static assets — welds, vessels, piping, castings — usually against an acceptance code. A senior engineer moves fluently between both.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The family tree</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
+          <rect x="250" y="20" width="200" height="44" rx="10" fill="#fb923c" opacity="0.9"/>
+          <text x="350" y="47" fill="#0b0f14" font-size="15" font-weight="800" text-anchor="middle">ASSET HEALTH</text>
+          <line x1="350" y1="64" x2="180" y2="110" stroke="#334155" stroke-width="2"/>
+          <line x1="350" y1="64" x2="520" y2="110" stroke="#334155" stroke-width="2"/>
+          <rect x="60" y="110" width="240" height="40" rx="9" fill="#232d3f" stroke="#fb923c"/>
+          <text x="180" y="135" fill="#fdba74" font-size="13.5" font-weight="700" text-anchor="middle">MACHINERY CM (running)</text>
+          <rect x="400" y="110" width="240" height="40" rx="9" fill="#232d3f" stroke="#a78bfa"/>
+          <text x="520" y="135" fill="#c4b5fd" font-size="13.5" font-weight="700" text-anchor="middle">STRUCTURAL NDT (static)</text>
+          <g font-size="12" text-anchor="middle">
+            <line x1="180" y1="150" x2="90" y2="185" stroke="#334155" stroke-width="1.5"/>
+            <line x1="180" y1="150" x2="180" y2="185" stroke="#334155" stroke-width="1.5"/>
+            <line x1="180" y1="150" x2="270" y2="185" stroke="#334155" stroke-width="1.5"/>
+            <rect x="40" y="185" width="100" height="34" rx="8" fill="#1a2230" stroke="#facc15"/>
+            <text x="90" y="206" fill="#fde68a">Vibration · A42</text>
+            <rect x="130" y="185" width="100" height="34" rx="8" fill="#1a2230" stroke="#f472b6"/>
+            <text x="180" y="206" fill="#f9a8d4">Thermal · A41</text>
+            <rect x="220" y="185" width="100" height="34" rx="8" fill="#1a2230" stroke="#4ade80"/>
+            <text x="270" y="206" fill="#86efac">Oil analysis</text>
+            <rect x="130" y="235" width="100" height="34" rx="8" fill="#1a2230" stroke="#38bdf8"/>
+            <text x="180" y="256" fill="#7dd3fc">Ultrasound</text>
+            <line x1="180" y1="219" x2="180" y2="235" stroke="#334155" stroke-width="1.5"/>
+            <line x1="520" y1="150" x2="430" y2="185" stroke="#334155" stroke-width="1.5"/>
+            <line x1="520" y1="150" x2="520" y2="185" stroke="#334155" stroke-width="1.5"/>
+            <line x1="520" y1="150" x2="610" y2="185" stroke="#334155" stroke-width="1.5"/>
+            <rect x="380" y="185" width="100" height="34" rx="8" fill="#1a2230" stroke="#fb923c"/>
+            <text x="430" y="206" fill="#fdba74">UT · thickness</text>
+            <rect x="470" y="185" width="100" height="34" rx="8" fill="#1a2230" stroke="#a78bfa"/>
+            <text x="520" y="206" fill="#c4b5fd">PT · MT</text>
+            <rect x="560" y="185" width="100" height="34" rx="8" fill="#1a2230" stroke="#f87171"/>
+            <text x="610" y="206" fill="#fca5a5">ET · RT</text>
+          </g>
+          <text x="350" y="300" fill="#94a3b8" font-size="12.5" text-anchor="middle">surface methods (PT/MT/ET) find what breaks OUT · volumetric methods (UT/RT) find what hides WITHIN</text>
+        </svg>
+        <div class="cap">One decision tree: is the asset running or static, and is the suspected defect on the surface or in the volume? Those two questions select the method before any physics is discussed.</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">P-F</div><h4>Earliest wins</h4><p>Ultrasound &amp; oil debris sit near vibration at the early end of the P-F curve — long planning windows.</p></div>
+      <div class="mini c-purp"><div class="big">5+1</div><h4>Classic methods</h4><p>VT (visual), PT, MT, UT, ET, RT — plus the CM technologies. Visual inspection is method zero, always first.</p></div>
+      <div class="mini c-sky"><div class="big">9712</div><h4>People are certified</h4><p>ISO 9712 / ASNT SNT-TC-1A qualify NDT personnel Level 1–3; ISO 18436 covers CM analysts.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 ============ -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 14 · Physics</span>
+    <h2 class="page-title">Ultrasonic Physics — Waves, Impedance, Echoes</h2>
+    <p class="page-sub">Everything ultrasonic — leak detectors and flaw detectors alike — runs on three equations.</p>
+
+    <div class="card">
+      <div class="label">Waves in metal</div>
+      <p class="lead">Ultrasound is elastic vibration above ~20 kHz. In solids it travels as <span class="hl">longitudinal</span> waves (particles push along travel — fastest), <span class="hl2">shear</span> waves (particles move across — ~half speed, solids only), plus surface (Rayleigh) and plate (Lamb) modes.</p>
+      <div class="eqn">λ = v / f            wavelength sets detectable defect size (~λ/2 rule of thumb)
+
+v_long: steel 5900 · aluminium 6320 · water 1480 · air 343   [m/s]
+v_shear ≈ 0.55 × v_long (steel: 3230 m/s)
+
+5 MHz in steel:  λ = 5900/5×10⁶ ≈ <b>1.2 mm</b>  → resolves ~0.6 mm reflectors</div>
+      <p class="body">Frequency is the resolution/penetration trade: <strong>higher f → shorter λ → smaller detectable flaws but more attenuation</strong> (scattering grows steeply with f). Coarse-grained castings are tested at 1–2.25 MHz; fine-grained wrought steel at 5–10 MHz.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Acoustic impedance — why echoes exist</div>
+      <div class="eqn">Z = ρ·v    [Rayl = kg/(m²s)]
+steel 46×10⁶ · water 1.5×10⁶ · air 415
+
+reflection coefficient (energy, normal incidence):
+<b>R = ((Z₂−Z₁)/(Z₂+Z₁))²</b>       transmission T = 1 − R
+
+steel→air : R ≈ 0.99996  → total reflection (cracks are air gaps!)
+steel→water: R ≈ 0.88    → 12% crosses — enough to work with</div>
+      <p class="body">Two consequences run the whole discipline. <strong>Cracks reflect almost everything</strong> — an air-filled discontinuity is a near-perfect mirror, which is why UT finds them. And <strong>you cannot couple through air</strong> — the probe needs gel, water or oil (couplant) to smuggle sound into the part; a dry probe on steel transmits ~0.004%.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Pulse-echo and the A-scan</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 270" xmlns="http://www.w3.org/2000/svg">
+          <rect x="40" y="60" width="240" height="150" rx="8" fill="#2b3650" stroke="#334155"/>
+          <text x="160" y="235" fill="#94a3b8" font-size="12" text-anchor="middle">test piece (thickness d)</text>
+          <rect x="120" y="34" width="80" height="26" rx="6" fill="#fb923c"/>
+          <text x="160" y="27" fill="#fdba74" font-size="12" font-weight="700" text-anchor="middle">probe (TX/RX)</text>
+          <rect x="120" y="60" width="80" height="5" fill="#38bdf8"/>
+          <path d="M 150 70 L 150 200" stroke="#fdba74" stroke-width="2.5" marker-end="url(#arr43)"/>
+          <path d="M 170 200 L 170 70" stroke="#7dd3fc" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#arr43b)"/>
+          <defs>
+            <marker id="arr43" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#fdba74"/></marker>
+            <marker id="arr43b" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#7dd3fc"/></marker>
+          </defs>
+          <circle cx="205" cy="140" r="9" fill="#f87171"/>
+          <text x="228" y="144" fill="#fca5a5" font-size="12">flaw</text>
+          <rect x="340" y="40" width="330" height="185" rx="12" fill="#11161f" stroke="#334155"/>
+          <text x="505" y="62" fill="#94a3b8" font-size="12" text-anchor="middle">A-SCAN — amplitude vs time</text>
+          <line x1="360" y1="200" x2="650" y2="200" stroke="#334155" stroke-width="2"/>
+          <path d="M 370 200 l 4 -120 l 5 120" fill="none" stroke="#fb923c" stroke-width="2.5"/>
+          <text x="374" y="72" fill="#fdba74" font-size="11" text-anchor="middle">initial pulse</text>
+          <path d="M 490 200 l 4 -70 l 5 70" fill="none" stroke="#f87171" stroke-width="2.5"/>
+          <text x="494" y="122" fill="#fca5a5" font-size="11" text-anchor="middle">flaw echo</text>
+          <path d="M 590 200 l 4 -100 l 5 100" fill="none" stroke="#7dd3fc" stroke-width="2.5"/>
+          <text x="594" y="92" fill="#7dd3fc" font-size="11" text-anchor="middle">back wall</text>
+          <path d="M 379 212 H 592" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr43)"/>
+          <text x="485" y="224" fill="#94a3b8" font-size="11" text-anchor="middle">t = 2d/v  (round trip!)</text>
+        </svg>
+        <div class="cap">Pulse-echo: one probe sends and listens. Time locates the reflector (d = v·t/2 — divide by two, the sound travels there AND back); amplitude sizes it; a flaw echo before the back wall means something is inside the metal.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 ============ -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 14 · Plant Ultrasound</span>
+    <h2 class="page-title">Airborne &amp; Structure-Borne Ultrasound</h2>
+    <p class="page-sub">Leaks, bearings, steam traps and arcing all shout at 40 kHz — you just need the translator.</p>
+
+    <div class="card">
+      <div class="label">How the instrument works</div>
+      <p class="lead">Turbulence, friction and electrical discharge all generate broadband ultrasound. The detector listens around <span class="hl">38–42 kHz</span> and <span class="hl2">heterodynes</span> (frequency-shifts) it down into the audible band — you literally hear the fault in headphones, with a dB(µV) level to log and trend.</p>
+      <p class="body">Ultrasound at 40 kHz has an 8.6 mm wavelength in air: it is <strong>highly directional and attenuates fast</strong>, so the loudest point IS the source — unlike audible noise, which floods the room. That directionality is the tool&#39;s superpower: sweep, follow the loudest bearing, valve or fitting, and you have localised the fault.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The four plant applications</div>
+      <div class="grid-2">
+        <div class="mini c-sky"><div class="big">💨</div><h4>Compressed air &amp; gas leaks</h4><p>Turbulent escape = broadband ultrasound. Survey under load, quantify per-leak cost (a 3 mm leak at 7 bar ≈ €3–5k/yr of compressor energy). The fastest-payback survey in industry.</p></div>
+        <div class="mini"><div class="big">⚙️</div><h4>Bearing early warning</h4><p>Friction &amp; impacting raise the ultrasonic floor 8 dB (alert) → 16 dB (lubricate/watch) → &gt;30 dB (failure) over the bearing&#39;s own baseline — the stage-1 detector before even the envelope spectrum (→ A42 p6).</p></div>
+        <div class="mini c-teal"><div class="big">♨️</div><h4>Steam traps &amp; valves</h4><p>A blowing trap hisses continuously in ultrasound; a good inverted-bucket cycles. Internal valve passing is audible downstream when ΔP exists — no disassembly.</p></div>
+        <div class="mini c-purp"><div class="big">⚡</div><h4>Electrical: corona · tracking · arcing</h4><p>Each has a sound signature (steady frying / erratic buzzing / violent popping). Detects through cabinet seams without opening — pairs with IR (→ A41 p6) which needs line-of-sight.</p></div>
+      </div>
+      <p class="body"><strong>Lube-by-ultrasound</strong> deserves its own line: grease while listening — friction dB drops as grease arrives, then rises again when over-greased (churning). It solves the classic "how many shots?" problem with feedback instead of a calendar guess, and over-greasing kills more small motors than under-greasing.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">🧪 Interactive — leak cost estimator</div>
+      <div class="demo">
+        <div class="demo-row"><span>Equivalent leak diameter</span><b><span id="lkdV">3.0</span> mm</b></div>
+        <input type="range" id="lkdR" min="0.5" max="10" step="0.5" value="3">
+        <div class="demo-row"><span>Line pressure</span><b><span id="lkpV">7.0</span> bar(g)</b></div>
+        <input type="range" id="lkpR" min="4" max="12" step="0.5" value="7">
+        <div class="demo-row"><span>Electricity price</span><b><span id="lkcV">0.20</span> €/kWh</b></div>
+        <input type="range" id="lkcR" min="0.08" max="0.40" step="0.01" value="0.20">
+        <div class="demo-out" id="lkOut"></div>
+      </div>
+      <p class="body">Model: choked orifice flow (discharge coeff 0.65), compressor specific power ~0.11 kWh/Nm³, 8760 h/yr. The point is not three decimal places — it is that <strong>a single fitting can out-cost the survey</strong>.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 ============ -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 14 · UT</span>
+    <h2 class="page-title">UT Thickness Gauging &amp; Flaw Detection</h2>
+    <p class="page-sub">The volumetric workhorse: corrosion mapping, weld inspection, and the modern phased-array upgrade.</p>
+
+    <div class="card">
+      <div class="label">Thickness gauging — corrosion&#39;s bookkeeper</div>
+      <div class="eqn"><b>d = v·t / 2</b>       (t = round-trip time; the ÷2 is the #1 exam trap)
+
+corrosion rate = (d_prev − d_now)/Δt      remaining life = (d_now − d_min)/rate</div>
+      <p class="body">Calibrate on a <strong>step wedge of the same material</strong> (velocity varies alloy to alloy), zero the probe delay, and log thickness at fixed, labelled grid points (TMLs — thickness monitoring locations). Piping and vessel integrity programmes (API 570/510) are essentially disciplined trend charts of d over years. Hot surfaces need high-temperature couplant and delay-line probes; velocity itself drifts ~1%/100 °C — correct or your "corrosion" is thermometry.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">🧪 Interactive — pulse-echo calculator</div>
+      <div class="demo">
+        <div class="seg" id="matSeg">
+          <button class="on" data-v="5900">Steel 5900</button>
+          <button data-v="6320">Alu 6320</button>
+          <button data-v="4700">Cast iron ~4700</button>
+          <button data-v="2730">Perspex 2730</button>
+        </div>
+        <div class="demo-row"><span>Measured round-trip time</span><b><span id="totV">6.78</span> µs</b></div>
+        <input type="range" id="totR" min="0.5" max="40" step="0.01" value="6.78">
+        <div class="demo-row"><span>Probe frequency</span><b><span id="pfV">5.0</span> MHz</b></div>
+        <input type="range" id="pfR" min="1" max="10" step="0.25" value="5">
+        <div class="demo-out" id="utOut"></div>
+      </div>
+      <p class="body">Defaults: 6.78 µs in steel → 20.0 mm. The wavelength line shows the ~λ/2 smallest-reflector rule shifting as you change frequency and material.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Flaw detection &amp; the modern methods</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Technique</th><th>Idea</th><th>Strength</th></tr>
+        <tr><td><b>Pulse-echo A-scan</b></td><td>Single probe, echoes on a timebase</td><td>Simple, portable, deep penetration</td></tr>
+        <tr><td><b>Angle-beam (shear)</b></td><td>Wedge refracts sound at 45/60/70° into welds</td><td>Weld root &amp; fusion-face defects; skip-distance geometry</td></tr>
+        <tr><td><b>TOFD</b></td><td>Two probes time the <i>diffracted</i> tip signals of a crack</td><td>Accurate crack <b>height</b> sizing — amplitude-independent</td></tr>
+        <tr><td><b>Phased array (PAUT)</b></td><td>Element array steers/focuses beams electronically</td><td>Sector images, recordable, replaces much radiography</td></tr>
+        <tr><td><b>Immersion UT</b></td><td>Water couples probe to part, scanned by gantry</td><td>Production scanning of billets, composites, discs</td></tr>
+        <tr><td><b>Guided wave</b></td><td>Low-f Lamb waves run tens of metres along pipe</td><td>Screening buried/insulated lines from one location</td></tr>
+      </table></div>
+      <p class="body"><strong>Sizing rules of thumb:</strong> reflectors are compared against reference notches/side-drilled holes (DAC curves) or computed DGS diagrams; a defect echo crossing the DAC at the code-specified level is reportable. Sizing by amplitude alone is unreliable below ~λ — which is exactly why TOFD&#39;s time-based sizing became the crack-height standard.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 ============ -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 14 · Tribology</span>
+    <h2 class="page-title">Oil Analysis I — The Lubricant as Witness</h2>
+    <p class="page-sub">Oil circulates everywhere, remembers everything. Sample it properly and it testifies.</p>
+
+    <div class="card">
+      <div class="label">Three questions, one sample</div>
+      <p class="lead">Every oil report answers: is the <span class="hl">lubricant</span> still fit for service? is the <span class="hl2">machine</span> shedding wear metal? is <span class="hl3">contamination</span> getting in? Fluid health, machine health, contamination — memorise the triad.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>Test</th><th>Measures</th><th>Flag means</th></tr>
+        <tr><td><b>Viscosity @40/100 °C</b></td><td>The lubricant&#39;s #1 property (ISO VG grade)</td><td>±10% from fresh: oxidation (up), shear/dilution (down)</td></tr>
+        <tr><td><b>TAN</b> (acid number)</td><td>Oxidation acids accumulating</td><td>Rising TAN → oil ageing; abrupt rise → overheating event</td></tr>
+        <tr><td><b>TBN</b> (base number, engines)</td><td>Alkaline reserve neutralising combustion acids</td><td>Falling toward TAN → drain interval reached</td></tr>
+        <tr><td><b>FTIR</b></td><td>Infrared fingerprint: oxidation, nitration, soot, additive bands</td><td>Chemistry-level confirmation of degradation mode</td></tr>
+        <tr><td><b>Karl Fischer water</b></td><td>Dissolved + free water in ppm</td><td>&gt;200–500 ppm in bearing oils: film damage, rust, additive hydrolysis</td></tr>
+        <tr><td><b>Particle count</b></td><td>Cleanliness → ISO 4406 code</td><td>Rising code: ingress or wear — see next page</td></tr>
+      </table></div>
+      <p class="body"><strong>Water is the quiet killer:</strong> at 0.1% free water, rolling-bearing fatigue life can fall by more than half (hydrogen embrittlement at the contact). Demulsibility, breathers and seals are lubrication engineering, not housekeeping.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">ISO 4406 cleanliness coding</div>
+      <div class="eqn">count particles per mL at &gt;4 µm / &gt;6 µm / &gt;14 µm
+each Range code = a DOUBLING band (code +1 ⇒ 2× the particles)
+
+example: 2500 · 640 · 80 per mL  →  <b>ISO 18/16/13</b>
+typical targets: servo valves 15/13/10 · hydraulics 17/15/12 ·
+                 gearboxes 19/17/14   (→ A13 Hydraulics)</div>
+      <p class="body">Because codes are log₂, <strong>dropping two codes = 4× cleaner oil</strong>, and filtration upgrades show up fast. Cleanliness is the cheapest life-extension available: halving the 4406 level of a hydraulic system routinely doubles component life (Noria/fluid-power life-extension tables).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Sampling — where programmes are won or lost</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Live zone, machine running, normal temperature</strong> — sample from turbulent flow (elbow upstream of filter, return line), never the drain plug sludge or the filter bowl.</div></li>
+        <li><span class="num">2</span><div><strong>Same point, same method, every time.</strong> Install sampling valves (minimess) — trend validity dies with wandering sample points, exactly like vibration points (A42 p3).</div></li>
+        <li><span class="num">3</span><div><strong>Flush the valve, use clean bottles,</strong> label with machine hours and oil hours — a perfect lab cannot rescue a dirty bottle.</div></li>
+        <li><span class="num">4</span><div><strong>Trend against the machine&#39;s own baseline;</strong> absolute limits are secondary. One sample is an opinion, five samples are a diagnosis.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 ============ -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 14 · Tribology</span>
+    <h2 class="page-title">Oil Analysis II — Wear-Debris Forensics</h2>
+    <p class="page-sub">The metal in the oil names the part that shed it — element by element, particle by particle.</p>
+
+    <div class="card">
+      <div class="label">Elemental spectroscopy — who is wearing?</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Element</th><th>Usual source</th><th>Partner clues</th></tr>
+        <tr><td><b>Fe</b></td><td>Gears, shafts, bearings, cylinders — the workhorse metal</td><td>With Cr: rings/rolling elements; with Mn: shafts</td></tr>
+        <tr><td><b>Cu</b></td><td>Bronze cages, bushings, thrust washers, oil-cooler cores</td><td>With Sn = bronze wear; with Zn steady = maybe cooler leach</td></tr>
+        <tr><td><b>Pb / Sn</b></td><td>Babbitt / white-metal journal bearing overlays</td><td>Rising Pb+Sn = plain-bearing distress (→ A19)</td></tr>
+        <tr><td><b>Al</b></td><td>Pistons, pumps housings, planetary carriers</td><td>With Si: piston scuffing from dirt ingress</td></tr>
+        <tr><td><b>Si</b></td><td><b>Dirt!</b> (silica) — or silicone sealant/antifoam</td><td>Si + Al + rising Fe = the classic dust-ingestion chain</td></tr>
+        <tr><td><b>Cr / Ni / Mo</b></td><td>Alloyed steels, rings, valves</td><td>Identify which alloyed component</td></tr>
+        <tr><td><b>Zn / P / Ca / Mg</b></td><td>Additives (ZDDP anti-wear, detergents) — not wear</td><td>FALLING additive elements = depletion, plan oil change</td></tr>
+      </table></div>
+      <p class="body"><strong>Limitation that matters:</strong> spectroscopy sees particles below roughly 5–8 µm only. Severe fatigue spalls shed LARGE particles — a machine can be destroying itself while elemental ppm stays calm. That gap is what ferrography and PQ close.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Ferrography &amp; particle shape</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg">
+          <g text-anchor="middle">
+            <rect x="35" y="30" width="150" height="130" rx="12" fill="#11161f" stroke="#334155"/>
+            <ellipse cx="110" cy="80" rx="34" ry="10" fill="#94a3b8" opacity="0.8"/>
+            <text x="110" y="145" fill="#e2e8f0" font-size="12.5" font-weight="700">rubbing platelets</text>
+            <text x="110" y="180" fill="#64748b" font-size="11">&lt;15 µm, thin — normal</text>
+            <rect x="200" y="30" width="150" height="130" rx="12" fill="#11161f" stroke="#334155"/>
+            <path d="M 240 95 q 12 -28 30 -18 q 22 8 12 26 q -14 20 -30 8 q -16 -8 -12 -16 z" fill="#fb923c" opacity="0.85"/>
+            <text x="275" y="145" fill="#fdba74" font-size="12.5" font-weight="700">fatigue chunks</text>
+            <text x="275" y="180" fill="#64748b" font-size="11">&gt;20 µm, 3-D — spalling!</text>
+            <rect x="365" y="30" width="150" height="130" rx="12" fill="#11161f" stroke="#334155"/>
+            <path d="M 395 100 c 15 -25 45 -25 65 -12 l -8 10 c -18 -10 -40 -8 -50 8 z" fill="#a78bfa" opacity="0.85"/>
+            <text x="440" y="145" fill="#c4b5fd" font-size="12.5" font-weight="700">cutting swarf</text>
+            <text x="440" y="180" fill="#64748b" font-size="11">curls — abrasive 3-body</text>
+            <rect x="530" y="30" width="135" height="130" rx="12" fill="#11161f" stroke="#334155"/>
+            <circle cx="580" cy="85" r="12" fill="#f87171" opacity="0.85"/>
+            <circle cx="612" cy="100" r="7" fill="#f87171" opacity="0.6"/>
+            <text x="597" y="145" fill="#fca5a5" font-size="12.5" font-weight="700">spheres</text>
+            <text x="597" y="180" fill="#64748b" font-size="11">rolling fatigue micro-melt</text>
+          </g>
+          <text x="350" y="225" fill="#94a3b8" font-size="12.5" text-anchor="middle">analytical ferrography: magnetically strung particles under the microscope — SHAPE tells the wear MODE, quantity tells severity</text>
+        </svg>
+        <div class="cap">Morphology is the diagnosis: platelets = benign rubbing; chunky 3-D particles = fatigue; curls = abrasion by hard contaminant; spheres = rolling-contact distress. PQ index (bulk ferrous mass) trends the total iron regardless of size — the counterweight to spectroscopy&#39;s size blindness.</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">ppm↑</div><h4>Rate, not level</h4><p>A jump in Fe generation rate per 100 h matters more than any absolute ppm — normalise for oil hours and top-ups.</p></div>
+      <div class="mini c-purp"><div class="big">PQ</div><h4>Large-particle guard</h4><p>PQ rising while Fe ppm is flat = big fatigue particles: spectroscopy&#39;s blind spot, ferrography&#39;s cue.</p></div>
+      <div class="mini c-sky"><div class="big">Si→Fe</div><h4>The ingestion chain</h4><p>Dust in (Si) → abrasive wear (Fe up 2–4 weeks later). Fix breathers/seals, not just the oil.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 7 ============ -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 14 · Surface NDT</span>
+    <h2 class="page-title">Penetrant &amp; Magnetic Particle Testing</h2>
+    <p class="page-sub">Two surface methods, one division of labour: PT for anything non-porous, MT for ferromagnetic — and MT sees just under the skin.</p>
+
+    <div class="card">
+      <div class="label">Dye penetrant (PT) — capillarity as a detector</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg">
+          <g text-anchor="middle" font-size="12">
+            <rect x="30" y="55" width="115" height="70" rx="10" fill="#232d3f" stroke="#334155"/>
+            <rect x="45" y="95" width="85" height="18" rx="3" fill="#64748b"/>
+            <path d="M 85 95 l 3 18" stroke="#0b0f14" stroke-width="2"/>
+            <text x="87" y="45" fill="#e2e8f0" font-weight="700">1 · CLEAN</text>
+            <text x="87" y="145" fill="#64748b" font-size="10.5">degrease — crack must be open &amp; empty</text>
+            <rect x="170" y="55" width="115" height="70" rx="10" fill="#232d3f" stroke="#334155"/>
+            <rect x="185" y="95" width="85" height="18" rx="3" fill="#64748b"/>
+            <rect x="185" y="88" width="85" height="8" fill="#f87171" opacity="0.8"/>
+            <path d="M 225 96 l 3 17" stroke="#f87171" stroke-width="2.5"/>
+            <text x="227" y="45" fill="#e2e8f0" font-weight="700">2 · PENETRANT</text>
+            <text x="227" y="145" fill="#64748b" font-size="10.5">dwell 10–30 min — capillary pull</text>
+            <rect x="310" y="55" width="115" height="70" rx="10" fill="#232d3f" stroke="#334155"/>
+            <rect x="325" y="95" width="85" height="18" rx="3" fill="#64748b"/>
+            <path d="M 365 96 l 3 17" stroke="#f87171" stroke-width="2.5"/>
+            <text x="367" y="45" fill="#e2e8f0" font-weight="700">3 · REMOVE EXCESS</text>
+            <text x="367" y="145" fill="#64748b" font-size="10.5">wipe — never flush the crack out</text>
+            <rect x="450" y="55" width="115" height="70" rx="10" fill="#232d3f" stroke="#334155"/>
+            <rect x="465" y="95" width="85" height="18" rx="3" fill="#e2e8f0"/>
+            <path d="M 505 96 l 3 17" stroke="#f87171" stroke-width="2.5"/>
+            <path d="M 500 92 q 8 -6 16 0 q -8 8 -16 0" fill="#f87171"/>
+            <text x="507" y="45" fill="#e2e8f0" font-weight="700">4 · DEVELOPER</text>
+            <text x="507" y="145" fill="#64748b" font-size="10.5">white blotter wicks dye back OUT — bleed-out magnifies the crack</text>
+            <rect x="590" y="55" width="80" height="70" rx="10" fill="#1a1033" stroke="#a78bfa"/>
+            <circle cx="630" cy="80" r="12" fill="#a78bfa" opacity="0.5"/>
+            <text x="630" y="45" fill="#c4b5fd" font-weight="700">5 · INSPECT</text>
+            <text x="630" y="145" fill="#64748b" font-size="10.5">visible or UV-A fluorescent</text>
+          </g>
+          <text x="350" y="190" fill="#94a3b8" font-size="12.5" text-anchor="middle">works on any non-porous material (steel, alu, plastics, ceramics) — but ONLY for defects open to the surface</text>
+        </svg>
+        <div class="cap">The five-step penetrant ritual. Sensitivity comes from the developer&#39;s bleed-out amplifying a sub-µm crack opening into a visible indication; fluorescent penetrant under UV-A in a darkened area is the high-sensitivity variant.</div>
+      </div>
+      <p class="body"><strong>Failure modes of the method itself:</strong> smeared metal from grinding closes cracks (etch first if needed); over-washing empties them; too-short dwell finds nothing. PT is cheap and portable — and merciless about process discipline.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Magnetic particle (MT) — flux leakage made visible</div>
+      <p class="lead">Magnetise a ferromagnetic part; a crack cutting the flux lines forces the field to <span class="hl">leak out of the surface</span>, and iron particles (dry powder or fluorescent ink) pile up on the leak — drawing the crack in real time.</p>
+      <div class="eqn">sensitivity rule: defect must CUT flux lines
+⇒ field ⊥ crack finds it · field ∥ crack is blind
+⇒ always magnetise in TWO directions (yoke turned 90°)
+
+detects: surface + slightly subsurface (~1–2 mm with DC)
+ferromagnetic only — no austenitic SS, no aluminium (use PT)</div>
+      <p class="body">Field methods: AC yoke for welds (surface-concentrated field), prods/coils for bulk parts, bench machines with head-shot + coil for two-axis coverage. <strong>Demagnetise afterwards</strong> — residual magnetism attracts swarf into bearings and deflects welding arcs downstream. MT beats PT on speed and on paint-tolerant detection (thin coatings), and it sees the just-subsurface defects PT can never reach.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">PT</div><h4>Any non-porous</h4><p>Surface-breaking only · 5 steps · dwell time is sacred.</p></div>
+      <div class="mini c-purp"><div class="big">MT</div><h4>Ferromagnetic</h4><p>Surface + ~1–2 mm deep · two directions · demagnetise after.</p></div>
+      <div class="mini c-sky"><div class="big">VT</div><h4>Always first</h4><p>A trained eye + borescope finds most gross defects free of charge before either method is unpacked.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 8 ============ -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 14 · Volumetric NDT</span>
+    <h2 class="page-title">Eddy Current &amp; Radiography</h2>
+    <p class="page-sub">Induction for surfaces and tubes; photons for the full volume — with a safety culture all its own.</p>
+
+    <div class="card">
+      <div class="label">Eddy current testing (ET)</div>
+      <p class="lead">A coil carrying AC induces <span class="hl">eddy currents</span> in any conductor; a crack interrupts their path, changing the coil&#39;s impedance. No couplant, no contact, instant response — the inspection happens at the speed the probe moves.</p>
+      <div class="eqn">standard depth of penetration (skin effect):
+<b>δ = 1/√(π·f·µ·σ)</b>    currents at depth δ are 37% of surface value
+
+high f → shallow &amp; sensitive · low f → deeper &amp; coarser
+applications: heat-exchanger tube surveys (bobbin probes),
+aerospace fastener holes, weld caps through paint, conductivity/alloy sorting</div>
+      <p class="body">ET&#39;s signature strength is <strong>tubing</strong>: a bobbin probe pulled through thousands of condenser tubes flags wall loss, pitting and cracks at metres per second, plotted on an impedance-plane display where phase angle ≈ defect depth. Limits: conductors only, depth limited by skin effect, and ferromagnetic tubes need magnetic saturation or remote-field probes.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Radiography (RT) — and its safety contract</div>
+      <p class="lead">X-rays or gamma (Ir-192, Se-75, Co-60) pass through the part onto film or a digital detector; <span class="hl">density differences reveal volume</span> — porosity, slag, lack of fusion, corrosion under insulation.</p>
+      <div class="eqn">attenuation: <b>I = I₀·e^(−µx)</b>     contrast comes from Δ(µx)
+image quality proven by IQI/penetrameter wire visibility
+inverse-square law: dose rate ∝ 1/r²  → distance is the cheapest shielding</div>
+      <p class="body">RT sees volumetric defects PT/MT miss and leaves a permanent image — but planar cracks aligned <em>across</em> the beam can vanish (orientation sensitivity, the mirror of MT&#39;s rule). Modern practice replaces much film with <strong>digital radiography</strong> and much RT altogether with <strong>PAUT/TOFD</strong> — no exclusion zones, instant results. Where gamma is used: controlled areas, dosimeters, collimators, and a licensed crew are non-negotiable — treat every source as live until proven stored.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Method selection — one table to rule them</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Method</th><th>Detects</th><th>Materials</th><th>Depth</th><th>Speed / cost</th></tr>
+        <tr><td><b>VT</b></td><td>Gross surface defects</td><td>All</td><td>Surface</td><td>Fastest, cheapest</td></tr>
+        <tr><td><b>PT</b></td><td>Surface-breaking cracks/porosity</td><td>Non-porous</td><td>Surface only</td><td>Cheap, slow (dwell)</td></tr>
+        <tr><td><b>MT</b></td><td>Surface + near-surface cracks</td><td>Ferromagnetic</td><td>~1–2 mm</td><td>Fast, cheap</td></tr>
+        <tr><td><b>ET</b></td><td>Surface cracks, wall loss, sorting</td><td>Conductors</td><td>Skin-limited (mm)</td><td>Very fast, probe-limited</td></tr>
+        <tr><td><b>UT / PAUT</b></td><td>Internal planar + thickness</td><td>Most (couplable)</td><td>Full volume</td><td>Skilled, recordable</td></tr>
+        <tr><td><b>RT</b></td><td>Internal volumetric</td><td>All</td><td>Full volume</td><td>Slow, safety overhead</td></tr>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 9 ============ -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 14 · Programme</span>
+    <h2 class="page-title">Designing the Combined Programme</h2>
+    <p class="page-sub">Technologies confirm each other. The programme is a matrix, not a favourite tool.</p>
+
+    <div class="card">
+      <div class="label">The technology matrix</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Machine class</th><th>Primary</th><th>Secondary</th><th>Confirming</th></tr>
+        <tr><td><b>Motors &amp; pumps</b></td><td>Vibration route (A42)</td><td>Ultrasound (bearings, lube)</td><td>IR on connections (A41), MCA</td></tr>
+        <tr><td><b>Gearboxes</b></td><td>Vibration + oil analysis</td><td>Ferrography on flag</td><td>Borescope / magnetic plugs</td></tr>
+        <tr><td><b>Hydraulics</b></td><td>Particle count (4406)</td><td>Oil chemistry</td><td>Thermography on valves (A13)</td></tr>
+        <tr><td><b>Compressors</b></td><td>Vibration + oil</td><td>Airborne US (valves, leaks)</td><td>Performance trending</td></tr>
+        <tr><td><b>Switchgear</b></td><td>IR survey (A41)</td><td>Airborne US (corona/tracking)</td><td>Contact resistance</td></tr>
+        <tr><td><b>Steam system</b></td><td>US trap survey</td><td>IR (traps, insulation)</td><td>Trap population stats</td></tr>
+        <tr><td><b>Static (vessels/piping)</b></td><td>UT thickness TMLs</td><td>PAUT/TOFD on welds</td><td>PT/MT at nozzles, RT spot</td></tr>
+      </table></div>
+      <p class="body"><strong>Cross-confirmation is the discipline:</strong> ultrasound flags a bearing → envelope spectrum names the race (A42 p6-7) → oil ferrography shows fatigue chunks → planned change-out, and the tear-down photo closes the loop and calibrates everyone&#39;s thresholds. One technology alarming alone is a question; two agreeing is a work order.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">People, intervals, economics</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Certify the humans:</strong> ISO 18436 (CM: vibration -2, lubricants -4/-5, thermography -7, ultrasound -8) and ISO 9712 / SNT-TC-1A Levels 1–3 for NDT. Reports signed at the right level are contractual currency.</div></li>
+        <li><span class="num">2</span><div><strong>Interval ≪ P-F interval:</strong> survey at ⅓–½ of the shortest credible P-F time so a fault cannot be born and die between visits. Criticality ranks who gets monthly vs quarterly.</div></li>
+        <li><span class="num">3</span><div><strong>Acceptance criteria come from codes, not opinions:</strong> ISO 5817 weld quality classes, API 570/510 remaining-life, ISO 4406 targets per component, ISO 20816 zones — cite the clause in every report.</div></li>
+        <li><span class="num">4</span><div><strong>Sell with avoided cost:</strong> each catch documented as (repair before) vs (failure after: downtime × rate + collateral). Three good case studies fund the programme for years — same logic as A22 OEE losses.</div></li>
+      </ul>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">⅓ P-F</div><h4>Interval rule</h4><p>Monitor faster than faults mature — criticality sets the cadence.</p></div>
+      <div class="mini c-sky"><div class="big">2 of N</div><h4>Confirm before acting</h4><p>Two independent technologies agreeing turn a reading into a work order.</p></div>
+      <div class="mini c-grn"><div class="big">€</div><h4>Close the loop</h4><p>Tear-down findings vs prediction — the only way thresholds ever improve.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 10 ============ -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 14 · Consolidate</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Quiz</h2>
+    <p class="page-sub">Eight ideas, six ways the inspection itself fails, six checks.</p>
+
+    <div class="card">
+      <div class="label">Eight ideas that carry the module</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Running vs static, surface vs volume</strong> — two questions select the method.</div></li>
+        <li><span class="num">2</span><div><strong>R = ((Z₂−Z₁)/(Z₂+Z₁))²</strong> — cracks mirror sound; air blocks it; couplant exists because of this one equation.</div></li>
+        <li><span class="num">3</span><div><strong>d = v·t/2</strong> — pulse-echo divides by two; calibrate velocity per material.</div></li>
+        <li><span class="num">4</span><div><strong>40 kHz airborne ultrasound is directional</strong> — the loudest point is the leak, the dry bearing, the arcing joint.</div></li>
+        <li><span class="num">5</span><div><strong>Oil answers three questions:</strong> fluid health (viscosity/TAN), machine health (wear metals), contamination (Si, water, 4406).</div></li>
+        <li><span class="num">6</span><div><strong>ISO 4406 codes are log₂</strong> — one code = 2×; cleanliness is the cheapest life extension.</div></li>
+        <li><span class="num">7</span><div><strong>MT/RT are orientation-sensitive; PT needs an open crack; ET obeys the skin effect</strong> — every method has a blind axis. Know it.</div></li>
+        <li><span class="num">8</span><div><strong>Two technologies agreeing = work order</strong> — the programme is a matrix with certified people and coded acceptance criteria.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Six ways the inspection lies</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">⚠️ Dry / cocked probe</div><p>No couplant or a rocked probe drops the back-wall echo — thin readings, phantom "corrosion". Watch echo quality, not just numbers.</p></div>
+        <div class="fail"><div class="ft">⚠️ Wrong velocity</div><p>Steel-calibrated gauge on stainless or alu misreads every thickness by the velocity ratio. Calibrate per material, correct for temperature.</p></div>
+        <div class="fail"><div class="ft">⚠️ Doubling error</div><p>A thin, corroded back wall can trigger on the 2nd multiple — reading DOUBLE the true thickness on the worst spot in the plant. Verify on the A-scan.</p></div>
+        <div class="fail"><div class="ft">⚠️ Smeared or washed cracks</div><p>Grinding smears metal over cracks before PT; over-washing empties them. Process discipline IS the sensitivity.</p></div>
+        <div class="fail"><div class="ft">⚠️ Single-direction MT</div><p>Field parallel to the crack = invisible defect. Two magnetisation directions or it did not happen.</p></div>
+        <div class="fail"><div class="ft">⚠️ Bottle-sample oil</div><p>Drain-plug sludge or wandering sample points destroy the trend — the lab faithfully analyses the wrong oil.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 1</div>
+      <p class="quiz-q">Why can a hairline crack invisible to X-ray be a near-perfect ultrasonic reflector?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">RT needs a density-path difference — a tight crack across the beam removes almost no material, so contrast ≈ 0. UT sees the <strong>impedance interface</strong>: steel→air reflects ~99.996% of energy regardless of gap width. Orientation completes the story: cracks normal to the X-ray beam vanish; cracks normal to the sound beam blaze.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 2</div>
+      <p class="quiz-q">A UT gauge shows 6.78 µs round trip in steel (5900 m/s). Wall thickness?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">d = v·t/2 = 5900 × 6.78×10⁻⁶ / 2 = <strong>20.0 mm</strong>. Forgetting the ÷2 gives 40 mm — the classic error that hides half your corrosion allowance.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 3</div>
+      <p class="quiz-q">Oil report: Fe rising, Si rising, Cu flat, PQ climbing, viscosity normal. Story?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Dirt ingestion driving abrasive wear:</strong> Si (silica) entered first, ferrous wear followed, and rising PQ says particles include large ones. Fluid itself is healthy — so fix the ingress (breather, seals), flush/filter, and re-baseline. An oil change alone treats the symptom.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 4</div>
+      <p class="quiz-q">Why must MT magnetise in two directions, and what is the matching rule in RT?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">MT only detects defects that <strong>cut flux lines</strong> — a crack parallel to the field leaks nothing, so the yoke is rotated 90° and the area re-tested. RT&#39;s mirror rule: a planar crack must be roughly <strong>aligned with the beam</strong> to image; across the beam it disappears. Every method has a blind orientation — procedures exist to rotate around it.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 5</div>
+      <p class="quiz-q">Bearing point reads +16 dB over its ultrasonic baseline; vibration velocity spectrum is still clean. Action?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">+16 dB ≈ lubrication-needed / early-stage threshold: <strong>grease while listening</strong> (stop when dB drops), log, and re-check within days. If the level will not come down with lubrication, treat as stage-1→2 bearing damage: pull an envelope spectrum (A42 p7) to hunt for BPFO/BPFI and start trending. Clean velocity spectrum is expected this early — that is exactly why ultrasound leads the P-F curve.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 6</div>
+      <p class="quiz-q">Hydraulic oil counts: 5000 /mL &gt;4 µm, 1200 /mL &gt;6 µm, 150 /mL &gt;14 µm. Assign the ISO 4406 code (ranges double per code; 1300–2500 = 18).</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">5000 falls in 2500–5000 → <strong>19</strong>; 1200 falls in 640–1300 → <strong>17</strong>; 150 falls in 80–160 → <strong>14</strong>. Code <strong>19/17/14</strong> — two codes above a 17/15/12 target, i.e. ~4× too dirty: upgrade filtration and hunt ingress before it becomes valve wear.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 11 ============ -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 / 14 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade numericals, solved step by step.</p>
+
+    <div class="card">
+      <div class="label">Worked Example 1 — Locating a flaw in a 20 mm wall</div>
+      <p class="body"><b>Given:</b> pulse-echo on steel (v = 5900 m/s). Back-wall echo at 6.78 µs; an intermediate echo at 4.20 µs. Find wall thickness, flaw depth, and remaining ligament.</p>
+      <div class="eqn">wall:  d = v·t/2 = 5900 × 6.78×10⁻⁶ / 2 = <b>20.0 mm</b>
+flaw:  d_f = 5900 × 4.20×10⁻⁶ / 2      = <b>12.4 mm</b> below the surface
+ligament to back wall = 20.0 − 12.4     = <b>7.6 mm</b></div>
+      <p class="body"><em>Discussion:</em> the A-scan tells position for free; what it does not tell honestly is <strong>size</strong>. The flaw echo&#39;s amplitude vs the DAC curve classifies it for the code, but a tight crack tilted away from the beam can return a whisper — which is why critical welds get angle-beam coverage from both sides plus TOFD for height sizing, not a single normal-beam pass.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 2 — Impedance chain: why immersion testing still works</div>
+      <p class="body"><b>Given:</b> Z_steel = 46.3, Z_water = 1.48 (×10⁶ Rayl). Compute R at the water/steel interface and the round-trip transmission for an immersion inspection (sound must cross twice).</p>
+      <div class="eqn">R = ((46.3 − 1.48)/(46.3 + 1.48))² = (44.82/47.78)² = <b>0.880</b>
+T = 1 − R = 0.120  per crossing
+
+round trip: T² = 0.120² = 0.0144 ≈ <b>1.4%</b> of energy
+in dB (energy): 10·log₁₀(0.0144) ≈ <b>−18.4 dB</b></div>
+      <p class="body"><em>Discussion:</em> only ~1.4% of the energy survives entering AND leaving the part — and immersion UT works superbly anyway, because receivers have &gt;100 dB of dynamic range. The same arithmetic with air (Z = 0.000415) gives T ≈ 4×10⁻⁵ per crossing, ~10⁻⁹ round-trip: unmeasurable. One equation separates "needs gel" from "physically hopeless".</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 3 — ISO 4406 coding and a filtration decision</div>
+      <p class="body"><b>Given:</b> hydraulic oil counts 2500 / 640 / 80 particles per mL at &gt;4/&gt;6/&gt;14 µm. Target for the servo-valve system is 15/13/10. Code the oil and size the gap.</p>
+      <div class="eqn">code bands double per step (…, 13: 40–80, 14: 80–160, 15: 160–320,
+16: 320–640, 17: 640–1300, 18: 1300–2500 …)
+
+2500 → code <b>18</b> · 640 → code <b>16</b> · 80 → code <b>13</b>   ⇒  ISO <b>18/16/13</b>
+gap to 15/13/10 = 3 codes at every size = 2³ = <b>8× too many particles</b></div>
+      <p class="body"><em>Discussion:</em> three codes is not a top-up problem — it is an architecture problem: add kidney-loop filtration (β₅ ≥ 200 element), fix breather and cylinder-rod ingress, then re-sample after 50 h of circulation. Component-life tables reward the effort: moving 18/16/13 → 15/13/10 typically better than doubles servo-valve and pump life — the cheapest "overhaul" in the plant (→ A13 Hydraulics).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 4 — Eddy-current skin depth</div>
+      <p class="body"><b>Given:</b> aluminium (σ = 3.5×10⁷ S/m, µ ≈ µ₀ = 4π×10⁻⁷ H/m) inspected at f = 100 kHz. Find the standard depth of penetration and comment on frequency choice.</p>
+      <div class="eqn">δ = 1/√(π·f·µ·σ)
+  = 1/√(π × 10⁵ × 4π×10⁻⁷ × 3.5×10⁷)
+  = 1/√(1.382×10⁷) = 1/3718 ≈ <b>0.27 mm</b>
+
+at 10 kHz:  δ ≈ 0.85 mm   (δ ∝ 1/√f)</div>
+      <p class="body"><em>Discussion:</em> at 100 kHz the test is a surface microscope — ideal for fatigue cracks at fastener holes; wall-loss surveys in tubing drop to tens of kHz to reach the far wall. Steel adds µ_r in the hundreds, collapsing δ to hundredths of a millimetre — hence magnetic saturation or remote-field techniques for ferromagnetic tubes. Frequency is the ET analyst&#39;s focus knob.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 ============ -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 / 14 · MSc Practice</span>
+    <h2 class="page-title">Problem Set — 10 Questions</h2>
+    <p class="page-sub">Work each one before revealing. The physics pages carry every answer.</p>
+
+    <div class="card quiz">
+      <div class="label">Problem 1</div>
+      <p class="quiz-q">Aluminium (6320 m/s), round-trip 9.5 µs. Thickness?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">d = 6320 × 9.5×10⁻⁶/2 = <strong>30.0 mm</strong>.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 2</div>
+      <p class="quiz-q">Wavelength and smallest-detectable-reflector estimate at 2.25 MHz in steel?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">λ = 5900/2.25×10⁶ = <strong>2.62 mm</strong>; λ/2 rule → reflectors down to ≈ <strong>1.3 mm</strong>. Choosing 5 MHz halves both — at the price of attenuation in coarse structures.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 3</div>
+      <p class="quiz-q">Compute R for steel (46.3) to perspex wedge (3.22 ×10⁶ Rayl). Why do angle probes still work well?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">R = ((46.3−3.22)/(46.3+3.22))² = (43.08/49.52)² ≈ <strong>0.76</strong> — only ~24% crosses. It works because probes drive plenty of energy, receivers are sensitive, and the wedge geometry converts the transmitted fraction into a well-defined refracted shear beam (Snell&#39;s law) — efficiency is traded for beam control.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 4</div>
+      <p class="quiz-q">Why does a UT probe read nothing on bare dry steel, and what fixes it?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">A microscopic air film separates probe and part: steel/air R ≈ 0.99996, so ~0.004% of energy crosses each way — nothing measurable returns. <strong>Couplant</strong> (gel/oil/water) replaces the air with a medium of workable impedance; on hot lines, high-temperature couplant or delay-line probes do the same job.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 5</div>
+      <p class="quiz-q">A filtration upgrade moves a system from ISO 19/17/14 to 17/15/12. By what factor did particle counts fall?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Two codes at every size = 2² = <strong>4× fewer particles</strong> at each threshold — typically worth roughly a doubling of hydraulic component life.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 6</div>
+      <p class="quiz-q">Oil report: viscosity +12%, TAN rising, Fe normal, Si normal. Diagnosis and action?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Oxidation</strong> — the fluid is ageing (heat, air, time): viscosity thickening + acid build-up with no wear or dirt signature. Check operating temperature and breather condition, plan an oil change (and address the heat source); FTIR oxidation band confirms. The machine is fine; the lubricant is dying.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 7</div>
+      <p class="quiz-q">ET at 400 kHz on aluminium: how does δ compare to the 100 kHz value of 0.27 mm?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">δ ∝ 1/√f → ×4 frequency = ÷2 depth: δ ≈ <strong>0.13 mm</strong>. Sharper surface sensitivity, blinder to depth — frequency is the focus knob.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 8</div>
+      <p class="quiz-q">A gamma source gives 400 µSv/h at 2 m. Dose rate at 10 m, and the lesson?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Inverse square: ×(2/10)² = ×1/25 → <strong>16 µSv/h</strong>. Distance is the cheapest shielding — barriers are set by calculation, then verified by survey meter, never assumed.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 9</div>
+      <p class="quiz-q">You must crack-test an austenitic stainless weld cap. MT is proposed. Comment.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Rejected: austenitic SS is <strong>non-ferromagnetic</strong> — MT cannot work. Use <strong>PT</strong> (fluorescent for sensitivity) for surface-breaking defects, or <strong>ET</strong> for through-paint scanning; UT/PAUT if subsurface coverage is also required.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 10</div>
+      <p class="quiz-q">Suspected lack of side-wall fusion mid-thickness in a 25 mm butt weld. Pick the method set and justify.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Planar, subsurface, unfavourably oriented for RT → <strong>angle-beam UT/PAUT from both sides</strong> (beam normal to the fusion face) with <strong>TOFD</strong> for height sizing. RT would likely miss it (crack across the beam); PT/MT cannot reach it. Method selection = defect type + orientation + depth, every time.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 ============ -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 / 14 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">Where R, δ and the 4406 code come from — and the unit traps that sink reports.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 — reflection at an interface</div>
+      <div class="eqn">boundary conditions: pressure and particle velocity continuous
+⇒ pressure reflection r = (Z₂−Z₁)/(Z₂+Z₁)      (amplitude, signed)
+⇒ energy reflection   R = r²                    (what tables quote)
+
+limits:  Z₂ ≫ Z₁ (steel behind water): r → +1, hard mirror
+         Z₂ ≪ Z₁ (air behind steel):  r → −1, PHASE-INVERTED mirror</div>
+      <p class="body"><em>Why it matters:</em> the sign explains why free-surface (back-wall) echoes flip phase while a slag inclusion (denser than a void) may not — a phase clue analysts use to tell crack-like from volumetric reflectors. And the r vs R distinction is a live exam trap: amplitude dB uses 20·log, energy dB uses 10·log.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 — skin depth</div>
+      <div class="eqn">Maxwell + Ohm in a conductor → diffusion equation for the field:
+∇²B = µσ·∂B/∂t     with B = B₀e^(jωt) ⇒ B(x) = B₀·e^(−x/δ)·e^(−jx/δ)
+
+<b>δ = √(2/(ω·µ·σ)) = 1/√(π·f·µ·σ)</b>
+currents at x = δ: 37% amplitude · at 3δ: 5% — effectively gone</div>
+      <p class="body"><em>Why it matters:</em> the same δ governs eddy-current NDT, induction heating, transformer lamination thickness (→ A32) and why litz wire exists — one derivation, four industries. For ET it also sets the <strong>phase-depth relationship</strong>: deeper defects lag ~57°/δ, which is exactly how impedance-plane displays size depth.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 — the log₂ logic of ISO 4406</div>
+      <div class="eqn">code C for count n (per mL):  choose C such that
+  n_upper(C) = 0.01 × 2^C        (each code doubles the band)
+e.g. C=13 → upper 80 · C=14 → 160 · C=18 → 2500
+
+⇒ ΔC = log₂(n₁/n₂)   two codes cleaner = ×4 fewer particles</div>
+      <p class="body"><em>Why it matters:</em> log coding matches how contamination behaves (multiplicative processes) and how life-extension tables are built — component life gains per code drop are roughly constant, so "two codes cleaner" is a meaningful engineering promise, not lab pedantry.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol glossary</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Symbol / term</th><th>Meaning</th><th>Unit</th></tr>
+        <tr><td class="mono">v, λ, f</td><td>Sound velocity, wavelength, frequency (λ = v/f)</td><td>m/s · mm · MHz</td></tr>
+        <tr><td class="mono">Z = ρv</td><td>Acoustic impedance</td><td>Rayl (kg·m⁻²·s⁻¹)</td></tr>
+        <tr><td class="mono">R, T</td><td>Energy reflection / transmission coefficients</td><td>—</td></tr>
+        <tr><td class="mono">d = v·t/2</td><td>Pulse-echo distance (round trip halved)</td><td>mm</td></tr>
+        <tr><td class="mono">DAC / DGS / IQI</td><td>Distance-amplitude curve / size diagram / image quality indicator</td><td>—</td></tr>
+        <tr><td class="mono">δ</td><td>Standard depth of penetration (skin depth)</td><td>mm</td></tr>
+        <tr><td class="mono">TAN / TBN</td><td>Total acid / base number</td><td>mg KOH/g</td></tr>
+        <tr><td class="mono">ISO 4406 x/y/z</td><td>Cleanliness codes at &gt;4/&gt;6/&gt;14 µm</td><td>—</td></tr>
+        <tr><td class="mono">PQ index</td><td>Bulk ferrous debris (size-independent)</td><td>—</td></tr>
+        <tr><td class="mono">dB(µV)</td><td>Ultrasound instrument level vs 1 µV reference</td><td>dB</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven exam &amp; field traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>The forgotten ÷2.</strong> Pulse-echo time is a round trip; d = v·t/2. Doubling a thickness reading destroys a remaining-life calculation.</div></li>
+        <li><span class="num">2</span><div><strong>One velocity per material (and temperature).</strong> Steel-calibrated on aluminium reads 7% high; 100 °C shifts steel ~1%. Calibrate, then trend.</div></li>
+        <li><span class="num">3</span><div><strong>20·log vs 10·log.</strong> Amplitude ratios use 20·log₁₀, energy uses 10·log₁₀ — mixing them doubles/halves every dB figure in the report.</div></li>
+        <li><span class="num">4</span><div><strong>Orientation blindness.</strong> MT misses cracks parallel to flux; RT misses cracks across the beam; UT misses planes parallel to the beam. State the covered orientations in the procedure.</div></li>
+        <li><span class="num">5</span><div><strong>Spectroscopy&#39;s size ceiling (~5–8 µm).</strong> Calm ppm with rising PQ = large-particle fatigue — the most expensive "green" report in oil analysis.</div></li>
+        <li><span class="num">6</span><div><strong>4406 codes are per mL at &gt;4/&gt;6/&gt;14 µm</strong> — quoting "/100 mL" legacy NAS-style numbers against 4406 targets misgrades cleanliness by orders of magnitude.</div></li>
+        <li><span class="num">7</span><div><strong>PT dwell and wash discipline.</strong> Short dwell or aggressive washing yields a clean report on a cracked part — process parameters are the sensitivity, log them.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 ============ -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 / 14 · MSc Practice</span>
+    <h2 class="page-title">Study &amp; Practice Path</h2>
+    <p class="page-sub">The canon, a hands-on ladder, and an honest self-check.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Resource</th><th>What it gives you</th><th>Level</th></tr>
+        <tr><td><b>Hellier</b> — <i>Handbook of Nondestructive Evaluation</i></td><td>All methods in one readable volume — the NDT survey text</td><td>Core</td></tr>
+        <tr><td><b>Krautkrämer &amp; Krautkrämer</b> — <i>Ultrasonic Testing of Materials</i></td><td>The UT bible: physics, probes, techniques, applications</td><td>MSc / reference</td></tr>
+        <tr><td><b>ASNT NDT Handbook series</b></td><td>Method-by-method depth (UT, ET, RT, MT/PT volumes)</td><td>Reference</td></tr>
+        <tr><td><b>ISO 9712 / SNT-TC-1A</b></td><td>Personnel qualification schemes — Level 1/2/3 syllabi</td><td>Certification</td></tr>
+        <tr><td><b>ISO 5817 · API 570/510</b></td><td>Weld acceptance classes; piping/vessel integrity &amp; remaining life</td><td>Codes</td></tr>
+        <tr><td><b>Fitch / Troyer (Noria)</b> — <i>Oil Analysis Basics</i></td><td>Sampling, tests, interpretation — the lubrication programme text</td><td>Core</td></tr>
+        <tr><td><b>ISO 4406 · ISO 18436-4/-5/-8</b></td><td>Cleanliness coding; lubricant-analyst &amp; ultrasound-analyst certification</td><td>Standards</td></tr>
+        <tr><td><b>UE Systems / SDT resources</b></td><td>Airborne-ultrasound application guides (leaks, traps, lube, electrical)</td><td>Practitioner</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder — eight exercises</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Impedance table drill.</strong> Compute Z and steel-interface R for water, perspex, alu, air from ρ and v — five minutes that cement page 2 forever.</div></li>
+        <li><span class="num">2</span><div><strong>Thickness ritual.</strong> With any UT gauge and a step wedge: zero, calibrate, then measure five plant points and log them as TMLs with date and temperature.</div></li>
+        <li><span class="num">3</span><div><strong>Leak walkdown.</strong> Borrow an ultrasonic gun for one compressed-air survey; tag ten leaks, cost them with the page-3 model, and hand the list to maintenance.</div></li>
+        <li><span class="num">4</span><div><strong>Sample like a professional.</strong> Fit one minimess valve, take three samples over a month with the full ritual, and read the lab reports against the triad (fluid/machine/contamination).</div></li>
+        <li><span class="num">5</span><div><strong>PT on scrap.</strong> Run the five-step penetrant process on a scrapped welded bracket — including one deliberately over-washed area to see sensitivity die.</div></li>
+        <li><span class="num">6</span><div><strong>Flux-leakage demo.</strong> Magnet under paper, iron filings, then a hacksaw cut in a steel strip: watch particles bridge the "defect". MT in one desk experiment.</div></li>
+        <li><span class="num">7</span><div><strong>Grease by ear.</strong> On one motor, grease while metering ultrasonic dB; log the drop-and-rise curve and set that bearing&#39;s lube interval from data.</div></li>
+        <li><span class="num">8</span><div><strong>Write the case study.</strong> Take one cross-confirmed catch (US + vibration, or oil + ferrography), document find→plan→teardown photos→avoided cost, one page.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment — can you…?</div>
+      <div class="grid-2">
+        <div class="mini"><div class="big">◔</div><h4>Recall</h4><p>Write d=vt/2, R=((Z₂−Z₁)/(Z₂+Z₁))², δ=1/√(πfµσ), the oil triad and three 4406 target codes from memory.</p></div>
+        <div class="mini c-sky"><div class="big">◑</div><h4>Apply</h4><p>Code a particle count, convert a µs reading to mm in any listed material, and cost a tagged air leak.</p></div>
+        <div class="mini c-purp"><div class="big">◕</div><h4>Diagnose</h4><p>Read an oil report&#39;s element pattern into a named wearing component, and pick the right NDT method for a stated defect/orientation/material.</p></div>
+        <div class="mini c-grn"><div class="big">●</div><h4>Design</h4><p>Draft the technology matrix for one plant area with intervals at ⅓ P-F, certified roles, and coded acceptance criteria.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="card memory">
+    <div class="label">Memory Hook</div>
+    <p class="quote">"Surface or volume, running or static — cracks mirror sound, dirt writes its name in silicon, and the loudest point is the leak."</p>
+  </div>
+
+  <div class="footer">
+    <p><strong>A43 · NDT, Ultrasound &amp; Oil Analysis — Advanced Deep Dive</strong></p>
+    <p>Companion modules: <a href="A42_Vibration_Analysis_Deep_Dive.html" style="color:var(--accent-soft)">A42 Vibration</a> · <a href="A41_Thermal_Imaging_Deep_Dive.html" style="color:var(--accent-soft)">A41 Thermal Imaging</a> · <a href="A19_Bearings_Deep_Dive.html" style="color:var(--accent-soft)">A19 Bearings</a> · <a href="A13_Hydraulic_Systems_Deep_Dive.html" style="color:var(--accent-soft)">A13 Hydraulics</a> · <a href="A23_TPM_Deep_Dive.html" style="color:var(--accent-soft)">A23 TPM</a></p>
+    <p>Micro Learning · Advanced Library · optimised for iPad Pro 11&Prime; · dark, high-contrast, keratoconus-friendly</p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // Leak cost estimator
+  var lkdR=document.getElementById('lkdR'), lkpR=document.getElementById('lkpR'), lkcR=document.getElementById('lkcR');
+  function leak(){
+    var d=+lkdR.value, p=+lkpR.value, c=+lkcR.value;
+    document.getElementById('lkdV').textContent=d.toFixed(1);
+    document.getElementById('lkpV').textContent=p.toFixed(1);
+    document.getElementById('lkcV').textContent=c.toFixed(2);
+    var A=Math.PI/4*Math.pow(d/1000,2);              // m²
+    var mdot=0.65*0.0404*(p+1)*1e5*A/Math.sqrt(293); // kg/s choked, Cd=0.65
+    var Qnh=mdot/1.204*3600;                          // Nm³/h free air
+    var kwh=Qnh*8760*0.11;                            // kWh/yr @0.11 kWh/Nm³
+    var cost=kwh*c;
+    document.getElementById('lkOut').innerHTML=
+      'free-air loss ≈ <b>'+Qnh.toFixed(1)+' Nm³/h</b> ('+(Qnh/3.6).toFixed(1)+' L/s)<br>'+
+      'compressor energy ≈ <b>'+Math.round(kwh).toLocaleString()+' kWh/yr</b><br>'+
+      'annual cost ≈ <b>€'+Math.round(cost).toLocaleString()+'</b> — from one fitting';
+  }
+  lkdR.addEventListener('input',leak); lkpR.addEventListener('input',leak); lkcR.addEventListener('input',leak); leak();
+
+  // UT pulse-echo calculator
+  var vUT=5900;
+  var matSeg=document.getElementById('matSeg'), totR=document.getElementById('totR'), pfR=document.getElementById('pfR');
+  matSeg.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    matSeg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); vUT=+b.dataset.v; ut();
+  });
+  function ut(){
+    var t=+totR.value, f=+pfR.value;
+    document.getElementById('totV').textContent=t.toFixed(2);
+    document.getElementById('pfV').textContent=f.toFixed(2);
+    var dmm=vUT*t*1e-6/2*1000;
+    var lam=vUT/(f*1e6)*1000;
+    document.getElementById('utOut').innerHTML=
+      'v = <b>'+vUT+' m/s</b><br>'+
+      'thickness d = v·t/2 = <b>'+dmm.toFixed(2)+' mm</b><br>'+
+      'λ = v/f = <b>'+lam.toFixed(2)+' mm</b> → smallest reflector ≈ λ/2 = <b>'+(lam/2).toFixed(2)+' mm</b>';
+  }
+  totR.addEventListener('input',ut); pfR.addEventListener('input',ut); ut();
+})();
+</script>
+</body>
+</html>

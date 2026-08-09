@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CNC Machining &amp; G-Code · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #60a5fa;       /* machinist steel blue */
+    --accent-soft: #93c5fd;
+    --accent-2: #fb923c;     /* orange */
+    --accent-3: #4ade80;     /* green */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(96,165,250,0.15), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(251,146,60,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(96,165,250,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(96,165,250,0.16), rgba(251,146,60,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(96,165,250,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #60a5fa, #2563eb); color: #061c38; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(6,28,56,0.75); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(96,165,250,0.12); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:110px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Manufacturing Technology · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🛠️</span>CNC Machining &amp; G-Code</h1>
+  <p class="hero-sub">From punched tape to 5-axis smart machining: how a CNC machine actually moves, the full grammar of G-code, speeds &amp; feeds with real cutting physics, tool life, chatter and stability lobes, CAM strategy, and the metrology that keeps microns honest.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>No micro card yet — a full advanced module. Related:</span>
+    <a href="A09_Servo_Motion_Deep_Dive.html">A09 Servo Motion →</a>
+    <a href="A21_GDT_Tolerances_Deep_Dive.html">A21 GD&amp;T →</a>
+    <a href="A27_Six_Sigma_DMAIC_Deep_Dive.html">A27 SPC →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · What Is CNC?</a>
+    <a href="#p2">2 · Coordinates &amp; Offsets</a>
+    <a href="#p3">3 · G-Code Grammar</a>
+    <a href="#p4">4 · Interpolation &amp; Motion</a>
+    <a href="#p5">5 · Speeds &amp; Feeds</a>
+    <a href="#p6">6 · Tooling &amp; Tool Life</a>
+    <a href="#p7">7 · Workholding &amp; Chatter</a>
+    <a href="#p8">8 · CAM &amp; Toolpaths</a>
+    <a href="#p9">9 · Accuracy &amp; Metrology</a>
+    <a href="#p10">10 · Recap, Faults &amp; Quiz</a>
+  </div>
+
+  <!-- ===== PAGE 1 ===== -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 10</span>
+    <h2 class="page-title">A Machine Tool With a Position Loop</h2>
+    <p class="page-sub">CNC is not "a robot that cuts metal". It is servo motion control (A09) wrapped around 200 years of cutting physics.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead"><span class="hl">Computer Numerical Control (CNC)</span> is the automatic control of machine-tool axes by a stored <span class="hl2">part program</span> — coded positions, feeds and machine functions — executed by a controller that closes a <span class="hl3">position loop</span> on every axis, typically to a resolution of 1&nbsp;µm or better.</p>
+      <p class="body">The idea is older than the computer: in 1949 <strong>John T. Parsons</strong>, making helicopter rotor blades, contracted the <strong>MIT Servomechanisms Laboratory</strong> to drive a milling machine from punched-card coordinate data. The first <strong>NC machine</strong> ran in 1952; the <strong>APT</strong> programming language followed in 1958, and when minicomputers replaced hard-wired logic in the 1970s, NC became <em>C</em>NC. Today a FANUC, Siemens SINUMERIK or Heidenhain control does the same job: read a block of text, plan a coordinated multi-axis move, and command the servo drives every millisecond or faster.</p>
+      <p class="body">What makes a machine tool different from any other motion system is the <strong>cutting process in the loop</strong>. The servo sees not just inertia but tool forces, vibration and heat — several kW concentrated at a cutting edge. Everything in this module is about managing that interaction: the program (pages 2–4), the physics (pages 5–7), the software chain (page 8) and the verification (page 9).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Anatomy of a vertical machining centre</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 350" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="m1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#60a5fa" stop-opacity="0.30"/><stop offset="1" stop-color="#60a5fa" stop-opacity="0.05"/></linearGradient>
+          <linearGradient id="m2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fb923c" stop-opacity="0.35"/><stop offset="1" stop-color="#fb923c" stop-opacity="0.06"/></linearGradient>
+          <linearGradient id="m3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity="0.30"/><stop offset="1" stop-color="#4ade80" stop-opacity="0.05"/></linearGradient>
+        </defs>
+        <!-- column -->
+        <rect x="470" y="30" width="120" height="270" rx="10" fill="url(#m1)" stroke="#60a5fa" stroke-width="1.6"/>
+        <text x="530" y="55" text-anchor="middle" fill="#93c5fd" font-size="12" font-weight="700">COLUMN</text>
+        <!-- spindle head -->
+        <rect x="380" y="70" width="95" height="90" rx="10" fill="url(#m2)" stroke="#fb923c" stroke-width="1.8"/>
+        <text x="427" y="95" text-anchor="middle" fill="#fb923c" font-size="11.5" font-weight="800">SPINDLE</text>
+        <text x="427" y="112" text-anchor="middle" fill="#94a3b8" font-size="10">BT40 · 12 000 rpm</text>
+        <text x="427" y="128" text-anchor="middle" fill="#94a3b8" font-size="10">Z-axis servo ↑↓</text>
+        <rect x="415" y="160" width="24" height="34" rx="4" fill="#11161f" stroke="#fb923c" stroke-width="1.4"/>
+        <path d="M 427 194 L 421 212 L 433 212 Z" fill="#fb923c"/>
+        <!-- workpiece + table -->
+        <rect x="330" y="228" width="60" height="24" rx="4" fill="url(#m3)" stroke="#4ade80" stroke-width="1.6"/>
+        <text x="360" y="222" text-anchor="middle" fill="#4ade80" font-size="10.5" font-weight="700">workpiece</text>
+        <rect x="180" y="252" width="290" height="22" rx="6" fill="url(#m1)" stroke="#60a5fa" stroke-width="1.6"/>
+        <text x="325" y="267" text-anchor="middle" fill="#93c5fd" font-size="10.5" font-weight="700">TABLE — X axis</text>
+        <rect x="200" y="278" width="250" height="20" rx="6" fill="#141a24" stroke="#334155" stroke-width="1.4"/>
+        <text x="325" y="292" text-anchor="middle" fill="#94a3b8" font-size="10.5">SADDLE — Y axis · ballscrews + linear guides</text>
+        <!-- ATC -->
+        <circle cx="120" cy="100" r="52" fill="#141a24" stroke="#c084fc" stroke-width="1.6"/>
+        <circle cx="120" cy="100" r="14" fill="#11161f" stroke="#c084fc" stroke-width="1.2"/>
+        <g fill="#c084fc"><circle cx="120" cy="60" r="7"/><circle cx="155" cy="80" r="7"/><circle cx="155" cy="120" r="7"/><circle cx="120" cy="140" r="7"/><circle cx="85" cy="120" r="7"/><circle cx="85" cy="80" r="7"/></g>
+        <text x="120" y="175" text-anchor="middle" fill="#c084fc" font-size="11" font-weight="700">ATC — tool carousel</text>
+        <!-- MCU -->
+        <rect x="620" y="90" width="115" height="150" rx="12" fill="#141a24" stroke="#2dd4bf" stroke-width="1.6"/>
+        <text x="677" y="115" text-anchor="middle" fill="#2dd4bf" font-size="11.5" font-weight="800">CNC CONTROL</text>
+        <rect x="635" y="128" width="85" height="52" rx="6" fill="#0b0f14" stroke="#334155"/>
+        <text x="677" y="150" text-anchor="middle" fill="#93c5fd" font-size="9" font-family="monospace">N10 G54 G90</text>
+        <text x="677" y="164" text-anchor="middle" fill="#93c5fd" font-size="9" font-family="monospace">N20 G01 X50.</text>
+        <text x="677" y="200" text-anchor="middle" fill="#94a3b8" font-size="9.5">interpolator +</text>
+        <text x="677" y="214" text-anchor="middle" fill="#94a3b8" font-size="9.5">servo drives (A09)</text>
+        <path d="M 620 165 H 595" stroke="#2dd4bf" stroke-width="2" stroke-dasharray="5 4"/>
+        <!-- axis triad -->
+        <g transform="translate(240,120)">
+          <path d="M 0 60 V 0" stroke="#4ade80" stroke-width="3"/><text x="8" y="10" fill="#4ade80" font-size="12" font-weight="800">+Z</text>
+          <path d="M 0 60 H 70" stroke="#fb923c" stroke-width="3"/><text x="74" y="64" fill="#fb923c" font-size="12" font-weight="800">+X</text>
+          <path d="M 0 60 L -34 88" stroke="#60a5fa" stroke-width="3"/><text x="-56" y="98" fill="#60a5fa" font-size="12" font-weight="800">+Y</text>
+        </g>
+        <text x="380" y="335" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">Three orthogonal servo axes, a tool magazine and a controller — every CNC machine is a variation on this loop.</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">The machine family</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Machine</th><th>Axes</th><th>Signature strength</th><th>Typical work</th></tr>
+        <tr><td><b>VMC</b> (vertical)</td><td>X Y Z</td><td>Versatile, easy setup &amp; viewing</td><td>Moulds, plates, prototypes</td></tr>
+        <tr><td><b>HMC</b> (horizontal)</td><td>X Y Z + B pallet</td><td>Chips fall away; pallet pools for lights-out</td><td>Production housings, 4-side work</td></tr>
+        <tr><td><b>Turning centre</b></td><td>X Z (+C, Y, live tools)</td><td>Round parts at high MRR</td><td>Shafts, bushings, flanges</td></tr>
+        <tr><td><b>5-axis</b></td><td>X Y Z + 2 rotary</td><td>One setup, complex geometry, short tools</td><td>Impellers, implants, aerospace</td></tr>
+        <tr><td><b>Swiss-type</b></td><td>Sliding headstock</td><td>Long thin parts, guide bushing support</td><td>Medical &amp; watch components</td></tr>
+        <tr><td><b>Wire / sinker EDM</b></td><td>X Y U V</td><td>Cuts hardened steel, zero cutting force</td><td>Dies, punches, carbide</td></tr>
+      </table></div>
+      <p class="body">Whatever the geometry, the control principle is identical: the interpolator plans a path, each axis closes a <strong>position → velocity → current</strong> cascade (exactly the structure of A09), and feedback comes from motor encoders or glass scales. Semi-closed loop (encoder on the motor) trusts the ballscrew; full-closed loop (linear scale on the axis) measures the table itself and removes screw pitch error and thermal growth from the equation.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Key numbers</div>
+      <div class="grid-3">
+        <div class="mini"><h4>First NC machine</h4><p class="big">1952</p><p>MIT + Parsons — punched tape, three axes</p></div>
+        <div class="mini c-org"><h4>Positioning accuracy</h4><p class="big">±5 µm</p><p>typical modern VMC over full travel</p></div>
+        <div class="mini c-grn"><h4>Control resolution</h4><p class="big">0.1–1 µm</p><p>command units on current controls</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 2 ===== -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 10</span>
+    <h2 class="page-title">Coordinates, Offsets &amp; the Chain of Zeros</h2>
+    <p class="page-sub">Every crash and every scrapped part traces back to one question: where does the control THINK the tool tip is?</p>
+
+    <div class="card">
+      <div class="label">Axis convention — ISO 841</div>
+      <p class="lead">The <span class="hl">Z axis is always the spindle axis</span>, positive direction <span class="hl2">away from the workpiece</span>. X is the longest travel perpendicular to Z, and Y completes a <span class="hl3">right-handed</span> set. Rotary axes A, B, C rotate about X, Y, Z respectively.</p>
+      <p class="body">Program motion is described as <strong>tool motion relative to the part</strong>, even when physically the table moves — the control inverts signs internally. That convention is what lets the same G-code logic run a VMC, an HMC and a gantry mill. <strong>G90</strong> makes coordinates absolute (positions in the active work system); <strong>G91</strong> makes them incremental (distances from the current point). <strong>G21</strong> selects millimetres, <strong>G20</strong> inches — a wrong units line multiplies every move by 25.4, which is why the safety block on page 3 always states it explicitly.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">From machine home to tool tip — the offset stack</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="a2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#93c5fd"/></marker>
+        </defs>
+        <rect x="20" y="30" width="720" height="240" rx="14" fill="#11161f" stroke="#334155"/>
+        <!-- machine zero -->
+        <circle cx="90" cy="70" r="10" fill="#f87171"/>
+        <text x="110" y="66" fill="#fca5a5" font-size="12.5" font-weight="700">MACHINE ZERO (home, G53)</text>
+        <text x="110" y="83" fill="#94a3b8" font-size="10.5">set by homing switches + encoder index — fixed in iron</text>
+        <!-- work offset arrow -->
+        <path d="M 95 80 Q 160 170 255 196" stroke="#93c5fd" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+        <text x="130" y="150" fill="#93c5fd" font-size="11.5" font-weight="700" transform="rotate(28 130 150)">work offset G54–G59</text>
+        <!-- part -->
+        <rect x="255" y="185" width="180" height="52" rx="6" fill="rgba(74,222,128,0.15)" stroke="#4ade80" stroke-width="1.8"/>
+        <circle cx="262" cy="192" r="7" fill="#4ade80"/>
+        <text x="278" y="197" fill="#4ade80" font-size="11.5" font-weight="700">PROGRAM ZERO (X0 Y0 Z0)</text>
+        <text x="345" y="225" text-anchor="middle" fill="#94a3b8" font-size="10.5">workpiece — datum corner found by probe or edge finder</text>
+        <!-- tool -->
+        <rect x="520" y="60" width="26" height="70" rx="4" fill="rgba(251,146,60,0.2)" stroke="#fb923c" stroke-width="1.6"/>
+        <path d="M 533 130 L 526 150 L 540 150 Z" fill="#fb923c"/>
+        <text x="560" y="80" fill="#fb923c" font-size="12" font-weight="700">tool in spindle</text>
+        <text x="560" y="97" fill="#94a3b8" font-size="10.5">length H## measured on</text>
+        <text x="560" y="111" fill="#94a3b8" font-size="10.5">presetter or tool setter</text>
+        <path d="M 533 155 V 190" stroke="#fb923c" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#a2)"/>
+        <text x="545" y="178" fill="#fb923c" font-size="11" font-weight="700">G43 H# — tool length</text>
+        <!-- G52 note -->
+        <rect x="470" y="205" width="255" height="46" rx="8" fill="#141a24" stroke="#334155"/>
+        <text x="597" y="224" text-anchor="middle" fill="#93c5fd" font-size="10.5" font-weight="700">G52 local shift · G54.1 P1–48 extended offsets</text>
+        <text x="597" y="240" text-anchor="middle" fill="#94a3b8" font-size="10">for multi-part fixtures and pallet pools</text>
+        <text x="380" y="288" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">Position of tool tip = machine zero + work offset + programmed point + tool length. Get ONE wrong and the part (or the vise) pays.</text>
+      </svg>
+      </div>
+      <div class="eqn">tool-tip position = <b>machine zero</b> + <span class="v3">work offset (G54)</span> + programmed X·Y·Z + <span class="v2">tool length H (G43)</span>
+wrong sign on H  →  tool tries to reach Z0 <b>through</b> the table — the classic crash</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Five-axis kinematics &amp; TCP</div>
+      <div class="grid-3">
+        <div class="mini"><h4>Table–table</h4><p>Trunnion A + rotary C under the part. Stiff, compact; part size limited. Most common on VMC-derived 5-axis.</p></div>
+        <div class="mini c-org"><h4>Head–head</h4><p>Both rotations on the spindle head. Huge parts stay still (gantries, aerospace skins); head is heavy and less stiff.</p></div>
+        <div class="mini c-grn"><h4>Head–table</h4><p>B on the head, C in the table — the lathe-mill hybrid layout. Flexible for mill-turn work.</p></div>
+      </div>
+      <p class="body"><strong>TCP — Tool Centre Point control</strong> (FANUC G43.4, Siemens TRAORI) is what makes simultaneous 5-axis usable: when a rotary axis moves, the control automatically translates the linear axes so the <em>tool tip stays put</em> on the programmed path. Without TCP the post-processor must bake the machine's exact pivot distances into every program — with it, the same program runs after a tool change of different length. The work datum itself is found by <strong>probing</strong>, and the logic of choosing datum features is exactly the 3-2-1 / datum-reference-frame discipline of A21.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 3 ===== -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 10</span>
+    <h2 class="page-title">The Grammar of G-Code</h2>
+    <p class="page-sub">A 60-year-old language (ISO 6983) that still runs almost every machine tool on Earth — because it is small, modal and merciless.</p>
+
+    <div class="card">
+      <div class="label">Blocks, words &amp; modality</div>
+      <p class="lead">A program is a list of <span class="hl">blocks</span> (lines). Each block holds <span class="hl2">words</span> — a letter address plus a value: <span class="mono">G01 X50. Y-12.5 F800</span>. Most G-codes are <span class="hl3">modal</span>: they stay active until another code from the same group replaces them.</p>
+      <p class="body">Modality is the language's power and its danger. After one <span class="mono">G01 F200</span>, every following coordinate line cuts at 200&nbsp;mm/min — no need to repeat it. But it also means a block inherits <em>everything you didn't say</em>: the active work offset, plane, units, feed mode. That is why professional programs begin with a <strong>safety block</strong> that forces every modal group to a known state, and why restarting a program mid-way requires re-establishing modality first.</p>
+      <div class="eqn"><span class="v3">(SAFETY / SETUP)</span>
+G21 G17 G40 G49 G80 G90     <span class="v3">(mm · XY plane · comp off · TLO off · cycles off · absolute)</span>
+T1 M06                      <span class="v3">(load tool 1)</span>
+G54 G00 X-15. Y-15.         <span class="v3">(work offset · rapid to approach point)</span>
+S8000 M03                   <span class="v3">(spindle 8000 rpm clockwise)</span>
+G43 H1 Z50. M08             <span class="v3">(tool length offset 1 · safe Z · coolant on)</span>
+G01 Z-3. F300               <span class="v3">(feed down to depth)</span>
+G41 D1 X0. F800             <span class="v3">(radius comp LEFT, approach ≥ tool radius)</span>
+X100. · Y60. · X0. · Y0.    <span class="v3">(profile the pocket walls)</span>
+G40 X-15.                   <span class="v3">(comp off on the way out)</span>
+G00 Z50. M09 · M05 · M30    <span class="v3">(retract · coolant/spindle off · end &amp; rewind)</span></div>
+    </div>
+
+    <div class="card">
+      <div class="label">The vocabulary that matters</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Code</th><th>Group</th><th>Meaning</th><th>Field note</th></tr>
+        <tr><td class="mono"><b>G00 / G01</b></td><td>motion</td><td>Rapid / linear feed</td><td>G00 path is NOT guaranteed straight on all controls</td></tr>
+        <tr><td class="mono"><b>G02 / G03</b></td><td>motion</td><td>Arc CW / CCW</td><td>centre via I J K (incremental) or R; full circles need IJK</td></tr>
+        <tr><td class="mono"><b>G17/18/19</b></td><td>plane</td><td>XY / XZ / YZ plane</td><td>decides arc plane and comp plane</td></tr>
+        <tr><td class="mono"><b>G40/41/42</b></td><td>comp</td><td>Radius comp off / left / right</td><td>lead-in move must exceed tool radius</td></tr>
+        <tr><td class="mono"><b>G43 H#</b></td><td>TLO</td><td>Tool length offset</td><td>always with a safe Z move; G49 cancels</td></tr>
+        <tr><td class="mono"><b>G54–G59</b></td><td>WCS</td><td>Work offsets</td><td>G54.1 P1–P48 extends for pallets/fixtures</td></tr>
+        <tr><td class="mono"><b>G81–G89</b></td><td>canned</td><td>Drill / peck / bore / tap cycles</td><td>G98/G99 choose retract plane; G80 cancels</td></tr>
+        <tr><td class="mono"><b>M03/04/05</b></td><td>M</td><td>Spindle CW / CCW / stop</td><td>M04 for left-hand tools &amp; rigid tap retract</td></tr>
+        <tr><td class="mono"><b>M06 · M08/09</b></td><td>M</td><td>Tool change · coolant on/off</td><td>—</td></tr>
+        <tr><td class="mono"><b>M30</b></td><td>M</td><td>Program end + rewind</td><td>M99 for subprogram return / loops</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Cutter compensation — why D offsets exist</div>
+      <p class="body">You program the <strong>part contour</strong>, not the tool-centre path. <span class="mono">G41/G42</span> shifts the path by the radius stored in the <strong>D register</strong>, so the same program cuts correctly with a nominally 10&nbsp;mm end mill that actually measures 9.96&nbsp;mm after regrind — the operator edits the offset, not the code. The pair <strong>geometry + wear</strong> offsets lets you dial a wall to tolerance in microns: measure the part, put the error in wear, re-run. On lathes the equivalent battle is <strong>tool-nose radius comp</strong>, without which every taper and radius is cut wrong by up to the nose radius.</p>
+      <p class="body"><strong>Dialects:</strong> FANUC-style ISO code dominates; Siemens SINUMERIK adds high-level cycles (<span class="mono">CYCLE81</span>) and real variables; Heidenhain offers conversational programming. Macro B (FANUC) gives variables <span class="mono">#100</span>, arithmetic and logic — enough to write parametric families of parts and probing routines. ISO&nbsp;14649 (<strong>STEP-NC</strong>) — feature-based, tolerance-aware programs — remains the perpetual "next step", tying into the digital-thread vision of A33.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 4 ===== -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 10</span>
+    <h2 class="page-title">Interpolation — Turning Text Into Coordinated Motion</h2>
+    <p class="page-sub">The interpolator is the metronome: every millisecond it hands each servo axis its next micro-target.</p>
+
+    <div class="card">
+      <div class="label">Linear &amp; circular interpolation</div>
+      <p class="lead">In <span class="hl">G01</span>, all axes start and finish together: each axis velocity is scaled so the <span class="hl2">vector feed</span> along the path equals F. In <span class="hl">G02/G03</span> the control solves the arc in the active plane from the centre offsets I, J (or radius R).</p>
+      <div class="eqn">path length  L = √(Δx² + Δy² + Δz²)
+axis feeds   V<b>x</b> = F·Δx/L    V<b>y</b> = F·Δy/L    V<b>z</b> = F·Δz/L
+arc centre   (x<b>c</b>, y<b>c</b>) = (x₀+I, y₀+J)      <span class="v2">I, J measured FROM start point</span></div>
+      <p class="body">CAM systems approximate free-form surfaces with thousands of tiny <strong>line segments</strong>. The geometric price is <strong>chord error</strong> — the sag between the true curve and its chord — and the computational price is <strong>block-processing load</strong>: every segment is a block the control must read, plan and execute.</p>
+      <div class="eqn">chord error  e ≈ <b>l² / 8R</b>      (segment l on radius R)
+block rate   = feed / (60 · l)   blocks per second
+if block rate &gt; control capacity → <span class="v2">data starving: axes pause each block, feed collapses, finish shows facets</span></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — segment length vs feed vs control</div>
+      <div class="demo">
+        <div class="demo-row"><span>Programmed feed</span><b><span id="ipFeedVal">3000</span> mm/min</b></div>
+        <input type="range" id="ipFeed" min="500" max="12000" step="100" value="3000">
+        <div class="demo-row"><span>CAM segment length</span><b><span id="ipSegVal">0.20</span> mm</b></div>
+        <input type="range" id="ipSeg" min="0.02" max="2" step="0.01" value="0.2">
+        <div class="demo-row"><span>Surface radius being approximated</span><b><span id="ipRadVal">10</span> mm</b></div>
+        <input type="range" id="ipRad" min="2" max="100" step="1" value="10">
+        <div class="demo-row"><span>Control block time</span><b><span id="ipBtVal">1.0</span> ms/block</b></div>
+        <input type="range" id="ipBt" min="0.2" max="8" step="0.1" value="1.0">
+        <div class="demo-out" id="ipOut"></div>
+      </div>
+      <p class="cap">The eternal CAM trade-off: shorter segments give better geometry but can outrun the control. High-end controls fit smooth splines through the points (nano-smoothing) to escape the dilemma.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Look-ahead, jerk &amp; following error</div>
+      <p class="body"><strong>Look-ahead</strong> lets the control read tens to thousands of blocks ahead and plan velocity like a rally driver reading pace notes: brake <em>before</em> the corner. Without it, a sharp direction change at full feed would demand infinite acceleration — the control would either overshoot (gouging the corner) or halt at every vertex. Modern planners use <strong>jerk-limited S-curve profiles</strong> (the same profiles as A09, page 6) so acceleration itself ramps smoothly — that is what keeps a mould surface free of vibration marks.</p>
+      <p class="body">Each servo axis still tracks with a small lag. For a classic proportional position loop the <strong>following error</strong> is <span class="mono">e = V / K<sub>v</sub></span> — at 10&nbsp;m/min with K<sub>v</sub>=16.7&nbsp;s⁻¹ that is a full 10&nbsp;µm. Matched K<sub>v</sub> across axes keeps the <em>path</em> true even while each axis lags; feed-forward (A10's same trick) cancels most of the rest. Mismatched axis tuning shows up instantly as ovality on a ballbar plot (page 9).</p>
+      <div class="grid-3">
+        <div class="mini"><h4>Look-ahead depth</h4><p class="big">40–1000+</p><p>blocks planned in advance</p></div>
+        <div class="mini c-org"><h4>Interpolation cycle</h4><p class="big">0.5–4 ms</p><p>new axis targets per cycle</p></div>
+        <div class="mini c-grn"><h4>Following error</h4><p class="big">V / K<sub>v</sub></p><p>lag ∝ speed; cancelled by feed-forward</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 5 ===== -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 10</span>
+    <h2 class="page-title">Speeds &amp; Feeds — The Actual Physics of Cutting</h2>
+    <p class="page-sub">Four numbers rule every cut: surface speed, chip load, radial and axial engagement. Everything else is derived.</p>
+
+    <div class="card">
+      <div class="label">The core equations</div>
+      <div class="eqn">cutting speed   V<b>c</b> = π·D·N / 1000        [m/min]   → N = 1000·V<b>c</b> / (π·D)
+table feed      V<b>f</b> = N · z · f<b>z</b>            [mm/min]  (z teeth, f<b>z</b> chip per tooth)
+removal rate    MRR = a<b>e</b> · a<b>p</b> · V<b>f</b> / 1000   [cm³/min] (a<b>e</b> radial, a<b>p</b> axial, mm)
+cutting power   P ≈ MRR · k<b>c</b> / 60 000        [kW]      (k<b>c</b> = specific cutting force, N/mm²)</div>
+      <p class="body"><strong>V<sub>c</sub> is a property of the tool–material pair</strong> (carbide on aluminium runs ~10× faster than on titanium); <strong>f<sub>z</sub> is a property of the edge</strong> — too low and the edge rubs instead of cutting, work-hardening the surface and burning the corner; too high and it chips. The classic beginner error is slowing <em>everything</em> down when chatter appears: halving f<sub>z</sub> below the edge radius makes rubbing worse. Diagnose first (page 7).</p>
+      <p class="body"><strong>Chip thinning:</strong> when radial engagement a<sub>e</sub> &lt; 50% of diameter, the average chip is thinner than f<sub>z</sub>. Compensate: <span class="mono">f<sub>z,eff</sub> = f<sub>z</sub> · D / (2·√(a<sub>e</sub>(D−a<sub>e</sub>)))</span> — the basis of high-efficiency milling on page 8, where tiny a<sub>e</sub> permits shockingly high feeds.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Climb vs conventional</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+        <g>
+          <text x="190" y="30" text-anchor="middle" fill="#4ade80" font-size="13.5" font-weight="800">CLIMB (down) milling</text>
+          <circle cx="190" cy="110" r="55" fill="rgba(96,165,250,0.12)" stroke="#60a5fa" stroke-width="2"/>
+          <path d="M 190 55 A 55 55 0 0 1 245 110" stroke="#4ade80" stroke-width="4" fill="none"/>
+          <path d="M 243 100 L 247 112 L 235 110 Z" fill="#4ade80"/>
+          <rect x="120" y="165" width="220" height="30" fill="rgba(148,163,184,0.15)" stroke="#94a3b8"/>
+          <path d="M 250 128 Q 235 160 205 166" stroke="#4ade80" stroke-width="3" fill="none"/>
+          <text x="190" y="215" text-anchor="middle" fill="#94a3b8" font-size="11">chip starts THICK → ends thin</text>
+          <text x="190" y="232" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">less rubbing · better finish · forces push down</text>
+          <path d="M 120 150 H 90" stroke="#93c5fd" stroke-width="2.5" marker-end="url(#a2)"/>
+          <text x="82" y="138" text-anchor="end" fill="#93c5fd" font-size="11" font-weight="700">feed</text>
+        </g>
+        <line x1="380" y1="30" x2="380" y2="230" stroke="#334155" stroke-dasharray="6 5"/>
+        <g>
+          <text x="570" y="30" text-anchor="middle" fill="#fb923c" font-size="13.5" font-weight="800">CONVENTIONAL (up) milling</text>
+          <circle cx="570" cy="110" r="55" fill="rgba(96,165,250,0.12)" stroke="#60a5fa" stroke-width="2"/>
+          <path d="M 515 110 A 55 55 0 0 1 570 55" stroke="#fb923c" stroke-width="4" fill="none"/>
+          <path d="M 562 53 L 574 50 L 570 63 Z" fill="#fb923c"/>
+          <rect x="500" y="165" width="220" height="30" fill="rgba(148,163,184,0.15)" stroke="#94a3b8"/>
+          <path d="M 520 165 Q 528 135 512 122" stroke="#fb923c" stroke-width="3" fill="none"/>
+          <text x="570" y="215" text-anchor="middle" fill="#94a3b8" font-size="11">chip starts at ZERO → rubs before it bites</text>
+          <text x="570" y="232" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">work-hardens surface · lifts part · use when backlash exists</text>
+          <path d="M 720 150 H 745" stroke="#93c5fd" stroke-width="2.5" marker-end="url(#a2)"/>
+          <text x="738" y="138" text-anchor="end" fill="#93c5fd" font-size="11" font-weight="700">feed</text>
+        </g>
+      </svg>
+      </div>
+      <p class="cap">Climb milling pulls the table INTO the cut — safe only because ballscrews are preloaded backlash-free. On a worn Bridgeport with 0.2 mm backlash, climb cutting snatches the table and breaks tools.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — speeds &amp; feeds calculator (carbide end mill)</div>
+      <div class="demo">
+        <div class="seg" id="matSeg">
+          <button data-vc="300" data-kc="800" class="on">Aluminium 6061</button>
+          <button data-vc="180" data-kc="2200">Mild steel</button>
+          <button data-vc="100" data-kc="2800">Stainless 316</button>
+          <button data-vc="45"  data-kc="3000">Ti-6Al-4V</button>
+        </div>
+        <div class="demo-row"><span>Tool diameter D</span><b><span id="sfDVal">10</span> mm</b></div>
+        <input type="range" id="sfD" min="2" max="25" step="1" value="10">
+        <div class="demo-row"><span>Teeth z</span><b><span id="sfZVal">3</span></b></div>
+        <input type="range" id="sfZ" min="1" max="6" step="1" value="3">
+        <div class="demo-row"><span>Chip load f<sub>z</sub></span><b><span id="sfFzVal">0.050</span> mm/tooth</b></div>
+        <input type="range" id="sfFz" min="0.01" max="0.25" step="0.005" value="0.05">
+        <div class="demo-row"><span>Axial a<sub>p</sub> / radial a<sub>e</sub></span><b><span id="sfApVal">10</span> / <span id="sfAeVal">5</span> mm</b></div>
+        <input type="range" id="sfAp" min="0.5" max="25" step="0.5" value="10">
+        <input type="range" id="sfAe" min="0.5" max="25" step="0.5" value="5">
+        <div class="demo-out" id="sfOut"></div>
+      </div>
+      <p class="cap">V<sub>c</sub> presets are mid-range for coated carbide. The 15 kW / 12 000 rpm limits mimic a typical BT40 VMC — hit either one and the cut must be re-planned.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 6 ===== -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 10</span>
+    <h2 class="page-title">Tooling — Carbide, Coatings &amp; the Taylor Curve</h2>
+    <p class="page-sub">The cutting edge is a consumable running at 800 °C. Managing its death is a core production skill.</p>
+
+    <div class="card">
+      <div class="label">Materials &amp; coatings</div>
+      <p class="lead"><span class="hl">Cemented carbide</span> — tungsten-carbide grains in a cobalt binder — owns modern machining: three times stiffer than steel, hot-hard to ~900 °C. <span class="hl2">Coatings</span> add a low-friction, heat-blocking skin a few microns thick.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>Coating</th><th>Colour</th><th>Best at</th><th>Note</th></tr>
+        <tr><td><b>TiN</b></td><td>gold</td><td>general purpose, HSS upgrade</td><td>the 1980s classic; oxidises ~600 °C</td></tr>
+        <tr><td><b>TiCN</b></td><td>blue-grey</td><td>abrasive materials, interrupted cuts</td><td>harder, tougher than TiN</td></tr>
+        <tr><td><b>TiAlN / AlTiN</b></td><td>violet-black</td><td>high-speed steel &amp; hard milling, dry cutting</td><td>forms protective Al₂O₃ layer AT temperature — likes heat</td></tr>
+        <tr><td><b>AlCrN</b></td><td>grey</td><td>gears, hobbing, heavy interruption</td><td>excellent hot hardness, low tendency to chip</td></tr>
+        <tr><td><b>Diamond (PCD/DLC)</b></td><td>—</td><td>aluminium, composites, graphite</td><td><b>never on steel</b> — carbon dissolves into hot iron</td></tr>
+        <tr><td><b>Uncoated + polished</b></td><td>bright</td><td>aluminium finishing</td><td>sharp polished edge beats any coating for BUE</td></tr>
+      </table></div>
+      <p class="body">Insert geometry is a second dial: a large <strong>nose radius</strong> gives a stronger corner and better finish but more radial force (chatter risk on thin parts); positive rake cuts free but weakens the edge. The ISO insert code (e.g. <span class="mono">CNMG&nbsp;120408</span>) encodes shape, clearance, tolerance and chipbreaker — reading it fluently is a shop superpower.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Tool life — Taylor's equation (1907)</div>
+      <div class="eqn">V<b>c</b> · T<sup>n</sup> = C        <span class="v3">(T = life in min at speed V<b>c</b>)</span>
+n ≈ 0.10–0.15 HSS · 0.2–0.3 carbide · 0.3–0.6 ceramic
+carbide, n = 0.25:  +20% speed → life × (1.2)<sup>−4</sup> ≈ <span class="v2">0.48 — half the life</span>
+                    +100% speed → life × 2⁻⁴ = <span class="v2">1/16</span></div>
+      <p class="body">Speed is exponential, feed is roughly linear: <strong>if cycle time must drop, raise feed and depth before speed</strong> — the same MRR for far less edge temperature. Tool life economics then set the optimum: a $30 insert edge that saves 2 minutes per part on a $120/hr machine pays for itself after 8 parts.</p>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="210" x2="720" y2="210" stroke="#475569" stroke-width="1.5"/>
+        <line x1="70" y1="210" x2="70" y2="30" stroke="#475569" stroke-width="1.5"/>
+        <text x="395" y="245" text-anchor="middle" fill="#94a3b8" font-size="12">cutting time →</text>
+        <text x="38" y="120" fill="#94a3b8" font-size="12" transform="rotate(-90 38 120)">flank wear VB (mm)</text>
+        <line x1="70" y1="80" x2="720" y2="80" stroke="#f87171" stroke-width="1.5" stroke-dasharray="7 5"/>
+        <text x="710" y="70" text-anchor="end" fill="#fca5a5" font-size="11.5" font-weight="700">VB = 0.3 mm — replace criterion (ISO 8688)</text>
+        <path d="M 70 205 Q 130 150 180 142 L 480 118 Q 560 110 620 60 L 660 34" stroke="#60a5fa" stroke-width="3.5" fill="none"/>
+        <rect x="72" y="185" width="105" height="20" rx="4" fill="rgba(251,146,60,0.15)"/>
+        <text x="124" y="199" text-anchor="middle" fill="#fb923c" font-size="10.5" font-weight="700">break-in</text>
+        <rect x="185" y="185" width="290" height="20" rx="4" fill="rgba(74,222,128,0.15)"/>
+        <text x="330" y="199" text-anchor="middle" fill="#4ade80" font-size="10.5" font-weight="700">steady wear — the productive zone</text>
+        <rect x="482" y="185" width="175" height="20" rx="4" fill="rgba(248,113,113,0.15)"/>
+        <text x="569" y="199" text-anchor="middle" fill="#f87171" font-size="10.5" font-weight="700">rapid wear — quit BEFORE here</text>
+        <circle cx="601" cy="80" r="6" fill="#f87171"/>
+        <text x="601" y="105" text-anchor="middle" fill="#fca5a5" font-size="10.5">change edge here,</text>
+        <text x="601" y="119" text-anchor="middle" fill="#fca5a5" font-size="10.5">not after it snaps</text>
+      </svg>
+      </div>
+      <p class="cap">The classic wear curve: fast break-in, long linear plateau, then runaway. Sister-tool counters in the control swap tools on schedule during lights-out runs.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">How edges die &amp; how they're held</div>
+      <div class="grid-3">
+        <div class="mini c-red"><h4>Flank wear</h4><p>Normal abrasion — the "good" death. Track VB; compensate with wear offsets.</p></div>
+        <div class="mini c-org"><h4>Crater wear</h4><p>Diffusion at high temperature hollows the rake face — reduce V<sub>c</sub> or up the coating.</p></div>
+        <div class="mini c-amb"><h4>Built-up edge</h4><p>Cold, sticky materials weld to the edge, then tear chunks away. Cure: MORE speed, sharper edge, better lube.</p></div>
+        <div class="mini c-purp"><h4>Chipping</h4><p>Interrupted cuts, vibration, too-brittle grade. Use tougher grade, honed edge, stable setup.</p></div>
+        <div class="mini c-teal"><h4>Notch wear</h4><p>At the depth-of-cut line, from work-hardened skin (stainless, Inconel). Vary a<sub>p</sub> between passes.</p></div>
+        <div class="mini c-grn"><h4>Thermal cracks</h4><p>Comb cracks from temperature cycling — often caused by <b>intermittent coolant</b>. Go full flood or fully dry.</p></div>
+      </div>
+      <p class="body"><strong>Toolholding sets the ceiling:</strong> total indicated runout at the flute directly steals chip load from one tooth and doubles it on another. Rule of thumb — <strong>every 10&nbsp;µm of runout costs roughly half the tool life</strong> in small end mills. The ladder: ER collet (5–10&nbsp;µm) → milling chuck (~4&nbsp;µm) → hydraulic (~3&nbsp;µm) → shrink-fit (≤3&nbsp;µm, best rigidity). Balance grade matters above ~8000&nbsp;rpm (G2.5 at speed), and BT/CAT taper vs <strong>HSK</strong> face-contact holders is the stiffness upgrade path for high-speed spindles.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 7 ===== -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 10</span>
+    <h2 class="page-title">Workholding, Forces &amp; the Chatter Problem</h2>
+    <p class="page-sub">The machine is a spring. The cut excites it. Whether the vibration grows or dies is pure — and beautiful — feedback theory.</p>
+
+    <div class="card">
+      <div class="label">Hold the part like a datum system</div>
+      <p class="body">Workholding is applied <strong>3-2-1 location</strong> (A21): three points define a plane, two a line, one kills the last freedom — clamps then apply force <em>against</em> the locators, never as locators themselves. A vise's solid jaw is a datum; the movable jaw is just force. Practical rules: cut <strong>toward</strong> the solid jaw, support thin floors (pocketing pressure bows them), use soft jaws bored in place for round or finished surfaces, and remember that a 2&nbsp;kN cutting force at 150&nbsp;mm stickout is a 300&nbsp;N·m moment trying to peel your part out of the vise. Zero-point pallet systems repeat location to &lt;5&nbsp;µm and turn setup time into seconds — the fixture equivalent of a tool changer.</p>
+      <div class="eqn">tangential force  F<b>c</b> ≈ k<b>c</b> · a<b>p</b> · h        (h = instantaneous chip thickness)
+spindle torque    T = F<b>c</b> · D/2 · 10⁻³  [N·m]     check vs motor curve at LOW rpm</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Regenerative chatter — the machine remembers</div>
+      <p class="lead">Each tooth cuts a wavy surface; the <span class="hl">next tooth re-cuts that wave</span>. If the phase is wrong, chip thickness oscillates harder each pass — a <span class="hl2">self-excited</span> vibration that grows until the tool screams, independent of how "smooth" the machine is.</p>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="230" x2="720" y2="230" stroke="#475569" stroke-width="1.5"/>
+        <line x1="70" y1="230" x2="70" y2="30" stroke="#475569" stroke-width="1.5"/>
+        <text x="395" y="265" text-anchor="middle" fill="#94a3b8" font-size="12">spindle speed (rpm) →</text>
+        <text x="38" y="130" fill="#94a3b8" font-size="12" transform="rotate(-90 38 130)">stable depth a_p (mm)</text>
+        <path d="M 70 195 L 720 195" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="6 5"/>
+        <text x="712" y="185" text-anchor="end" fill="#4ade80" font-size="11">a_lim — unconditionally stable</text>
+        <path d="M 90 190
+                 Q 120 90 150 185 Q 165 208 180 190
+                 Q 220 60 260 180 Q 280 210 300 185
+                 Q 355 40 410 170 Q 440 215 470 180
+                 Q 545 30 620 160 Q 660 220 700 175"
+              stroke="#60a5fa" stroke-width="3" fill="none"/>
+        <text x="545" y="70" text-anchor="middle" fill="#93c5fd" font-size="11.5" font-weight="700">stability lobes</text>
+        <circle cx="545" cy="120" r="7" fill="#4ade80"/>
+        <text x="545" y="105" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">sweet spot — 3× depth, zero chatter</text>
+        <circle cx="480" cy="90" r="7" fill="#f87171"/>
+        <text x="470" y="75" text-anchor="middle" fill="#fca5a5" font-size="11" font-weight="700">chatter</text>
+        <text x="395" y="250" text-anchor="middle" fill="#64748b" font-size="10.5">lobes occur where tooth-passing frequency divides the dominant natural frequency</text>
+      </svg>
+      </div>
+      <div class="eqn">tooth-passing frequency  f<b>t</b> = N · z / 60   [Hz]
+best speeds: f<b>t</b> ≈ f<b>n</b> / k  (k = 1, 2, 3…)   → N = 60·f<b>n</b> / (z·k)
+stiffness of a cantilever  k ∝ 3EI/L³  →  <span class="v2">shorten stickout 20% ⇒ ~2× stiffer</span></div>
+      <p class="body">The <strong>stability lobe diagram</strong> converts this into shop moves. Find the dominant natural frequency (tap test with an instrumented hammer, or just listen to the chatter tone and use a phone FFT app), then <em>speed up or down to a lobe peak</em> — chatter often disappears by going <strong>faster</strong>, which is deeply counter-intuitive. The fix ladder, in order of leverage: <strong>1)</strong> shorten stickout (L³ law — the biggest lever in the room), <strong>2)</strong> move rpm to a stable lobe, <strong>3)</strong> reduce radial engagement, <strong>4)</strong> variable-helix / variable-pitch tools that break the regeneration phase, <strong>5)</strong> tuned-mass damped holders for long reaches. Increasing <em>feed</em> slightly can also help — a thicker chip adds process damping.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Numbers to carry</div>
+      <div class="grid-3">
+        <div class="mini"><h4>Stickout law</h4><p class="big">k ∝ 1/L³</p><p>half the overhang = 8× the stiffness</p></div>
+        <div class="mini c-org"><h4>Zero-point pallets</h4><p class="big">&lt;5 µm</p><p>repeatability, seconds per swap</p></div>
+        <div class="mini c-grn"><h4>Chatter cure #1</h4><p class="big">rpm ↑</p><p>to the nearest stability lobe — not always slower!</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 8 ===== -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 10</span>
+    <h2 class="page-title">CAM — From Solid Model to Spindle</h2>
+    <p class="page-sub">Nobody types 200 000 blocks by hand. The CAM chain is where geometry, strategy and machine dialect meet.</p>
+
+    <div class="card">
+      <div class="label">The digital chain</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 210" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="a8" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#93c5fd"/></marker></defs>
+        <rect x="25" y="55" width="120" height="70" rx="12" fill="rgba(96,165,250,0.15)" stroke="#60a5fa" stroke-width="1.8"/>
+        <text x="85" y="85" text-anchor="middle" fill="#93c5fd" font-size="12.5" font-weight="800">CAD</text>
+        <text x="85" y="103" text-anchor="middle" fill="#94a3b8" font-size="10">solid model + PMI</text>
+        <path d="M 148 90 H 172" stroke="#93c5fd" stroke-width="2.5" marker-end="url(#a8)"/>
+        <rect x="175" y="55" width="130" height="70" rx="12" fill="rgba(251,146,60,0.15)" stroke="#fb923c" stroke-width="1.8"/>
+        <text x="240" y="80" text-anchor="middle" fill="#fb923c" font-size="12.5" font-weight="800">CAM</text>
+        <text x="240" y="98" text-anchor="middle" fill="#94a3b8" font-size="10">strategy · tools · stock</text>
+        <text x="240" y="113" text-anchor="middle" fill="#94a3b8" font-size="10">→ toolpath (CL data)</text>
+        <path d="M 308 90 H 332" stroke="#93c5fd" stroke-width="2.5" marker-end="url(#a8)"/>
+        <rect x="335" y="55" width="135" height="70" rx="12" fill="rgba(192,132,252,0.15)" stroke="#c084fc" stroke-width="1.8"/>
+        <text x="402" y="80" text-anchor="middle" fill="#c084fc" font-size="12.5" font-weight="800">POST-PROCESSOR</text>
+        <text x="402" y="98" text-anchor="middle" fill="#94a3b8" font-size="10">machine dialect, TCP,</text>
+        <text x="402" y="113" text-anchor="middle" fill="#94a3b8" font-size="10">cycles, rotary limits</text>
+        <path d="M 473 90 H 497" stroke="#93c5fd" stroke-width="2.5" marker-end="url(#a8)"/>
+        <rect x="500" y="55" width="110" height="70" rx="12" fill="rgba(74,222,128,0.15)" stroke="#4ade80" stroke-width="1.8"/>
+        <text x="555" y="80" text-anchor="middle" fill="#4ade80" font-size="12.5" font-weight="800">VERIFY</text>
+        <text x="555" y="98" text-anchor="middle" fill="#94a3b8" font-size="10">material removal sim,</text>
+        <text x="555" y="113" text-anchor="middle" fill="#94a3b8" font-size="10">machine collision model</text>
+        <path d="M 613 90 H 637" stroke="#93c5fd" stroke-width="2.5" marker-end="url(#a8)"/>
+        <rect x="640" y="55" width="95" height="70" rx="12" fill="rgba(45,212,191,0.15)" stroke="#2dd4bf" stroke-width="1.8"/>
+        <text x="687" y="85" text-anchor="middle" fill="#2dd4bf" font-size="12.5" font-weight="800">MACHINE</text>
+        <text x="687" y="103" text-anchor="middle" fill="#94a3b8" font-size="10">DNC / Ethernet</text>
+        <text x="380" y="175" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">The post-processor is the least glamorous and most crash-relevant software you own. Verify BEFORE the machine, not on it.</text>
+        <text x="380" y="195" text-anchor="middle" fill="#64748b" font-size="11">The same chain feeds the digital thread — simulation, twin and MES integration (→ A31, A33).</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Roughing has been reinvented</div>
+      <p class="body"><strong>Conventional pocketing</strong> offsets the boundary inward at ~50% stepover: engagement angle swings wildly in corners, forcing feeds set for the worst case. <strong>Adaptive / trochoidal (HSM) roughing</strong> holds a <em>constant engagement angle</em> with light radial cuts (5–15% of D) at full flute depth and very high feed (chip-thinning compensated). Result: heat leaves in the chip, the whole flute length wears evenly instead of one corner, and MRR typically <strong>doubles to quadruples</strong> in tough alloys while tool life goes <em>up</em>. It is the single highest-ROI CAM feature of the last two decades.</p>
+      <p class="body">Finishing is a geometry game: contour (Z-level) for steep walls, raster/parallel for shallow, <strong>scallop-constant</strong> paths for uniform texture, pencil and rest machining to chase corners a big tool couldn't reach. For ball-nose surfacing the scallop height ties stepover to finish:</p>
+      <div class="eqn">scallop height  h ≈ s² / (8·r)     (s = stepover, r = ball radius)
+turned/milled theoretical peak     R<b>t</b> ≈ f² / (8·r<b>ε</b>)   → finish improves with the SQUARE of feed reduction</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — ball-nose stepover vs finish vs time</div>
+      <div class="demo">
+        <div class="demo-row"><span>Ball end mill diameter</span><b><span id="scDVal">10</span> mm</b></div>
+        <input type="range" id="scD" min="2" max="20" step="1" value="10">
+        <div class="demo-row"><span>Stepover s</span><b><span id="scSVal">0.50</span> mm</b></div>
+        <input type="range" id="scS" min="0.05" max="4" step="0.05" value="0.5">
+        <div class="demo-row"><span>Surface width to cover</span><b><span id="scWVal">100</span> mm</b></div>
+        <input type="range" id="scW" min="20" max="400" step="10" value="100">
+        <div class="demo-out" id="scOut"></div>
+      </div>
+      <p class="cap">Halving stepover quarters the scallop but doubles machining time — the finishing trade every mould maker negotiates daily.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 9 ===== -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 10</span>
+    <h2 class="page-title">Accuracy, Compensation &amp; Metrology</h2>
+    <p class="page-sub">A machine that "reads microns" doesn't necessarily CUT microns. Error has a budget — audit it.</p>
+
+    <div class="card">
+      <div class="label">Where the microns go</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Error source</th><th>Magnitude</th><th>Signature</th><th>Countermeasure</th></tr>
+        <tr><td><b>Geometric</b> (squareness, straightness)</td><td>5–30 µm/m</td><td>out-of-square bores, taper</td><td>laser/ballbar mapping + volumetric comp</td></tr>
+        <tr><td><b>Thermal</b> (spindle &amp; ballscrew growth)</td><td>10–100 µm</td><td>morning parts differ from afternoon parts</td><td>warm-up cycle, sensors + comp, coolant temp control</td></tr>
+        <tr><td><b>Servo</b> (following error, mismatch)</td><td>1–20 µm</td><td>ovality on circles, corner rounding</td><td>K<sub>v</sub> matching, feed-forward (A10)</td></tr>
+        <tr><td><b>Backlash / lost motion</b></td><td>2–20 µm</td><td>steps at quadrant changes</td><td>preloaded screws, backlash comp, full-closed scales</td></tr>
+        <tr><td><b>Tool deflection</b></td><td>5–100 µm</td><td>tapered walls, undersize floors</td><td>shorter tools, spring passes, force-aware CAM</td></tr>
+        <tr><td><b>Workpiece</b> (clamp distortion, residual stress)</td><td>up to mm!</td><td>part springs when unclamped</td><td>stress-relieve, light finish clamping, symmetric material removal</td></tr>
+      </table></div>
+      <p class="body"><strong>Accuracy vs repeatability vs resolution:</strong> resolution is what the control can command (0.1–1 µm); repeatability is how well the axis returns to the same place (the servo + mechanics); accuracy is how close that place is to the truth (geometry + thermal + calibration). A machine can repeat to 2&nbsp;µm and still be 40&nbsp;µm wrong — which is fine, because <em>repeatable</em> error can be compensated away. ISO&nbsp;230 defines the test methods; pitch-error tables and volumetric compensation live in the control.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The diagnostic trio</div>
+      <div class="grid-3">
+        <div class="mini"><h4>Ballbar (QC20)</h4><p>Telescoping sensor traces a programmed circle. The polar plot is a fingerprint: <b>peanut at 45°</b> = squareness; <b>steps at axis reversals</b> = backlash; <b>oval</b> = servo mismatch.</p></div>
+        <div class="mini c-org"><h4>Laser interferometer</h4><p>Measures true position along each axis to sub-µm → builds the pitch-error compensation table. Repeat after crashes and seasonally.</p></div>
+        <div class="mini c-grn"><h4>Touch probe</h4><p>Spindle probe sets work offsets in seconds, measures features mid-cycle and closes the loop: measure → update wear offset → recut. Tool setter catches length error &amp; breakage.</p></div>
+      </div>
+      <p class="body"><strong>In-process gauging is a control loop</strong> (the same idea as A10, just slower): probe the finished bore, feed the deviation into the wear offset, and the next part lands centred in tolerance. Combined with SPC (A27) on a CMM, this is how a 24/7 cell holds ±10&nbsp;µm without a human touching an offset. The datum logic for what to probe — and what counts as the part's reference frame — is A21's territory: probe the <em>datums</em>, not convenient surfaces.</p>
+      <div class="eqn">thermal reality check:  ballscrew ΔL = α·L·ΔT = 11.7 µm/m·°C
+1 m screw warming 5 °C  →  <span class="v2">58 µm</span> of position error — a whole tolerance band</div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 10 ===== -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 10</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Self-Test</h2>
+    <p class="page-sub">Eight ideas that make you dangerous around a machine tool — in the good way.</p>
+
+    <div class="card">
+      <div class="label">The whole module in 8 lines</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span>CNC = servo position loops (A09) executing a text program — semi-closed trusts the screw, full-closed measures the table.</span></li>
+        <li><span class="num">2</span><span>Tool tip position = machine zero + G54 work offset + programmed point + G43 length. One wrong term = crash or scrap.</span></li>
+        <li><span class="num">3</span><span>G-code is modal: a block inherits everything you didn't say. Safety blocks force known state; comp needs a lead-in ≥ radius.</span></li>
+        <li><span class="num">4</span><span>Interpolation trades chord error (l²/8R) against block rate — data starving turns fine feeds into faceted crawls.</span></li>
+        <li><span class="num">5</span><span>V<sub>c</sub> belongs to the material, f<sub>z</sub> to the edge. Never fix chatter by rubbing (f<sub>z</sub> below edge radius work-hardens).</span></li>
+        <li><span class="num">6</span><span>Taylor: speed kills exponentially (V·Tⁿ=C) — for cycle time, raise feed &amp; depth first. Replace edges in steady wear, on schedule.</span></li>
+        <li><span class="num">7</span><span>Chatter is regenerative feedback — cure with stickout (1/L³), lobe-tuned rpm (often FASTER), engagement, variable helix.</span></li>
+        <li><span class="num">8</span><span>Accuracy is a budget: geometry + thermal + servo + deflection. Probe datums, close the loop with wear offsets and SPC (A27).</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Six classic failure modes</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">💥 The offset crash</div><p>Wrong H number, stale G54 from last week's setup, or G43 forgotten entirely — the tool drives through the part into the vise at rapid. Cure: safety blocks, distance-to-go check on first Z approach, single-block + rapid override 25% on every new program.</p></div>
+        <div class="fail"><div class="ft">🌀 Chatter scrapping the finish</div><p>Long stickout + resonant rpm: walls show fish-scale marks, tool corners chip. Cure: shortest tool that reaches, tap-test or FFT the tone, move rpm to a stable lobe, drop radial engagement — slowing down blindly often makes it worse.</p></div>
+        <div class="fail"><div class="ft">🔥 Recutting chips → dead tool</div><p>Chips packed in a pocket get re-cut, temperature spikes, carbide fails in seconds. Cure: air blast/through-tool coolant, trochoidal paths that fling chips out, peck retracts that actually clear, HSM strategies with room to evacuate.</p></div>
+        <div class="fail"><div class="ft">🌡️ Thermal drift scraps the afternoon</div><p>Morning-warm machine cuts different from lunch-hot machine; a 5 °C screw drift is ~60 µm/m. Cure: warm-up program, thermal comp on, tolerance-critical ops after thermal soak, full-closed scales for the fussy axes.</p></div>
+        <div class="fail"><div class="ft">👻 Backlash ghost steps</div><p>Quadrant marks on bores, position depends on approach direction. Cure: measure with ballbar, apply backlash comp, approach final position from one consistent direction in critical moves, preloaded/replaced ballscrew nut when worn.</p></div>
+        <div class="fail"><div class="ft">📉 Data-starved "high speed" finishing</div><p>0.02 mm segments at 5000 mm/min = 4200 blocks/s into a 1 ms control: feed collapses to a stutter, finish shows facets. Cure: sane CAM tolerance (~1/4 of part tolerance), smoothing/spline modes on, shorter look-ahead-hungry moves avoided.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick check 1</div>
+      <p class="quiz-q">A program runs G43 H7 but tool 7's length was measured with the OLD master gauge, 12 mm shorter. What happens at the first Z-2. cut, and which two habits catch this before contact?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">The control believes the tool is 12 mm shorter than reality, so the tip arrives 12 mm DEEPER than programmed — a crash into part or fixture. Catches: (1) first approach in single-block with rapid override low, watching DISTANCE-TO-GO equal the expected gap at the safe-Z stop; (2) a tool setter / probe re-measuring every tool in-machine so offsets can't inherit a stale reference.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick check 2</div>
+      <p class="quiz-q">Carbide end mill, D = 10 mm, z = 3, in 6061 at V<sub>c</sub> = 300 m/min and f<sub>z</sub> = 0.05 mm. Compute rpm and feed.</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">N = 1000·300/(π·10) ≈ <b>9 549 rpm</b>. V<sub>f</sub> = N·z·f<sub>z</sub> = 9549 × 3 × 0.05 ≈ <b>1 432 mm/min</b>. (If the spindle tops out at 8 000 rpm, keep f<sub>z</sub> and accept V<sub>c</sub> ≈ 251 m/min — feed drops to ~1 200 mm/min.)</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick check 3</div>
+      <p class="quiz-q">Why does climb milling need a backlash-free drive, and what happens on a worn-screw manual mill?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">In climb milling the cutting force acts in the SAME direction as table feed — the cut pulls the table. With backlash, the table gets snatched forward through the free play, chip load spikes, and the tool grabs or breaks. Preloaded ballscrews (CNC) have essentially zero backlash, so climb is standard; on a worn Acme-screw manual mill you cut conventional or fit a backlash eliminator.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick check 4</div>
+      <p class="quiz-q">Chatter appears at 8 000 rpm with a 4-flute cutter, tone ≈ 1 070 Hz. Give the reasoning for a better spindle speed.</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">Treat 1 070 Hz as the dominant natural frequency. Stable pockets sit where tooth-passing frequency = f<sub>n</sub>/k: N = 60·f<sub>n</sub>/(z·k) = 60×1070/(4k) ≈ 16 050/k rpm → k=1: 16 050 (too fast), k=2: <b>8 025</b>… already there and chattering means f<sub>n</sub> estimate is off or that lobe is shallow — try k=1.5-ish invalid, so test ~9 600 or ~6 900 (between lobes moves AWAY from resonance ratio). Practically: sweep rpm ±15% while listening, shorten stickout (1/L³), then drop a<sub>e</sub>. The point: chatter is fixed by CHANGING the phase relationship, not by universally slowing down.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick check 5</div>
+      <p class="quiz-q">A ballbar plot shows a peanut shape tilted 45° and small steps where each axis reverses. Diagnose both.</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">Peanut at 45° = X–Y <b>squareness error</b> (the axes aren't perpendicular; the circle stretches along one diagonal, shrinks along the other). Steps at reversals = <b>backlash / lost motion</b> at quadrant changes. Fix order: mechanical squareness/comp first, then backlash compensation — and re-run the ballbar to confirm each fix separately.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick check 6</div>
+      <p class="quiz-q">Carbide tooling with Taylor exponent n = 0.25: production wants 20% more spindle speed. What happens to tool life, and what would you propose instead?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">Life ratio = (1.2)^(−1/0.25) = 1.2⁻⁴ ≈ 0.48 → <b>tool life roughly halves</b> for a 20% cycle-time gain on the cutting portion only. Counter-proposal: raise feed and axial depth (roughly linear in life), use adaptive roughing to raise MRR at constant edge temperature, or accept the speed increase only on the roughing tools where edges are cheap and cycle time dominates.</span></div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"Right zero, right chip, rigid setup — the G-code is the easy part."</p>
+      <p style="margin-top:10px; font-size:15px;">Offsets tell it WHERE · speeds &amp; feeds tell it HOW · stiffness decides IF.</p>
+    </div>
+
+    <div class="footer">
+      🛠️ Advanced Deep Dive · CNC Machining &amp; G-Code · 10 pages · MSc level<br>
+      Standalone module — pairs with A09 Servo Motion, A10 PID, A21 GD&amp;T, A27 Six Sigma/SPC, A31 Digital Twins<br>
+      Micro Learning · Advanced Library
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  // --- P4: interpolation / data starving ---
+  var ipF = document.getElementById('ipFeed'), ipS = document.getElementById('ipSeg'),
+      ipR = document.getElementById('ipRad'), ipB = document.getElementById('ipBt');
+  function updIp(){
+    var F = +ipF.value, l = +ipS.value, R = +ipR.value, bt = +ipB.value;
+    document.getElementById('ipFeedVal').textContent = F;
+    document.getElementById('ipSegVal').textContent = l.toFixed(2);
+    document.getElementById('ipRadVal').textContent = R;
+    document.getElementById('ipBtVal').textContent = bt.toFixed(1);
+    var e = l*l/(8*R)*1000; // µm
+    var rate = F/(60*l);    // blocks per s
+    var cap = 1000/bt;
+    var starved = rate > cap;
+    var realFeed = starved ? l*cap*60 : F;
+    document.getElementById('ipOut').innerHTML =
+      'chord error ≈ '+l.toFixed(2)+'²/(8×'+R+') = <b>'+e.toFixed(1)+' µm</b>'+
+      (e>10 ? ' <span style="color:#fbbf24">— visible facets likely</span>' : ' <span style="color:#4ade80">— geometrically fine</span>')+'<br>'+
+      'block rate = '+F+'/(60×'+l.toFixed(2)+') = <b>'+rate.toFixed(0)+' blk/s</b> vs control capacity <b>'+cap.toFixed(0)+' blk/s</b><br>'+
+      (starved
+        ? '<span style="color:#f87171;font-weight:700">DATA STARVED ✗</span> — actual feed collapses to ≈ <b>'+realFeed.toFixed(0)+' mm/min</b> ('+(100*realFeed/F).toFixed(0)+'% of programmed)'
+        : '<span style="color:#4ade80;font-weight:700">Control keeps up ✓</span> — full programmed feed achieved, margin '+(100*(1-rate/cap)).toFixed(0)+'%');
+  }
+  [ipF,ipS,ipR,ipB].forEach(function(el){ el.addEventListener('input', updIp); });
+  updIp();
+
+  // --- P5: speeds & feeds ---
+  var vc = 300, kc = 800;
+  var mSeg = document.getElementById('matSeg');
+  var sfD = document.getElementById('sfD'), sfZ = document.getElementById('sfZ'),
+      sfFz = document.getElementById('sfFz'), sfAp = document.getElementById('sfAp'), sfAe = document.getElementById('sfAe');
+  var RPM_MAX = 12000, P_MAX = 15;
+  function updSf(){
+    var D = +sfD.value, z = +sfZ.value, fz = +sfFz.value, ap = +sfAp.value, ae = +sfAe.value;
+    if(ae > D){ ae = D; }
+    document.getElementById('sfDVal').textContent = D;
+    document.getElementById('sfZVal').textContent = z;
+    document.getElementById('sfFzVal').textContent = fz.toFixed(3);
+    document.getElementById('sfApVal').textContent = ap;
+    document.getElementById('sfAeVal').textContent = ae;
+    var N = 1000*vc/(Math.PI*D);
+    var capped = N > RPM_MAX;
+    var Nuse = Math.min(N, RPM_MAX);
+    var vf = Nuse*z*fz;
+    var mrr = ae*ap*vf/1000;
+    var P = mrr*kc/60000;
+    document.getElementById('sfOut').innerHTML =
+      'N = 1000×'+vc+'/(π×'+D+') = <b>'+N.toFixed(0)+' rpm</b>'+
+      (capped ? ' <span style="color:#fbbf24">→ capped at '+RPM_MAX+' (V<sub>c</sub> drops to '+(Math.PI*D*RPM_MAX/1000).toFixed(0)+' m/min)</span>' : '')+'<br>'+
+      'V<sub>f</sub> = '+Nuse.toFixed(0)+'×'+z+'×'+fz.toFixed(3)+' = <b>'+vf.toFixed(0)+' mm/min</b><br>'+
+      'MRR = '+ae+'×'+ap+'×'+vf.toFixed(0)+'/1000 = <b>'+mrr.toFixed(1)+' cm³/min</b><br>'+
+      'P ≈ MRR×'+kc+'/60000 = <b>'+P.toFixed(2)+' kW</b> of '+P_MAX+' kW '+
+      (P>P_MAX ? '<span style="color:#f87171;font-weight:700">— OVER spindle power ✗ reduce ap/ae</span>'
+               : (P>0.8*P_MAX ? '<span style="color:#fbbf24">— near the limit</span>'
+                              : '<span style="color:#4ade80">— comfortable ✓</span>'));
+  }
+  mSeg.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    mSeg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); vc = +b.dataset.vc; kc = +b.dataset.kc; updSf();
+  });
+  [sfD,sfZ,sfFz,sfAp,sfAe].forEach(function(el){ el.addEventListener('input', updSf); });
+  updSf();
+
+  // --- P8: scallop ---
+  var scD = document.getElementById('scD'), scS = document.getElementById('scS'), scW = document.getElementById('scW');
+  function updSc(){
+    var D = +scD.value, s = +scS.value, W = +scW.value;
+    var r = D/2;
+    if(s > D) s = D;
+    document.getElementById('scDVal').textContent = D;
+    document.getElementById('scSVal').textContent = s.toFixed(2);
+    document.getElementById('scWVal').textContent = W;
+    var h = s*s/(8*r)*1000; // µm
+    var passes = Math.ceil(W/s);
+    var grade = h<1 ? 'mirror-class (needs polish anyway)' : h<5 ? 'fine mould finish' : h<20 ? 'standard machined finish' : 'visible ridges — roughing texture';
+    var col = h<5 ? '#4ade80' : h<20 ? '#fbbf24' : '#f87171';
+    document.getElementById('scOut').innerHTML =
+      'scallop h = '+s.toFixed(2)+'²/(8×'+r+') = <b>'+h.toFixed(1)+' µm</b> — <span style="color:'+col+';font-weight:700">'+grade+'</span><br>'+
+      'passes over '+W+' mm = <b>'+passes+'</b> · relative machining time ∝ passes<br>'+
+      'halve the stepover → h ÷ 4, time × 2 — buy finish with time, or with a bigger ball';
+  }
+  [scD,scS,scW].forEach(function(el){ el.addEventListener('input', updSc); });
+  updSc();
+
+  // --- quizzes ---
+  document.querySelectorAll('.quiz-answer').forEach(function(q){
+    q.addEventListener('click', function(){ q.classList.add('revealed'); });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Three-Phase Power · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #e879f9;       /* fuchsia — matches micro card 30 (--accent-3ph) */
+    --accent-soft: #f5d0fe;
+    --accent-2: #60a5fa;     /* blue */
+    --accent-3: #fbbf24;     /* amber */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    /* phase colours — shared with micro card 30 */
+    --L1: #f87171;
+    --L2: #fbbf24;
+    --L3: #60a5fa;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(232,121,249,0.16), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(96,165,250,0.08), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #fff; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(232,121,249,0.4);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(232,121,249,0.14), rgba(96,165,250,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(232,121,249,0.16); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--accent-3)!important; } .c-amb .big{color:var(--accent-3)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .pro { background: linear-gradient(145deg, rgba(232,121,249,0.1), transparent); border:1px solid rgba(232,121,249,0.25); border-radius:14px; padding:16px; }
+  .pro .pt { font-weight:700; color:var(--accent-soft); margin-bottom:6px; font-size:15px; }
+  .pro p { font-size:13.5px; color:var(--text-dim); }
+  .pro em { color:var(--accent-3); font-style:normal; font-weight:600; }
+
+  .memory { background: linear-gradient(135deg, #e879f9, #86198f); color: #fff; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(255,255,255,0.85); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(232,121,249,0.1); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  /* phase legend */
+  .plegend { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+  .ptag { display:flex; align-items:center; gap:7px; font-family:ui-monospace,monospace; font-size:13px; font-weight:700; }
+  .ptag .sw { width:14px; height:14px; border-radius:4px; }
+  .ptag.l1 .sw{background:var(--L1)} .ptag.l1{color:var(--L1)}
+  .ptag.l2 .sw{background:var(--L2)} .ptag.l2{color:var(--L2)}
+  .ptag.l3 .sw{background:var(--L3)} .ptag.l3{color:var(--L3)}
+
+  /* interactive demos */
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  canvas { display:block; width:100%; border-radius:10px; background:var(--bg-2); }
+
+  .seg { display:flex; height:34px; border-radius:8px; overflow:hidden; margin-top:10px; border:1px solid var(--border); }
+  .seg div { display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#0b0f14; transition:width .4s ease; white-space:nowrap; }
+  .seg-p { background:linear-gradient(90deg,#4ade80,#34d399); }
+  .seg-q { background:linear-gradient(90deg,#fbbf24,#fb923c); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+  @keyframes spin { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Electrical &amp; Electronics · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🔱</span>Three-Phase Power</h1>
+  <p class="hero-sub">The backbone of every factory — from the 120° phasor math and line-vs-phase relationships to the √3 power triangle, the rotating magnetic field, induction-motor slip, star-delta starting and power-factor correction.</p>
+
+  <div class="connect">
+    <span class="pill">↔ MICRO 30</span>
+    <span>This is the exam-grade companion to your 90-second card.</span>
+    <a href="../30_Three_Phase_Power.html">Open Micro Card 30 →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · Why Three Phases</a>
+    <a href="#p2">2 · Phasors &amp; the 120° Math</a>
+    <a href="#p3">3 · Line vs Phase</a>
+    <a href="#p4">4 · Wye &amp; Delta</a>
+    <a href="#p5">5 · The √3 Power Triangle</a>
+    <a href="#p6">6 · Rotating Magnetic Field</a>
+    <a href="#p7">7 · The Induction Motor &amp; Slip</a>
+    <a href="#p8">8 · Star-Delta Starting</a>
+    <a href="#p9">9 · Power Factor &amp; Harmonics</a>
+    <a href="#p10">10 · Faults, Recap &amp; Quiz</a>
+    <a href="#p11">11 · Worked Examples</a>
+    <a href="#p12">12 · Problem Set</a>
+    <a href="#p13">13 · Derivations &amp; Traps</a>
+    <a href="#p14">14 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ===== PAGE 1 ===== -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 14</span>
+    <h2 class="page-title">Why Three Phases at All?</h2>
+    <p class="page-sub">One generator, three windings, 120° apart — the most efficient way ever found to move bulk power.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead">Three-phase power delivers energy on <span class="hl">three AC conductors whose voltages are equal in magnitude but offset in time by 120°</span> (one-third of a cycle). That single arrangement gives <span class="hl2">constant total power</span>, a self-starting <span class="hl2">rotating magnetic field</span>, and ~50% less copper than three separate single-phase circuits would need.</p>
+      <p class="body">Pioneered by <strong>Nikola Tesla, Galileo Ferraris and Mikhail Dolivo-Dobrowolsky</strong> in the 1880s–90s, the polyphase system won the "War of the Currents" because it could be <strong>generated, transmitted, transformed and converted to torque</strong> with no moving contacts. Today essentially all generation, transmission and industrial loads above a few kilowatts are three-phase — including your micro card's <a href="../08_VFD.html" style="color:var(--accent-soft)">VFD</a>, <a href="../09_Servo_Motor.html" style="color:var(--accent-soft)">servo</a> and compressor drives.</p>
+      <p class="body"><strong>The core idea to hold onto:</strong> a single-phase supply delivers power that pulses to zero twice per cycle. Add two more phases spaced 120° apart and, at every instant, what one phase loses another gains — the <em>sum is a smooth, constant value</em>. That is the whole reason three-phase exists.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">120°</div><h4>Phase spacing</h4><p>2π/3 radians between each of the three voltages.</p></div>
+      <div class="mini c-blue"><div class="big">√3</div><h4>The magic number</h4><p>1.732 — links line to phase quantities and sets power.</p></div>
+      <div class="mini c-amb"><div class="big">~50%</div><h4>Copper saved</h4><p>vs three single-phase circuits of equal power.</p></div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 2 ===== -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 14</span>
+    <h2 class="page-title">Phasors &amp; the 120° Mathematics</h2>
+    <p class="page-sub">Three rotating vectors that always sum to zero — the algebra behind the smooth power.</p>
+
+    <div class="card">
+      <div class="label">The Three Instantaneous Voltages</div>
+      <p class="body">Each phase is a sine wave of the same peak <span class="mono hl">Vm</span> and frequency, shifted by 120°:</p>
+      <div class="eqn">v₁(t) = Vm·sin(ωt)
+v₂(t) = Vm·sin(ωt − 120°)
+v₃(t) = Vm·sin(ωt − 240°)     where  ω = 2πf
+
+Key identity (balanced system):
+   <b>v₁ + v₂ + v₃ = 0</b>   at every instant
+   → the three phasors form a closed triangle; their vector sum is zero.</div>
+      <p class="body">Because the three add to zero, the <strong>neutral conductor carries no current</strong> in a perfectly balanced load — a fact that lets utilities run a thin neutral (or none at all in delta). This is also why a balanced three-phase load needs <em>no</em> return path proportional to the phase currents.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Live — The Three Sine Waves</div>
+      <p class="body">Watch the three phases trace out 120° apart, and the dashed line show their instantaneous sum sitting flat at zero.</p>
+      <div class="stage">
+        <canvas id="waveCanvas" height="240"></canvas>
+        <div class="plegend">
+          <div class="ptag l1"><span class="sw"></span>L1 · 0°</div>
+          <div class="ptag l2"><span class="sw"></span>L2 · 120°</div>
+          <div class="ptag l3"><span class="sw"></span>L3 · 240°</div>
+        </div>
+        <div class="cap">The white dashed line is v₁+v₂+v₃ — pinned at zero. That flatness <em>is</em> the constant-power property.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Phasor Diagram</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Phasor diagram of three voltages 120 degrees apart">
+          <line x1="80" y1="150" x2="680" y2="150" stroke="#334155" stroke-width="1.5"/>
+          <line x1="380" y1="30" x2="380" y2="270" stroke="#334155" stroke-width="1.5"/>
+          <circle cx="380" cy="150" r="110" fill="none" stroke="#1f2a3a" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <!-- L1 at 90 deg up -->
+          <line x1="380" y1="150" x2="380" y2="40" stroke="#f87171" stroke-width="4" marker-end="url(#a1)"/>
+          <text x="392" y="38" fill="#fca5a5" font-size="15" font-weight="800" font-family="monospace">V₁ ∠0°</text>
+          <!-- L2 at 90-120 = -30 deg -->
+          <line x1="380" y1="150" x2="475" y2="205" stroke="#fbbf24" stroke-width="4" marker-end="url(#a2)"/>
+          <text x="485" y="220" fill="#fcd34d" font-size="15" font-weight="800" font-family="monospace">V₂ ∠−120°</text>
+          <!-- L3 -->
+          <line x1="380" y1="150" x2="285" y2="205" stroke="#60a5fa" stroke-width="4" marker-end="url(#a3)"/>
+          <text x="150" y="220" fill="#93c5fd" font-size="15" font-weight="800" font-family="monospace">V₃ ∠−240°</text>
+          <defs>
+            <marker id="a1" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#f87171"/></marker>
+            <marker id="a2" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#fbbf24"/></marker>
+            <marker id="a3" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#60a5fa"/></marker>
+          </defs>
+          <text x="380" y="292" fill="#94a3b8" font-size="13" text-anchor="middle">Three equal phasors at 120° → tip-to-tail they close a triangle → vector sum = 0.</text>
+        </svg>
+        <div class="cap">Phase sequence L1→L2→L3 (here "negative" rotation drawn clockwise) sets the direction a motor will spin — swap any two lines to reverse it.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 3 ===== -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 14</span>
+    <h2 class="page-title">Line vs Phase — The Two Voltages Everyone Confuses</h2>
+    <p class="page-sub">"400/230 V" isn't two systems — it's one system measured two ways.</p>
+
+    <div class="card">
+      <div class="label">The Distinction</div>
+      <p class="body"><strong>Phase quantity</strong> = measured across one winding/load (line-to-neutral in a wye). <strong>Line quantity</strong> = measured between two lines (line-to-line). Because two phase voltages 120° apart subtract as phasors, the line value is <span class="hl">√3 larger</span>:</p>
+      <div class="eqn">In a WYE (star) connection:
+   <b>V_line = √3 × V_phase</b>        I_line = I_phase
+   e.g.  V_ph = 230 V  →  V_L = √3·230 ≈ <b>400 V</b>
+
+In a DELTA connection:
+   V_line = V_phase                  <b>I_line = √3 × I_phase</b>
+
+The √3 always appears once — on voltage (wye) or on current (delta).</div>
+      <p class="body">So a "400 V / 230 V" supply is a single <strong>wye system</strong>: 400 V between any two lines, 230 V from any line to neutral. North-American "208 V / 120 V" is the same idea (√3·120 ≈ 208). The √3 is just the geometry of subtracting two unit vectors 120° apart: |1∠0 − 1∠−120°| = √3.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Where √3 Comes From — Geometrically</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vector subtraction showing line voltage is root three times phase voltage">
+          <!-- origin -->
+          <circle cx="150" cy="220" r="4" fill="#94a3b8"/>
+          <!-- V1 phasor -->
+          <line x1="150" y1="220" x2="150" y2="70" stroke="#f87171" stroke-width="4"/>
+          <text x="120" y="60" fill="#fca5a5" font-size="14" font-weight="800" font-family="monospace">V₁</text>
+          <!-- V2 phasor (down-right, 120 deg from V1) -->
+          <line x1="150" y1="220" x2="280" y2="295" stroke="#fbbf24" stroke-width="4" opacity="0.35"/>
+          <!-- -V2 (reverse, up-right) -->
+          <line x1="150" y1="220" x2="20" y2="145" stroke="#fbbf24" stroke-width="3" stroke-dasharray="5 4"/>
+          <text x="10" y="135" fill="#fcd34d" font-size="13" font-weight="800" font-family="monospace">−V₂</text>
+          <!-- Resultant V1-V2 = line voltage -->
+          <line x1="150" y1="70" x2="20" y2="145" stroke="#e879f9" stroke-width="5" marker-end="url(#al)"/>
+          <text x="40" y="95" fill="#f5d0fe" font-size="15" font-weight="800" font-family="monospace">V_L = V₁−V₂ = √3·V_ph</text>
+          <defs><marker id="al" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#e879f9"/></marker></defs>
+          <!-- 30 deg note -->
+          <text x="430" y="120" fill="#cbd5e1" font-size="14" font-family="monospace">|V₁ − V₂| = 2·V_ph·cos(30°)</text>
+          <text x="430" y="148" fill="#cbd5e1" font-size="14" font-family="monospace">           = 2·V_ph·(√3/2)</text>
+          <text x="430" y="176" fill="#f5d0fe" font-size="15" font-weight="800" font-family="monospace">           = √3 · V_ph</text>
+          <text x="430" y="220" fill="#94a3b8" font-size="13" font-family="monospace">The 30° half-angle gives the √3.</text>
+        </svg>
+        <div class="cap">Line voltage is the phasor difference of two phase voltages — a 2·cos(30°) = √3 relationship. No magic, just trigonometry.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 4 ===== -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 14</span>
+    <h2 class="page-title">Wye &amp; Delta — The Two Connections</h2>
+    <p class="page-sub">Star for distribution and a neutral; delta for motors and high current. Know both cold.</p>
+
+    <div class="card">
+      <div class="label">Star (Y / Wye) vs Delta (Δ)</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Wye and delta three-phase connection schematics">
+          <!-- WYE -->
+          <text x="190" y="34" fill="#f5d0fe" font-size="16" font-weight="800" text-anchor="middle">★ WYE / STAR (4-wire)</text>
+          <line x1="190" y1="150" x2="100" y2="70"  stroke="#f87171" stroke-width="4"/>
+          <line x1="190" y1="150" x2="280" y2="70"  stroke="#fbbf24" stroke-width="4"/>
+          <line x1="190" y1="150" x2="190" y2="250" stroke="#60a5fa" stroke-width="4"/>
+          <circle cx="190" cy="150" r="7" fill="#f8fafc"/>
+          <text x="200" y="146" fill="#f8fafc" font-size="13" font-family="monospace">N</text>
+          <line x1="190" y1="150" x2="120" y2="200" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="4 3"/>
+          <text x="92" y="216" fill="#94a3b8" font-size="12" font-family="monospace">neutral</text>
+          <text x="78" y="62" fill="#fca5a5" font-size="13" font-weight="800" font-family="monospace">L1</text>
+          <text x="288" y="62" fill="#fcd34d" font-size="13" font-weight="800" font-family="monospace">L2</text>
+          <text x="200" y="262" fill="#93c5fd" font-size="13" font-weight="800" font-family="monospace">L3</text>
+          <text x="190" y="278" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="monospace">V_L=√3·V_ph · I_L=I_ph</text>
+          <!-- DELTA -->
+          <text x="560" y="34" fill="#f5d0fe" font-size="16" font-weight="800" text-anchor="middle">△ DELTA (3-wire)</text>
+          <polygon points="560,70 470,225 650,225" fill="none" stroke="#475569" stroke-width="2"/>
+          <line x1="560" y1="70" x2="470" y2="225" stroke="#f87171" stroke-width="4"/>
+          <line x1="470" y1="225" x2="650" y2="225" stroke="#fbbf24" stroke-width="4"/>
+          <line x1="650" y1="225" x2="560" y2="70" stroke="#60a5fa" stroke-width="4"/>
+          <line x1="560" y1="70" x2="560" y2="40" stroke="#f87171" stroke-width="3"/>
+          <line x1="470" y1="225" x2="445" y2="250" stroke="#fbbf24" stroke-width="3"/>
+          <line x1="650" y1="225" x2="675" y2="250" stroke="#60a5fa" stroke-width="3"/>
+          <text x="560" y="34" fill="#fca5a5" font-size="0"></text>
+          <text x="430" y="252" fill="#fcd34d" font-size="13" font-weight="800" font-family="monospace">L2</text>
+          <text x="668" y="245" fill="#93c5fd" font-size="13" font-weight="800" font-family="monospace">L3</text>
+          <text x="552" y="36" fill="#fca5a5" font-size="13" font-weight="800" font-family="monospace">L1</text>
+          <text x="560" y="270" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="monospace">V_L=V_ph · I_L=√3·I_ph</text>
+        </svg>
+        <div class="cap">Wye gives two voltages and a neutral (ideal for mixed single/three-phase distribution). Delta has no neutral, handles unbalanced motor loads gracefully, and is common inside motors and at the delta-side of transformers.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Choosing One Over the Other</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Aspect</th><th>Wye (Star)</th><th>Delta</th></tr>
+          <tr><td><b>Wires</b></td><td>4 (3 phase + neutral)</td><td>3 (no neutral)</td></tr>
+          <tr><td><b>Voltages available</b></td><td class="mono">V_ph &amp; √3·V_ph</td><td class="mono">one (V_L = V_ph)</td></tr>
+          <tr><td><b>Neutral / single-phase loads</b></td><td>✅ yes</td><td>❌ none</td></tr>
+          <tr><td><b>Typical use</b></td><td>Distribution, lighting, generators</td><td>Motors, transformer primaries, high current</td></tr>
+          <tr><td><b>Insulation stress</b></td><td>Lower (each winding sees V_ph)</td><td>Higher (winding sees full V_L)</td></tr>
+          <tr><td><b>3rd-harmonic path</b></td><td>Trapped if no neutral</td><td>Circulates &amp; cancels in the loop</td></tr>
+        </table>
+      </div>
+      <p class="body">A classic transformer is <strong>Dyn11</strong>: delta primary, wye secondary with neutral, 30° phase shift. The delta winding gives the triplen harmonics a circulating path so they don't pollute the line, while the wye provides the neutral for single-phase customer loads.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 5 ===== -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 14</span>
+    <h2 class="page-title">The √3 Power Triangle</h2>
+    <p class="page-sub">Real, reactive and apparent power — and why three-phase power never pulses.</p>
+
+    <div class="card">
+      <div class="label">The Three Powers</div>
+      <p class="body">AC loads draw current that may lag (inductive) or lead (capacitive) the voltage by angle φ. That splits power into the famous <strong>power triangle</strong>:</p>
+      <div class="eqn">Active (real) power:    <b>P = √3·V_L·I_L·cos φ</b>   [W]    ← does work
+Reactive power:         <span class="v3">Q = √3·V_L·I_L·sin φ</span>   [VAR]  ← stores/returns
+Apparent power:         <span class="v2">S = √3·V_L·I_L</span>        [VA]   ← what the cable carries
+
+Relationship:  S² = P² + Q²        Power factor  PF = cos φ = P / S</div>
+      <p class="body"><strong>cos φ is the power factor.</strong> A motor at PF 0.8 draws 25% more current than its real power suggests — that "wasted" reactive current still heats your cables and is billed by utilities. (Power-factor correction, page 9, fixes it.)</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Power triangle with P Q and S">
+          <line x1="120" y1="200" x2="560" y2="200" stroke="#4ade80" stroke-width="5"/>
+          <text x="330" y="225" fill="#4ade80" font-size="16" font-weight="800" text-anchor="middle" font-family="monospace">P  (kW, real)</text>
+          <line x1="560" y1="200" x2="560" y2="70" stroke="#fbbf24" stroke-width="5"/>
+          <text x="640" y="140" fill="#fbbf24" font-size="16" font-weight="800" text-anchor="middle" font-family="monospace">Q (kVAR)</text>
+          <line x1="120" y1="200" x2="560" y2="70" stroke="#60a5fa" stroke-width="5"/>
+          <text x="300" y="118" fill="#93c5fd" font-size="16" font-weight="800" text-anchor="middle" font-family="monospace" transform="rotate(-16 300 118)">S (kVA)</text>
+          <path d="M170,200 A50 50 0 0 1 162,176" fill="none" stroke="#e879f9" stroke-width="2.5"/>
+          <text x="186" y="188" fill="#f5d0fe" font-size="15" font-weight="800" font-family="monospace">φ</text>
+        </svg>
+        <div class="cap">PF = cos φ = P/S. Shrink φ (correct the PF) and S → P: the cable carries only useful current.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Why Total Power Is Constant — The Headline Result</div>
+      <p class="body">Sum the instantaneous power p = v·i over all three phases of a balanced load. The pulsating 2ω terms (each at the same frequency but 120° apart) cancel exactly, leaving a constant:</p>
+      <div class="eqn">p₁+p₂+p₃ = 3·V_ph·I_ph·cos φ = <b>constant</b>   (no 2ω ripple!)
+
+Single phase:  p(t) = V·I·cos φ − V·I·cos(2ωt+φ)   ← pulses to ~0
+Three phase:   the three 2ωt terms sum to zero   ← perfectly smooth</div>
+      <p class="body"><strong>This is the deep "why."</strong> A single-phase motor's torque pulses 100/120 times a second (hence vibration and the need for capacitors); a three-phase motor receives <em>uniform</em> power and therefore <em>uniform torque</em> — smoother, quieter, and self-starting (page 6).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — Power-Factor &amp; the Power Triangle</div>
+      <p class="body">Set a 400 V line, a load current, and a power factor. Watch real vs reactive split.</p>
+      <div class="demo">
+        <div class="demo-row"><span>Line current I_L</span><b id="iVal">50 A</b></div>
+        <input type="range" id="iSlide" min="5" max="200" value="50">
+        <div class="demo-row" style="margin-top:10px;"><span>Power factor cos φ</span><b id="pfVal">0.80</b></div>
+        <input type="range" id="pfSlide" min="50" max="100" value="80">
+        <div class="seg">
+          <div class="seg-p" id="segP" style="width:80%">P</div>
+          <div class="seg-q" id="segQ" style="width:20%">Q</div>
+        </div>
+        <div class="demo-out" id="powOut"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 6 ===== -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 14</span>
+    <h2 class="page-title">The Rotating Magnetic Field</h2>
+    <p class="page-sub">The crown jewel: three fixed coils + three phases = a magnetic field that spins on its own.</p>
+
+    <div class="card">
+      <div class="label">How Stationary Coils Make a Spinning Field</div>
+      <p class="body">Place three stator windings 120° apart in space and feed them the three phase currents (120° apart in <em>time</em>). Each coil's field pulses along its own axis; <strong>added vectorially, the resultant is a field of constant magnitude that rotates</strong> at the supply frequency. This is the <strong>Ferraris–Tesla rotating field</strong> — the reason a three-phase motor needs no brushes, commutator or starting capacitor.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stator with three coils and a rotating field arrow" style="max-width:300px;margin:0 auto;">
+          <circle cx="150" cy="150" r="120" fill="none" stroke="#475569" stroke-width="4"/>
+          <path d="M 150 30 A 120 120 0 0 1 254 210" fill="none" stroke="#f87171" stroke-width="13" stroke-linecap="round"/>
+          <path d="M 254 210 A 120 120 0 0 1 46 210" fill="none" stroke="#fbbf24" stroke-width="13" stroke-linecap="round"/>
+          <path d="M 46 210 A 120 120 0 0 1 150 30" fill="none" stroke="#60a5fa" stroke-width="13" stroke-linecap="round"/>
+          <text x="150" y="22" fill="#fca5a5" font-size="15" font-weight="800" text-anchor="middle" font-family="monospace">L1</text>
+          <text x="270" y="225" fill="#fcd34d" font-size="15" font-weight="800" text-anchor="middle" font-family="monospace">L2</text>
+          <text x="30" y="225" fill="#93c5fd" font-size="15" font-weight="800" text-anchor="middle" font-family="monospace">L3</text>
+          <circle cx="150" cy="150" r="55" fill="#1a2230" stroke="#e879f9" stroke-width="3"/>
+          <g style="transform-origin:150px 150px; animation:spin 2.4s linear infinite;">
+            <polygon points="150,105 162,150 150,140 138,150" fill="#e879f9"/>
+            <polygon points="150,195 138,150 150,160 162,150" fill="#e879f9"/>
+          </g>
+          <text x="150" y="295" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="monospace">rotor follows the field</text>
+        </svg>
+        <div class="cap">As L1→L2→L3 rise and fall in turn, the field vector sweeps around the bore. The rotor is dragged along behind it — no electrical connection to the rotor needed.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Synchronous Speed — How Fast the Field Spins</div>
+      <p class="body">The field's rotation speed depends only on supply frequency and the number of magnetic <strong>pole pairs</strong> wound into the stator:</p>
+      <div class="eqn"><b>n_s = 120·f / P</b>   [rpm]      (P = number of poles, f in Hz)
+
+50 Hz, 2-pole:  n_s = 3000 rpm      60 Hz, 2-pole:  3600 rpm
+50 Hz, 4-pole:  1500 rpm           60 Hz, 4-pole:  1800 rpm
+50 Hz, 6-pole:  1000 rpm           60 Hz, 6-pole:  1200 rpm</div>
+      <p class="body">A <strong>synchronous motor</strong> (or alternator) locks exactly to n_s. An <strong>induction motor</strong> (page 7) runs slightly slower — that gap is "slip," and it's what makes induction torque possible. A <a href="../08_VFD.html" style="color:var(--accent-soft)">VFD</a> changes f to set n_s and therefore speed, which is exactly how variable-speed drives work.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 7 ===== -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 14</span>
+    <h2 class="page-title">The Induction Motor &amp; Slip</h2>
+    <p class="page-sub">The workhorse that converts three-phase electricity into ~90% of the world's industrial torque.</p>
+
+    <div class="card">
+      <div class="label">Why the Rotor Must Lag — Slip</div>
+      <p class="body">In a squirrel-cage induction motor the rotor has <em>no</em> external supply. The rotating stator field sweeps past the rotor bars, <strong>induces</strong> a voltage and current in them (Faraday), and that current — interacting with the field — produces torque (Lorentz). But if the rotor ever caught up to synchronous speed, the bars would see <em>no</em> relative motion, induce nothing, and make no torque. So the rotor must always run a little slower. That lag is <strong>slip</strong>:</p>
+      <div class="eqn"><b>slip  s = (n_s − n_r) / n_s</b>     (typically 1–5% at full load)
+
+Rotor speed:        n_r = n_s·(1 − s)
+Rotor (slip) freq:  f_r = s·f
+Full-load example:  1500 rpm field, 1450 rpm rotor → s ≈ 3.3%</div>
+      <p class="body"><strong>At standstill s = 1</strong> (max induction, high inrush current ~6× rated); as the rotor accelerates, slip falls and current drops to its running value. This is why direct-on-line starting causes a large inrush — and why we use star-delta or soft starters (page 8).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The Torque–Speed Curve</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Induction motor torque speed curve">
+          <line x1="80" y1="250" x2="710" y2="250" stroke="#334155" stroke-width="2"/>
+          <line x1="80" y1="250" x2="80" y2="30" stroke="#334155" stroke-width="2"/>
+          <text x="400" y="285" fill="#94a3b8" font-size="13" text-anchor="middle">speed →  (0 = standstill,  n_s = synchronous)</text>
+          <text x="36" y="140" fill="#94a3b8" font-size="13" text-anchor="middle" transform="rotate(-90 36 140)">torque →</text>
+          <!-- curve: starting torque, dip, breakdown peak, drop to ns -->
+          <path d="M80,170 C140,150 180,120 250,70 C300,40 330,55 380,120 C440,200 560,240 660,250" fill="none" stroke="#e879f9" stroke-width="3.5"/>
+          <circle cx="80" cy="170" r="5" fill="#4ade80"/><text x="92" y="165" fill="#4ade80" font-size="12" font-family="monospace">starting torque (Tst)</text>
+          <circle cx="270" cy="62" r="5" fill="#fbbf24"/><text x="285" y="58" fill="#fbbf24" font-size="12" font-family="monospace">breakdown torque (Tmax)</text>
+          <circle cx="630" cy="248" r="5" fill="#60a5fa"/><text x="500" y="235" fill="#93c5fd" font-size="12" font-family="monospace">full-load operating point</text>
+          <line x1="660" y1="30" x2="660" y2="250" stroke="#64748b" stroke-dasharray="4 4"/><text x="640" y="44" fill="#94a3b8" font-size="12" font-family="monospace">n_s</text>
+          <text x="600" y="120" fill="#cbd5e1" font-size="12" font-family="monospace">stable operating region →</text>
+        </svg>
+        <div class="cap">The motor settles where load torque crosses the curve's steep right-hand (stable) branch — just below n_s. Push past breakdown torque and it stalls.</div>
+      </div>
+    </div>
+
+    <div class="pro">
+      <div class="pt">Connection to your micro card &amp; VFD</div>
+      <p>Your micro card says "motors self-start — no starter needed." Now you know <em>why</em>: the rotating field provides the starting torque automatically. And the <a href="../08_VFD.html" style="color:var(--accent-soft)">VFD deep dive (A08)</a> exploits n_s = 120f/P — vary <em>f</em> and the whole torque-speed curve shifts, giving smooth speed control without changing the motor.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 8 ===== -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 14</span>
+    <h2 class="page-title">Star-Delta Starting</h2>
+    <p class="page-sub">The classic trick to tame motor inrush — and the √3 maths that explains the famous "⅓".</p>
+
+    <div class="card">
+      <div class="label">The Problem &amp; the Fix</div>
+      <p class="body">Direct-on-line (DOL) start draws ~6–8× rated current and a large torque shock. <strong>Star-delta starting</strong> connects the motor windings in <span class="hl">star to start</span> (each winding sees only V_L/√3) then switches to <span class="hl">delta to run</span> (full line voltage). Because torque and current scale with voltage², the star step cuts both starting current and starting torque to <strong>one-third</strong> of the DOL delta values:</p>
+      <div class="eqn">Voltage per winding in star:   V_ph(star) = V_L / √3
+Since I ∝ V and T ∝ V² :
+
+   <b>I_star = ⅓ · I_delta</b>      <b>T_start(star) = ⅓ · T_start(delta)</b>
+
+Derivation:  (V_L/√3)² / V_L² = 1/3      ← the √3 squared = 3</div>
+      <p class="body"><strong>The catch:</strong> you also lose ⅔ of the starting torque, so star-delta only suits loads that start <em>unloaded</em> (pumps with open valves, fans, conveyors). For loaded starts, a <a href="../08_VFD.html" style="color:var(--accent-soft)">VFD</a> or soft-starter is the modern choice — it ramps voltage/frequency smoothly with full torque control.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Starting Methods Compared</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Method</th><th>Start current</th><th>Start torque</th><th>Best for</th></tr>
+          <tr><td><b>DOL (direct)</b></td><td class="mono">~6–8× FLC</td><td>100%</td><td>Small motors (&lt;~5 kW), loaded starts</td></tr>
+          <tr><td><b>Star-Delta</b></td><td class="mono">~2–2.7× FLC</td><td>~33%</td><td>Unloaded starts: pumps, fans</td></tr>
+          <tr><td><b>Soft-starter</b></td><td class="mono">2–4× (set)</td><td>ramped</td><td>Smooth voltage ramp, belts, conveyors</td></tr>
+          <tr><td><b>VFD</b></td><td class="mono">≤ FLC</td><td>full / controlled</td><td>Speed control + soft start; best overall</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 9 ===== -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 14</span>
+    <h2 class="page-title">Power Factor Correction &amp; Harmonics</h2>
+    <p class="page-sub">Two invisible costs in every factory — and how engineers cancel them.</p>
+
+    <div class="card">
+      <div class="label">Power-Factor Correction (PFC)</div>
+      <p class="body">Inductive loads (motors, transformers) draw <strong>lagging reactive power Q</strong>. Adding <strong>capacitors</strong> in parallel supplies leading VARs that cancel the lagging ones, shrinking S toward P — so the same real work flows on less current. Benefits: lower line losses (I²R), freed-up transformer/cable capacity, and avoidance of utility PF penalties.</p>
+      <div class="eqn">Capacitor kVAR needed to go from PF₁ → PF₂:
+   <b>Q_c = P · (tan φ₁ − tan φ₂)</b>
+
+Example: 100 kW load, PF 0.75 → 0.95
+   tan(acos 0.75)=0.882 ,  tan(acos 0.95)=0.329
+   Q_c = 100·(0.882 − 0.329) ≈ <b>55 kVAR</b> of capacitors</div>
+      <p class="body"><strong>Caution:</strong> over-correction makes the system leading and can resonate with line inductance. Modern plants use <strong>automatic PF controllers</strong> that switch capacitor banks in steps, and <strong>detuned reactors</strong> to avoid harmonic resonance (below).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Harmonics — The Non-Linear-Load Problem</div>
+      <p class="body">Rectifiers, <a href="../08_VFD.html" style="color:var(--accent-soft)">VFDs</a> and switch-mode supplies draw current in <em>pulses</em>, not sine waves. Those distorted currents contain <strong>harmonics</strong> (multiples of 50/60 Hz) that overheat neutrals and transformers, trip breakers and distort voltage. The standard metric is <strong>THD</strong>:</p>
+      <div class="eqn"><b>THD = √(ΣI²ₙ) / I₁</b>   (n = 2,3,5,7…)
+
+Triplen harmonics (3rd, 9th…) add up in the NEUTRAL of a wye system
+  → a balanced load can still have a neutral hotter than the phases!
+Mitigation: delta windings (trap triplens), line reactors, 12-pulse
+            rectifiers, active/passive filters, IEEE 519 limits.</div>
+      <div class="grid-2">
+        <div class="mini c-amb"><h4>Triplen trap</h4><p>The delta winding circulates 3rd-harmonic currents so they don't reach the line — a hidden job of that Dyn11 transformer.</p></div>
+        <div class="mini c-blue"><h4>IEEE 519</h4><p>The reference standard capping voltage &amp; current THD at the point of common coupling.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 10 ===== -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 14</span>
+    <h2 class="page-title">Faults, Protection, Recap &amp; Quiz</h2>
+    <p class="page-sub">How three-phase systems fail — and the one-line truths to carry away.</p>
+
+    <div class="card">
+      <div class="label">How Three-Phase Systems Fail</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">⚡ Single-phasing</div><p>One line lost (blown fuse/loose lug). The motor runs on two phases, current surges, windings cook. A phase-loss relay must trip it.</p></div>
+        <div class="fail"><div class="ft">🔀 Phase-sequence reversal</div><p>Two lines swapped → motor &amp; pump spin backwards. A phase-sequence relay blocks the start.</p></div>
+        <div class="fail"><div class="ft">⚖️ Voltage unbalance</div><p>Even 2% unbalance causes ~6–10% extra heating (negative-sequence currents). Derate or fix the source.</p></div>
+        <div class="fail"><div class="ft">🔥 Earth / ground fault</div><p>Insulation breakdown to frame. Earth-fault (RCD/ground) protection and proper bonding catch it.</p></div>
+        <div class="fail"><div class="ft">💥 Line-to-line / 3-φ short</div><p>Massive fault current; clearing relies on correctly graded breakers &amp; fuses (discrimination).</p></div>
+        <div class="fail"><div class="ft">🌡️ Neutral overload (triplens)</div><p>Harmonic-rich loads overheat a "lightly loaded" neutral. Oversize the neutral or filter.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">One-Page Recap</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span>Three voltages, <b>120° apart</b>, always sum to zero → <b>constant power, constant torque</b>.</span></li>
+        <li><span class="num">2</span><span>The <b>√3</b> links line &amp; phase: wye → V_L=√3·V_ph; delta → I_L=√3·I_ph.</span></li>
+        <li><span class="num">3</span><span>Power triangle: <b>P=√3·V_L·I_L·cosφ</b>, with S²=P²+Q² and PF=cosφ.</span></li>
+        <li><span class="num">4</span><span>Three coils + three phases = a <b>rotating magnetic field</b> at <b>n_s=120f/P</b> — self-starting motors.</span></li>
+        <li><span class="num">5</span><span><b>Slip</b> makes induction torque; <b>star-delta</b> cuts start current/torque to ⅓ (√3²); correct <b>PF</b> &amp; tame <b>harmonics</b>.</span></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check — Tap to Reveal</div>
+      <p class="quiz-q">Q1: Why is total three-phase power constant while single-phase power pulses to zero?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Each phase's instantaneous power has a constant term plus a 2ω pulsation. The three pulsation terms are 120° apart and sum to exactly zero, leaving only the constant 3·V_ph·I_ph·cosφ. Single-phase has no partners to cancel its 2ω term, so it dips to zero twice per cycle.</span></div>
+
+      <p class="quiz-q">Q2: A wye supply reads 230 V line-to-neutral. What is the line-to-line voltage, and why?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> √3·230 ≈ 400 V. Line voltage is the phasor difference of two phase voltages 120° apart: |V₁−V₂| = 2·V_ph·cos30° = √3·V_ph.</span></div>
+
+      <p class="quiz-q">Q3: Why must an induction-motor rotor always run slower than synchronous speed?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Torque comes from current induced in the rotor bars by the rotating field. That induction requires <em>relative</em> motion (slip). At synchronous speed there'd be no relative motion, no induced current, no torque — so the rotor settles a few % below n_s.</span></div>
+
+      <p class="quiz-q">Q4: Star-delta starting cuts both start current and torque to one-third. Where does the "⅓" come from?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> In star each winding sees V_L/√3. Current ∝ V (÷√3) and torque ∝ V² (÷3). The (1/√3)² = 1/3 factor cuts current to ⅓ and torque to ⅓ vs the delta (running) connection.</span></div>
+
+      <p class="quiz-q">Q5: A balanced wye load draws no neutral current — yet the neutral overheats. How?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Triplen harmonics (3rd, 9th…) from non-linear loads are in-phase across all three phases, so instead of cancelling they <em>add</em> in the neutral — which can carry more than the phase conductors. Fix with delta windings, filters, or an oversized neutral.</span></div>
+    </div>
+
+  </section>
+
+  <!-- ============ PAGE 11 · WORKED EXAMPLES ============ -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 / 14 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade numericals worked line by line, each closing with the insight the examiner is really testing.</p>
+
+    <div class="card">
+      <div class="label">WE1 · Delta Load — Line vs Phase, and the Full Power Triangle</div>
+      <p class="body">A balanced <b>delta-connected</b> load of Z = 20 + j15 Ω per phase is supplied at 415 V, 50 Hz. Find phase current, line current, P, Q, S and power factor. Then repeat the load as <b>wye-connected</b> on the same supply and compare.</p>
+      <div class="eqn">DELTA CONNECTION
+|Z| = √(20² + 15²) = √625 = 25 Ω        φ = arctan(15/20) = 36.87°   → cosφ = 0.80 lagging
+
+In delta, each phase sees the FULL line voltage:  V_ph = V_L = 415 V
+I_ph = V_ph / |Z| = 415 / 25 = 16.6 A
+I_L  = √3 · I_ph = 1.732 × 16.6 = 28.75 A
+
+P = √3 · V_L · I_L · cosφ = 1.732 × 415 × 28.75 × 0.80 = 16 534 W ≈ 16.5 kW
+Q = √3 · V_L · I_L · sinφ = 1.732 × 415 × 28.75 × 0.60 = 12 401 var ≈ 12.4 kvar
+S = √3 · V_L · I_L        = 1.732 × 415 × 28.75 = 20 667 VA ≈ 20.7 kVA
+Check: √(16.5² + 12.4²) = √(272 + 154) = √426 = 20.6 kVA ✓
+Cross-check per phase: P = 3 · I_ph² · R = 3 × 16.6² × 20 = 16 534 W ✓
+
+WYE CONNECTION (same load impedances, same supply)
+V_ph = V_L / √3 = 415 / 1.732 = 239.6 V
+I_ph = 239.6 / 25 = 9.58 A  and in wye  I_L = I_ph = 9.58 A
+P = 3 · I_ph² · R = 3 × 9.58² × 20 = 5 508 W ≈ 5.5 kW
+
+RATIO:  P_delta / P_wye = 16 534 / 5 508 = 3.00</div>
+      <p class="body"><b>Discussion / insight.</b> The same three impedances draw <b>exactly three times</b> the power in delta as in wye, because delta applies √3 times the voltage to each impedance and power goes as V² — (√3)² = 3. This single ratio is the entire basis of star-delta starting (WE2), of dual-voltage motor windings (a 230/400 V motor is the same windings in delta or wye), and of the classic field mistake of energising a delta-connected 400 V motor's windings in delta on a 690 V supply — which applies √3 times rated volts, saturates the iron and burns it out. Note also that the power-factor and the impedance angle are <b>identical</b> in both connections: connection changes magnitude, never phase angle.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE2 · Star-Delta Starting — Current and Torque Numbers</div>
+      <p class="body">A 30 kW, 400 V, 4-pole induction motor has full-load current 55 A, locked-rotor current 6× FLC (DOL) and locked-rotor torque 1.8× full-load torque (DOL). Full-load torque follows from rated speed 1450 rpm. Compute DOL and star-delta starting current and torque, and comment on whether the starter can accelerate a conveyor needing 45% of FLT to break away.</p>
+      <div class="eqn">FULL-LOAD TORQUE
+T_FL = 9550 · P(kW) / N(rpm) = 9550 × 30 / 1450 = 197.6 N·m
+
+DIRECT ON LINE
+I_start(DOL) = 6 × 55 = 330 A
+T_start(DOL) = 1.8 × 197.6 = 355.7 N·m
+
+STAR-DELTA  (windings normally run in DELTA; the starter first connects them in STAR)
+In star each winding sees V_L/√3, so winding current falls by 1/√3,
+and the LINE current falls by a further 1/√3 (no √3 multiplication in star):
+
+I_start(star) = I_start(DOL) / 3 = 330 / 3 = 110 A          (= 2.0 × FLC)
+T_start(star) = T_start(DOL) / 3 = 355.7 / 3 = 118.6 N·m    (= 0.60 × T_FL)
+
+BREAKAWAY CHECK
+Load breakaway torque = 0.45 × 197.6 = 88.9 N·m
+Available in star     = 118.6 N·m  →  margin = 118.6 / 88.9 = 1.33  ✓ accelerates
+
+TRANSITION CURRENT (the hidden problem)
+At changeover the motor is near full speed but the open-transition break
+re-energises the windings in delta at low slip: a transient peak of
+typically 1.5–3 × I_FL·(6) is possible for a few cycles.</div>
+      <p class="body"><b>Discussion / insight.</b> Both current and torque fall by <b>the same factor of 3</b> — star-delta buys a 67% reduction in starting current at the price of a 67% reduction in starting torque, and there is no way to separate the two. That is why star-delta only works for loads whose torque demand at low speed is genuinely small (fans, centrifugal pumps, unloaded compressors) and fails on loaded conveyors, crushers and positive-displacement pumps. Examiners like the follow-up: <i>why not just use a soft starter or VFD?</i> A soft starter reduces voltage smoothly (torque still falls as V², but the ramp is continuous and there is no open-transition transient); a VFD reduces <b>frequency as well as voltage</b>, keeping V/f — and therefore flux and torque capability — constant, so it can deliver full torque at a fraction of the current. That is the fundamental advantage of A08's frequency control over any voltage-only starter.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE3 · Power-Factor Correction — kvar, Capacitance and the Delta/Wye Factor of 3</div>
+      <p class="body">A factory draws 500 kW at 0.78 lagging power factor from a 400 V, 50 Hz supply. Correct the power factor to 0.95 lagging. Find the required kvar, the capacitance per phase for delta and for wye connection, the new line current, and the released transformer capacity.</p>
+      <div class="eqn">EXISTING AND TARGET ANGLES
+cosφ₁ = 0.78 → φ₁ = 38.74°  → tanφ₁ = 0.8025
+cosφ₂ = 0.95 → φ₂ = 18.19°  → tanφ₂ = 0.3287
+
+REQUIRED COMPENSATION
+Q_C = P (tanφ₁ − tanφ₂) = 500 (0.8025 − 0.3287) = 500 × 0.4738 = 236.9 kvar
+   → specify a 240 kvar bank (nearest standard, in stages)
+
+CAPACITANCE — DELTA CONNECTION (capacitors connected across the lines)
+Per-phase (per-capacitor) kvar = 236.9 / 3 = 78.97 kvar, at V_cap = V_L = 400 V
+C = Q_ph / (ω · V_cap²)   with ω = 2π × 50 = 314.16 rad/s
+C_delta = 78 970 / (314.16 × 400²) = 78 970 / 50 265 600 = 1.571 × 10⁻³ F
+        = 1571 µF per phase
+
+CAPACITANCE — WYE CONNECTION (capacitors to neutral)
+V_ph = 400/√3 = 231 V,  per-phase kvar still 78.97 kvar
+C_wye = 78 970 / (314.16 × 231²) = 78 970 / 16 764 500 = 4.710 × 10⁻³ F
+      = 4710 µF per phase
+
+RATIO:  C_wye / C_delta = 4710 / 1570 = 3.00
+
+NEW CURRENT AND RELEASED CAPACITY
+Before: S₁ = 500 / 0.78 = 641.0 kVA   → I₁ = 641 000/(1.732 × 400) = 925 A
+After:  S₂ = 500 / 0.95 = 526.3 kVA   → I₂ = 526 300/(1.732 × 400) = 760 A
+Released capacity = 641.0 − 526.3 = 114.7 kVA  (18% of the transformer, free)
+Current reduction = 925 − 760 = 165 A (18%)</div>
+      <p class="body"><b>Discussion / insight.</b> The headline result is the <b>factor of 3</b>: a delta-connected bank needs only one third of the capacitance of a wye-connected bank for the same kvar, because each capacitor sees √3 times the voltage and Q ∝ V². Delta is therefore the standard connection for LV correction (less capacitance, cheaper cans) — at the cost of each capacitor being rated for the full line voltage. Two professional caveats that turn this from an arithmetic exercise into engineering. First, <b>do not over-correct</b>: pushing beyond unity makes the load capacitive (leading), which raises voltage, upsets generator AVRs and can cause self-excitation of a motor coasting down. Correct to 0.95–0.98, not 1.00, and use automatic staged switching for varying loads. Second — and this is the reason A56 exists — <b>this whole calculation only addresses reactive power Q</b>. If the 0.78 power factor is partly caused by rectifier loads (distortion power D), capacitors will not recover it, and worse, the bank will resonate with the supply inductance at h<sub>r</sub> = √(S<sub>SC</sub>/Q<sub>C</sub>). With a 1000 kVA/5% transformer and 240 kvar, h<sub>r</sub> = √(20 000/240) = 9.1 — uncomfortably near the 11th harmonic, so this bank should be <b>detuned</b>.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE4 · Unbalanced Four-Wire Load — Neutral Current and Sequence Components</div>
+      <p class="body">A 400/230 V four-wire distribution board carries unbalanced single-phase resistive loads: I<sub>a</sub> = 80 A∠0°, I<sub>b</sub> = 60 A∠−120°, I<sub>c</sub> = 35 A∠−240°. Find the neutral current, the zero- and negative-sequence components, and the NEMA percentage unbalance.</p>
+      <div class="eqn">RESOLVE INTO RECTANGULAR FORM
+I_a = 80∠0°     = 80.00 + j0
+I_b = 60∠−120°  = 60(−0.5 − j0.866)  = −30.00 − j51.96
+I_c = 35∠−240°  = 35(−0.5 + j0.866)  = −17.50 + j30.31
+
+NEUTRAL CURRENT  (Kirchhoff at the star point)
+I_N = I_a + I_b + I_c = (80 − 30 − 17.5) + j(0 − 51.96 + 30.31)
+    = 32.50 − j21.65
+|I_N| = √(32.50² + 21.65²) = √(1056 + 469) = √1525 = 39.1 A   ∠−33.7°
+
+ZERO-SEQUENCE COMPONENT
+I_0 = ⅓(I_a + I_b + I_c) = ⅓ × 39.1 = 13.0 A       and note  I_N = 3·I_0 ✓
+
+POSITIVE / NEGATIVE SEQUENCE  (a = 1∠120°)
+I_1 = ⅓(I_a + a·I_b + a²·I_c) = ⅓(80∠0° + 60∠0° + 35∠0°) = 58.33 A
+    (because rotating I_b by +120° and I_c by +240° aligns all three)
+I_2 = ⅓(I_a + a²·I_b + a·I_c)
+    = ⅓(80∠0° + 60∠120° + 35∠240°)
+    = ⅓[(80 − 30 − 17.5) + j(0 + 51.96 − 30.31)] = ⅓(32.50 + j21.65)
+|I_2| = 13.0 A
+Unbalance factor = I_2/I_1 = 13.0/58.33 = 22.3%  (severe)
+
+NEMA PERCENTAGE UNBALANCE (current form)
+mean = (80 + 60 + 35)/3 = 58.33 A
+max deviation = |35 − 58.33| = 23.33 A
+%unbalance = 23.33/58.33 × 100 = 40.0%</div>
+      <p class="body"><b>Discussion / insight.</b> Three lessons stack up here. (1) <b>The neutral is doing real work</b> — 39 A, half the heaviest phase — purely from fundamental-frequency unbalance, before any harmonics are considered. Add triplen harmonics from the single-phase electronic loads and the neutral can exceed the phase conductors entirely (see A56). (2) The identity <b>I<sub>N</sub> = 3·I<sub>0</sub></b> falls straight out of the arithmetic, which is why zero-sequence current is sometimes just called "neutral current ÷ 3", and why a core-balance CT around all three phases measures 3I<sub>0</sub> and forms the basis of earth-fault protection. (3) The two unbalance definitions give <b>very different numbers</b> (22.3% sequence-based, 40% NEMA) because they measure different things — always state which convention you used; standards specify the sequence-based ratio, field practice often uses NEMA. Practical action: redistribute the single-phase loads (moving ~20 A from phase A to phase C nearly balances the board), because unbalance costs neutral heating, extra losses, and — if the same unbalance appears in <i>voltage</i> — negative-sequence rotor heating in every motor on the board at roughly 2 × (%unbalance)² extra loss.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 · PROBLEM SET ============ -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 / 14 · MSc Practice</span>
+    <h2 class="page-title">Problem Set</h2>
+    <p class="page-sub">Ten problems in ascending difficulty. Attempt each on paper before revealing — the struggle is the learning.</p>
+
+    <div class="card quiz">
+      <p class="quiz-q"><b>P1.</b> A wye-connected supply has 240 V line-to-neutral. State the line-to-line voltage and the phase angle between V<sub>an</sub> and V<sub>ab</sub>.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> V<sub>L</sub> = √3 × 240 = <b>415.7 V</b>. The line-to-line phasor <b>leads</b> its reference phase voltage by <b>30°</b>: V<sub>ab</sub> = V<sub>an</sub> − V<sub>bn</sub> = √3·V<sub>an</sub>∠+30°. The 30° is not decoration — it is exactly the phase shift a Dyn11 transformer introduces, which is why transformers must have matching vector groups before they can be paralleled (A32).</span></div>
+    </div>
+
+    <div class="card quiz">
+      <p class="quiz-q"><b>P2.</b> A 415 V, 3-phase motor draws 42 A at 0.86 power factor. Find kVA, kW and kvar.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> S = √3·V·I = 1.732 × 415 × 42 = <b>30.2 kVA</b>. P = S·cosφ = 30.2 × 0.86 = <b>26.0 kW</b>. Q = S·sinφ = 30.2 × 0.510 = <b>15.4 kvar</b>. Check: √(26.0² + 15.4²) = √(676 + 237) = 30.2 ✓. <b>Trap:</b> the formula is √3·V<sub>L</sub>·I<sub>L</sub>, not 3·V<sub>L</sub>·I<sub>L</sub> — the 3 belongs with <i>phase</i> quantities (3·V<sub>ph</sub>·I<sub>ph</sub>), and √3 with <i>line</i> quantities. Both give the same answer; mixing them gives an answer 1.73× wrong.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <p class="quiz-q"><b>P3.</b> A 6-pole induction motor on a 50 Hz supply runs at 960 rpm at full load. Find synchronous speed, slip, rotor frequency, and the speed if the supply were 60 Hz.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> n<sub>s</sub> = 120f/P = 120 × 50/6 = <b>1000 rpm</b>. Slip s = (1000 − 960)/1000 = <b>0.04 = 4%</b>. Rotor (slip) frequency f<sub>r</sub> = s·f = 0.04 × 50 = <b>2 Hz</b> — which is why a rotor-bar fault shows sidebands at ±2·s·f around the line frequency in a current spectrum (A42/A55). At 60 Hz: n<sub>s</sub> = 120 × 60/6 = 1200 rpm, and at the same slip the shaft would run ≈ <b>1152 rpm</b>. <b>Caution:</b> running a 50 Hz motor on 60 Hz at the same voltage <i>reduces</i> flux (V/f falls by 17%), so torque capability drops even though speed rises — the V/f principle behind every VFD (A08).</span></div>
+    </div>
+
+    <div class="card quiz">
+      <p class="quiz-q"><b>P4.</b> A balanced delta load of 30 Ω per phase (pure resistance) is fed at 400 V. One line fuse blows. What power is now dissipated, as a fraction of the original?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Original: each of three 30 Ω phases sees 400 V → P = 3 × 400²/30 = <b>16.0 kW</b>. With one line open, the phase directly across the two remaining healthy lines still sees 400 V (P = 5.33 kW), while the other two phases are now in <b>series</b> across those same two lines (60 Ω total, P = 400²/60 = 2.67 kW). Total = 5.33 + 2.67 = <b>8.0 kW = exactly half</b>. Insight: single-phasing does not simply remove one third of the load — the remaining lines carry redistributed, unbalanced current, which is why for a <i>motor</i> single-phasing is so destructive (current in the surviving phases rises by ~1.7×) and why phase-failure protection (ANSI 46/47) is not optional.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <p class="quiz-q"><b>P5.</b> A 1000 kVA, 400 V transformer has 5% impedance. Find full-load current and prospective three-phase short-circuit current at its terminals. Which breaker rating do you specify?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> I<sub>FL</sub> = 1 000 000/(1.732 × 400) = <b>1443 A</b>. I<sub>SC</sub> = I<sub>FL</sub>/0.05 = <b>28.9 kA</b> (equivalently S<sub>SC</sub> = 1000/0.05 = 20 MVA). Specify switchgear with a breaking capacity comfortably above this — commonly <b>36 kA</b> at 400 V — and remember to add the contribution of any parallel transformer or on-site generation, and that motor contribution briefly raises the peak. <b>Two follow-ons examiners like:</b> (1) a <i>lower</i> %Z gives better voltage regulation but <i>higher</i> fault current and more expensive switchgear — that trade-off is why 4–6% is the usual LV distribution choice; (2) this same S<sub>SC</sub> sets the harmonic resonance order with any capacitor bank, h<sub>r</sub> = √(S<sub>SC</sub>/Q<sub>C</sub>) — see A56.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <p class="quiz-q"><b>P6.</b> Explain, with numbers, why a three-phase transmission line uses about 75% of the conductor material of a single-phase line delivering the same power at the same voltage and loss.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Take P watts at line voltage V and unity PF. <b>Single-phase</b> (two conductors): I<sub>1φ</sub> = P/V. Loss = 2·I<sub>1φ</sub>²R<sub>1</sub>. <b>Three-phase</b> (three conductors, balanced so the neutral carries nothing and can be omitted): I<sub>3φ</sub> = P/(√3·V), so I<sub>3φ</sub> = I<sub>1φ</sub>/√3. Loss = 3·I<sub>3φ</sub>²R<sub>3</sub> = 3·(I<sub>1φ</sub>²/3)·R<sub>3</sub> = I<sub>1φ</sub>²R<sub>3</sub>. For equal losses: 2·I<sub>1φ</sub>²R<sub>1</sub> = I<sub>1φ</sub>²R<sub>3</sub> → R<sub>3</sub> = 2R<sub>1</sub>, i.e. each three-phase conductor may have <b>half the cross-section</b>. Material ∝ (number of conductors) × (area): single-phase = 2 × A, three-phase = 3 × A/2 = 1.5A → ratio <b>1.5/2 = 0.75</b>. Hence the famous <b>25% copper saving</b> — the economic reason the entire world grid is three-phase, and the reason the neutral can often be omitted or reduced (until harmonics arrive and reverse that conclusion).</span></div>
+    </div>
+
+    <div class="card quiz">
+      <p class="quiz-q"><b>P7.</b> A 400 V feeder supplies 250 kW at 0.82 lagging. A 100 kvar detuned capacitor bank (7%) is switched in. Find the new power factor and comment on the capacitor voltage rating required.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Initial Q₁ = P·tanφ₁ = 250 × tan(34.92°) = 250 × 0.6982 = <b>174.6 kvar</b>. A 7% detuned bank delivers <i>more</i> than its capacitor rating at the busbar: Q<sub>eff</sub> ≈ Q<sub>C</sub>/(1 − p) = 100/0.93 = <b>107.5 kvar</b>. New Q₂ = 174.6 − 107.5 = 67.1 kvar → φ₂ = arctan(67.1/250) = 15.03° → <b>cos φ₂ = 0.966</b>. Capacitor voltage: V<sub>C</sub> = V<sub>L</sub>/(1 − p) = 400/0.93 = <b>430 V</b> continuous, so specify capacitors rated <b>≥ 480 V</b> (with margin for tolerance, harmonics and supply overvoltage). Fitting standard 415 V cans behind a detuning reactor is a well-known premature-failure cause. Also verify the tuned order h<sub>t</sub> = 1/√0.07 = 3.78 sits below the 5th ✓ (A56).</span></div>
+    </div>
+
+    <div class="card quiz">
+      <p class="quiz-q"><b>P8.</b> A three-phase 4-wire circuit feeds 120 A per phase of LED lighting with 40% third-harmonic content. Compute the neutral current and compare it with the phase RMS. What does this do to the "neutral can be smaller" rule?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> I₃ per phase = 0.40 × 120 = 48 A. Being <b>zero-sequence</b> (3 × 120° = 360° ≡ 0°, i.e. all three in phase), triplens add <b>arithmetically</b>: I<sub>N</sub> = 3 × 48 = <b>144 A</b>. Phase RMS = √(120² + 48²) = √(14 400 + 2304) = <b>129.2 A</b>. So <b>I<sub>N</sub>/I<sub>phase</sub> = 1.11 — the neutral carries MORE than the phases</b>, at 150 Hz where skin effect raises the effective resistance, and with <b>no protective device watching it</b>. The textbook rule ("balanced load ⇒ zero neutral current ⇒ reduce the neutral") is valid only at the fundamental and inverts completely for single-phase electronic loads. Correct practice: full-size or 200% neutral, treat the circuit as four loaded conductors for derating, and thermographically inspect neutral terminations. Full treatment in A56.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <p class="quiz-q"><b>P9.</b> Two 500 kVA transformers, both 400 V, are to run in parallel. One is Dyn11, the other Dyn1. The impedances are 4.5% and 5.5%. Discuss whether they can be paralleled and how load would divide if the vector groups matched.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> <b>They cannot be paralleled at all.</b> Dyn11 gives +30° and Dyn1 gives −30° phase displacement, a 60° difference; connecting them would place 60° of phase difference across the interconnection, driving an enormous circulating current limited only by the two impedances — effectively a short circuit. Vector group compatibility is an absolute prerequisite (along with the same voltage ratio, the same phase sequence and correct polarity). <b>If the groups did match</b>, load divides inversely with per-unit impedance: transformer A takes (1/4.5)/((1/4.5)+(1/5.5)) = 0.2222/(0.2222+0.1818) = <b>55%</b> and B takes <b>45%</b>. Total usable capacity is therefore limited by the first unit to reach 100%: A hits its 500 kVA when total load = 500/0.55 = <b>909 kVA</b>, not 1000 kVA — a 9% capacity loss caused purely by mismatched impedance. This is why parallel transformers should be specified with matched %Z.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <p class="quiz-q"><b>P10.</b> <i>Synthesis.</i> A plant has a 1000 kVA/5% transformer at 400 V, 620 A maximum demand, 0.79 lagging power factor, 200 kvar of plain capacitors installed, roughly 40% of the load being six-pulse VFDs, and a 2.4% voltage unbalance. Produce a prioritised engineering assessment.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Work through the four numbers the plant already gives you. <b>(1) Capacity.</b> S = √3 × 400 × 620 = 429 kVA of 1000 kVA — headroom exists, but 0.79 PF wastes it: at 0.95 the same 339 kW would need only 357 kVA, freeing ~72 kVA. <b>(2) Resonance — do this first, it is a hazard.</b> S<sub>SC</sub> = 1000/0.05 = 20 000 kVA; with 200 kvar in, h<sub>r</sub> = √(20 000/200) = <b>10.0 — essentially on the 11th harmonic</b>, which every six-pulse drive produces. With half the bank in, h<sub>r</sub> = √200 = 14.1 (near the 13th). The plain bank is unsafe in a 40%-VFD plant: expect capacitor and fuse failures. <b>Action:</b> retrofit 5.67% or 7% detuning reactors with correctly voltage-rated capacitors (≥480 V), interlocked off on generator. <b>(3) Power factor is partly distortion.</b> With 40% VFD load, some of the 0.79 is distortion power D, which capacitors cannot correct — so measure <b>true PF and the spectrum</b> before sizing any more kvar, and expect that the achievable cos φ₁ correction lifts true PF less than the arithmetic promises. Then check TDD against IEEE 519: I<sub>SC</sub> = 28.9 kA, I<sub>SC</sub>/I<sub>L</sub> = 28 900/620 = 46.6 → the 20–50 band, <b>TDD limit 8%</b>. <b>(4) Unbalance.</b> 2.4% exceeds EN 50160's 2% expectation and implies roughly 2 × 2.4² ≈ <b>12% extra rotor heating</b> in every motor — derate per NEMA MG-1 and hunt the cause (single-phase load distribution, a high-resistance joint, or one failed capacitor element, which would also explain item 2). <b>Sequence:</b> detune the bank → rebalance and re-measure → 7-day survey for TDD and true PF → then size correction/mitigation on measured data → finally re-check transformer loading with Factor-K. Full method in A56.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 · DERIVATIONS &amp; TRAPS ============ -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 / 14 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">Three derivations to reproduce from memory, a symbol glossary, and the seven mistakes that cost marks and equipment.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 · Where √3 Comes From</div>
+      <div class="eqn">Line voltage is the PHASOR DIFFERENCE of two phase voltages, not their sum.
+
+Take  V_an = V∠0°   and   V_bn = V∠−120°
+V_ab = V_an − V_bn
+     = V(1∠0°) − V(1∠−120°)
+     = V[(1 + j0) − (−0.5 − j0.866)]
+     = V[1.5 + j0.866]
+|V_ab| = V√(1.5² + 0.866²) = V√(2.25 + 0.75) = V√3    ∎
+∠V_ab  = arctan(0.866/1.5) = +30°
+
+GEOMETRIC VIEW (the version to sketch in an exam)
+Two equal phasors separated by 120°: their difference is the base of an
+isosceles triangle with equal sides V and apex angle 120°. Dropping a
+perpendicular gives two right triangles with base V·cos30°, so
+
+|V_ab| = 2·V·cos30° = 2V(√3/2) = √3·V     ∎
+
+THE SAME GEOMETRY, APPLIED TO CURRENT IN DELTA
+In delta, each LINE current is the difference of two PHASE currents:
+I_L = I_ph1 − I_ph2  →  |I_L| = √3·|I_ph|,  lagging by 30°
+
+SO THE SYMMETRY IS:
+   WYE  : V_L = √3·V_ph ,  I_L = I_ph
+   DELTA: V_L = V_ph    ,  I_L = √3·I_ph
+Either way:  S = 3·V_ph·I_ph = √3·V_L·I_L</div>
+      <p class="body"><b>What it teaches.</b> √3 is never a fudge factor — it is always <b>2cos30°</b>, the geometry of subtracting two phasors 120° apart. The accompanying <b>30° phase shift</b> is equally important and is usually the part students forget: it is the physical origin of transformer vector groups (Dyn11 = delta primary, wye secondary, secondary lagging by 30° in the "11 o'clock" position) and therefore of the paralleling rules in A32. Notice too that S = 3·V<sub>ph</sub>·I<sub>ph</sub> = √3·V<sub>L</sub>·I<sub>L</sub> in <b>both</b> connections — the 3 travels with phase quantities and the √3 with line quantities, and that is the whole content of the most common arithmetic error in three-phase work.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 · Why Total Instantaneous Power Is Constant</div>
+      <div class="eqn">For one phase, with v = √2·V·sin(ωt) and i = √2·I·sin(ωt − φ):
+
+p(t) = v·i = 2VI·sin(ωt)·sin(ωt − φ)
+
+Use the identity  2·sinA·sinB = cos(A−B) − cos(A+B):
+
+p(t) = VI·cosφ − VI·cos(2ωt − φ)
+       └ constant ┘   └ pulsates at TWICE line frequency ┘
+
+Now sum all three phases. The constant terms simply add:
+   3·VI·cosφ
+The pulsating terms are displaced by 2 × 120° = 240° from each other:
+   cos(2ωt − φ) + cos(2ωt − φ − 240°) + cos(2ωt − φ − 480°)
+
+Since 480° ≡ 120°, these are three unit cosines at 0°, 240° and 120°
+— three vectors evenly spaced by 120° — whose sum is exactly ZERO.
+
+Therefore:   p_total(t) = 3·V_ph·I_ph·cosφ = CONSTANT, for all t    ∎
+Equivalently: p_total = √3·V_L·I_L·cosφ, with no ripple term at all.</div>
+      <p class="body"><b>What it teaches.</b> This is the deepest reason the world is three-phase, and it is a <i>mechanical</i> reason as much as an electrical one. Constant instantaneous power means <b>constant torque</b>: a three-phase motor produces smooth shaft torque, whereas a single-phase motor's torque pulses to zero 100 times a second, which is why single-phase machines need starting mechanisms, vibrate more, and are limited to small ratings. It also means a three-phase generator experiences constant mechanical loading on its prime mover — no 100 Hz torque ripple to fatigue the shaft and coupling. The corollary is examinable: <b>the moment the load becomes unbalanced or distorted, the cancellation is incomplete and torque ripple returns</b> — which is exactly how 5th/7th harmonics produce a 6× line-frequency (300 Hz) pulsation in A56 and a diagnosable vibration signature in A42.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 · The Star-Delta ⅓ Factor</div>
+      <div class="eqn">A motor's windings are designed to run in DELTA on line voltage V_L.
+The starter first connects them in STAR on the same supply.
+
+STEP 1 — voltage across each winding
+   Delta (run):   V_w = V_L
+   Star (start):  V_w = V_L/√3        → a factor 1/√3 = 0.577
+
+STEP 2 — current in each winding (winding impedance Z unchanged)
+   I_w,star / I_w,delta = (V_L/√3)/V_L = 1/√3
+
+STEP 3 — LINE current (this is where the second √3 appears)
+   In delta:  I_L = √3 · I_w      (line current is √3 × winding current)
+   In star:   I_L = I_w           (line current IS the winding current)
+
+   I_L,star / I_L,delta = (I_w/√3) / (√3·I_w) = 1/3        ∎
+
+STEP 4 — torque
+   Induction motor torque ∝ V_w²  (at a given slip)
+   T_star / T_delta = (1/√3)² = 1/3                        ∎
+
+CONCLUSION
+   Starting current falls to 1/3   AND   starting torque falls to 1/3.
+   The reduction ratio is identical — you cannot have one without the other.</div>
+      <p class="body"><b>What it teaches.</b> The 1/3 arrives by <b>two independent factors of 1/√3</b> — one from the reduced winding voltage, one from the loss of the delta's √3 line/phase multiplication — and being able to say which is which is what distinguishes a real understanding from a memorised ratio. The engineering consequence is the honest limitation of star-delta starting: it is a <b>fixed, un-tunable</b> 3:1 trade with an open-transition current transient at changeover, suitable only for loads with low breakaway torque. Compare the alternatives on the same basis: a <b>soft starter</b> reduces voltage continuously (torque still ∝ V², but smoothly and with no transition step), while a <b>VFD</b> reduces voltage <i>and</i> frequency together, holding V/f — hence flux — constant, which is the only way to obtain full torque at low speed and low current (A08).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol Glossary</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Symbol</th><th>Name</th><th>Units</th><th>Note</th></tr>
+          <tr><td>V<sub>L</sub>, V<sub>ph</sub></td><td>Line, phase voltage</td><td>V</td><td>Wye: V<sub>L</sub> = √3·V<sub>ph</sub>; delta: V<sub>L</sub> = V<sub>ph</sub></td></tr>
+          <tr><td>I<sub>L</sub>, I<sub>ph</sub></td><td>Line, phase current</td><td>A</td><td>Wye: I<sub>L</sub> = I<sub>ph</sub>; delta: I<sub>L</sub> = √3·I<sub>ph</sub></td></tr>
+          <tr><td>P, Q, S</td><td>Active, reactive, apparent power</td><td>W, var, VA</td><td>S = √3·V<sub>L</sub>·I<sub>L</sub>; S² = P² + Q² (sinusoidal only — add D if distorted, A56)</td></tr>
+          <tr><td>cos φ</td><td>Power factor</td><td>—</td><td>Displacement PF; true PF differs when harmonics are present</td></tr>
+          <tr><td>n<sub>s</sub></td><td>Synchronous speed</td><td>rpm</td><td>120f/P (P = poles) = 60f/pole-pairs</td></tr>
+          <tr><td>s</td><td>Slip</td><td>—</td><td>(n<sub>s</sub> − n<sub>r</sub>)/n<sub>s</sub>; rotor frequency = s·f</td></tr>
+          <tr><td>I<sub>0</sub>, I<sub>1</sub>, I<sub>2</sub></td><td>Zero, positive, negative sequence</td><td>A</td><td>I<sub>N</sub> = 3·I<sub>0</sub>; I<sub>2</sub> causes backward torque &amp; rotor heating</td></tr>
+          <tr><td>Z%</td><td>Transformer impedance</td><td>%</td><td>I<sub>SC</sub> = I<sub>FL</sub>/Z; S<sub>SC</sub> = S<sub>tx</sub>/Z</td></tr>
+          <tr><td>Q<sub>C</sub></td><td>Capacitor rating</td><td>kvar</td><td>Q<sub>C</sub> = P(tanφ₁ − tanφ₂); C<sub>wye</sub> = 3·C<sub>delta</sub></td></tr>
+          <tr><td>h<sub>r</sub></td><td>Resonant harmonic order</td><td>—</td><td>√(S<sub>SC</sub>/Q<sub>C</sub>) — always check before installing capacitors</td></tr>
+          <tr><td>a</td><td>Rotation operator</td><td>—</td><td>1∠120°; 1 + a + a² = 0</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven Exam &amp; Field Traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>Mixing √3 and 3.</b> S = √3·V<sub>L</sub>·I<sub>L</sub> = 3·V<sub>ph</sub>·I<sub>ph</sub>. Using 3 with line quantities inflates every answer by 1.732. Write down which quantities you have <i>before</i> choosing the formula.</span></li>
+        <li><span class="num">2</span><span><b>Line voltage as a sum.</b> V<sub>ab</sub> = V<sub>an</sub> − V<sub>bn</sub>, a phasor <b>difference</b> (giving √3 and +30°), not 2V and not V<sub>an</sub> + V<sub>bn</sub>.</span></li>
+        <li><span class="num">3</span><span><b>Forgetting the ×3 capacitance factor.</b> For the same kvar, C<sub>wye</sub> = 3·C<sub>delta</sub>, because each delta capacitor sees √3 times the voltage and Q ∝ V². Also: never over-correct past unity, and always check h<sub>r</sub> = √(S<sub>SC</sub>/Q<sub>C</sub>) — a plain bank in a converter-rich plant is a resonance waiting to happen (A56).</span></li>
+        <li><span class="num">4</span><span><b>n<sub>s</sub> = 120f/P with P as pole-pairs.</b> P is the number of <b>poles</b> (always even). A "4-pole" motor has 2 pole-pairs and 1500 rpm at 50 Hz; using pole-pairs in the same formula doubles the answer.</span></li>
+        <li><span class="num">5</span><span><b>Assuming the neutral is idle.</b> True only for a balanced <i>fundamental</i>. Unbalance puts real current in it (WE4), and zero-sequence <b>triplen harmonics add arithmetically</b> — a neutral can exceed the phase conductors, unprotected (P8, A56).</span></li>
+        <li><span class="num">6</span><span><b>Treating star-delta as free.</b> Current and torque both fall to <b>exactly ⅓</b>; you cannot reduce inrush without losing the same fraction of torque. Also remember the open-transition transient at changeover, and that a delta-wound motor connected in delta on √3× its rated voltage will saturate and burn.</span></li>
+        <li><span class="num">7</span><span><b>Ignoring phase sequence and vector group.</b> Swapping any two phases reverses rotation — dangerous for pumps, compressors and conveyors, hence ANSI 47 phase-sequence relays. And transformers of different vector groups (Dyn11 vs Dyn1) can <b>never</b> be paralleled, whatever their ratings match (P9, A32).</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 · STUDY &amp; PRACTICE ============ -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 / 14 · MSc Practice</span>
+    <h2 class="page-title">Study &amp; Practice Path</h2>
+    <p class="page-sub">The reference shelf, an eight-step hands-on ladder, and a self-assessment grid.</p>
+
+    <div class="card">
+      <div class="label">Reference Shelf</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Source</th><th>Type</th><th>Use it for</th></tr>
+          <tr><td><b>Electrical Machinery — P. S. Bimbhra</b></td><td>Textbook <span class="hl2">(in your material folder)</span></td><td>The rigorous treatment: three-phase circuits, symmetrical components, machine equivalent circuits. The standard reference for this material</td></tr>
+          <tr><td><b>Electrical and Electronic Principles and Technology — John Bird</b></td><td>Textbook <span class="hl2">(in your material folder)</span></td><td>Clear worked three-phase examples, phasor algebra, PF correction — best starting point if the maths feels rusty</td></tr>
+          <tr><td><b>Theory and Problems of Basic Electrical Engineering</b></td><td>Problem book <span class="hl2">(in your material folder)</span></td><td>Drill: dozens of balanced/unbalanced three-phase problems with solutions</td></tr>
+          <tr><td><b>Introduction to Electric Circuits</b></td><td>Textbook <span class="hl2">(in your material folder)</span></td><td>Phasors, complex impedance, mesh/nodal analysis under AC — the toolkit behind every calculation here</td></tr>
+          <tr><td><b>Electric Motors and Drives — Austin Hughes</b></td><td>Textbook <span class="hl2">(in your material folder)</span></td><td>The physical intuition: rotating field, slip, starting methods, why V/f matters</td></tr>
+          <tr><td><b>Practical Electrical Engineering (2016)</b></td><td>Textbook <span class="hl2">(in your material folder)</span></td><td>Applied three-phase power systems, transformers, distribution</td></tr>
+          <tr><td><b>Electrical Installation Designs</b></td><td>Handbook <span class="hl2">(in your material folder)</span></td><td>Real distribution practice: cable sizing, neutral sizing, capacitor installation</td></tr>
+          <tr><td><b>IEC 60038</b></td><td>Standard</td><td>Standard voltages (230/400 V, 400/690 V, 11 kV, 33 kV) and tolerances</td></tr>
+          <tr><td><b>IEC 60076 / EN 50160 / IEEE 519</b></td><td>Standards</td><td>Transformer vector groups &amp; impedance; supply voltage characteristics; harmonic limits</td></tr>
+          <tr><td><b>A08, A32, A55, A51, A56</b></td><td>This library</td><td>VFDs, transformers, motors, starters, and power quality — the five modules that build directly on this one</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Eight-Step Hands-On Ladder</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>Measure a real board.</b> With a true-RMS meter, record all three line-to-line and line-to-neutral voltages. Verify the √3 ratio to within 1%, and compute the NEMA percentage unbalance. Almost no one does this, and it takes three minutes.</span></li>
+        <li><span class="num">2</span><span><b>Draw the phasor diagram from your own readings</b> to scale, and confirm the 30° shift between V<sub>an</sub> and V<sub>ab</sub> geometrically. Sketching it once beats reading it ten times.</span></li>
+        <li><span class="num">3</span><span><b>Clamp the neutral</b> of a lighting or socket distribution board. Compare it with the phase currents and explain the number using both unbalance and triplen harmonics.</span></li>
+        <li><span class="num">4</span><span><b>Read a motor nameplate</b> and decode it fully: 400/690 V Δ/Y meaning, FLC, cos φ, rated speed → number of poles, slip and full-load torque via T = 9550P/N.</span></li>
+        <li><span class="num">5</span><span><b>Trace a star-delta starter</b> in a real panel: the three contactors, the interlocks, the timer, and where the open-transition transient occurs. Then compute its starting current and torque for the motor fitted (WE2).</span></li>
+        <li><span class="num">6</span><span><b>Do your site's fault-level arithmetic:</b> from the transformer nameplate, compute I<sub>FL</sub>, I<sub>SC</sub> and S<sub>SC</sub>, and write them on the single-line diagram alongside the switchgear rating.</span></li>
+        <li><span class="num">7</span><span><b>Size a PF correction bank</b> for a real feeder from its metered kW and PF, choose delta connection, compute the capacitance, then <b>check h<sub>r</sub> = √(S<sub>SC</sub>/Q<sub>C</sub>)</b> for every stage combination and specify detuning if needed.</span></li>
+        <li><span class="num">8</span><span><b>Simulate an unbalanced four-wire load</b> in Python or a spreadsheet: enter three phasor currents, output I<sub>N</sub>, I<sub>0</sub>, I<sub>1</sub>, I<sub>2</sub> and both unbalance definitions. Then verify your WE4 answers with it.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-Assessment — Do You Own This Subject?</div>
+      <div class="grid-2">
+        <div class="mini c-blue"><h4>Foundation</h4><p>Can you derive √3 as 2cos30° from a phasor difference, and state the wye/delta line-phase relations for both voltage and current without looking them up?</p></div>
+        <div class="mini c-amb"><h4>Working</h4><p>Given any two of {kW, kVA, kvar, PF, current, voltage}, can you find the rest — and size a PF correction bank with the correct delta capacitance?</p></div>
+        <div class="mini c-purp"><h4>Diagnostic</h4><p>Shown an unbalanced four-wire board, can you compute I<sub>N</sub> and the sequence components, and explain both the neutral heating and the motor rotor heating it causes?</p></div>
+        <div class="mini c-teal"><h4>Design</h4><p>Can you compute a site's fault level, choose a starting method with justified current/torque numbers, and check capacitor resonance before installing anything?</p></div>
+      </div>
+      <p class="body" style="margin-top:14px">When all four are true, you can read any three-phase installation from its nameplates alone — and you are ready for the modules that build on it: A08 (VFDs), A32 (transformers), A51 (starters), A55 (motors) and A56 (power quality).</p>
+    </div>
+  </section>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"Three phases, 120° apart → constant power, a free-spinning field, and √3 everywhere."</p>
+    </div>
+
+    <div class="footer">
+      Advanced Deep Dive · Lesson A30 · Three-Phase Power<br>
+      Companion to Micro Card 30 · Industrial Engineering Micro-Learning Series<br>
+      Connects to: <a href="../30_Three_Phase_Power.html" style="color:var(--accent-soft)">Three-Phase micro (30)</a> · <a href="A08_VFD_Deep_Dive.html" style="color:var(--accent-soft)">VFD (A08)</a> · <a href="A09_Servo_Motion_Deep_Dive.html" style="color:var(--accent-soft)">Servo &amp; Motion (A09)</a> · <a href="A29_MOSFETs_Deep_Dive.html" style="color:var(--accent-soft)">MOSFETs (A29)</a>
+    </div>
+
+
+</div>
+
+<script>
+  /* Page 2 — three sine waves + zero sum */
+  const wc = document.getElementById('waveCanvas');
+  const wx = wc.getContext('2d');
+  function wresize(){ const dpr=window.devicePixelRatio||1; wc.width=wc.offsetWidth*dpr; wc.height=240*dpr; wx.setTransform(dpr,0,0,dpr,0,0); }
+  wresize(); window.addEventListener('resize', wresize);
+  const cols=['#f87171','#fbbf24','#60a5fa'];
+  const offs=[0, 2*Math.PI/3, 4*Math.PI/3];
+  let t=0;
+  function wdraw(){
+    const W=wc.offsetWidth, H=240;
+    wx.clearRect(0,0,W,H);
+    wx.strokeStyle='rgba(148,163,184,0.18)'; wx.lineWidth=1;
+    wx.beginPath(); wx.moveTo(0,H/2); wx.lineTo(W,H/2); wx.stroke();
+    for(let x=0;x<W;x+=W/8){ wx.beginPath(); wx.moveTo(x,0); wx.lineTo(x,H); wx.strokeStyle='rgba(148,163,184,0.06)'; wx.stroke(); }
+    // three phases
+    for(let i=0;i<3;i++){
+      wx.beginPath(); wx.strokeStyle=cols[i]; wx.lineWidth=3; wx.shadowColor=cols[i]; wx.shadowBlur=7;
+      for(let x=0;x<=W;x++){ const a=(x/W)*4*Math.PI - t + offs[i]; const y=H/2 - Math.sin(a)*(H/2.8); x===0?wx.moveTo(x,y):wx.lineTo(x,y); }
+      wx.stroke(); wx.shadowBlur=0;
+    }
+    // sum (should be flat zero)
+    wx.beginPath(); wx.strokeStyle='#ffffff'; wx.lineWidth=2; wx.setLineDash([6,5]);
+    for(let x=0;x<=W;x++){ let s=0; for(let i=0;i<3;i++){ s+=Math.sin((x/W)*4*Math.PI - t + offs[i]); } const y=H/2 - s*(H/2.8); x===0?wx.moveTo(x,y):wx.lineTo(x,y); }
+    wx.stroke(); wx.setLineDash([]);
+    t+=0.04; requestAnimationFrame(wdraw);
+  }
+  wdraw();
+
+  /* Page 5 — power triangle / PF demo */
+  const iS=document.getElementById('iSlide'), pfS=document.getElementById('pfSlide');
+  const iVal=document.getElementById('iVal'), pfVal=document.getElementById('pfVal');
+  const segP=document.getElementById('segP'), segQ=document.getElementById('segQ'), powOut=document.getElementById('powOut');
+  function powUpdate(){
+    const I=+iS.value, pf=+pfS.value/100, VL=400;
+    const S=Math.sqrt(3)*VL*I/1000;          // kVA
+    const P=S*pf;                            // kW
+    const Q=S*Math.sin(Math.acos(pf));       // kVAR
+    iVal.textContent=I+' A'; pfVal.textContent=pf.toFixed(2);
+    const pPct=P/S*100, qPct=Q/S*100;
+    segP.style.width=pPct+'%'; segQ.style.width=qPct+'%';
+    segP.textContent = pPct>14 ? 'P '+pPct.toFixed(0)+'%' : '';
+    segQ.textContent = qPct>14 ? 'Q '+qPct.toFixed(0)+'%' : '';
+    let note = pf>=0.95 ? 'good PF — minimal wasted current' : pf>=0.85 ? 'acceptable — correction may still help' : 'poor PF — add capacitors, you pay for wasted VARs';
+    powOut.innerHTML = `S = √3·400·${I} = <b>${S.toFixed(1)} kVA</b> · P = <b>${P.toFixed(1)} kW</b> · Q = <b>${Q.toFixed(1)} kVAR</b>\n→ ${note}`;
+  }
+  iS.addEventListener('input',powUpdate); pfS.addEventListener('input',powUpdate); powUpdate();
+</script>
+</body>
+</html>

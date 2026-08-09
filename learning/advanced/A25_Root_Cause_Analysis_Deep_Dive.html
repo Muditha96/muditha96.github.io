@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Root Cause Analysis — RCA · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #22d3ee;       /* cyan — matches micro card 25 RCA theme (--accent-rca) */
+    --accent-soft: #a5f3fc;
+    --accent-2: #60a5fa;     /* blue */
+    --accent-3: #fbbf24;     /* amber */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(34,211,238,0.14), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(96,165,250,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--bg); background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(34,211,238,0.32);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(34,211,238,0.12), rgba(96,165,250,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent); background: rgba(34,211,238,0.12); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--accent-3)!important; } .c-amb .big{color:var(--accent-3)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .pro { background: linear-gradient(145deg, rgba(34,211,238,0.08), transparent); border:1px solid rgba(34,211,238,0.22); border-radius:14px; padding:16px; }
+  .pro .pt { font-weight:700; color:var(--accent-soft); margin-bottom:6px; font-size:15px; }
+  .pro p { font-size:13.5px; color:var(--text-dim); }
+  .pro em { color:var(--accent-3); font-style:normal; font-weight:600; }
+
+  .memory { background: linear-gradient(135deg, #22d3ee, #0e7490); color: #fff; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(255,255,255,0.85); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(34,211,238,0.08); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  /* interactive 5-Whys ladder demo */
+  .why-demo { display:grid; gap:10px; margin-top:8px; }
+  .why-step { background:var(--card-2); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:10px; padding:14px 16px; opacity:.35; transform:translateX(-8px); transition:all .35s ease; }
+  .why-step.on { opacity:1; transform:translateX(0); box-shadow:0 0 16px rgba(34,211,238,0.18); }
+  .why-step .wq { font-size:13px; color:var(--text-dim); font-weight:700; }
+  .why-step .wa { font-size:15px; color:var(--text); margin-top:3px; }
+  .why-root { background:linear-gradient(135deg,var(--green),#16a34a); color:var(--bg); font-weight:800; border-radius:10px; padding:14px 16px; text-align:center; opacity:0; transform:scale(.92); transition:all .4s ease; }
+  .why-root.on { opacity:1; transform:scale(1); }
+  .why-ctrl { display:flex; gap:10px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
+  .why-ctrl button { background:var(--card); border:2px solid var(--accent); color:var(--accent); padding:9px 18px; border-radius:999px; font-size:14px; font-weight:700; cursor:pointer; }
+  .why-ctrl button:active { background:var(--accent); color:var(--bg); }
+
+  /* tool selector demo */
+  .tool-pick { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
+  .tcard { background:var(--card-2); border:1px solid var(--border); border-bottom:3px solid var(--accent); border-radius:10px; padding:14px 8px; text-align:center; cursor:pointer; transition:all .2s; }
+  .tcard .ti { font-size:24px; display:block; margin-bottom:5px; }
+  .tcard .tn { font-size:12px; font-weight:800; color:var(--accent-soft); }
+  .tcard.active { background:var(--accent); border-color:var(--accent); }
+  .tcard.active .tn { color:var(--bg); }
+  .tinfo { margin-top:14px; background:var(--card-2); border-left:4px solid var(--accent); border-radius:12px; padding:18px 20px; }
+  .tinfo h4 { color:var(--accent-soft); font-size:18px; margin-bottom:6px; }
+  .tinfo p { font-size:15px; color:var(--text-dim); line-height:1.5; }
+  .tinfo .ex { font-size:14px; color:var(--text); margin-top:8px; } .tinfo .ex b { color:var(--accent); }
+
+  @keyframes fadeUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.4);opacity:.65;} }
+  @media (min-width: 820px) and (max-width: 1180px) { .container { padding: 48px 40px 100px; } }
+  @media (max-width: 620px){ .grid-2,.grid-3,.fail-grid,.tool-pick{grid-template-columns:1fr;} .container{padding:26px 16px 70px;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Track · MSc-Level Deep Dive · ~10 pages</span></div>
+  <h1 class="hero"><span class="emoji">🔎</span>Root Cause Analysis</h1>
+  <p class="hero-sub">The full discipline behind "ask why five times": the epistemology of causation, the seven classic RCA tools (5 Whys, Fishbone, Fault Tree, Pareto, FMEA, the Apollo cause-map, Barrier analysis), the math of fault trees and Pareto, the 8D / A3 corrective-action frameworks, human-error and Swiss-cheese systems thinking, and the traps that make teams "solve" the wrong problem.</p>
+
+  <div class="connect">
+    <span class="pill">↔ MICRO 25</span>
+    <span>This deep dive expands the 90-second card <a href="../25_Root_Cause_Analysis.html">"Root Cause Analysis"</a>. The card showed the interactive 5-Whys ladder, the 6-M fishbone and the "don't stop at blame" rule. Here we build it rigorously: a precise definition of a <em>root cause</em>, all seven tools with the math behind fault trees and Pareto, evidence-based causation vs. opinion, the <a href="A23_TPM_Deep_Dive.html">A23 TPM</a> link (RCA feeds the Focused-Improvement pillar), the <a href="A22_OEE_Deep_Dive.html">A22 OEE</a> link (RCA attacks the six big losses), 8D &amp; A3 corrective action, and Reason's Swiss-cheese model of systemic failure. It is the engine room of every Six Sigma, Lean and reliability programme.</span>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · What a root cause is</a>
+    <a href="#p2">2 · The causal chain</a>
+    <a href="#p3">3 · The 7 tools</a>
+    <a href="#p4">4 · 5 Whys done right</a>
+    <a href="#p5">5 · Fishbone (Ishikawa)</a>
+    <a href="#p6">6 · Fault Tree &amp; math</a>
+    <a href="#p7">7 · Pareto &amp; FMEA</a>
+    <a href="#p8">8 · 8D &amp; A3 process</a>
+    <a href="#p9">9 · Human error &amp; pitfalls</a>
+    <a href="#p10">10 · Recall</a>
+  </div>
+
+  <!-- PAGE 1 -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 · Foundations</span>
+    <h2 class="page-title">What a Root Cause Actually Is</h2>
+    <div class="card">
+      <div class="label">Precise Definition</div>
+      <p class="lead"><span class="hl">Root Cause Analysis (RCA)</span> is a structured, evidence-based method for tracing a problem back to the <strong>deepest fixable cause</strong> — the point in the causal chain where, if you intervene, the problem stops recurring and does not migrate elsewhere.</p>
+      <p class="body">The micro card called RCA "a structured method to find the true source of a problem." Correct — but the word that does the heavy lifting is <em>fixable</em>. A true root cause has three tests, drawn from the classic RCA literature (Latino &amp; Latino, ASQ): <span class="hl">(1)</span> when you remove it, the problem goes away; <span class="hl2">(2)</span> when you remove it, the problem does not reappear by another path; and <span class="hl3">(3)</span> it is something the organisation can actually control. "Gravity," "the laws of physics" or "the operator was careless" all fail at least one test — they are either uncontrollable or are themselves symptoms of a system.</p>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="mini c-grn"><div class="big">1</div><h4>Removal eliminates</h4><p>Take it away and the problem stops — proof you reached deep enough.</p></div>
+        <div class="mini c-blue"><div class="big">2</div><h4>No recurrence</h4><p>It does not return by a different route — you didn't just patch a symptom.</p></div>
+        <div class="mini c-amb"><div class="big">3</div><h4>Controllable</h4><p>The organisation can act on it — otherwise keep digging to a cause you can.</p></div>
+      </div>
+      <div class="label" style="margin-top:22px">Symptom vs. cause — the central confusion</div>
+      <p class="body">Most failed problem-solving stops at a <strong>symptom</strong> (the motor stopped), a <strong>causal factor</strong> (the overload tripped), or a convenient <strong>scapegoat</strong> (the new operator). RCA's whole job is to push past these to the <em>physical, human and latent system</em> layers beneath. A mature analysis usually finds <span class="hl">three layers of root cause</span>: the <strong>physical</strong> (bearing seized), the <strong>human</strong> (lubrication step skipped), and the <strong>latent / systemic</strong> (no lubrication task on the PM schedule and no audit to catch it). Fix only the physical and you replace bearings forever; fix the latent cause and the failure is gone.</p>
+    </div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 · The causal chain</span>
+    <h2 class="page-title">The Causal Chain — From Symptom to Latent System</h2>
+    <div class="card">
+      <div class="label">The three layers of cause</div>
+      <p class="body">Every failure sits on a chain. The micro card's 5-Whys ladder is really a walk down this chain — each "why" moves you one link deeper. The skill is knowing <strong>which link is the root</strong>, and not stopping one link too early (a recurring patch) or one too late (boiling the ocean).</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g-sym" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f87171"/><stop offset="1" stop-color="#b91c1c"/></linearGradient>
+            <linearGradient id="g-phys" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fb923c"/><stop offset="1" stop-color="#c2410c"/></linearGradient>
+            <linearGradient id="g-hum" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient>
+            <linearGradient id="g-lat" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#15803d"/></linearGradient>
+          </defs>
+          <text x="380" y="26" text-anchor="middle" fill="#94a3b8" font-size="13" font-style="italic">Each arrow = one "Why?" — keep going until you hit a controllable system</text>
+
+          <rect x="40" y="50" width="160" height="64" rx="12" fill="url(#g-sym)"/>
+          <text x="120" y="78" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">SYMPTOM</text>
+          <text x="120" y="98" text-anchor="middle" fill="#fff" font-size="11">Motor stopped</text>
+
+          <rect x="230" y="50" width="160" height="64" rx="12" fill="url(#g-phys)"/>
+          <text x="310" y="74" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">PHYSICAL CAUSE</text>
+          <text x="310" y="92" text-anchor="middle" fill="#fff" font-size="11">Bearing seized,</text>
+          <text x="310" y="106" text-anchor="middle" fill="#fff" font-size="11">overload tripped</text>
+
+          <rect x="420" y="50" width="160" height="64" rx="12" fill="url(#g-hum)"/>
+          <text x="500" y="74" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">HUMAN CAUSE</text>
+          <text x="500" y="92" text-anchor="middle" fill="#fff" font-size="11">Lubrication step</text>
+          <text x="500" y="106" text-anchor="middle" fill="#fff" font-size="11">not performed</text>
+
+          <rect x="600" y="50" width="160" height="64" rx="12" fill="url(#g-lat)" transform="translate(-30,0)"/>
+          <text x="650" y="74" text-anchor="middle" fill="#06241a" font-size="13" font-weight="800">LATENT / SYSTEM</text>
+          <text x="650" y="92" text-anchor="middle" fill="#06241a" font-size="11">No PM task &amp;</text>
+          <text x="650" y="106" text-anchor="middle" fill="#06241a" font-size="11">no audit = ROOT</text>
+
+          <g stroke="#22d3ee" stroke-width="3" marker-end="url(#arr)">
+            <line x1="200" y1="82" x2="226" y2="82"/>
+            <line x1="390" y1="82" x2="416" y2="82"/>
+            <line x1="580" y1="82" x2="596" y2="82"/>
+          </g>
+          <defs><marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#22d3ee"/></marker></defs>
+
+          <rect x="40" y="160" width="690" height="110" rx="14" fill="#11161f" stroke="#334155"/>
+          <text x="60" y="188" fill="#a5f3fc" font-size="14" font-weight="800">The "stop-here" trap at each layer:</text>
+          <text x="60" y="214" fill="#fca5a5" font-size="12.5">✗ Stop at SYMPTOM → reset the motor → it fails again next week.</text>
+          <text x="60" y="234" fill="#fdba74" font-size="12.5">✗ Stop at PHYSICAL → replace the bearing → it seizes again, same cause.</text>
+          <text x="60" y="254" fill="#93c5fd" font-size="12.5">✗ Stop at HUMAN → "retrain / discipline the operator" → next operator repeats it.</text>
+          <text x="400" y="254" fill="#86efac" font-size="12.5" font-weight="700">✓ Fix the SYSTEM → it is gone for good.</text>
+        </svg>
+        <div class="cap">The causal chain. RCA's craft is choosing the deepest <em>controllable</em> link — not the first plausible one.</div>
+      </div>
+      <p class="body" style="margin-top:14px">This is why RCA practitioners say <strong>"stop at human error and you have stopped too early."</strong> Human error is almost never a root cause — it is a signal that the surrounding system (training, procedure, tooling, workload, design) permitted or invited the error. Page 9 develops this into James Reason's Swiss-cheese model.</p>
+    </div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 · The toolbox</span>
+    <h2 class="page-title">The Seven Classic RCA Tools — and When to Reach for Each</h2>
+    <div class="card">
+      <div class="label">No single tool fits every problem</div>
+      <p class="body">The micro card showed two tools (5 Whys and Fishbone). In practice RCA is a <strong>toolbox</strong>, and choosing the right tool for the failure type is half the skill. A simple, single-thread breakdown wants 5 Whys; a complex defect with many possible contributors wants a Fishbone or Fault Tree; a fleet of recurring issues wants Pareto to pick the vital few first. Tap a tool below to see when it shines.</p>
+
+      <div class="tool-pick" id="toolPick">
+        <div class="tcard active" data-t="whys"><span class="ti">5️⃣</span><span class="tn">5 Whys</span></div>
+        <div class="tcard" data-t="fish"><span class="ti">🐟</span><span class="tn">Fishbone</span></div>
+        <div class="tcard" data-t="fta"><span class="ti">🌲</span><span class="tn">Fault Tree</span></div>
+        <div class="tcard" data-t="pareto"><span class="ti">📊</span><span class="tn">Pareto</span></div>
+        <div class="tcard" data-t="fmea"><span class="ti">⚠️</span><span class="tn">FMEA</span></div>
+        <div class="tcard" data-t="map"><span class="ti">🗺️</span><span class="tn">Cause Map</span></div>
+        <div class="tcard" data-t="barrier"><span class="ti">🛡️</span><span class="tn">Barrier</span></div>
+      </div>
+      <div class="tinfo" id="toolInfo">
+        <h4>5️⃣ The 5 Whys</h4>
+        <p>Iteratively ask "why?" along a single causal thread until you reach a controllable system cause. Fast, needs no software, great for shop-floor problems with one dominant chain.</p>
+        <p class="ex"><b>Best for:</b> simple, single-cause breakdowns &nbsp;·&nbsp; <b>Weak for:</b> defects with several interacting causes (it tunnels down one branch and misses the others).</p>
+      </div>
+
+      <div class="label" style="margin-top:24px">Inductive vs. deductive — the deep distinction</div>
+      <p class="body">RCA tools split into two logics. <span class="hl">Inductive</span> tools start from the observed failure and reason <em>upward</em> to possible causes (5 Whys, Fishbone, FMEA, cause maps). <span class="hl2">Deductive</span> tools start from a top undesired event and reason <em>downward</em> through logic gates to the basic events that could produce it (Fault Tree Analysis). Inductive tools are quick and exploratory; deductive tools are rigorous and quantifiable. Serious reliability work uses both — brainstorm inductively, then test the leading hypothesis deductively.</p>
+      <div class="tbl-wrap" style="margin-top:14px">
+        <table>
+          <tr><th>Tool</th><th>Logic</th><th>Output</th><th>Reach for it when…</th></tr>
+          <tr><td><b>5 Whys</b></td><td>Inductive</td><td>One causal chain</td><td>Single, obvious thread; need a fast answer</td></tr>
+          <tr><td><b>Fishbone</b></td><td>Inductive</td><td>Categorised cause map (6 M)</td><td>Many candidate causes; team brainstorm</td></tr>
+          <tr><td><b>Fault Tree</b></td><td>Deductive</td><td>Boolean tree + probability</td><td>Safety/high-consequence; need quantification</td></tr>
+          <tr><td><b>Pareto</b></td><td>Statistical</td><td>Ranked "vital few"</td><td>Many recurring events; choose what to fix first</td></tr>
+          <tr><td><b>FMEA</b></td><td>Inductive (prospective)</td><td>RPN-ranked risks</td><td>Before launch; prevent failures by design</td></tr>
+          <tr><td><b>Cause Map (Apollo)</b></td><td>Inductive</td><td>Cause-and-effect network</td><td>Multi-cause incidents; evidence-linked</td></tr>
+          <tr><td><b>Barrier / Bowtie</b></td><td>Systemic</td><td>Failed-defence list</td><td>Safety incidents; which control let it through</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 · 5 Whys, rigorously</span>
+    <h2 class="page-title">5 Whys Done Right — The Interactive Ladder, Plus Its Failure Modes</h2>
+    <div class="card">
+      <div class="label">Walk the ladder</div>
+      <p class="body">The micro card let you reveal a 5-Whys ladder one step at a time. Here is the same engine — but the lesson is in the <em>rules</em> that separate a real 5-Whys from a guessing game. Reveal each "why," then read the discipline below.</p>
+      <div class="why-demo">
+        <div style="background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff;padding:14px 16px;border-radius:10px;font-weight:800;text-align:center">❌ PROBLEM: Robot weld cell down — parts not clamping</div>
+        <div class="why-step" data-i="1"><div class="wq">Why didn't the parts clamp?</div><div class="wa">The pneumatic clamp lost holding force.</div></div>
+        <div class="why-step" data-i="2"><div class="wq">Why did it lose force?</div><div class="wa">Supply pressure dropped below 5 bar at the manifold.</div></div>
+        <div class="why-step" data-i="3"><div class="wq">Why did pressure drop?</div><div class="wa">The FRL filter element was clogged — high pressure drop.</div></div>
+        <div class="why-step" data-i="4"><div class="wq">Why was the filter clogged?</div><div class="wa">It had not been changed in 14 months.</div></div>
+        <div class="why-step" data-i="5"><div class="wq">Why hadn't it been changed?</div><div class="wa">No filter-replacement task existed on the PM schedule, and condition wasn't monitored.</div></div>
+        <div class="why-root" id="whyRoot">🎯 ROOT CAUSE: Missing PM task + no condition monitoring on the FRL<br><span style="font-weight:600;font-size:13px">Fix: add ΔP-triggered filter change to PM (links A12 Pneumatics &amp; A23 TPM)</span></div>
+        <div class="why-ctrl"><button id="whyNext">Reveal Next Why ▶</button><button id="whyReset">⟲ Reset</button></div>
+      </div>
+
+      <div class="label" style="margin-top:24px">The five rules that make it real (not theatre)</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><b>Evidence at every rung.</b> Each "why" must be confirmed with data — a gauge reading, a photo, a log — not assumed. An unverified chain is just a story.</div></li>
+        <li><span class="num">2</span><div><b>"Five" is a guide, not a law.</b> Sometimes the root appears at 3 whys, sometimes at 7. Stop when you hit a controllable system cause, not when you hit number five.</div></li>
+        <li><span class="num">3</span><div><b>Beware the single-thread trap.</b> 5 Whys follows one branch. If a problem has parallel causes (A <em>and</em> B both needed), switch to a Fishbone or Fault Tree.</div></li>
+        <li><span class="num">4</span><div><b>Don't let it become "5 Blames."</b> If an answer names a person, the next why must ask why the <em>system</em> allowed it.</div></li>
+        <li><span class="num">5</span><div><b>Test the chain backwards.</b> Read root → symptom with "therefore." If each step doesn't logically force the next, a link is missing or wrong.</div></li>
+      </ul>
+      <div class="fail-grid" style="margin-top:16px">
+        <div class="fail"><div class="ft">⚠️ Confirmation tunnelling</div><p>The team picks a favourite cause at why-1 and bends every later answer to fit it. Cure: have a sceptic challenge each rung.</p></div>
+        <div class="fail"><div class="ft">⚠️ Premature stop</div><p>Stopping at "operator error" or "worn part" — a symptom of the real system gap. Always ask one more why past the human/physical layer.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 5 -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 · Fishbone</span>
+    <h2 class="page-title">The Fishbone (Ishikawa) Diagram — Brainstorm Before You Bet</h2>
+    <div class="card">
+      <div class="label">The 6 M framework</div>
+      <p class="body">Where 5 Whys tunnels down one thread, the <strong>Ishikawa / fishbone diagram</strong> fans out across every category of cause <em>before</em> you commit to investigating any one. Invented by Kaoru Ishikawa at Kawasaki in the 1960s, it forces a team to brainstorm causes under the <span class="hl">6 Ms</span> — Man, Machine, Method, Material, Measurement and Mother-nature (Environment) — so no category is forgotten. The "head" is the effect; each bone is a category; each twig is a candidate cause to test.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g-head" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f87171"/><stop offset="1" stop-color="#b91c1c"/></linearGradient></defs>
+          <!-- spine -->
+          <line x1="70" y1="170" x2="600" y2="170" stroke="#22d3ee" stroke-width="5"/>
+          <!-- head -->
+          <rect x="600" y="135" width="130" height="70" rx="10" fill="url(#g-head)"/>
+          <text x="665" y="165" text-anchor="middle" fill="#fff" font-size="14" font-weight="800">WELD</text>
+          <text x="665" y="184" text-anchor="middle" fill="#fff" font-size="14" font-weight="800">POROSITY</text>
+
+          <!-- top bones -->
+          <g stroke="#22d3ee" stroke-width="2.5">
+            <line x1="150" y1="60" x2="200" y2="170"/>
+            <line x1="320" y1="60" x2="370" y2="170"/>
+            <line x1="490" y1="60" x2="540" y2="170"/>
+          </g>
+          <text x="138" y="50" fill="#a5f3fc" font-size="14" font-weight="800">MAN</text>
+          <text x="60" y="84" fill="#94a3b8" font-size="11">• Skill / cert gap</text>
+          <text x="60" y="100" fill="#94a3b8" font-size="11">• Wrong technique</text>
+          <text x="60" y="116" fill="#94a3b8" font-size="11">• Fatigue</text>
+
+          <text x="300" y="50" fill="#a5f3fc" font-size="14" font-weight="800">MACHINE</text>
+          <text x="232" y="84" fill="#94a3b8" font-size="11">• Worn contact tip</text>
+          <text x="232" y="100" fill="#94a3b8" font-size="11">• Gas-valve fault</text>
+          <text x="232" y="116" fill="#94a3b8" font-size="11">• Bad ground</text>
+
+          <text x="476" y="50" fill="#a5f3fc" font-size="14" font-weight="800">METHOD</text>
+          <text x="404" y="84" fill="#94a3b8" font-size="11">• Wrong WPS</text>
+          <text x="404" y="100" fill="#94a3b8" font-size="11">• Travel speed</text>
+          <text x="404" y="116" fill="#94a3b8" font-size="11">• Gas flow set low</text>
+
+          <!-- bottom bones -->
+          <g stroke="#22d3ee" stroke-width="2.5">
+            <line x1="200" y1="170" x2="150" y2="280"/>
+            <line x1="370" y1="170" x2="320" y2="280"/>
+            <line x1="540" y1="170" x2="490" y2="280"/>
+          </g>
+          <text x="120" y="300" fill="#a5f3fc" font-size="14" font-weight="800">MATERIAL</text>
+          <text x="60" y="320" fill="#94a3b8" font-size="11">• Rust / oil on part</text>
+          <text x="60" y="336" fill="#94a3b8" font-size="11">• Wet wire/flux</text>
+
+          <text x="290" y="300" fill="#a5f3fc" font-size="14" font-weight="800">MEASUREMENT</text>
+          <text x="232" y="320" fill="#94a3b8" font-size="11">• Uncal. flow meter</text>
+          <text x="232" y="336" fill="#94a3b8" font-size="11">• No leak check</text>
+
+          <text x="450" y="300" fill="#a5f3fc" font-size="14" font-weight="800">ENVIRONMENT</text>
+          <text x="404" y="320" fill="#94a3b8" font-size="11">• Draught blows shield gas</text>
+          <text x="404" y="336" fill="#94a3b8" font-size="11">• Humidity</text>
+        </svg>
+        <div class="cap">A 6-M fishbone for weld porosity. Every category gets candidates <em>before</em> the team picks which to test with data.</div>
+      </div>
+      <div class="label" style="margin-top:20px">From brainstorm to proof — the discipline that prevents waste</div>
+      <p class="body">A fishbone <strong>generates hypotheses; it does not prove anything.</strong> Its danger is that a team admires a full diagram and then "fixes" five things at once, learning nothing about which mattered. The professional workflow: brainstorm the bones → rank each candidate by likelihood and ease of test → <span class="hl">verify the top suspects with data</span> (a measurement, a controlled trial, a designed experiment) → keep only the causes the evidence supports. In Six Sigma this hands off directly to the Analyze phase — the fishbone supplies the X's, and data confirms which X's truly drive the Y. Variants you'll meet: the <span class="hl2">Process fishbone</span> (bones = process steps) and the <span class="hl3">4 P</span> framework for services (Policy, Procedure, People, Plant).</p>
+    </div>
+  </section>
+
+  <!-- PAGE 6 -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 · Fault Tree + math</span>
+    <h2 class="page-title">Fault Tree Analysis — Boolean Logic Made Quantitative</h2>
+    <div class="card">
+      <div class="label">The deductive tool</div>
+      <p class="body">When a failure is high-consequence (a press crushes, a reactor over-pressures, a robot enters a guarded zone), brainstorming is not enough — you need to <strong>quantify</strong> how it can happen. <span class="hl">Fault Tree Analysis (FTA)</span> starts from a single <em>top event</em> (the undesired outcome) and works <em>downward</em> through Boolean logic gates to the <em>basic events</em> (component failures, human errors) that can cause it. Developed at Bell Labs in 1962 for the Minuteman missile, it is the backbone of functional-safety standards (IEC 61508, ISO 13849).</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g-top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f87171"/><stop offset="1" stop-color="#b91c1c"/></linearGradient></defs>
+          <!-- top event -->
+          <rect x="300" y="20" width="160" height="50" rx="8" fill="url(#g-top)"/>
+          <text x="380" y="42" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="800">TOP EVENT:</text>
+          <text x="380" y="60" text-anchor="middle" fill="#fff" font-size="11">Guard fails to stop motion</text>
+          <!-- AND gate -->
+          <line x1="380" y1="70" x2="380" y2="92" stroke="#22d3ee" stroke-width="2.5"/>
+          <path d="M340 130 A40 40 0 0 1 420 130 L420 130 L340 130 Z" fill="#232d3f" stroke="#22d3ee" stroke-width="2.5"/>
+          <rect x="340" y="110" width="80" height="22" fill="#232d3f" stroke="none"/>
+          <text x="380" y="124" text-anchor="middle" fill="#a5f3fc" font-size="12" font-weight="800">AND</text>
+          <line x1="340" y1="130" x2="340" y2="92" stroke="#22d3ee" stroke-width="2.5"/>
+          <line x1="420" y1="130" x2="420" y2="92" stroke="#22d3ee" stroke-width="2.5"/>
+          <line x1="340" y1="92" x2="420" y2="92" stroke="#22d3ee" stroke-width="2.5"/>
+          <!-- branches -->
+          <line x1="380" y1="132" x2="380" y2="150" stroke="#22d3ee" stroke-width="2.5"/>
+          <line x1="200" y1="150" x2="560" y2="150" stroke="#22d3ee" stroke-width="2.5"/>
+          <line x1="200" y1="150" x2="200" y2="178" stroke="#22d3ee" stroke-width="2.5"/>
+          <line x1="560" y1="150" x2="560" y2="178" stroke="#22d3ee" stroke-width="2.5"/>
+
+          <!-- left: OR gate -->
+          <path d="M160 230 Q200 200 240 230 Q200 215 160 230 Z" fill="#232d3f" stroke="#fbbf24" stroke-width="2.5"/>
+          <text x="200" y="222" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="800">OR</text>
+          <line x1="200" y1="178" x2="200" y2="200" stroke="#22d3ee" stroke-width="2.5"/>
+          <line x1="200" y1="230" x2="200" y2="246" stroke="#22d3ee" stroke-width="2.5"/>
+          <line x1="120" y1="246" x2="280" y2="246" stroke="#22d3ee" stroke-width="2.5"/>
+          <circle cx="120" cy="278" r="22" fill="#11161f" stroke="#60a5fa" stroke-width="2.5"/>
+          <text x="120" y="276" text-anchor="middle" fill="#93c5fd" font-size="9">Switch</text>
+          <text x="120" y="288" text-anchor="middle" fill="#93c5fd" font-size="9">stuck</text>
+          <text x="120" y="312" text-anchor="middle" fill="#94a3b8" font-size="9">Q=1e-3</text>
+          <line x1="120" y1="246" x2="120" y2="256" stroke="#22d3ee" stroke-width="2.5"/>
+          <circle cx="280" cy="278" r="22" fill="#11161f" stroke="#60a5fa" stroke-width="2.5"/>
+          <text x="280" y="276" text-anchor="middle" fill="#93c5fd" font-size="9">Wiring</text>
+          <text x="280" y="288" text-anchor="middle" fill="#93c5fd" font-size="9">open</text>
+          <text x="280" y="312" text-anchor="middle" fill="#94a3b8" font-size="9">Q=2e-3</text>
+          <line x1="280" y1="246" x2="280" y2="256" stroke="#22d3ee" stroke-width="2.5"/>
+
+          <!-- right: basic event -->
+          <circle cx="560" cy="278" r="24" fill="#11161f" stroke="#60a5fa" stroke-width="2.5"/>
+          <text x="560" y="276" text-anchor="middle" fill="#93c5fd" font-size="9">Safety relay</text>
+          <text x="560" y="288" text-anchor="middle" fill="#93c5fd" font-size="9">welded</text>
+          <text x="560" y="316" text-anchor="middle" fill="#94a3b8" font-size="9">Q=5e-4</text>
+          <line x1="560" y1="178" x2="560" y2="254" stroke="#22d3ee" stroke-width="2.5"/>
+
+          <text x="610" y="120" fill="#a5f3fc" font-size="12" font-weight="800">⌂ legend</text>
+          <text x="610" y="140" fill="#94a3b8" font-size="10.5">⬭ AND = all inputs</text>
+          <text x="610" y="156" fill="#94a3b8" font-size="10.5">◠ OR = any input</text>
+          <text x="610" y="172" fill="#94a3b8" font-size="10.5">◯ basic event (Q)</text>
+        </svg>
+        <div class="cap">A fault tree for "guard fails to stop motion." AND = both branches needed; OR = either basic event suffices.</div>
+      </div>
+      <div class="label" style="margin-top:20px">The Boolean probability math</div>
+      <p class="body">FTA turns a diagram into a number. Each basic event has a failure probability Q. Gates combine them with two rules (events assumed independent):</p>
+      <div class="eqn">OR gate (either causes it):   Q<sub>OR</sub> = 1 − (1−Q<sub>a</sub>)(1−Q<sub>b</sub>) ≈ <b>Q<sub>a</sub> + Q<sub>b</sub></b>   (for small Q)
+AND gate (both needed):       Q<sub>AND</sub> = <b>Q<sub>a</sub> × Q<sub>b</sub></b>
+
+Worked example (tree above):
+  OR branch  = 1e-3 + 2e-3            = <span class="v3">3.0e-3</span>
+  AND of (OR branch) and (relay)      = 3.0e-3 × 5e-4
+  TOP EVENT  Q                        = <b>1.5e-6</b>  per demand</div>
+      <p class="body" style="margin-top:12px">The lesson the math teaches RCA: an <strong>AND gate is a redundancy</strong> — two independent things must fail together, so the combined probability is tiny (multiply small numbers). An <strong>OR gate is a vulnerability</strong> — any single basic event triggers the top, so probabilities add. This is exactly why safety design adds redundant channels (forcing an AND) and why a single un-redundant component is a "single point of failure." A <span class="hl">minimal cut set</span> is the smallest combination of basic events that alone causes the top event — finding the smallest cut sets tells you precisely where the system is weakest. It connects forward to <a href="A28_Switching_Power_Electronics_Deep_Dive.html" style="color:var(--accent-soft)">A28</a>-style reliability and to functional-safety SIL/PL ratings.</p>
+    </div>
+  </section>
+
+  <!-- PAGE 7 -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 · Pareto + FMEA</span>
+    <h2 class="page-title">Pareto for "What to Fix First," FMEA for "What Could Fail"</h2>
+    <div class="card">
+      <div class="label">Pareto — the 80/20 of root causes</div>
+      <p class="body">RCA does not happen in a vacuum of one problem; a plant has dozens. <strong>Pareto analysis</strong> (Vilfredo Pareto, popularised by Juran) ranks failure modes by frequency or cost so you spend your limited RCA effort on the <span class="hl">vital few, not the trivial many</span>. The rule of thumb: ~80% of the losses come from ~20% of the causes. You attack the tallest bar first because it returns the most.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+          <line x1="60" y1="250" x2="720" y2="250" stroke="#334155" stroke-width="2"/>
+          <line x1="60" y1="40" x2="60" y2="250" stroke="#334155" stroke-width="2"/>
+          <!-- bars -->
+          <g>
+            <rect x="80"  y="70"  width="70" height="180" fill="#22d3ee"/>
+            <rect x="170" y="130" width="70" height="120" fill="#22d3ee"/>
+            <rect x="260" y="180" width="70" height="70"  fill="#38bdf8"/>
+            <rect x="350" y="208" width="70" height="42"  fill="#475569"/>
+            <rect x="440" y="222" width="70" height="28"  fill="#475569"/>
+            <rect x="530" y="234" width="70" height="16"  fill="#475569"/>
+            <rect x="620" y="240" width="70" height="10"  fill="#475569"/>
+          </g>
+          <!-- cumulative line -->
+          <polyline points="115,120 205,72 295,46 385,38 475,33 565,30 655,28" fill="none" stroke="#fbbf24" stroke-width="3"/>
+          <g fill="#fbbf24"><circle cx="115" cy="120" r="4"/><circle cx="205" cy="72" r="4"/><circle cx="295" cy="46" r="4"/><circle cx="385" cy="38" r="4"/><circle cx="475" cy="33" r="4"/><circle cx="565" cy="30" r="4"/><circle cx="655" cy="28" r="4"/></g>
+          <line x1="60" y1="58" x2="720" y2="58" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4 4" opacity="0.5"/>
+          <text x="725" y="62" fill="#fbbf24" font-size="11">80%</text>
+          <!-- labels -->
+          <g fill="#94a3b8" font-size="10" text-anchor="middle">
+            <text x="115" y="266">Seal leak</text>
+            <text x="205" y="266">Sensor</text>
+            <text x="295" y="266">Jam</text>
+            <text x="385" y="266">Wiring</text>
+            <text x="475" y="266">Tooling</text>
+            <text x="565" y="266">Cal.</text>
+            <text x="655" y="266">Other</text>
+          </g>
+          <text x="40" y="50" fill="#a5f3fc" font-size="11" transform="rotate(-90 40 50)" text-anchor="middle">downtime hrs</text>
+          <text x="380" y="290" fill="#a5f3fc" font-size="12" font-weight="700" text-anchor="middle">failure mode (ranked)</text>
+        </svg>
+        <div class="cap">Bars = frequency/cost per cause; gold line = cumulative %. The first 2–3 causes ("vital few", cyan) cross 80% — fix those first.</div>
+      </div>
+      <div class="eqn">Cumulative %  =  (Σ losses up to cause i) ÷ (Σ all losses) × 100
+Vital few     =  smallest set of causes whose cumulative % ≥ <b>80%</b>
+Priority      =  attack the tallest bar first → highest return per RCA hour</div>
+
+      <div class="label" style="margin-top:24px">FMEA — RCA run in reverse, before failure happens</div>
+      <p class="body">RCA is <em>reactive</em> — it acts after a failure. <span class="hl2">Failure Mode &amp; Effects Analysis (FMEA)</span> is its <em>proactive</em> twin: you brainstorm how each part or step <strong>could</strong> fail, then prioritise prevention before anything breaks. Each potential failure mode is scored on three 1–10 scales and multiplied into a <span class="hl3">Risk Priority Number</span>:</p>
+      <div class="eqn">RPN = <b>S</b> × <span class="v2">O</span> × <span class="v3">D</span>
+   <b>S</b> = Severity   (how bad if it happens; 10 = catastrophic)
+   <span class="v2">O</span> = Occurrence (how likely; 10 = almost certain)
+   <span class="v3">D</span> = Detection  (how hard to catch BEFORE it reaches the customer; 10 = undetectable)
+
+Example:  S=8, O=4, D=6  →  RPN = <b>192</b>   (work the highest RPNs first)
+Note: high D = BAD (you can't detect it). Improving detection lowers D and RPN.</div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="mini c-red"><h4>Severity (S)</h4><p>Consequence of the failure. You usually can't lower S without a design change — it's fixed by physics.</p></div>
+        <div class="mini c-amb"><h4>Occurrence (O)</h4><p>Frequency. RCA + robust design lowers O — this is where prevention lives.</p></div>
+        <div class="mini c-blue"><h4>Detection (D)</h4><p>Can you catch it first? Poka-yoke, sensors and inspection lower D (and RPN).</p></div>
+      </div>
+      <p class="body" style="margin-top:14px"><strong>How they pair in practice:</strong> Pareto tells you <em>which</em> recurring failure to RCA; RCA finds <em>why</em> it happens; FMEA captures the lesson so the same failure mode is <em>designed out</em> of the next product or line — and modern AIAG-VDA FMEA replaces the single RPN with Action-Priority (High/Medium/Low) tables to stop teams gaming the number.</p>
+    </div>
+  </section>
+
+  <!-- PAGE 8 -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 · Corrective action</span>
+    <h2 class="page-title">From Cause to Cure — The 8D and A3 Frameworks</h2>
+    <div class="card">
+      <div class="label">RCA is the middle, not the whole</div>
+      <p class="body">Finding the root cause is necessary but not sufficient — the problem isn't solved until a <strong>verified, permanent corrective action</strong> is in place and the system is updated so it can't drift back. Two industry-standard frameworks wrap RCA in this discipline: the automotive <span class="hl">8D</span> (Eight Disciplines, from Ford) and the Toyota <span class="hl2">A3</span> (one-page problem-solving on A3 paper). RCA tools live inside step D4 of 8D and the "Analysis" box of A3.</p>
+      <div class="tbl-wrap" style="margin-top:8px">
+        <table>
+          <tr><th>8D step</th><th>What happens</th><th>Why it matters</th></tr>
+          <tr><td><b>D0</b> Plan</td><td>Decide if 8D is warranted; gather a team</td><td>Don't over-process trivial issues</td></tr>
+          <tr><td><b>D1</b> Team</td><td>Cross-functional, with process knowledge</td><td>One person can't see the whole system</td></tr>
+          <tr><td><b>D2</b> Describe</td><td>Quantify the problem: is/is-not, 5W2H</td><td>A vague problem has no findable cause</td></tr>
+          <tr><td><b>D3</b> Contain</td><td>Interim action to protect the customer NOW</td><td>Stops the bleeding while you investigate</td></tr>
+          <tr><td><b>D4</b> Root cause</td><td><b>← RCA lives here</b>: 5 Whys, fishbone, data</td><td>The analytical heart of the whole method</td></tr>
+          <tr><td><b>D5</b> Choose CA</td><td>Pick &amp; verify permanent corrective action</td><td>Prove it actually removes the cause</td></tr>
+          <tr><td><b>D6</b> Implement</td><td>Roll out the permanent fix; remove the interim</td><td>Make the cure the new normal</td></tr>
+          <tr><td><b>D7</b> Prevent</td><td>Update FMEA, SOPs, control plan, read-across</td><td>Stop it recurring on sister lines too</td></tr>
+          <tr><td><b>D8</b> Close</td><td>Recognise the team; confirm sustained result</td><td>Verify the gain held over time</td></tr>
+        </table>
+      </div>
+      <div class="label" style="margin-top:22px">Corrective vs. preventive vs. corrective-of-the-system</div>
+      <p class="body">A subtle but exam-critical distinction. A <span class="hl">correction</span> fixes the immediate instance (replace the seized bearing). <span class="hl2">Corrective action</span> removes the cause of <em>this</em> problem so it won't recur (add the lubrication task). <span class="hl3">Preventive / systemic action</span> asks "where else could this same gap exist?" and closes it everywhere (audit every PM schedule for missing lube tasks). Weak RCA delivers only corrections; strong RCA delivers corrective <em>and</em> systemic action — which is exactly the <strong>read-across</strong> in D7 and the link to TPM's Focused-Improvement pillar.</p>
+      <div class="connect" style="margin-top:8px;margin-bottom:0">
+        <span class="pill">↔ A23 TPM</span>
+        <span>RCA is the analytical engine of TPM's <a href="A23_TPM_Deep_Dive.html">Focused Improvement (Kobetsu Kaizen)</a> pillar, and the corrective actions it produces are exactly what closes the six big losses behind a low <a href="A22_OEE_Deep_Dive.html">OEE</a> number. In Six Sigma DMAIC, the whole of this page is the <em>Improve</em> &amp; <em>Control</em> phases.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 9 -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 · Systems &amp; pitfalls</span>
+    <h2 class="page-title">Human Error Is a Symptom — The Swiss-Cheese Model &amp; Classic Traps</h2>
+    <div class="card">
+      <div class="label">Reason's Swiss-cheese model</div>
+      <p class="body">James Reason's model (1990) is the antidote to "operator error." Every system has layers of defence — training, procedures, supervision, interlocks, design. Each layer has holes (latent weaknesses). An accident happens only when the holes in <em>every</em> layer momentarily line up so a hazard passes straight through. The active error at the sharp end (the operator) is the <strong>last hole</strong>, not the cause — the cause is the latent holes that let it through.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="haz" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fca5a5"/><stop offset="1" stop-color="#dc2626"/></radialGradient></defs>
+          <!-- hazard -->
+          <circle cx="40" cy="135" r="22" fill="url(#haz)"/>
+          <text x="40" y="139" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">HAZARD</text>
+          <!-- cheese slices -->
+          <g>
+            <rect x="130" y="40" width="90" height="190" rx="10" fill="#fde68a" opacity="0.9"/>
+            <rect x="280" y="40" width="90" height="190" rx="10" fill="#fcd34d" opacity="0.9"/>
+            <rect x="430" y="40" width="90" height="190" rx="10" fill="#fbbf24" opacity="0.9"/>
+            <rect x="580" y="40" width="90" height="190" rx="10" fill="#f59e0b" opacity="0.9"/>
+          </g>
+          <!-- holes, aligned along y=135 to let the trajectory pass -->
+          <g fill="#0f1419">
+            <circle cx="175" cy="135" r="16"/><circle cx="170" cy="80" r="11"/>
+            <circle cx="325" cy="135" r="16"/><circle cx="330" cy="190" r="12"/>
+            <circle cx="475" cy="135" r="16"/><circle cx="470" cy="95" r="10"/>
+            <circle cx="625" cy="135" r="16"/><circle cx="630" cy="185" r="11"/>
+          </g>
+          <!-- accident trajectory -->
+          <line x1="62" y1="135" x2="700" y2="135" stroke="#ef4444" stroke-width="3" stroke-dasharray="7 5"/>
+          <polygon points="700,135 688,129 688,141" fill="#ef4444"/>
+          <text x="710" y="139" fill="#fca5a5" font-size="10" font-weight="800">LOSS</text>
+          <!-- labels -->
+          <g fill="#7c2d12" font-size="11" font-weight="700" text-anchor="middle">
+            <text x="175" y="252">Design</text>
+            <text x="325" y="252">Procedure</text>
+            <text x="475" y="252">Supervision</text>
+            <text x="625" y="252">Operator</text>
+          </g>
+          <text x="380" y="26" text-anchor="middle" fill="#94a3b8" font-size="12" font-style="italic">Holes = latent weaknesses. Loss happens only when they all line up — the operator is the last hole, not the cause.</text>
+        </svg>
+        <div class="cap">The Swiss-cheese model. RCA's job is to find and close the <em>latent</em> holes, not punish the sharp-end error.</div>
+      </div>
+      <div class="label" style="margin-top:20px">The pitfalls that make teams solve the wrong problem</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">⚠️ Stopping at blame</div><p>"Operator error" ends the analysis. It's the last hole, never the root. Ask: what in the system invited the error?</p></div>
+        <div class="fail"><div class="ft">⚠️ Opinion, not evidence</div><p>Plausible-sounding chains that were never verified with data. Every link needs proof or it's fiction.</p></div>
+        <div class="fail"><div class="ft">⚠️ Single-cause bias</div><p>Forcing one root onto a problem that has several interacting causes. Use a fishbone/fault tree to check for parallels.</p></div>
+        <div class="fail"><div class="ft">⚠️ Solving the symptom</div><p>A fast patch that makes the alarm stop but leaves the cause — it returns, often worse, by the same path.</p></div>
+        <div class="fail"><div class="ft">⚠️ Confirmation tunnelling</div><p>Picking the answer first and bending evidence to fit. Assign a devil's advocate to challenge each step.</p></div>
+        <div class="fail"><div class="ft">⚠️ No verification of the fix</div><p>Closing the action without proving the problem actually stopped. D8 / Control exists for exactly this.</p></div>
+      </div>
+      <div class="pro" style="margin-top:14px"><div class="pt">⭐ The reframe that separates experts from novices</div><p>A novice asks <em>"who did this?"</em>; an expert asks <em>"what about our system made this outcome likely?"</em> Blameless RCA isn't soft — it is the only version that finds causes you can actually fix. People are usually the <em>inheritors</em> of a bad system, not its authors.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 10 -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 · Consolidate</span>
+    <h2 class="page-title">Practice &amp; Active Recall</h2>
+
+    <div class="card">
+      <div class="label">Try It — Build a Pareto, find the vital few</div>
+      <p class="body">Set the downtime hours for each failure mode. Watch the bars re-rank, the cumulative line redraw, and the tool tell you the smallest set of causes that crosses 80% — the ones worth a full RCA first.</p>
+      <div class="stage">
+        <div class="demo-row" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+          <div class="slider-box" style="background:var(--card-2);border-radius:12px;padding:14px 18px"><label style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:8px">Seal leaks</label><input type="range" id="pa" min="0" max="50" value="34" step="1" style="width:100%;accent-color:var(--accent)"><div style="font-family:ui-monospace,monospace;font-weight:800;color:var(--accent-soft);font-size:18px"><span id="va">34</span> h</div></div>
+          <div class="slider-box" style="background:var(--card-2);border-radius:12px;padding:14px 18px"><label style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:8px">Sensor faults</label><input type="range" id="pb" min="0" max="50" value="22" step="1" style="width:100%;accent-color:var(--accent)"><div style="font-family:ui-monospace,monospace;font-weight:800;color:var(--accent-soft);font-size:18px"><span id="vb">22</span> h</div></div>
+          <div class="slider-box" style="background:var(--card-2);border-radius:12px;padding:14px 18px"><label style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:8px">Jams</label><input type="range" id="pc" min="0" max="50" value="12" step="1" style="width:100%;accent-color:var(--accent)"><div style="font-family:ui-monospace,monospace;font-weight:800;color:var(--accent-soft);font-size:18px"><span id="vc">12</span> h</div></div>
+          <div class="slider-box" style="background:var(--card-2);border-radius:12px;padding:14px 18px"><label style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:8px">Wiring / other</label><input type="range" id="pd" min="0" max="50" value="8" step="1" style="width:100%;accent-color:var(--accent)"><div style="font-family:ui-monospace,monospace;font-weight:800;color:var(--accent-soft);font-size:18px"><span id="vd">8</span> h</div></div>
+        </div>
+        <svg id="paretoSvg" viewBox="0 0 600 220" style="width:100%;height:auto;margin-top:16px" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="verdict" style="text-align:center;margin-top:12px;font-family:ui-monospace,monospace;font-size:14px;color:var(--text-dim)">Vital few (≥80%): <strong id="vitalFew" style="color:var(--accent-soft)">Seal leaks, Sensor faults</strong></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">The RCA loop — five moves</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><b>Describe &amp; contain:</b> quantify the problem (is/is-not), protect the customer with an interim action.</div></li>
+        <li><span class="num">2</span><div><b>Pick the tool:</b> single thread → 5 Whys; many causes → Fishbone; high-consequence → Fault Tree; many problems → Pareto first.</div></li>
+        <li><span class="num">3</span><div><b>Dig with evidence:</b> verify every "why" with data; push past the human/physical layer to the latent system.</div></li>
+        <li><span class="num">4</span><div><b>Verify the cause:</b> removing it must eliminate the problem and stop recurrence — and you must be able to control it.</div></li>
+        <li><span class="num">5</span><div><b>Act &amp; prevent:</b> permanent corrective action + read-across + update FMEA/SOP so it can't return anywhere.</div></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check 1</div>
+      <p class="quiz-q">Q: A 5-Whys ends at "the operator forgot the lubrication step." Why is that not yet a root cause, and what's the next why?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal answer ↓</span>
+        <span class="hidden"><strong>A:</strong> It stops at the human layer — a symptom of the system, not a controllable system cause. The next why: <em>"Why was it possible to forget?"</em> → no step on the PM checklist, no poka-yoke, no condition monitoring. The root is the missing system control; the operator is the last Swiss-cheese hole, not the cause.</span>
+      </div>
+      <div class="label">Quick Check 2</div>
+      <p class="quiz-q">Q: In a fault tree, two basic events sit under an AND gate (Q = 1×10⁻³ each). Under an OR gate the same two would be… — compute both top probabilities and say which design is safer.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal answer ↓</span>
+        <span class="hidden"><strong>A:</strong> AND: Q = 1e-3 × 1e-3 = <b>1×10⁻⁶</b>. OR: Q ≈ 1e-3 + 1e-3 = <b>2×10⁻³</b>. The AND is ~2000× safer because both independent things must fail together (redundancy). An OR gate is a single-point-of-failure vulnerability. This is why safety functions use redundant channels — they convert an OR into an AND.</span>
+      </div>
+      <div class="label">Quick Check 3</div>
+      <p class="quiz-q">Q: An FMEA line reads S=9, O=3, D=8. Compute the RPN, name the cheapest lever to reduce risk, and explain why.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal answer ↓</span>
+        <span class="hidden"><strong>A:</strong> RPN = 9×3×8 = <b>216</b>. Severity (9) is usually locked by physics/design and hard to move. Occurrence (3) is already low. The big, cheap lever is <b>Detection</b> (8 = nearly undetectable): add a poka-yoke or sensor so the failure is caught before it escapes. Drop D from 8→2 and RPN falls 216→54 with no redesign.</span>
+      </div>
+      <div class="label">Quick Check 4</div>
+      <p class="quiz-q">Q: Why does fixing only the "correction" (replace the part) keep an engineer busy forever, and how do D7 / systemic action break the cycle?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal answer ↓</span>
+        <span class="hidden"><strong>A:</strong> A correction restores the instance but leaves the cause intact, so the failure recurs by the same path — you replace bearings forever. Corrective action removes <em>this</em> cause; D7 systemic action (read-across) then asks "where else does this same gap exist?" and closes it on every sister line, plus updates the FMEA/SOP so the failure mode can't be re-introduced. That converts a recurring firefight into a one-time, permanent fix.</span>
+      </div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"Past the symptom, past the blame — fix the system that allowed it."</p>
+    </div>
+
+    <div class="footer">
+      Advanced Deep Dive A25 · companion to Micro Card 25 "Root Cause Analysis"<br>
+      Links to A23 TPM (RCA = Focused-Improvement engine) · A22 OEE (RCA attacks the six big losses) · A12 Pneumatics (worked 5-Whys)<br>
+      Optimized for iPad Pro 11″ M4 · keratoconus-friendly · self-contained HTML
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // --- 5 Whys ladder ---
+  const wSteps = document.querySelectorAll('.why-step');
+  const wRoot = document.getElementById('whyRoot');
+  const wNext = document.getElementById('whyNext');
+  const wReset = document.getElementById('whyReset');
+  let wn = 0;
+  function showWhy(n){
+    wSteps.forEach(s => s.classList.toggle('on', +s.dataset.i <= n));
+    wRoot.classList.toggle('on', n >= 5);
+    wNext.textContent = n >= 5 ? '✓ All 5 Whys shown' : 'Reveal Next Why ▶';
+  }
+  wNext.addEventListener('click', () => { if (wn < 5){ wn++; showWhy(wn); } });
+  wReset.addEventListener('click', () => { wn = 0; showWhy(0); });
+  wSteps.forEach(s => s.addEventListener('click', () => { wn = +s.dataset.i; showWhy(wn); }));
+
+  // --- Tool selector ---
+  const toolData = {
+    whys:   {h:'5️⃣ The 5 Whys', p:'Iteratively ask "why?" along a single causal thread until you reach a controllable system cause. Fast, needs no software.', best:'simple, single-cause breakdowns', weak:'defects with several interacting causes (it tunnels one branch).'},
+    fish:   {h:'🐟 Fishbone (Ishikawa)', p:'Fan out candidate causes across the 6 Ms (Man, Machine, Method, Material, Measurement, Environment) before committing to investigate.', best:'team brainstorms with many candidate causes', weak:'proving anything — it only generates hypotheses to test.'},
+    fta:    {h:'🌲 Fault Tree Analysis', p:'Deductive: start at the top undesired event, work down through AND/OR logic gates to basic events, and quantify the probability.', best:'high-consequence / safety, where you must quantify risk', weak:'quick shop-floor problems (it is heavyweight).'},
+    pareto: {h:'📊 Pareto Analysis', p:'Rank failure modes by frequency or cost; the cumulative line reveals the "vital few" causes behind ~80% of the loss.', best:'choosing WHICH of many problems to RCA first', weak:'finding the cause itself — it prioritises, not diagnoses.'},
+    fmea:   {h:'⚠️ FMEA', p:'Proactive: brainstorm how each part/step could fail, score Severity × Occurrence × Detection into an RPN, fix highest first.', best:'preventing failures BEFORE launch, by design', weak:'a live breakdown already in progress (use reactive RCA).'},
+    map:    {h:'🗺️ Cause Map (Apollo)', p:'Build an evidence-linked cause-and-effect network capturing multiple, parallel causes and the data that supports each.', best:'complex multi-cause incidents needing an audit trail', weak:'a trivial single-thread issue (overkill).'},
+    barrier:{h:'🛡️ Barrier / Bowtie', p:'Map the defences (barriers) between hazard and loss and identify which barrier failed or was missing.', best:'safety incidents — which control let the hazard through', weak:'pure quality/process-variation problems.'}
+  };
+  const toolInfo = document.getElementById('toolInfo');
+  document.querySelectorAll('#toolPick .tcard').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('#toolPick .tcard').forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+      const d = toolData[c.dataset.t];
+      toolInfo.innerHTML = '<h4>'+d.h+'</h4><p>'+d.p+'</p><p class="ex"><b>Best for:</b> '+d.best+' &nbsp;·&nbsp; <b>Weak for:</b> '+d.weak+'</p>';
+    });
+  });
+
+  // --- Pareto demo ---
+  const pIds = ['pa','pb','pc','pd'];
+  const pNames = {pa:'Seal leaks', pb:'Sensor faults', pc:'Jams', pd:'Wiring / other'};
+  const svg = document.getElementById('paretoSvg');
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+  function drawPareto(){
+    pIds.forEach(i => document.getElementById('v'+i[1]).textContent = document.getElementById(i).value);
+    let data = pIds.map(i => ({id:i, name:pNames[i], v:+document.getElementById(i).value}));
+    data.sort((a,b)=>b.v-a.v);
+    const total = data.reduce((s,d)=>s+d.v,0) || 1;
+    svg.innerHTML='';
+    // axes
+    svg.appendChild(el('line',{x1:50,y1:180,x2:580,y2:180,stroke:'#334155','stroke-width':2}));
+    svg.appendChild(el('line',{x1:50,y1:20,x2:50,y2:180,stroke:'#334155','stroke-width':2}));
+    // 80% line
+    svg.appendChild(el('line',{x1:50,y1:48,x2:580,y2:48,stroke:'#fbbf24','stroke-width':1,'stroke-dasharray':'4 4',opacity:0.5}));
+    const t80=el('text',{x:585,y:52,fill:'#fbbf24','font-size':10}); t80.textContent='80%'; svg.appendChild(t80);
+    const bw=110, gap=20; let x=70, cum=0; const pts=[]; const vital=[];
+    const maxV = Math.max(...data.map(d=>d.v),1);
+    data.forEach((d,idx)=>{
+      const h = (d.v/maxV)*140;
+      const isVital = (cum/total) < 0.8 || idx===0;
+      svg.appendChild(el('rect',{x:x, y:180-h, width:bw-30, height:h, rx:4, fill: isVital?'#22d3ee':'#475569'}));
+      cum += d.v;
+      if((cum/total - d.v/total) < 0.8) vital.push(d.name);
+      pts.push([x+(bw-30)/2, 180-(cum/total)*160]);
+      const lbl=el('text',{x:x+(bw-30)/2, y:196, fill:'#94a3b8','font-size':10,'text-anchor':'middle'}); lbl.textContent=d.name; svg.appendChild(lbl);
+      const val=el('text',{x:x+(bw-30)/2, y:174-h, fill:'#cbd5e1','font-size':10,'text-anchor':'middle'}); val.textContent=d.v+'h'; svg.appendChild(val);
+      x += bw+gap;
+    });
+    // cumulative polyline
+    const poly=el('polyline',{points:pts.map(p=>p.join(',')).join(' '), fill:'none', stroke:'#fbbf24','stroke-width':3});
+    svg.appendChild(poly);
+    pts.forEach(p=>svg.appendChild(el('circle',{cx:p[0],cy:p[1],r:4,fill:'#fbbf24'})));
+    document.getElementById('vitalFew').textContent = vital.length ? vital.join(', ') : data[0].name;
+  }
+  pIds.forEach(i => document.getElementById(i).addEventListener('input', drawPareto));
+  drawPareto();
+</script>
+</body>
+</html>

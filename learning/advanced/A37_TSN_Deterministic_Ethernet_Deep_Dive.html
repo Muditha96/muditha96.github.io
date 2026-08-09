@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>TSN — Time-Sensitive Networking &amp; Deterministic Ethernet · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #38bdf8;       /* sky — the deterministic-Ethernet theme */
+    --accent-soft: #7dd3fc;
+    --accent-2: #f472b6;     /* pink */
+    --accent-3: #4ade80;     /* green */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(56,189,248,0.15), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(244,114,182,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(56,189,248,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(56,189,248,0.16), rgba(244,114,182,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(56,189,248,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent)!important; } .c-sky .big{color:var(--accent)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #38bdf8, #0284c7); color: #05202e; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(5,32,46,0.75); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(56,189,248,0.12); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:110px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Industrial Networking · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">⏱️</span>TSN — Time-Sensitive Networking</h1>
+  <p class="hero-sub">How standard Ethernet learns to keep promises: where latency actually comes from, the IEEE 802.1 TSN toolbox, sub-microsecond clock sync (802.1AS), time-aware gates (Qbv), frame preemption, seamless redundancy (FRER) — and how PROFINET, OPC UA and EtherCAT ride on top.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>No micro card yet — a full advanced module. Related:</span>
+    <a href="A02_PROFINET_Deep_Dive.html">A02 PROFINET →</a>
+    <a href="A03_EtherCAT_Deep_Dive.html">A03 EtherCAT →</a>
+    <a href="A06_OPC_UA_Deep_Dive.html">A06 OPC UA →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · Why Deterministic?</a>
+    <a href="#p2">2 · Anatomy of Latency</a>
+    <a href="#p3">3 · The TSN Toolbox</a>
+    <a href="#p4">4 · Clock Sync 802.1AS</a>
+    <a href="#p5">5 · Time-Aware Shaper Qbv</a>
+    <a href="#p6">6 · Preemption &amp; Shapers</a>
+    <a href="#p7">7 · Redundancy FRER</a>
+    <a href="#p8">8 · Configuration Qcc</a>
+    <a href="#p9">9 · TSN in Industry</a>
+    <a href="#p10">10 · Recap, Faults &amp; Quiz</a>
+  </div>
+
+  <!-- ===== PAGE 1 ===== -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 10</span>
+    <h2 class="page-title">Ethernet Is Fast — But It Doesn't Promise Anything</h2>
+    <p class="page-sub">A control network doesn't need speed. It needs a GUARANTEE. Those are different products.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead"><span class="hl">Time-Sensitive Networking (TSN)</span> is a set of IEEE 802.1 standards that add <span class="hl2">bounded latency</span>, <span class="hl2">sub-microsecond time synchronisation</span> and <span class="hl3">seamless redundancy</span> to ordinary switched Ethernet — so that control traffic and office traffic can share one network without the control traffic ever being late.</p>
+      <p class="body">Classic Ethernet is <strong>best-effort</strong>: switches queue frames and forward them as soon as they can. On an idle network that takes microseconds; under load, a frame can sit behind a full queue for milliseconds — and no mechanism even tells you it happened. Average latency is excellent; <strong>worst-case latency is unbounded</strong>. A PLC cycle, a servo loop or a power-grid protection message doesn't care about the average — it cares about the one frame that arrives after the deadline (→ the same hard/firm/soft logic as A36, page 5).</p>
+      <p class="body">Industry's first answer (2000s) was to <em>modify</em> Ethernet per vendor: PROFINET IRT reserves a scheduled red phase (→ A02), EtherCAT processes frames on the fly through slave silicon (→ A03), SERCOS III and Powerlink did their own thing. All work — none interoperate. <span class="hl">TSN is the vendor-neutral redo</span>: put the determinism into the IEEE 802.1 bridge standard itself, so any compliant switch from any vendor can carry any real-time protocol, plus your video streams and backups, on the same wire.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Three networks become one</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="q1a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f472b6" stop-opacity="0.30"/><stop offset="1" stop-color="#f472b6" stop-opacity="0.04"/></linearGradient>
+          <linearGradient id="q1b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbbf24" stop-opacity="0.30"/><stop offset="1" stop-color="#fbbf24" stop-opacity="0.04"/></linearGradient>
+          <linearGradient id="q1c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity="0.30"/><stop offset="1" stop-color="#4ade80" stop-opacity="0.04"/></linearGradient>
+          <linearGradient id="q1d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.35"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.06"/></linearGradient>
+        </defs>
+        <text x="190" y="28" text-anchor="middle" fill="#94a3b8" font-size="13" font-weight="700">BEFORE — parallel networks</text>
+        <rect x="30" y="45" width="320" height="70" rx="12" fill="url(#q1a)" stroke="#f472b6" stroke-width="1.6"/>
+        <text x="190" y="74" text-anchor="middle" fill="#f472b6" font-size="12.5" font-weight="800">Motion network (EtherCAT / IRT)</text>
+        <text x="190" y="96" text-anchor="middle" fill="#94a3b8" font-size="11">µs cycles · own cables · own switches</text>
+        <rect x="30" y="130" width="320" height="70" rx="12" fill="url(#q1b)" stroke="#fbbf24" stroke-width="1.6"/>
+        <text x="190" y="159" text-anchor="middle" fill="#fbbf24" font-size="12.5" font-weight="800">Control network (PROFINET RT)</text>
+        <text x="190" y="181" text-anchor="middle" fill="#94a3b8" font-size="11">ms cycles · separate VLANs or cables</text>
+        <rect x="30" y="215" width="320" height="70" rx="12" fill="url(#q1c)" stroke="#4ade80" stroke-width="1.6"/>
+        <text x="190" y="244" text-anchor="middle" fill="#4ade80" font-size="12.5" font-weight="800">IT network (office / MES / video)</text>
+        <text x="190" y="266" text-anchor="middle" fill="#94a3b8" font-size="11">best-effort · firewalled from OT</text>
+
+        <path d="M 375 165 H 425" stroke="#38bdf8" stroke-width="3" marker-end="url(#arr1)"/>
+        <defs><marker id="arr1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#38bdf8"/></marker></defs>
+
+        <text x="575" y="28" text-anchor="middle" fill="#7dd3fc" font-size="13" font-weight="700">AFTER — one converged TSN network</text>
+        <rect x="440" y="45" width="290" height="240" rx="16" fill="url(#q1d)" stroke="#38bdf8" stroke-width="2"/>
+        <rect x="460" y="70" width="250" height="52" rx="10" fill="#11161f" stroke="#f472b6" stroke-width="1.4"/>
+        <text x="585" y="92" text-anchor="middle" fill="#f472b6" font-size="11.5" font-weight="700">Scheduled class — motion / control</text>
+        <text x="585" y="110" text-anchor="middle" fill="#94a3b8" font-size="10.5">gated windows, bounded latency</text>
+        <rect x="460" y="132" width="250" height="52" rx="10" fill="#11161f" stroke="#fbbf24" stroke-width="1.4"/>
+        <text x="585" y="154" text-anchor="middle" fill="#fbbf24" font-size="11.5" font-weight="700">Reserved class — audio/video, alarms</text>
+        <text x="585" y="172" text-anchor="middle" fill="#94a3b8" font-size="10.5">credit-based shaping</text>
+        <rect x="460" y="194" width="250" height="52" rx="10" fill="#11161f" stroke="#4ade80" stroke-width="1.4"/>
+        <text x="585" y="216" text-anchor="middle" fill="#4ade80" font-size="11.5" font-weight="700">Best effort — everything else</text>
+        <text x="585" y="234" text-anchor="middle" fill="#94a3b8" font-size="10.5">gets the leftover bandwidth, safely</text>
+        <text x="585" y="270" text-anchor="middle" fill="#7dd3fc" font-size="11" font-weight="700">one cable · one switch fabric · shared clock</text>
+        <text x="380" y="310" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">Convergence is the business case: fewer networks to install, certify and maintain — the Industry 4.0 IT/OT merger made physical (→ A33).</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">What "deterministic" actually promises</div>
+      <div class="grid-3">
+        <div class="mini c-sky"><h4>Bounded latency</h4><p>A provable worst-case end-to-end delay for each critical stream — not a hope, a calculation.</p></div>
+        <div class="mini c-pink"><h4>Bounded jitter</h4><p>Arrival-time variation small enough for control loops and synchronised drives (→ A09).</p></div>
+        <div class="mini c-grn"><h4>Zero congestion loss</h4><p>Reserved streams never lose frames to a full queue — loss becomes a hardware fault, not a load symptom.</p></div>
+      </div>
+      <div class="eqn"><b>Determinism</b> ≠ speed.  A 10 ms bound that ALWAYS holds beats a 50 µs average that sometimes becomes 20 ms.</div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 2 ===== -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 10</span>
+    <h2 class="page-title">Anatomy of Latency — Where the Microseconds Go</h2>
+    <p class="page-sub">You cannot bound what you cannot decompose. Four delays add up per hop; only one of them is the villain.</p>
+
+    <div class="card">
+      <div class="label">The four components, per switch hop</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="q2a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.30"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.05"/></linearGradient>
+        </defs>
+        <rect x="30" y="60" width="120" height="90" rx="12" fill="#232d3f" stroke="#4ade80" stroke-width="1.6"/>
+        <text x="90" y="98" text-anchor="middle" fill="#4ade80" font-size="12.5" font-weight="800">Talker</text>
+        <text x="90" y="118" text-anchor="middle" fill="#94a3b8" font-size="10.5">(sensor, PLC)</text>
+        <rect x="240" y="45" width="280" height="120" rx="14" fill="url(#q2a)" stroke="#38bdf8" stroke-width="2"/>
+        <text x="380" y="72" text-anchor="middle" fill="#7dd3fc" font-size="13.5" font-weight="800">TSN switch</text>
+        <rect x="260" y="85" width="110" height="60" rx="8" fill="#11161f" stroke="#fbbf24" stroke-width="1.4"/>
+        <text x="315" y="110" text-anchor="middle" fill="#fbbf24" font-size="10.5" font-weight="700">ingress · lookup</text>
+        <text x="315" y="128" text-anchor="middle" fill="#94a3b8" font-size="10">~1–4 µs fixed</text>
+        <rect x="390" y="85" width="110" height="60" rx="8" fill="#11161f" stroke="#f87171" stroke-width="1.4"/>
+        <text x="445" y="110" text-anchor="middle" fill="#f87171" font-size="10.5" font-weight="700">egress QUEUE</text>
+        <text x="445" y="128" text-anchor="middle" fill="#94a3b8" font-size="10">0 … unbounded!</text>
+        <rect x="610" y="60" width="120" height="90" rx="12" fill="#232d3f" stroke="#f472b6" stroke-width="1.6"/>
+        <text x="670" y="98" text-anchor="middle" fill="#f472b6" font-size="12.5" font-weight="800">Listener</text>
+        <text x="670" y="118" text-anchor="middle" fill="#94a3b8" font-size="10.5">(drive, controller)</text>
+        <path d="M 150 105 H 240" stroke="#64748b" stroke-width="2.5"/>
+        <path d="M 520 105 H 610" stroke="#64748b" stroke-width="2.5"/>
+        <text x="195" y="95" text-anchor="middle" fill="#64748b" font-size="10">propagation + serialisation</text>
+        <text x="565" y="95" text-anchor="middle" fill="#64748b" font-size="10">propagation + serialisation</text>
+
+        <rect x="60" y="195" width="640" height="86" rx="12" fill="#0b0f14" stroke="#334155"/>
+        <text x="380" y="220" text-anchor="middle" fill="#f1f5f9" font-size="12.5" font-weight="700">Per-hop delay budget</text>
+        <text x="120" y="245" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">propagation</text>
+        <text x="120" y="263" text-anchor="middle" fill="#94a3b8" font-size="10.5">5 ns/m — fixed</text>
+        <text x="290" y="245" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="700">serialisation</text>
+        <text x="290" y="263" text-anchor="middle" fill="#94a3b8" font-size="10.5">bits ÷ link rate — fixed</text>
+        <text x="470" y="245" text-anchor="middle" fill="#7dd3fc" font-size="11" font-weight="700">switch processing</text>
+        <text x="470" y="263" text-anchor="middle" fill="#94a3b8" font-size="10.5">~1–4 µs — fixed</text>
+        <text x="630" y="245" text-anchor="middle" fill="#f87171" font-size="11" font-weight="700">queuing</text>
+        <text x="630" y="263" text-anchor="middle" fill="#94a3b8" font-size="10.5">variable — TSN's target</text>
+      </svg>
+      </div>
+      <p class="cap">Three of the four delays are physics and silicon — computable once. Queuing is traffic-dependent. All of TSN's shaping machinery exists to bound that one red box.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The numbers</div>
+      <div class="eqn">t<b>_ser</b> = frame_bits / link_rate     1518 B ⇒ <b>12.3 µs</b> @ 1 Gbit/s · 123 µs @ 100 Mbit/s
+t<b>_prop</b> ≈ 5 ns per metre of copper/fibre  (100 m ⇒ 0.5 µs)
+t<b>_queue,worst</b> (no TSN, priority only) ≈ one max frame already departing
+                + <span class="v2">all queued higher/equal-priority frames ahead of you</span>  ⇒ grows with load, unbounded in general</div>
+      <p class="body">Store-and-forward switches must receive the <strong>whole frame</strong> before forwarding, so serialisation is paid <em>again at every hop</em>. That is why hop count dominates worst-case budgets, and why flat, shallow topologies (or cut-through silicon) matter for motion-class traffic. Even with strict priority queuing, a critical frame that arrives one bit after a 1518-byte best-effort frame started transmitting waits the full 12.3 µs — <span class="hl">priority cannot recall a frame already on the wire</span>. Fixing exactly that is page 5 (gates) and page 6 (preemption).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — worst-case path latency (priority queuing, no TSN)</div>
+      <div class="demo">
+        <div class="demo-row"><span>Link speed</span><b><span id="lsVal">1000</span> Mbit/s</b></div>
+        <div class="seg" id="lsSeg">
+          <button data-v="100">100 M</button>
+          <button data-v="1000" class="on">1 G</button>
+          <button data-v="10000">10 G</button>
+        </div>
+        <div class="demo-row"><span>Switch hops</span><b><span id="hpVal">4</span></b></div>
+        <input type="range" id="hpSlide" min="1" max="12" step="1" value="4">
+        <div class="demo-row"><span>Your critical frame size</span><b><span id="cfVal">128</span> B</b></div>
+        <input type="range" id="cfSlide" min="64" max="1518" step="2" value="128">
+        <div class="demo-row"><span>Cable per hop</span><b><span id="cbVal">50</span> m</b></div>
+        <input type="range" id="cbSlide" min="2" max="100" step="1" value="50">
+        <div class="demo-out" id="latOut"></div>
+      </div>
+      <p class="cap">Per hop: own serialisation + 2 µs processing + propagation + ONE 1518 B blocking frame (the frame that just beat you to the port). Real congested queues are worse — this is the <em>best</em> worst case without TSN gates.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 3 ===== -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 10</span>
+    <h2 class="page-title">The TSN Toolbox — A Family, Not a Protocol</h2>
+    <p class="page-sub">TSN is a menu of IEEE 802.1 amendments. Every industry profile picks a different subset — nobody deploys them all.</p>
+
+    <div class="card">
+      <div class="label">The four pillars</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="q3a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.30"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.04"/></linearGradient>
+          <linearGradient id="q3b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f472b6" stop-opacity="0.30"/><stop offset="1" stop-color="#f472b6" stop-opacity="0.04"/></linearGradient>
+          <linearGradient id="q3c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity="0.30"/><stop offset="1" stop-color="#4ade80" stop-opacity="0.04"/></linearGradient>
+          <linearGradient id="q3d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbbf24" stop-opacity="0.30"/><stop offset="1" stop-color="#fbbf24" stop-opacity="0.04"/></linearGradient>
+        </defs>
+        <rect x="25" y="30" width="345" height="120" rx="14" fill="url(#q3a)" stroke="#38bdf8" stroke-width="1.8"/>
+        <text x="197" y="56" text-anchor="middle" fill="#7dd3fc" font-size="13.5" font-weight="800">⏰ TIME — shared clock</text>
+        <text x="197" y="80" text-anchor="middle" fill="#cbd5e1" font-size="11.5">802.1AS (gPTP) — profile of IEEE 1588 PTP</text>
+        <text x="197" y="100" text-anchor="middle" fill="#94a3b8" font-size="11">every bridge &amp; endpoint within ~1 µs</text>
+        <text x="197" y="120" text-anchor="middle" fill="#94a3b8" font-size="11">prerequisite for everything scheduled</text>
+
+        <rect x="390" y="30" width="345" height="120" rx="14" fill="url(#q3b)" stroke="#f472b6" stroke-width="1.8"/>
+        <text x="562" y="56" text-anchor="middle" fill="#f472b6" font-size="13.5" font-weight="800">🚦 SHAPING — bounded queues</text>
+        <text x="562" y="80" text-anchor="middle" fill="#cbd5e1" font-size="11.5">Qbv time-aware gates · Qav credit-based</text>
+        <text x="562" y="100" text-anchor="middle" fill="#cbd5e1" font-size="11.5">Qbu+802.3br preemption · Qch cyclic · Qcr ATS</text>
+        <text x="562" y="120" text-anchor="middle" fill="#94a3b8" font-size="11">turns "usually fast" into "never late"</text>
+
+        <rect x="25" y="165" width="345" height="120" rx="14" fill="url(#q3c)" stroke="#4ade80" stroke-width="1.8"/>
+        <text x="197" y="191" text-anchor="middle" fill="#4ade80" font-size="13.5" font-weight="800">🛟 RELIABILITY — no single loss</text>
+        <text x="197" y="215" text-anchor="middle" fill="#cbd5e1" font-size="11.5">802.1CB FRER — duplicate over disjoint paths</text>
+        <text x="197" y="235" text-anchor="middle" fill="#cbd5e1" font-size="11.5">Qca explicit path control · Qci per-stream filtering</text>
+        <text x="197" y="255" text-anchor="middle" fill="#94a3b8" font-size="11">zero-swap-time redundancy for critical streams</text>
+
+        <rect x="390" y="165" width="345" height="120" rx="14" fill="url(#q3d)" stroke="#fbbf24" stroke-width="1.8"/>
+        <text x="562" y="191" text-anchor="middle" fill="#fbbf24" font-size="13.5" font-weight="800">🗺️ RESOURCES — who may send what</text>
+        <text x="562" y="215" text-anchor="middle" fill="#cbd5e1" font-size="11.5">Qcc stream configuration (CNC/CUC)</text>
+        <text x="562" y="235" text-anchor="middle" fill="#cbd5e1" font-size="11.5">Qat stream reservation · Qdd/Qdj (newer RAP)</text>
+        <text x="562" y="255" text-anchor="middle" fill="#94a3b8" font-size="11">admission control: no reservation, no guarantee</text>
+      </svg>
+      </div>
+      <p class="cap">Remember it as T-S-R-R: Time, Shaping, Reliability, Resources. Every TSN feature you'll ever meet fits one pillar.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The standards you will actually see quoted</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Standard</th><th>Nickname</th><th>Pillar</th><th>One-line job</th></tr>
+        <tr><td class="mono"><b>802.1AS</b></td><td>gPTP</td><td>Time</td><td>Propagate one grandmaster clock to every node, µs-accurate</td></tr>
+        <tr><td class="mono"><b>802.1Qbv</b></td><td>TAS / time-aware shaper</td><td>Shaping</td><td>Open/close egress queue gates on a repeating schedule</td></tr>
+        <tr><td class="mono"><b>802.1Qbu + 802.3br</b></td><td>frame preemption</td><td>Shaping</td><td>Pause a big frame mid-flight to let an express frame out</td></tr>
+        <tr><td class="mono"><b>802.1Qav</b></td><td>CBS</td><td>Shaping</td><td>Credit-based shaping for A/V-class streams (the AVB legacy)</td></tr>
+        <tr><td class="mono"><b>802.1CB</b></td><td>FRER</td><td>Reliability</td><td>Send every frame twice on disjoint paths, discard the duplicate</td></tr>
+        <tr><td class="mono"><b>802.1Qci</b></td><td>PSFP</td><td>Reliability</td><td>Per-stream policing at ingress — babbling nodes get filtered</td></tr>
+        <tr><td class="mono"><b>802.1Qcc</b></td><td>—</td><td>Resources</td><td>How streams get requested, computed and configured (CNC/CUC)</td></tr>
+      </table></div>
+      <p class="body"><strong>Key mental model:</strong> TSN standards define <em>mechanisms in bridges</em>, not an application protocol. Your process data still travels as PROFINET, OPC UA Pub/Sub, or plain UDP — TSN just decides <em>when</em> each frame is allowed to leave each port. That layering is why one converged network can carry several industrial protocols simultaneously (page 9).</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 4 ===== -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 10</span>
+    <h2 class="page-title">802.1AS — One Clock to Rule Them All</h2>
+    <p class="page-sub">Scheduled gates are meaningless if every switch disagrees about what time it is. Sync comes first, always.</p>
+
+    <div class="card">
+      <div class="label">How gPTP measures link delay and offset</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg">
+        <text x="200" y="30" text-anchor="middle" fill="#7dd3fc" font-size="13.5" font-weight="800">Master (GM)</text>
+        <text x="560" y="30" text-anchor="middle" fill="#f472b6" font-size="13.5" font-weight="800">Slave / bridge</text>
+        <path d="M 200 45 V 290" stroke="#38bdf8" stroke-width="2.5"/>
+        <path d="M 560 45 V 290" stroke="#f472b6" stroke-width="2.5"/>
+        <path d="M 200 70 L 560 110" stroke="#4ade80" stroke-width="2.2" marker-end="url(#arr2)"/>
+        <text x="370" y="76" text-anchor="middle" fill="#4ade80" font-size="11.5" font-weight="700">Sync (+ Follow_Up carries t₁)</text>
+        <circle cx="200" cy="70" r="5" fill="#4ade80"/><text x="178" y="66" text-anchor="end" fill="#cbd5e1" font-size="11.5" class="mono">t₁ sent</text>
+        <circle cx="560" cy="110" r="5" fill="#4ade80"/><text x="582" y="108" fill="#cbd5e1" font-size="11.5" class="mono">t₂ received</text>
+        <path d="M 560 170 L 200 210" stroke="#fbbf24" stroke-width="2.2" marker-end="url(#arr3)"/>
+        <text x="380" y="180" text-anchor="middle" fill="#fbbf24" font-size="11.5" font-weight="700">Pdelay_Req</text>
+        <circle cx="560" cy="170" r="5" fill="#fbbf24"/><text x="582" y="168" fill="#cbd5e1" font-size="11.5" class="mono">t₃ sent</text>
+        <circle cx="200" cy="210" r="5" fill="#fbbf24"/><text x="178" y="206" text-anchor="end" fill="#cbd5e1" font-size="11.5" class="mono">t₄ received</text>
+        <path d="M 200 240 L 560 270" stroke="#c084fc" stroke-width="2.2" marker-end="url(#arr4)"/>
+        <text x="370" y="248" text-anchor="middle" fill="#c084fc" font-size="11.5" font-weight="700">Pdelay_Resp (returns t₄, t₅…)</text>
+        <defs>
+          <marker id="arr2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#4ade80"/></marker>
+          <marker id="arr3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#fbbf24"/></marker>
+          <marker id="arr4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#c084fc"/></marker>
+        </defs>
+        <text x="380" y="310" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">Timestamps are taken in PHY hardware, not software — that's what makes sub-µs possible.</text>
+      </svg>
+      </div>
+      <div class="eqn"><b>link_delay</b> = ((t₂−t₁) + (t₄−t₃)) / 2        ← peer-delay, assumes symmetric cable
+<b>offset</b>   = (t₂−t₁) − link_delay             ← slave corrects its clock by −offset
+each bridge adds its residence time to the <span class="v2">correction field</span> → errors don't snowball blindly</div>
+      <p class="body">802.1AS is a tightened <strong>profile of IEEE 1588 PTP</strong>: peer-to-peer delay on every link (not end-to-end), hardware timestamping mandatory, one domain, and a <span class="hl">Best Master Clock Algorithm (BMCA)</span> that elects the grandmaster automatically — priority fields first, then clock quality, then MAC address as tie-break. Bridges are <em>time-aware relays</em>: they syntonise (match frequency) to the GM and pass corrected time downstream. Typical per-hop error is tens of nanoseconds; over a sane industrial topology you stay comfortably <strong>below 1 µs across 7+ hops</strong> — the figure every scheduled feature silently assumes.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Engineering consequences</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Asymmetric paths poison sync.</strong> The ÷2 assumes both directions take equal time. Mismatched fibre pairs, media converters, or one direction through a non-PTP-aware device inject a constant, invisible offset.</span></li>
+        <li><span class="num">2</span><span><strong>Every device in the sync path must be gPTP-capable.</strong> One dumb switch = timestamps corrupted by its queuing jitter. (Same class of mistake as putting an office switch inside a PROFINET IRT domain → A02.)</span></li>
+        <li><span class="num">3</span><span><strong>Plan grandmaster failover.</strong> BMCA re-elects automatically, but the network free-runs on local oscillators during the handover — schedules survive on holdover only if drift is small. Watch <span class="mono">clockClass</span> in diagnostics.</span></li>
+        <li><span class="num">4</span><span><strong>Sync error budget eats schedule margin.</strong> Gate windows must be padded by the worst clock disagreement between any two devices — the tighter your sync, the more bandwidth your schedule can actually use (page 5).</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 5 ===== -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 10</span>
+    <h2 class="page-title">802.1Qbv — The Time-Aware Shaper</h2>
+    <p class="page-sub">A railway timetable for frames: each egress queue gets a gate, and the gates open and close on a synchronized, repeating schedule.</p>
+
+    <div class="card">
+      <div class="label">Gate control list on one egress port</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+        <text x="380" y="24" text-anchor="middle" fill="#f1f5f9" font-size="14" font-weight="700">One cycle (e.g. 1 ms), repeating forever — all switches phase-aligned by 802.1AS</text>
+        <rect x="60" y="45" width="640" height="44" rx="8" fill="#0b0f14" stroke="#334155"/>
+        <rect x="60" y="45" width="160" height="44" rx="8" fill="rgba(244,114,182,0.35)" stroke="#f472b6" stroke-width="1.5"/>
+        <text x="140" y="72" text-anchor="middle" fill="#f472b6" font-size="11.5" font-weight="800">TT window — queue 7 only</text>
+        <rect x="228" y="45" width="60" height="44" fill="rgba(251,191,36,0.25)" stroke="#fbbf24" stroke-width="1.2"/>
+        <text x="258" y="72" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="700">guard</text>
+        <rect x="288" y="45" width="412" height="44" rx="8" fill="rgba(74,222,128,0.20)" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="494" y="72" text-anchor="middle" fill="#4ade80" font-size="11.5" font-weight="800">open window — queues 0–6 (best effort, A/V, …)</text>
+        <text x="60" y="110" fill="#64748b" font-size="10.5">t = 0</text>
+        <text x="700" y="110" text-anchor="end" fill="#64748b" font-size="10.5">t = cycle</text>
+
+        <text x="80" y="145" fill="#7dd3fc" font-size="12" font-weight="700">Gate states over the cycle (1 = open):</text>
+        <text x="95" y="175" fill="#f472b6" font-size="11" class="mono">Q7 control : 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0</text>
+        <text x="95" y="200" fill="#4ade80" font-size="11" class="mono">Q0–6 rest  : 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1</text>
+        <text x="95" y="232" fill="#94a3b8" font-size="11.5">The guard band before the TT window is sized to one max frame —</text>
+        <text x="95" y="252" fill="#94a3b8" font-size="11.5">no best-effort frame may START if it cannot FINISH before the gate closes.</text>
+        <text x="95" y="280" fill="#7dd3fc" font-size="11.5" font-weight="700">Result: when the control frame arrives, the wire is guaranteed idle. Queuing delay ≈ 0, by construction.</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">What it costs</div>
+      <p class="body">Qbv buys <span class="hl">hard bounds</span> at the price of <strong>engineering effort and bandwidth</strong>. Someone must compute a global schedule: which stream transmits in which window on which port at which phase — an NP-hard scheduling problem solved by the CNC's tooling (page 8), not by hand. Guard bands waste one max-frame-time per gate transition (~12.3 µs at 1 G) unless preemption shrinks them (page 6). And a schedule is <strong>brittle by design</strong>: add one new cyclic stream and the whole timetable may need recomputation — exactly like adding a train to a saturated railway.</p>
+      <div class="eqn"><b>usable_TT_bandwidth</b> ≈ (TT_window − sync_error_pad) / cycle
+<b>guard_band</b> = t_ser(max_frame) = 12.3 µs @1G  → with preemption ≈ t_ser(127 B fragment) ≈ <span class="v3">1.0 µs</span></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — will the control frame always make its window?</div>
+      <div class="demo">
+        <div class="demo-row"><span>Cycle time</span><b><span id="cyVal">1000</span> µs</b></div>
+        <input type="range" id="cySlide" min="125" max="4000" step="125" value="1000">
+        <div class="demo-row"><span>TT window length</span><b><span id="ttVal">120</span> µs</b></div>
+        <input type="range" id="ttSlide" min="20" max="800" step="10" value="120">
+        <div class="demo-row"><span>Control payload per cycle</span><b><span id="pdVal">6</span> frames × 128 B</b></div>
+        <input type="range" id="pdSlide" min="1" max="40" step="1" value="6">
+        <div class="demo-row"><span>Clock sync error pad (±)</span><b><span id="seVal">1.0</span> µs</b></div>
+        <input type="range" id="seSlide" min="0.1" max="10" step="0.1" value="1.0">
+        <div class="demo-out" id="qbvOut"></div>
+      </div>
+      <p class="cap">Frames need t_ser = (128+22) B × 8 / 1 Gbit/s ≈ 1.2 µs each. Window must hold all frames + 2× sync pad. The leftover cycle is what best-effort traffic gets.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 6 ===== -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 10</span>
+    <h2 class="page-title">Preemption &amp; the Other Shapers</h2>
+    <p class="page-sub">Gates aren't the only tool. Preemption shrinks guard bands; CBS and ATS bound latency without any global schedule.</p>
+
+    <div class="card">
+      <div class="label">802.1Qbu + 802.3br — frame preemption</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg">
+        <text x="380" y="24" text-anchor="middle" fill="#f1f5f9" font-size="14" font-weight="700">Express frame interrupts a preemptable frame mid-transmission</text>
+        <text x="30" y="70" fill="#94a3b8" font-size="11.5">Without preemption:</text>
+        <rect x="200" y="50" width="330" height="30" rx="6" fill="rgba(74,222,128,0.25)" stroke="#4ade80"/>
+        <text x="365" y="70" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">1518 B best-effort frame (12.3 µs)</text>
+        <rect x="533" y="50" width="60" height="30" rx="6" fill="rgba(244,114,182,0.4)" stroke="#f472b6"/>
+        <text x="563" y="70" text-anchor="middle" fill="#f472b6" font-size="10.5" font-weight="800">ctrl</text>
+        <text x="640" y="70" fill="#f87171" font-size="11" font-weight="700">waits 12.3 µs ✗</text>
+
+        <text x="30" y="140" fill="#94a3b8" font-size="11.5">With preemption:</text>
+        <rect x="200" y="120" width="110" height="30" rx="6" fill="rgba(74,222,128,0.25)" stroke="#4ade80"/>
+        <text x="255" y="140" text-anchor="middle" fill="#4ade80" font-size="10.5" font-weight="700">fragment 1</text>
+        <rect x="316" y="120" width="60" height="30" rx="6" fill="rgba(244,114,182,0.4)" stroke="#f472b6" stroke-width="2"/>
+        <text x="346" y="140" text-anchor="middle" fill="#f472b6" font-size="10.5" font-weight="800">ctrl ✓</text>
+        <rect x="382" y="120" width="220" height="30" rx="6" fill="rgba(74,222,128,0.25)" stroke="#4ade80" stroke-dasharray="5 3"/>
+        <text x="492" y="140" text-anchor="middle" fill="#4ade80" font-size="10.5" font-weight="700">fragment 2 (resumes, re-assembled in MAC)</text>
+        <text x="640" y="140" fill="#4ade80" font-size="11" font-weight="700">waits ≤ ~1 µs</text>
+
+        <text x="380" y="195" text-anchor="middle" fill="#94a3b8" font-size="11.5">Two MACs share one port: the <tspan fill="#f472b6" font-weight="700">express MAC</tspan> may interrupt the <tspan fill="#4ade80" font-weight="700">preemptable MAC</tspan> at any 64 B boundary.</text>
+        <text x="380" y="218" text-anchor="middle" fill="#94a3b8" font-size="11.5">Min fragment 64 B ⇒ worst blocking = 127 B still departing ≈ 1.0 µs @1G. Hop-local, invisible to endpoints.</text>
+        <text x="380" y="245" text-anchor="middle" fill="#64748b" font-size="11" font-style="italic">Preemption + Qbv: guard bands shrink from one max frame to one fragment — schedules get ~11 µs denser per gate at 1G.</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Shaper family — pick by traffic type</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Mechanism</th><th>Needs global schedule?</th><th>Needs synced clocks?</th><th>Latency bound</th><th>Best for</th></tr>
+        <tr><td><b>Strict priority</b> (802.1Q)</td><td>No</td><td>No</td><td>none (unbounded)</td><td>legacy QoS, ordinary VLANs</td></tr>
+        <tr><td><b>CBS</b> (Qav)</td><td>No</td><td>No</td><td>bounded, loose (ms class)</td><td>audio/video streams, soft cyclic data</td></tr>
+        <tr><td><b>ATS</b> (Qcr, async)</td><td>No</td><td>No</td><td>bounded per hop, tighter</td><td>mixed sporadic control traffic</td></tr>
+        <tr><td><b>TAS</b> (Qbv)</td><td><b>Yes</b></td><td><b>Yes</b></td><td>tightest (µs, provable)</td><td>isochronous motion &amp; controller cycles</td></tr>
+        <tr><td><b>Preemption</b> (Qbu/br)</td><td>No</td><td>No</td><td>helper — shrinks blocking</td><td>combine with any of the above</td></tr>
+      </table></div>
+      <p class="body"><strong>CBS (credit-based shaper)</strong> — the AVB inheritance — meters each class with a credit counter: transmit while credit ≥ 0, earn credit while idle/blocked at <span class="mono">idleSlope</span>, spend at <span class="mono">sendSlope</span>. It smooths bursts into a steady drip, which bounds downstream queue build-up without any schedule. <strong>ATS</strong> (asynchronous traffic shaping, from urgency-based scheduling theory) gives per-hop bounds for traffic that isn't periodic at all. The professional pattern is <span class="hl">layered</span>: Qbv windows for the motion class, CBS/ATS for alarms and video, best effort for the rest — all on the same port.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 7 ===== -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 10</span>
+    <h2 class="page-title">802.1CB FRER — Losing a Frame Without Noticing</h2>
+    <p class="page-sub">At 10⁻⁹ frame-error rates, a gigabit link still drops frames every few hours. Critical streams can't wait for a retransmission.</p>
+
+    <div class="card">
+      <div class="label">Frame Replication and Elimination for Reliability</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#38bdf8"/></marker>
+          <marker id="arr6" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#f472b6"/></marker>
+        </defs>
+        <rect x="30" y="115" width="120" height="70" rx="12" fill="#232d3f" stroke="#4ade80" stroke-width="1.8"/>
+        <text x="90" y="145" text-anchor="middle" fill="#4ade80" font-size="12.5" font-weight="800">Talker</text>
+        <text x="90" y="165" text-anchor="middle" fill="#94a3b8" font-size="10">seq# stamped: R-TAG</text>
+
+        <rect x="220" y="40" width="130" height="56" rx="10" fill="#1a2230" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="285" y="63" text-anchor="middle" fill="#7dd3fc" font-size="11" font-weight="700">bridge A1</text>
+        <text x="285" y="82" text-anchor="middle" fill="#64748b" font-size="10">path A</text>
+        <rect x="420" y="40" width="130" height="56" rx="10" fill="#1a2230" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="485" y="63" text-anchor="middle" fill="#7dd3fc" font-size="11" font-weight="700">bridge A2</text>
+        <text x="485" y="82" text-anchor="middle" fill="#64748b" font-size="10">frames 1,2,3,4 ✓</text>
+
+        <rect x="220" y="204" width="130" height="56" rx="10" fill="#1a2230" stroke="#f472b6" stroke-width="1.5"/>
+        <text x="285" y="227" text-anchor="middle" fill="#f472b6" font-size="11" font-weight="700">bridge B1</text>
+        <text x="285" y="246" text-anchor="middle" fill="#64748b" font-size="10">path B</text>
+        <rect x="420" y="204" width="130" height="56" rx="10" fill="#1a2230" stroke="#f472b6" stroke-width="1.5"/>
+        <text x="485" y="227" text-anchor="middle" fill="#f472b6" font-size="11" font-weight="700">bridge B2</text>
+        <text x="485" y="246" text-anchor="middle" fill="#f87171" font-size="10">frame 3 lost ✗</text>
+
+        <rect x="610" y="115" width="120" height="70" rx="12" fill="#232d3f" stroke="#c084fc" stroke-width="1.8"/>
+        <text x="670" y="143" text-anchor="middle" fill="#c084fc" font-size="12.5" font-weight="800">Listener</text>
+        <text x="670" y="163" text-anchor="middle" fill="#94a3b8" font-size="10">eliminates duplicates</text>
+        <text x="670" y="177" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="700">receives 1,2,3,4 ✓</text>
+
+        <path d="M 150 130 Q 185 90 220 72" stroke="#38bdf8" stroke-width="2.2" fill="none" marker-end="url(#arr5)"/>
+        <path d="M 350 68 H 420" stroke="#38bdf8" stroke-width="2.2" marker-end="url(#arr5)"/>
+        <path d="M 550 72 Q 585 90 615 122" stroke="#38bdf8" stroke-width="2.2" fill="none" marker-end="url(#arr5)"/>
+        <path d="M 150 170 Q 185 210 220 228" stroke="#f472b6" stroke-width="2.2" fill="none" marker-end="url(#arr6)"/>
+        <path d="M 350 232 H 420" stroke="#f472b6" stroke-width="2.2" marker-end="url(#arr6)"/>
+        <path d="M 550 228 Q 585 210 615 178" stroke="#f472b6" stroke-width="2.2" fill="none" marker-end="url(#arr6)"/>
+        <text x="380" y="290" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">Every frame travels twice on physically disjoint paths. First copy wins; the R-TAG sequence number kills the twin. Recovery time from a path failure: zero.</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">FRER vs the classic redundancy protocols</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Scheme</th><th>Standard</th><th>Recovery time</th><th>Topology</th><th>Notes</th></tr>
+        <tr><td><b>RSTP</b></td><td>802.1w</td><td>~100 ms – s</td><td>any mesh</td><td>IT default; far too slow for control</td></tr>
+        <tr><td><b>MRP</b></td><td>IEC 62439-2</td><td>10–200 ms typ.</td><td>ring</td><td>PROFINET's usual ring (→ A02)</td></tr>
+        <tr><td><b>PRP</b></td><td>IEC 62439-3</td><td><b>0 ms</b> (seamless)</td><td>two parallel LANs</td><td>duplicate everything, dual NICs</td></tr>
+        <tr><td><b>HSR</b></td><td>IEC 62439-3</td><td><b>0 ms</b> (seamless)</td><td>ring</td><td>duplicates circulate the ring both ways</td></tr>
+        <tr><td><b>FRER</b></td><td>802.1CB</td><td><b>0 ms</b> (seamless)</td><td>any, per-stream</td><td>TSN-native: replicate only the streams that matter</td></tr>
+      </table></div>
+      <p class="body">FRER's advantage over PRP/HSR is <span class="hl">granularity</span>: replication is configured <em>per stream</em>, so the network duplicates the 2% of traffic that is safety- or motion-critical instead of doubling everything. Its subtlety is state: elimination functions track sequence-number windows, and a talker reset or misconfigured recovery window can silently blackhole a stream (failure mode #6, page 10). <span class="hl2">802.1Qci (PSFP)</span> complements it at ingress — per-stream gates, meters and filters that stop a babbling device from flooding a reserved class (the network-level equivalent of a fuse).</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 8 ===== -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 10</span>
+    <h2 class="page-title">802.1Qcc — Who Computes the Timetable?</h2>
+    <p class="page-sub">Streams must be requested, admitted and configured. Three architectures exist; industry overwhelmingly picked the centralized one.</p>
+
+    <div class="card">
+      <div class="label">Fully centralized model (the industrial default)</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr7" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#fbbf24"/></marker>
+          <marker id="arr8" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#38bdf8"/></marker>
+        </defs>
+        <rect x="290" y="30" width="180" height="60" rx="12" fill="#232d3f" stroke="#c084fc" stroke-width="1.8"/>
+        <text x="380" y="55" text-anchor="middle" fill="#c084fc" font-size="13" font-weight="800">CUC</text>
+        <text x="380" y="75" text-anchor="middle" fill="#94a3b8" font-size="10.5">Centralized User Config — knows the APPLICATION</text>
+        <rect x="290" y="130" width="180" height="60" rx="12" fill="#232d3f" stroke="#fbbf24" stroke-width="1.8"/>
+        <text x="380" y="155" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="800">CNC</text>
+        <text x="380" y="175" text-anchor="middle" fill="#94a3b8" font-size="10.5">Centralized Network Config — knows the TOPOLOGY</text>
+        <path d="M 380 90 V 130" stroke="#c084fc" stroke-width="2.5"/>
+        <text x="500" y="112" text-anchor="middle" fill="#64748b" font-size="10.5">stream requirements (talker, listeners, period, size, deadline)</text>
+
+        <rect x="60" y="240" width="130" height="56" rx="10" fill="#1a2230" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="125" y="264" text-anchor="middle" fill="#7dd3fc" font-size="11" font-weight="700">TSN bridge</text>
+        <text x="125" y="282" text-anchor="middle" fill="#64748b" font-size="10">GCL, FRER, PSFP cfg</text>
+        <rect x="240" y="240" width="130" height="56" rx="10" fill="#1a2230" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="305" y="264" text-anchor="middle" fill="#7dd3fc" font-size="11" font-weight="700">TSN bridge</text>
+        <text x="305" y="282" text-anchor="middle" fill="#64748b" font-size="10">via NETCONF/YANG</text>
+        <rect x="420" y="240" width="130" height="56" rx="10" fill="#1a2230" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="485" y="264" text-anchor="middle" fill="#7dd3fc" font-size="11" font-weight="700">TSN bridge</text>
+        <text x="485" y="282" text-anchor="middle" fill="#64748b" font-size="10">…</text>
+        <rect x="600" y="240" width="130" height="56" rx="10" fill="#1a2230" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="665" y="264" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">end stations</text>
+        <text x="665" y="282" text-anchor="middle" fill="#64748b" font-size="10">talkers &amp; listeners</text>
+        <path d="M 340 190 Q 200 215 135 240" stroke="#fbbf24" stroke-width="2" fill="none" marker-end="url(#arr7)"/>
+        <path d="M 370 190 Q 320 218 308 240" stroke="#fbbf24" stroke-width="2" fill="none" marker-end="url(#arr7)"/>
+        <path d="M 410 190 Q 460 218 480 240" stroke="#fbbf24" stroke-width="2" fill="none" marker-end="url(#arr7)"/>
+        <path d="M 440 190 Q 580 215 655 240" stroke="#fbbf24" stroke-width="2" fill="none" marker-end="url(#arr7)"/>
+        <text x="380" y="315" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">CUC gathers what the application needs; CNC solves the schedule and pushes per-bridge config. Think "SDN for the factory".</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">The three Qcc models</div>
+      <div class="grid-3">
+        <div class="mini c-grn"><h4>Fully distributed</h4><p>Talkers announce streams hop-by-hop (SRP-style, as in AVB). Simple, no controller — but can't compute Qbv timetables. Fine for CBS-class streams.</p></div>
+        <div class="mini c-amb"><h4>Centralized network / distributed user</h4><p>Devices still request at the edge; a CNC computes paths &amp; schedules. Transitional model.</p></div>
+        <div class="mini c-sky"><h4>Fully centralized</h4><p>CUC + CNC know everything, compute everything, push everything. The only model that scales to scheduled motion traffic — and the one PROFINET over TSN and OPC UA FX use.</p></div>
+      </div>
+      <p class="body">Under the hood the CNC speaks <span class="mono">NETCONF/RESTCONF + YANG models</span> to every bridge — the same management machinery as datacentre SDN, aimed at gate control lists instead of routing tables. The practical consequence for the engineer: <strong>a TSN domain is engineered offline, like a PROFINET IRT domain (→ A02), not plug-and-pray like an office LAN</strong>. Change management, config backup and topology documentation stop being optional hygiene and become part of the control system itself.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 9 ===== -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 10</span>
+    <h2 class="page-title">TSN in the Real Factory</h2>
+    <p class="page-sub">TSN is plumbing. What flows through it is PROFINET, OPC UA, CC-Link — and, increasingly, everything at once.</p>
+
+    <div class="card">
+      <div class="label">Who rides on TSN — and how</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Ecosystem</th><th>Approach</th><th>Deep dive</th></tr>
+        <tr><td><b>PROFINET over TSN</b></td><td>Keeps the PROFINET application layer; replaces IRT's proprietary scheduling with 802.1AS + Qbv. Conformance Class D.</td><td>→ A02</td></tr>
+        <tr><td><b>OPC UA FX (Pub/Sub over TSN)</b></td><td>Controller-to-controller and field exchange: UADP frames in scheduled windows — the "one language + one wire" Industry 4.0 stack.</td><td>→ A06, A33</td></tr>
+        <tr><td><b>CC-Link IE TSN</b></td><td>First fieldbus natively built on TSN (gigabit); strong in Asian machine markets.</td><td>—</td></tr>
+        <tr><td><b>EtherCAT</b></td><td>Stays as-is — its on-the-fly processing already delivers determinism inside the segment; TSN carries EtherCAT segments <em>between</em> machines via 802.1AS-aware couplers.</td><td>→ A03</td></tr>
+        <tr><td><b>Automotive / in-vehicle</b></td><td>TSN (AS + Qbv + CB) is the backbone for zonal E/E architectures replacing kilograms of CAN harness.</td><td>→ A04</td></tr>
+        <tr><td><b>Power &amp; process</b></td><td>IEC 61850 substations (sampled values), Ethernet-APL field instruments feeding TSN backbones.</td><td>→ A11</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Deployment reality check</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Hardware is the entry ticket.</strong> Qbv/CB/AS live in switch silicon and PHY timestamping — no firmware update turns an office switch into TSN. Endpoints need TSN-capable NICs/MACs (common in modern industrial SoCs).</span></li>
+        <li><span class="num">2</span><span><strong>Profiles tame the toolbox.</strong> IEC/IEEE 60802 defines <em>which</em> features an industrial-automation device must implement, so vendors converge on an interoperable subset. Match devices to the profile, not to the marketing word "TSN".</span></li>
+        <li><span class="num">3</span><span><strong>Start where determinism pays.</strong> Machine-to-machine motion coordination, line-level controller sync, converged cells with vision + control (→ A16). Best-effort MQTT telemetry does not need Qbv — don't schedule what a queue can absorb.</span></li>
+        <li><span class="num">4</span><span><strong>5G URLLC and wireless TSN</strong> extend bounded latency to mobile robots and tools — the 3GPP bridge model presents the 5G system as one virtual TSN bridge with measured, bounded delay. Early, but real (→ A33).</span></li>
+        <li><span class="num">5</span><span><strong>Security rides along:</strong> a converged network erases the old air gap — IEC 62443 zoning, PSFP ingress policing and 802.1X device authentication belong in the same design review as the schedule (→ A33 page 8).</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Interactive — sync-error budget across the line</div>
+      <div class="demo">
+        <div class="demo-row"><span>gPTP hops between GM and farthest device</span><b><span id="shVal">6</span></b></div>
+        <input type="range" id="shSlide" min="1" max="14" step="1" value="6">
+        <div class="demo-row"><span>Per-hop time error (quality of bridges)</span><b><span id="peVal">30</span> ns</b></div>
+        <input type="range" id="peSlide" min="10" max="200" step="5" value="30">
+        <div class="demo-row"><span>Gate window you must protect</span><b><span id="gwVal">50</span> µs</b></div>
+        <input type="range" id="gwSlide" min="10" max="500" step="5" value="50">
+        <div class="demo-out" id="syncOut"></div>
+      </div>
+      <p class="cap">Worst device-to-device disagreement ≈ 2 × (hops × per-hop error). That pad is stolen from every gate window — cheap bridges tax every single cycle.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 10 ===== -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 10</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Quiz</h2>
+    <p class="page-sub">Determinism is designed, calculated and monitored — never assumed.</p>
+
+    <div class="card">
+      <div class="label">The whole module in six lines</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span>Ethernet's problem is not speed but <strong>unbounded queuing delay</strong> — TSN exists to bound the red box.</span></li>
+        <li><span class="num">2</span><span><strong>802.1AS</strong> gives every node one clock (sub-µs); everything scheduled stands on it.</span></li>
+        <li><span class="num">3</span><span><strong>Qbv gates</strong> reserve exclusive time windows — queuing delay ≈ 0 by construction, paid for with engineering and guard bands.</span></li>
+        <li><span class="num">4</span><span><strong>Preemption</strong> (Qbu/802.3br) shrinks blocking from 1518 B to 127 B; <strong>CBS/ATS</strong> bound latency without a global schedule.</span></li>
+        <li><span class="num">5</span><span><strong>FRER</strong> duplicates critical streams over disjoint paths — zero-time recovery, per stream, with sequence-number state to respect.</span></li>
+        <li><span class="num">6</span><span><strong>Qcc CUC/CNC</strong> computes and pushes the timetable — a TSN domain is an engineered artefact, managed like the control system it is.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Six classic failure modes</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">⏰ Sync loss, gates keep running</div><p>GM fails or a non-PTP device corrupts sync; bridges free-run and gate schedules drift apart. Streams start missing windows sporadically — monitor clockClass and offset, alarm on holdover.</p></div>
+        <div class="fail"><div class="ft">🚦 Schedule starves best effort</div><p>Over-generous TT windows leave diagnostics, backups and vision uploads crawling. Users respond with rogue switches and bypass cables — audit gate utilisation like line OEE (→ A22).</p></div>
+        <div class="fail"><div class="ft">🔀 Non-TSN switch in the path</div><p>One unmanaged switch re-introduces unbounded queuing and destroys the whole chain's bound. The calculation is only as good as its weakest hop — enforce with topology discovery (LLDP).</p></div>
+        <div class="fail"><div class="ft">📏 Asymmetric link breaks sync</div><p>Media converters or mismatched paths violate the symmetric-delay assumption; a constant hidden offset shifts every gate. Verify with round-trip measurements at commissioning.</p></div>
+        <div class="fail"><div class="ft">💥 Babbling talker floods a class</div><p>A faulty device transmits far beyond its reservation, drowning its priority class. Without Qci ingress policing, one sensor takes down the reserved lane it shares.</p></div>
+        <div class="fail"><div class="ft">👻 FRER sequence blackhole</div><p>Talker reboot resets sequence numbers outside the listener's recovery window — every frame gets "eliminated" as a stale duplicate. Symptom: perfect links, zero traffic. Reset the recovery function or age out state.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick check 1</div>
+      <p class="quiz-q">Why can't strict priority alone bound latency for a critical frame?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">Priority chooses the next frame from the queues, but it cannot interrupt a frame already on the wire — a 1518 B best-effort frame that started first blocks the port for its full serialisation time (12.3 µs @1G), and under sustained load queue depth ahead of you is unbounded. Gates (Qbv) or preemption (Qbu) are needed to bound it.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick check 2</div>
+      <p class="quiz-q">In gPTP, how are link delay and offset computed from t₁…t₄ — and what assumption can silently break the result?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">link_delay = ((t₂−t₁)+(t₄−t₃))/2 and offset = (t₂−t₁) − link_delay. The division by two assumes the path is symmetric; asymmetric media (converters, mismatched fibres) injects a constant offset error that no averaging removes.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick check 3</div>
+      <p class="quiz-q">What is a Qbv guard band for, and how does frame preemption shrink it?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">The guard band before a protected window stops any frame starting that couldn't finish before the gate closes — sized to one max frame (~12.3 µs @1G). With preemption, a preemptable frame can be cut at a 64 B fragment boundary, so the worst blocking falls to a 127 B fragment (~1 µs), letting schedules pack ~11 µs tighter per transition.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick check 4</div>
+      <p class="quiz-q">A stream needs zero-loss behaviour through a switch failure. Compare MRP, PRP and FRER for this job.</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">MRP is a ring that reconfigures in tens–hundreds of ms — frames are lost during the hole. PRP duplicates ALL traffic across two separate LANs with zero recovery time but doubles the whole network. FRER duplicates per-stream over disjoint paths inside one TSN network — seamless like PRP, but only for the streams that need it.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick check 5</div>
+      <p class="quiz-q">Why does the fully-distributed Qcc model fundamentally not work for scheduled (Qbv) traffic?</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">A Qbv timetable is a global optimisation: every gate on every port along every path must be phase-coordinated. Hop-by-hop reservation only knows local state — it can admit bandwidth (CBS-style) but cannot compute a coherent network-wide schedule. That requires the CNC's complete topology + stream view.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick check 6</div>
+      <p class="quiz-q">Your Qbv line works for months, then one device's frames start arriving late a few times per hour. Name three suspects, in test order.</p>
+      <div class="quiz-answer"><span class="tap">Tap to reveal</span><span class="hidden">(1) Clock sync degradation — check gPTP offset/clockClass logs first, it's the base of everything. (2) A topology change or replaced switch that isn't running the pushed schedule (config drift vs CNC). (3) A new or babbling talker sharing the class without a reservation — check Qci counters/port statistics for policing drops and unexpected load.</span></div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"TSN = one clock, scheduled gates, twin paths."</p>
+      <p style="margin-top:10px; font-size:15px;">Sync it (AS) · shape it (Qbv/Qbu) · double it (CB) · book it (Qcc).</p>
+    </div>
+
+    <div class="footer">
+      ⏱️ Advanced Deep Dive · TSN &amp; Deterministic Ethernet · 10 pages · MSc level<br>
+      Standalone module — pairs with A02 PROFINET, A03 EtherCAT, A06 OPC UA, A33 Industry 4.0<br>
+      Micro Learning · Advanced Library
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  // --- P2: worst-case path latency ---
+  var ls = 1000; // Mbit/s
+  var lsSeg = document.getElementById('lsSeg');
+  var hp = document.getElementById('hpSlide'), cf = document.getElementById('cfSlide'), cb = document.getElementById('cbSlide');
+  function tser(bytes, mbps){ return (bytes+22)*8/mbps; } // µs, incl preamble+IFG ≈22B
+  function updLat(){
+    var hops = +hp.value, cfB = +cf.value, cab = +cb.value;
+    document.getElementById('hpVal').textContent = hops;
+    document.getElementById('cfVal').textContent = cfB;
+    document.getElementById('cbVal').textContent = cab;
+    document.getElementById('lsVal').textContent = ls;
+    var own = tser(cfB, ls);
+    var block = tser(1518, ls);
+    var proc = 2.0, prop = cab*0.005;
+    var perHop = own + block + proc + prop;
+    var total = perHop*hops + own; // first serialisation at talker
+    document.getElementById('latOut').innerHTML =
+      'own frame t_ser = <b>'+own.toFixed(2)+' µs</b> · blocking frame = <b>'+block.toFixed(2)+' µs</b>/hop<br>'+
+      'per-hop worst ≈ '+own.toFixed(1)+' + '+block.toFixed(1)+' + 2.0 + '+prop.toFixed(2)+' = <b>'+perHop.toFixed(1)+' µs</b><br>'+
+      'end-to-end worst over '+hops+' hop(s) ≈ <b style="font-size:18px">'+total.toFixed(1)+' µs</b>'+
+      (total>1000 ? ' <span style="color:#f87171">— above 1 ms: too loose for motion class</span>'
+                  : (total>250 ? ' <span style="color:#fbbf24">— OK for PLC I/O, marginal for drives</span>'
+                               : ' <span style="color:#4ade80">— motion-capable if it HOLDS (needs TSN to hold!)</span>'));
+  }
+  lsSeg.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    lsSeg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); ls = +b.dataset.v; updLat();
+  });
+  [hp,cf,cb].forEach(function(el){ el.addEventListener('input', updLat); });
+  updLat();
+
+  // --- P5: Qbv window check ---
+  var cy = document.getElementById('cySlide'), tt = document.getElementById('ttSlide'),
+      pd = document.getElementById('pdSlide'), se = document.getElementById('seSlide');
+  function updQbv(){
+    var cyc = +cy.value, win = +tt.value, n = +pd.value, pad = +se.value;
+    document.getElementById('cyVal').textContent = cyc;
+    document.getElementById('ttVal').textContent = win;
+    document.getElementById('pdVal').textContent = n;
+    document.getElementById('seVal').textContent = pad.toFixed(1);
+    var perFrame = (128+22)*8/1000; // µs @1G
+    var need = n*perFrame + 2*pad;
+    var beShare = Math.max(0, (cyc - win - 12.3)/cyc*100); // minus one guard band
+    var ok = need <= win && win < cyc;
+    document.getElementById('qbvOut').innerHTML =
+      'needed inside window = '+n+' × '+perFrame.toFixed(2)+' µs + 2×'+pad.toFixed(1)+' µs pad = <b>'+need.toFixed(1)+' µs</b><br>'+
+      'window = <b>'+win+' µs</b> → '+(ok
+        ? '<span style="color:#4ade80;font-weight:700">GUARANTEED — margin '+(win-need).toFixed(1)+' µs every cycle ✓</span>'
+        : '<span style="color:#f87171;font-weight:700">FAILS — frames spill past the gate ✗ (widen window, cut payload, or improve sync)</span>')+'<br>'+
+      'best-effort share of cycle ≈ <b>'+beShare.toFixed(0)+'%</b> (incl. one 12.3 µs guard band)';
+  }
+  [cy,tt,pd,se].forEach(function(el){ el.addEventListener('input', updQbv); });
+  updQbv();
+
+  // --- P9: sync budget ---
+  var sh = document.getElementById('shSlide'), pe = document.getElementById('peSlide'), gw = document.getElementById('gwSlide');
+  function updSync(){
+    var hops = +sh.value, per = +pe.value, win = +gw.value;
+    document.getElementById('shVal').textContent = hops;
+    document.getElementById('peVal').textContent = per;
+    document.getElementById('gwVal').textContent = win;
+    var dev = hops*per/1000; // µs vs GM
+    var d2d = 2*dev;        // worst device-to-device
+    var eff = win - 2*d2d;
+    document.getElementById('syncOut').innerHTML =
+      'worst error vs GM ≈ '+hops+' × '+per+' ns = <b>'+dev.toFixed(2)+' µs</b><br>'+
+      'worst device-to-device disagreement ≈ <b>'+d2d.toFixed(2)+' µs</b><br>'+
+      'usable part of the '+win+' µs window ≈ <b>'+Math.max(0,eff).toFixed(1)+' µs</b> '+(
+        eff > 0.8*win ? '<span style="color:#4ade80">— healthy budget ✓</span>'
+                      : (eff > 0 ? '<span style="color:#fbbf24">— sync is eating your schedule</span>'
+                                 : '<span style="color:#f87171">— window smaller than the sync error: schedule is fiction ✗</span>'));
+  }
+  [sh,pe,gw].forEach(function(el){ el.addEventListener('input', updSync); });
+  updSync();
+
+  // --- quizzes ---
+  document.querySelectorAll('.quiz-answer').forEach(function(q){
+    q.addEventListener('click', function(){ q.classList.add('revealed'); });
+  });
+})();
+</script>
+</body>
+</html>

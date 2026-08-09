@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://muditha96.github.io/sitemap.xml

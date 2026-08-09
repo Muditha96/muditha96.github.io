@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Robotics & ROS 2 — Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #f472b6;       /* pink — Mechatronics category colour */
+    --accent-soft: #f9a8d4;
+    --accent-2: #a3e635;     /* lime — the "linked to micro" colour */
+    --accent-3: #38bdf8;     /* sky — data/topic accent */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #34d399;
+    --amber: #facc15;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(244,114,182,0.13), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(45,212,191,0.10), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--bg); background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(244,114,182,0.35);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(244,114,182,0.12), rgba(163,230,53,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent-2);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-2); background: rgba(163,230,53,0.12); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:24px; font-weight:800; color: var(--accent); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-lime { border-top-color: var(--accent-2)!important; } .c-lime .big{color:var(--accent-2)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-sky  { border-top-color: var(--accent-3)!important; } .c-sky .big{color:var(--accent-3)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .lang { background: var(--card-2); border-radius:14px; padding:18px; border-left:4px solid var(--accent); }
+  .lang .tag { font-family:ui-monospace,monospace; font-weight:800; font-size:13px; color:var(--accent); }
+  .lang h4 { font-size:16px; margin:4px 0 6px; }
+  .lang p { font-size:14px; color:var(--text-dim); }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)} .eqn .vr{color:var(--danger)}
+
+  .code { font-family: ui-monospace, monospace; font-size:13.5px; line-height:1.75; background:#0a0e13; border:1px solid var(--border); border-left:4px solid var(--accent-3); border-radius:10px; padding:16px 18px; margin-top:12px; color:#cbd5e1; overflow-x:auto; white-space:pre; }
+  .code .k{color:#c084fc} .code .s{color:#a3e635} .code .c{color:#64748b} .code .f{color:#38bdf8} .code .t{color:#f472b6}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .pro { background: linear-gradient(145deg, rgba(244,114,182,0.08), transparent); border:1px solid rgba(244,114,182,0.22); border-radius:14px; padding:16px; }
+  .pro .pt { font-weight:700; color:var(--accent); margin-bottom:6px; font-size:15px; }
+  .pro p { font-size:13.5px; color:var(--text-dim); }
+  .pro em { color:var(--accent-3); font-style:normal; font-weight:600; }
+
+  .memory { background: linear-gradient(135deg, var(--accent), #831843); color: #fff7ed; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(0,0,0,0.5); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; color:#1a0510; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(244,114,182,0.08); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo-row { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; justify-content:center; margin-top:8px; }
+  .slider-box { background:var(--card-2); border-radius:12px; padding:14px 18px; min-width:200px; flex:1; }
+  .slider-box label { font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); display:block; margin-bottom:8px; }
+  .slider-box .val { font-family:ui-monospace,monospace; font-weight:800; color:var(--accent); font-size:18px; }
+  input[type=range]{ width:100%; accent-color:var(--accent); }
+  .verdict { text-align:center; margin-top:14px; font-family:ui-monospace,monospace; font-size:15px; color:var(--text-dim); }
+  .verdict strong{ color:var(--accent); }
+
+  @keyframes fadeUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.4);opacity:.65;} }
+  @media (max-width: 620px){ .grid-2,.grid-3,.fail-grid{grid-template-columns:1fr;} .container{padding:26px 16px 70px;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Track · MSc-Level Deep Dive · ~10 pages</span></div>
+  <h1 class="hero"><span class="emoji">🦾</span>Robotics &amp; ROS 2</h1>
+  <p class="hero-sub">From rigid-body kinematics to the software nervous system. How a 6-axis arm turns joint angles into a pose, why inverse kinematics is the hard direction, and how ROS 2 wires sensors, planners and motors into one real-time robot.</p>
+
+  <div class="connect">
+    <span class="pill">↔ MICRO 15</span>
+    <span>This deep dive expands the 90-second card <a href="../15_Robotics_Basics.html">“Robotics Basics”</a>. The card introduced <em>joints, links, degrees of freedom and reach</em>. Here we open every box: the maths that maps joints↔pose (DH parameters, forward &amp; inverse kinematics, the Jacobian &amp; singularities), trajectory planning, and the <strong>ROS 2</strong> framework — nodes, topics, services, actions, DDS, URDF/TF2, and the Nav2/MoveIt 2 stacks that turn theory into a working robot.</span>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · What is a robot?</a>
+    <a href="#p2">2 · Anatomy & DOF</a>
+    <a href="#p3">3 · Frames & DH</a>
+    <a href="#p4">4 · Forward kinematics</a>
+    <a href="#p5">5 · Inverse kinematics</a>
+    <a href="#p6">6 · Jacobian & singularities</a>
+    <a href="#p7">7 · ROS 2 architecture</a>
+    <a href="#p8">8 · URDF, TF2 & control</a>
+    <a href="#p9">9 · Nav2 & MoveIt 2</a>
+    <a href="#p10">10 · Failures + recall</a>
+  </div>
+
+  <!-- PAGE 1 -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 · Foundations</span>
+    <h2 class="page-title">What a Robot Really Is — Sense, Plan, Act</h2>
+    <div class="card">
+      <div class="label">Precise Definition</div>
+      <p class="lead">A <span class="hl">robot</span> is a programmable machine that <strong>senses</strong> its environment, <strong>plans</strong> a course of action, and <strong>acts</strong> on the physical world through actuators — closing a loop between perception and motion.</p>
+      <p class="body">Micro 15 described the body — links and joints. The full discipline is two halves that must meet: <span class="hl">mechanics</span> (the rigid-body maths of where the tool is) and <span class="hl3">software</span> (the framework that moves data from camera to motor in milliseconds). An industrial arm is useless without both. ROS 2 is the dominant open framework for the software half — and increasingly the language the two halves speak.</p>
+      <div class="grid-3" style="margin-top:8px">
+        <div class="mini c-sky"><h4>Sense</h4><p>Encoders, force/torque, cameras, LiDAR, IMUs feed the robot's model of itself and the world. Links to <a href="A11_Industrial_Sensors_Deep_Dive.html" style="color:var(--accent-soft)">A11 Sensors</a>.</p></div>
+        <div class="mini c-pink"><h4>Plan</h4><p>Kinematics, motion planning &amp; collision checking turn a goal pose into a safe joint trajectory.</p></div>
+        <div class="mini c-lime"><h4>Act</h4><p>Servo drives execute the trajectory under closed-loop control — the <a href="A09_Servo_Motion_Deep_Dive.html" style="color:var(--accent-soft)">A09 servo</a> &amp; <a href="A10_PID_Control_Deep_Dive.html" style="color:var(--accent-soft)">A10 PID</a> loops, one per joint.</p></div>
+      </div>
+      <div class="eqn" style="margin-top:14px">The robotics stack, top to bottom:
+   <b>Task</b>      "pick that part"            ← mission / behaviour
+   <span class="v2">Planning</span>  pose → collision-free path  ← MoveIt 2 / Nav2
+   <span class="v3">Kinematics</span> path → joint angles θ(t)    ← DH, IK, Jacobian
+   <b>Control</b>   θ(t) → motor torque         ← per-joint servo loops
+   <span class="vr">Hardware</span>  drives, gearboxes, encoders ← the physical arm</div>
+      <div class="pro" style="margin-top:14px"><div class="pt">Where this sits in the plant</div><p>Robots are the flexible apex of automation: where a <a href="A07_PLC_Deep_Dive.html" style="color:var(--accent-soft)">PLC</a> sequences fixed machinery, a robot re-programs its motion for new parts. They feed directly into <a href="../16_Machine_Vision.html" style="color:var(--accent-soft)">machine vision</a> and <a href="../17_End_Effectors.html" style="color:var(--accent-soft)">end-effector</a> design — the eyes and hands that make an arm useful.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 · The Body</span>
+    <h2 class="page-title">Anatomy, Joints &amp; Degrees of Freedom</h2>
+    <div class="card">
+      <p class="body">A robot arm is a <em>serial chain</em> of rigid <strong>links</strong> connected by <strong>joints</strong>. Each joint adds one <span class="hl">degree of freedom</span> (DOF). To place a tool at an arbitrary <em>position and orientation</em> in 3-D space you need <strong>six</strong> DOF — three to position (x,y,z) and three to orient (roll, pitch, yaw).</p>
+      <div class="stage" style="margin-top:8px">
+        <svg class="illus" viewBox="0 0 660 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Six-axis robot arm with joints labelled J1 to J6">
+          <!-- base -->
+          <rect x="60" y="180" width="90" height="24" rx="6" fill="#232d3f" stroke="#f472b6" stroke-width="2"/>
+          <text x="105" y="197" font-size="11" fill="#f9a8d4" text-anchor="middle" font-weight="700">Base</text>
+          <!-- link chain -->
+          <g stroke="#94a3b8" stroke-width="10" stroke-linecap="round" fill="none">
+            <line x1="105" y1="180" x2="105" y2="120"/>
+            <line x1="105" y1="120" x2="220" y2="80"/>
+            <line x1="220" y1="80" x2="340" y2="100"/>
+            <line x1="340" y1="100" x2="440" y2="70"/>
+            <line x1="440" y1="70" x2="510" y2="95"/>
+          </g>
+          <!-- joints -->
+          <g>
+            <circle cx="105" cy="180" r="11" fill="#f472b6"/><text x="105" y="184" font-size="10" fill="#0f1419" text-anchor="middle" font-weight="800">1</text>
+            <circle cx="105" cy="120" r="11" fill="#38bdf8"/><text x="105" y="124" font-size="10" fill="#0f1419" text-anchor="middle" font-weight="800">2</text>
+            <circle cx="220" cy="80" r="11" fill="#a3e635"/><text x="220" y="84" font-size="10" fill="#0f1419" text-anchor="middle" font-weight="800">3</text>
+            <circle cx="340" cy="100" r="11" fill="#facc15"/><text x="340" y="104" font-size="10" fill="#0f1419" text-anchor="middle" font-weight="800">4</text>
+            <circle cx="440" cy="70" r="11" fill="#2dd4bf"/><text x="440" y="74" font-size="10" fill="#0f1419" text-anchor="middle" font-weight="800">5</text>
+            <circle cx="510" cy="95" r="11" fill="#c084fc"/><text x="510" y="99" font-size="10" fill="#0f1419" text-anchor="middle" font-weight="800">6</text>
+          </g>
+          <!-- tool -->
+          <rect x="520" y="86" width="40" height="18" rx="4" fill="#232d3f" stroke="#f472b6" stroke-width="2"/>
+          <text x="585" y="100" font-size="12" fill="#f9a8d4" font-weight="700">TCP</text>
+          <text x="560" y="124" font-size="10" fill="#94a3b8">tool centre point</text>
+          <text x="240" y="200" fill="#94a3b8" font-size="11" font-style="italic">J1 waist · J2 shoulder · J3 elbow · J4–J6 wrist (the spherical wrist gives orientation)</text>
+        </svg>
+        <p class="cap">A classic 6R arm: three "regional" joints place the wrist, three "wrist" joints orient the tool. The frame at the gripper is the Tool Centre Point (TCP).</p>
+      </div>
+      <div class="tbl-wrap" style="margin-top:16px">
+        <table>
+          <tr><th>Configuration</th><th>Joints</th><th>Strength</th></tr>
+          <tr><td><b>Articulated (6R)</b></td><td>6 revolute</td><td>Most versatile — full 6-DOF pose; welding, assembly, handling</td></tr>
+          <tr><td><b>SCARA</b></td><td>2R + 1P + rotate</td><td>Fast, stiff in Z; high-speed pick-and-place &amp; assembly</td></tr>
+          <tr><td><b>Delta / parallel</b></td><td>3 parallel arms</td><td>Extremely fast, light payload; packaging, sorting</td></tr>
+          <tr><td><b>Cartesian / gantry</b></td><td>3P (XYZ)</td><td>Simple kinematics, big workspace; 3D printing, CNC, palletising</td></tr>
+          <tr><td><b>Cobot</b></td><td>6–7R, torque-sensed</td><td>Safe beside humans; flexible low-volume cells</td></tr>
+        </table>
+      </div>
+      <div class="pro" style="margin-top:14px"><div class="pt">Why 7 DOF? Redundancy</div><p>A 7-DOF arm (many cobots) has one <em>more</em> joint than the 6 needed for a pose. That redundancy lets it reach the same TCP pose with many elbow positions — so it can dodge obstacles, avoid <a href="#p6">singularities</a>, and keep a comfortable posture. The cost: infinitely many IK solutions to choose between.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 · The Maths Begins</span>
+    <h2 class="page-title">Frames, Transforms &amp; DH Parameters</h2>
+    <div class="card">
+      <p class="body">To compute where the tool is, attach a <strong>coordinate frame</strong> to every link and describe how each frame relates to the next. A <span class="hl">homogeneous transform</span> — a 4×4 matrix — packs rotation and translation into one object you can chain by multiplication.</p>
+      <div class="eqn" style="margin-top:6px">Homogeneous transform (frame i relative to i−1):
+        ⎡ R₃ₓ₃   p₃ₓ₁ ⎤      R = 3×3 rotation,  p = position
+   T  =  ⎢              ⎥
+        ⎣ 0 0 0   1   ⎦      chain frames:  T₀ⁿ = T₁·T₂·…·Tₙ</div>
+      <p class="body" style="margin-top:14px">The <span class="hl">Denavit–Hartenberg (DH)</span> convention is the standard shorthand: it describes each joint with just <strong>four numbers</strong> instead of a full matrix, so an n-joint arm is a clean table of 4n values.</p>
+      <div class="stage" style="margin-top:8px">
+        <svg class="illus" viewBox="0 0 660 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DH parameters theta d a alpha between two link frames">
+          <!-- axis i-1 -->
+          <line x1="120" y1="40" x2="120" y2="170" stroke="#38bdf8" stroke-width="2.5"/>
+          <text x="120" y="32" fill="#38bdf8" font-size="12" text-anchor="middle" font-weight="700">Zᵢ₋₁</text>
+          <!-- axis i -->
+          <line x1="430" y1="30" x2="430" y2="150" stroke="#f472b6" stroke-width="2.5"/>
+          <text x="430" y="22" fill="#f472b6" font-size="12" text-anchor="middle" font-weight="700">Zᵢ</text>
+          <!-- common normal a -->
+          <line x1="120" y1="120" x2="430" y2="100" stroke="#a3e635" stroke-width="2.5"/>
+          <text x="275" y="98" fill="#a3e635" font-size="12" text-anchor="middle" font-weight="700">a (link length)</text>
+          <!-- d along Zi-1 -->
+          <line x1="120" y1="170" x2="120" y2="120" stroke="#facc15" stroke-width="3"/>
+          <text x="92" y="150" fill="#facc15" font-size="12" text-anchor="middle" font-weight="700">d</text>
+          <!-- theta -->
+          <path d="M150 120 a30 30 0 0 1 -12 -26" fill="none" stroke="#fb923c" stroke-width="2.5"/>
+          <text x="170" y="108" fill="#fb923c" font-size="12" font-weight="700">θ</text>
+          <!-- alpha -->
+          <path d="M430 100 a26 26 0 0 1 -8 24" fill="none" stroke="#c084fc" stroke-width="2.5"/>
+          <text x="458" y="120" fill="#c084fc" font-size="12" font-weight="700">α</text>
+          <text x="330" y="186" fill="#94a3b8" font-size="11" text-anchor="middle" font-style="italic">θ &amp; d act along Zᵢ₋₁ · a &amp; α act along the common normal (the new X axis)</text>
+        </svg>
+        <p class="cap">Four DH parameters per joint: θ (joint angle), d (link offset), a (link length), α (link twist).</p>
+      </div>
+      <div class="grid-2" style="margin-top:16px">
+        <div class="lang"><span class="tag">θ — joint angle</span><h4>Rotation about Zᵢ₋₁</h4><p>The <em>variable</em> for a revolute joint — this is what the motor changes. (For a prismatic joint, <em>d</em> is the variable instead.)</p></div>
+        <div class="lang"><span class="tag">d, a, α — geometry</span><h4>Fixed by the build</h4><p><strong>d</strong> = offset along the previous Z; <strong>a</strong> = length of the common normal; <strong>α</strong> = twist between the two Z axes. These come from the robot's CAD and never change.</p></div>
+      </div>
+      <div class="pro" style="margin-top:14px"><div class="pt">Why DH still matters in the ROS 2 era</div><p>Modern tools read geometry from a <a href="#p8">URDF</a> file, not a hand-built DH table — but DH is <em>why</em> the maths is tractable and is how textbooks, controllers and your own sanity-checks express a chain. Understand DH and the 4×4 transform, and every kinematics library stops being a black box.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 · The Easy Direction</span>
+    <h2 class="page-title">Forward Kinematics — Joints → Pose</h2>
+    <div class="card">
+      <p class="body"><span class="hl">Forward kinematics (FK)</span> answers: "given the joint angles, where is the tool?" It is the <em>easy</em>, always-solvable direction — just multiply the per-joint transforms together. There is exactly <strong>one</strong> answer.</p>
+      <div class="eqn" style="margin-top:6px">FK:   given θ = (θ₁ … θₙ)   find   T₀ᵗᵒᵒˡ
+   T₀ᵗᵒᵒˡ(θ) = A₁(θ₁) · A₂(θ₂) · … · Aₙ(θₙ)
+where each Aᵢ is built from that joint's 4 DH parameters.
+The result is one 4×4 pose: position + orientation of the TCP.   <span class="v2">Unique, closed-form, fast.</span></div>
+      <p class="body" style="margin-top:14px">Worked 2-link planar example (the intuition behind every arm):</p>
+      <div class="stage" style="margin-top:6px">
+        <svg class="illus" viewBox="0 0 660 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two link planar arm forward kinematics geometry">
+          <circle cx="120" cy="160" r="8" fill="#f472b6"/>
+          <line x1="120" y1="160" x2="300" y2="80" stroke="#94a3b8" stroke-width="9" stroke-linecap="round"/>
+          <circle cx="300" cy="80" r="7" fill="#38bdf8"/>
+          <line x1="300" y1="80" x2="470" y2="120" stroke="#94a3b8" stroke-width="9" stroke-linecap="round"/>
+          <circle cx="470" cy="120" r="7" fill="#a3e635"/>
+          <line x1="120" y1="160" x2="240" y2="160" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <path d="M160 160 a40 40 0 0 0 -14 -24" fill="none" stroke="#fb923c" stroke-width="2"/>
+          <text x="172" y="146" fill="#fb923c" font-size="12">θ₁</text>
+          <text x="210" y="108" fill="#94a3b8" font-size="12">L₁</text>
+          <text x="395" y="92" fill="#94a3b8" font-size="12">L₂</text>
+          <text x="486" y="124" fill="#a3e635" font-size="12" font-weight="700">(x, y)</text>
+        </svg>
+      </div>
+      <div class="eqn" style="margin-top:14px">2-link planar arm, lengths L₁,L₂, angles θ₁,θ₂:
+   x = L₁·cos θ₁ + L₂·cos(θ₁+θ₂)
+   y = L₁·sin θ₁ + L₂·sin(θ₁+θ₂)
+Example: L₁=L₂=0.5 m, θ₁=30°, θ₂=45°
+   x = 0.5·cos30 + 0.5·cos75 = 0.433 + 0.129 = <b>0.562 m</b>
+   y = 0.5·sin30 + 0.5·sin75 = 0.250 + 0.483 = <b>0.733 m</b></div>
+      <div class="pro" style="margin-top:14px"><div class="pt">FK is your ground truth</div><p>Because FK is unique and exact, it's the check on everything else: solve <a href="#p5">inverse kinematics</a> for joint angles, then run FK to confirm those angles really land on the target pose. Every robot controller does this round-trip continuously to verify its own commands.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 5 -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 · The Hard Direction</span>
+    <h2 class="page-title">Inverse Kinematics — Pose → Joints</h2>
+    <div class="card">
+      <p class="body"><span class="hl">Inverse kinematics (IK)</span> answers the question you actually care about: "I want the tool <em>here</em> — what joint angles get it there?" This is the hard direction: it can have <strong>many solutions, one, or none</strong>, and is generally non-linear.</p>
+      <div class="grid-3" style="margin-top:8px">
+        <div class="mini c-lime"><h4>Multiple solutions</h4><p>"Elbow-up" and "elbow-down" both reach the same point. A 6R arm can have up to <strong>8</strong> distinct solutions — you must pick one.</p></div>
+        <div class="mini c-amb"><h4>No solution</h4><p>Target outside the workspace, or blocked by a joint limit → IK fails. The arm simply can't get there.</p></div>
+        <div class="mini c-pink"><h4>Singular solution</h4><p>At a <a href="#p6">singularity</a> the maths degenerates — infinite joint speeds for finite tool speed.</p></div>
+      </div>
+      <div class="eqn" style="margin-top:14px">Two-link IK (the elbow-up / elbow-down pair):
+   cos θ₂ = (x² + y² − L₁² − L₂²) / (2·L₁·L₂)
+   θ₂ = ± acos(…)        ← the ± is the two elbow solutions
+   θ₁ = atan2(y, x) − atan2(L₂·sin θ₂, L₁ + L₂·cos θ₂)
+Reachability test:  a solution exists only if |L₁−L₂| ≤ √(x²+y²) ≤ L₁+L₂</div>
+      <div class="grid-2" style="margin-top:16px">
+        <div class="lang"><span class="tag">ANALYTIC IK</span><h4>Closed-form, instant</h4><p>For arms with a <em>spherical wrist</em> (J4-5-6 axes meet at a point), IK decouples into position + orientation and solves in closed form — microseconds, exact. This is why nearly all industrial 6R arms are built that way.</p></div>
+        <div class="lang"><span class="tag">NUMERIC IK</span><h4>Iterative, general</h4><p>For odd geometries or redundant (7-DOF) arms, solve iteratively with the <a href="#p6">Jacobian</a> (e.g. damped least-squares). Flexible, but slower and can get stuck in local minima.</p></div>
+      </div>
+      <div class="pro" style="margin-top:14px"><div class="pt">The configuration trap</div><p>Switching IK solution branch mid-path — "elbow-up" flipping to "elbow-down" — makes a robot lurch violently through a wild reconfiguration. Good planners <em>constrain</em> the solution to stay in one branch, or plan in joint space so the choice is continuous. This is one of the most common causes of a "the robot moved somewhere crazy" incident.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 6 -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 · Velocity & Limits</span>
+    <h2 class="page-title">The Jacobian &amp; Singularities</h2>
+    <div class="card">
+      <p class="body">Positions are static; robots move. The <span class="hl">Jacobian J</span> is the matrix that links <em>joint velocities</em> to <em>tool velocities</em> — the derivative of forward kinematics. It governs speed, force and the dreaded singularities.</p>
+      <div class="eqn" style="margin-top:6px">Velocity:   ẋ = J(θ) · θ̇        (tool twist = Jacobian × joint rates)
+Inverse:    θ̇ = J⁻¹ · ẋ         ← needed to make the TCP follow a path
+Force (duality):  τ = Jᵀ · F     (joint torques from a tool wrench)</div>
+      <p class="body" style="margin-top:14px">A <span class="hl">singularity</span> is a pose where the Jacobian loses rank — <em>det(J) → 0</em>. There, the arm can't move the tool in some direction, and the inverse <em>J⁻¹</em> blows up: tiny tool motion demands near-infinite joint speed.</p>
+      <div class="stage" style="margin-top:8px">
+        <svg class="illus" viewBox="0 0 660 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Singularity at full arm extension">
+          <!-- normal pose -->
+          <circle cx="90" cy="120" r="7" fill="#f472b6"/>
+          <line x1="90" y1="120" x2="170" y2="60" stroke="#a3e635" stroke-width="8" stroke-linecap="round"/>
+          <line x1="170" y1="60" x2="250" y2="110" stroke="#a3e635" stroke-width="8" stroke-linecap="round"/>
+          <text x="160" y="150" fill="#a3e635" font-size="12" text-anchor="middle" font-weight="700">dexterous ✓</text>
+          <!-- singular pose: fully stretched -->
+          <circle cx="400" cy="110" r="7" fill="#f472b6"/>
+          <line x1="400" y1="110" x2="500" y2="80" stroke="#f87171" stroke-width="8" stroke-linecap="round"/>
+          <line x1="500" y1="80" x2="600" y2="50" stroke="#f87171" stroke-width="8" stroke-linecap="round"/>
+          <text x="500" y="140" fill="#f87171" font-size="12" text-anchor="middle" font-weight="700">fully extended → singular ✗</text>
+          <text x="500" y="40" fill="#94a3b8" font-size="10" text-anchor="middle">no reach left in this direction</text>
+        </svg>
+        <p class="cap">Boundary singularity: at full stretch, the arm cannot move the TCP further out — J⁻¹ diverges.</p>
+      </div>
+      <div class="grid-3" style="margin-top:16px">
+        <div class="mini c-red"><h4>Boundary</h4><p>Arm fully extended or fully folded — at the edge of the workspace. Avoid by staying clear of the reach limit.</p></div>
+        <div class="mini c-amb"><h4>Wrist (interior)</h4><p>Two wrist axes line up (e.g. J4 &amp; J6 collinear) → a wrist axis "disappears." Common and nasty mid-workspace.</p></div>
+        <div class="mini c-purp"><h4>Manipulability</h4><p>√det(J·Jᵀ) measures how far you are from a singularity — planners maximise it to keep motion smooth.</p></div>
+      </div>
+      <div class="pro" style="margin-top:14px"><div class="pt">Why your robot "alarms out" near a straight line</div><p>Drive a TCP in a straight Cartesian line through a wrist singularity and the controller commands an axis to spin at thousands of °/s for an instant — it can't, so it faults to protect itself. Fixes: plan around the singularity, slow down through it, use a redundant 7-DOF arm, or use damped least-squares IK that trades a little path error for bounded joint speed.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 7 -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 · The Software Nervous System</span>
+    <h2 class="page-title">ROS 2 — Nodes, Topics, Services, Actions</h2>
+    <div class="card">
+      <p class="body"><span class="hl">ROS 2</span> (Robot Operating System 2) is not an OS — it is a <strong>middleware</strong>: a set of libraries and conventions for building a robot out of many small programs that talk to each other. It is the de-facto standard for research and, increasingly, industry.</p>
+      <div class="stage" style="margin-top:8px">
+        <svg class="illus" viewBox="0 0 660 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ROS2 nodes communicating over topics services and actions via DDS">
+          <defs><marker id="arn" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#38bdf8"/></marker></defs>
+          <!-- nodes -->
+          <rect x="30" y="30" width="120" height="46" rx="10" fill="#232d3f" stroke="#a3e635" stroke-width="2"/><text x="90" y="51" font-size="12" fill="#f1f5f9" text-anchor="middle" font-weight="700">/camera</text><text x="90" y="67" font-size="9.5" fill="#94a3b8" text-anchor="middle">node (publisher)</text>
+          <rect x="270" y="30" width="120" height="46" rx="10" fill="#232d3f" stroke="#f472b6" stroke-width="2"/><text x="330" y="51" font-size="12" fill="#f1f5f9" text-anchor="middle" font-weight="700">/perception</text><text x="330" y="67" font-size="9.5" fill="#94a3b8" text-anchor="middle">node (sub + pub)</text>
+          <rect x="510" y="30" width="120" height="46" rx="10" fill="#232d3f" stroke="#facc15" stroke-width="2"/><text x="570" y="51" font-size="12" fill="#f1f5f9" text-anchor="middle" font-weight="700">/motion</text><text x="570" y="67" font-size="9.5" fill="#94a3b8" text-anchor="middle">node (subscriber)</text>
+          <!-- topic arrows -->
+          <g stroke="#38bdf8" stroke-width="2.4" fill="none" marker-end="url(#arn)">
+            <line x1="150" y1="53" x2="268" y2="53"/>
+            <line x1="390" y1="53" x2="508" y2="53"/>
+          </g>
+          <text x="209" y="44" fill="#38bdf8" font-size="10" text-anchor="middle">topic /image</text>
+          <text x="449" y="44" fill="#38bdf8" font-size="10" text-anchor="middle">topic /target_pose</text>
+          <!-- DDS bus -->
+          <rect x="30" y="120" width="600" height="40" rx="10" fill="#1a2230" stroke="#c084fc" stroke-width="2"/>
+          <text x="330" y="145" font-size="13" fill="#c084fc" text-anchor="middle" font-weight="700">DDS middleware — discovery, transport, QoS (the bus every node plugs into)</text>
+          <g stroke="#c084fc" stroke-width="1.5" stroke-dasharray="4 3"><line x1="90" y1="76" x2="90" y2="120"/><line x1="330" y1="76" x2="330" y2="120"/><line x1="570" y1="76" x2="570" y2="120"/></g>
+          <text x="330" y="190" fill="#94a3b8" font-size="11" text-anchor="middle" font-style="italic">Nodes never address each other directly — they publish/subscribe by topic name over DDS.</text>
+        </svg>
+        <p class="cap">A ROS 2 graph: independent nodes, loosely coupled by named channels, all riding on DDS.</p>
+      </div>
+      <div class="tbl-wrap" style="margin-top:16px">
+        <table>
+          <tr><th>Primitive</th><th>Pattern</th><th>Use it for</th></tr>
+          <tr><td><b>Topic</b></td><td>Publish / subscribe, many-to-many, streaming</td><td>Sensor data, state, commands — e.g. /joint_states, /cmd_vel</td></tr>
+          <tr><td><b>Service</b></td><td>Request / response, synchronous, one-shot</td><td>Quick queries &amp; commands — "get map", "reset odometry"</td></tr>
+          <tr><td><b>Action</b></td><td>Goal + feedback + result, long-running, cancellable</td><td>"Navigate to X", "execute trajectory" — with progress &amp; abort</td></tr>
+          <tr><td><b>Parameter</b></td><td>Named config value per node, runtime-settable</td><td>Gains, limits, frame names — tune without recompiling</td></tr>
+        </table>
+      </div>
+      <div class="grid-2" style="margin-top:16px">
+        <div class="mini c-purp"><h4>DDS &amp; QoS</h4><p>ROS 2 rides on <strong>DDS</strong> (Data Distribution Service) — peer-to-peer, no central master (the big change from ROS 1). Per-topic <em>QoS</em> picks reliability vs best-effort, history depth and deadlines — vital for real-time and lossy links.</p></div>
+        <div class="mini c-sky"><h4>Why ROS 2 over ROS 1</h4><p>Real-time support, multi-robot by default, security (SROS 2), Windows/embedded support, and lifecycle-managed nodes. ROS 1 reached end-of-life; <strong>Jazzy Jalisco</strong> (LTS to 2029) and Humble are the current stable lines.</p></div>
+      </div>
+      <div class="pro" style="margin-top:14px"><div class="pt">The mental model that unlocks ROS 2</div><p>Think of it as a <em>postal system for data</em>, not a program. You write small single-purpose nodes; the framework handles discovery and delivery by topic name. Swap the camera node for a simulated one and nothing else changes — that decoupling is the whole point, and why the same code runs in <a href="#p9">simulation</a> and on real hardware.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 8 -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 · Describing & Driving the Robot</span>
+    <h2 class="page-title">URDF, TF2 &amp; ros2_control</h2>
+    <div class="card">
+      <p class="body">Three pieces connect the kinematics maths of pages 3–6 to running ROS 2 code: a <span class="hl">URDF</span> model of the robot, the <span class="hl3">TF2</span> transform tree that tracks every frame in real time, and <span class="hl2">ros2_control</span>, the hardware-abstraction layer that talks to the drives.</p>
+      <div class="grid-3" style="margin-top:8px">
+        <div class="mini c-pink"><h4>URDF</h4><p>An XML description of links, joints, limits, inertias and meshes. It <em>is</em> the DH table in modern form — the single source of truth for the robot's geometry.</p></div>
+        <div class="mini c-sky"><h4>TF2</h4><p>A live tree of every coordinate frame (base → wrist → tool → camera). Ask "where is the gripper in the world frame?" and TF2 chains the transforms for you, time-stamped.</p></div>
+        <div class="mini c-lime"><h4>ros2_control</h4><p>Standard interface between controllers (position/velocity/effort) and hardware drivers — so the same controller runs on a real arm or in sim.</p></div>
+      </div>
+      <div class="code" style="margin-top:14px"><span class="c"># URDF — one joint connecting two links (the DH row, in XML)</span>
+<span class="t">&lt;joint</span> name=<span class="s">"shoulder"</span> type=<span class="s">"revolute"</span><span class="t">&gt;</span>
+  <span class="t">&lt;parent</span> link=<span class="s">"base_link"</span><span class="t">/&gt;</span>
+  <span class="t">&lt;child</span>  link=<span class="s">"upper_arm"</span><span class="t">/&gt;</span>
+  <span class="t">&lt;origin</span> xyz=<span class="s">"0 0 0.30"</span> rpy=<span class="s">"0 0 0"</span><span class="t">/&gt;</span>   <span class="c">&lt;!-- d, a, α --&gt;</span>
+  <span class="t">&lt;axis</span> xyz=<span class="s">"0 0 1"</span><span class="t">/&gt;</span>                       <span class="c">&lt;!-- rotates about Z --&gt;</span>
+  <span class="t">&lt;limit</span> lower=<span class="s">"-2.96"</span> upper=<span class="s">"2.96"</span> effort=<span class="s">"150"</span> velocity=<span class="s">"3.14"</span><span class="t">/&gt;</span>
+<span class="t">&lt;/joint&gt;</span></div>
+      <div class="code" style="margin-top:12px"><span class="c"># A minimal ROS 2 publisher node (rclpy) — the "hello robot"</span>
+<span class="k">import</span> rclpy
+<span class="k">from</span> rclpy.node <span class="k">import</span> Node
+<span class="k">from</span> geometry_msgs.msg <span class="k">import</span> Twist
+
+<span class="k">class</span> <span class="f">Driver</span>(Node):
+    <span class="k">def</span> <span class="f">__init__</span>(self):
+        super().__init__(<span class="s">'driver'</span>)
+        self.pub = self.create_publisher(Twist, <span class="s">'/cmd_vel'</span>, <span class="s">10</span>)
+        self.create_timer(<span class="s">0.1</span>, self.tick)   <span class="c"># 10 Hz</span>
+    <span class="k">def</span> <span class="f">tick</span>(self):
+        msg = Twist(); msg.linear.x = <span class="s">0.2</span>      <span class="c"># drive forward</span>
+        self.pub.publish(msg)
+
+rclpy.init(); rclpy.spin(Driver())</div>
+      <div class="pro" style="margin-top:14px"><div class="pt">Real-time is a property of the whole chain</div><p>A robot control loop must hit its deadline every cycle — a late command is a wrong command. ROS 2 enables this (DDS QoS, real-time executors, lifecycle nodes), but you still need an RT kernel, lock-free code on the hot path, and the per-joint <a href="A10_PID_Control_Deep_Dive.html" style="color:var(--accent-soft)">PID</a>/<a href="A09_Servo_Motion_Deep_Dive.html" style="color:var(--accent-soft)">servo</a> loop running at 1–10&nbsp;kHz <em>below</em> ROS 2, often on the drive itself.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 9 -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 · The Application Stacks</span>
+    <h2 class="page-title">Nav2, MoveIt 2 &amp; Simulation</h2>
+    <div class="card">
+      <p class="body">You rarely write planning from scratch. Two mature ROS 2 stacks do the heavy lifting: <span class="hl">Nav2</span> for mobile robots that <em>drive</em>, and <span class="hl3">MoveIt 2</span> for arms that <em>manipulate</em>. Both are built from the nodes, actions and TF2 of pages 7–8.</p>
+      <div class="grid-2" style="margin-top:8px">
+        <div class="lang"><span class="tag">NAV2 — mobile</span><h4>Drive there without hitting things</h4><p>Localisation (AMCL / SLAM), global &amp; local path planning, costmaps, recovery behaviours and a behaviour-tree brain. You send a "NavigateToPose" <em>action</em>; Nav2 handles the rest — AMRs, delivery, inspection.</p></div>
+        <div class="lang"><span class="tag">MOVEIT 2 — arms</span><h4>Plan a collision-free reach</h4><p>Wraps IK, motion planning (OMPL/Pilz), collision checking against a live world model, and trajectory execution. You give it a goal pose; it returns a safe joint trajectory — pick-and-place, assembly, welding.</p></div>
+      </div>
+      <div class="stage" style="margin-top:16px">
+        <svg class="illus" viewBox="0 0 660 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sense plan act pipeline mapping to ROS2 stacks">
+          <defs><marker id="arp" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#a3e635"/></marker></defs>
+          <rect x="20" y="50" width="130" height="56" rx="10" fill="#1a2230" stroke="#38bdf8" stroke-width="2"/><text x="85" y="74" font-size="13" fill="#7dd3fc" text-anchor="middle" font-weight="700">SENSE</text><text x="85" y="92" font-size="10" fill="#94a3b8" text-anchor="middle">camera · LiDAR · TF2</text>
+          <rect x="190" y="50" width="150" height="56" rx="10" fill="#1a2230" stroke="#f472b6" stroke-width="2"/><text x="265" y="74" font-size="13" fill="#f9a8d4" text-anchor="middle" font-weight="700">PLAN</text><text x="265" y="92" font-size="10" fill="#94a3b8" text-anchor="middle">Nav2 / MoveIt 2</text>
+          <rect x="380" y="50" width="150" height="56" rx="10" fill="#1a2230" stroke="#a3e635" stroke-width="2"/><text x="455" y="74" font-size="13" fill="#bef264" text-anchor="middle" font-weight="700">ACT</text><text x="455" y="92" font-size="10" fill="#94a3b8" text-anchor="middle">ros2_control · drives</text>
+          <rect x="560" y="50" width="80" height="56" rx="10" fill="#1a2230" stroke="#facc15" stroke-width="2"/><text x="600" y="74" font-size="12" fill="#fde68a" text-anchor="middle" font-weight="700">WORLD</text><text x="600" y="92" font-size="9.5" fill="#94a3b8" text-anchor="middle">moves</text>
+          <g stroke="#a3e635" stroke-width="2.4" fill="none" marker-end="url(#arp)">
+            <line x1="150" y1="78" x2="188" y2="78"/>
+            <line x1="340" y1="78" x2="378" y2="78"/>
+            <line x1="530" y1="78" x2="558" y2="78"/>
+          </g>
+          <path d="M600 106 V134 H85 V108" stroke="#38bdf8" stroke-width="2" fill="none" marker-end="url(#arp)"/>
+          <text x="340" y="128" fill="#38bdf8" font-size="10" text-anchor="middle">feedback: the world's new state is sensed again — the loop never stops</text>
+        </svg>
+      </div>
+      <div class="grid-3" style="margin-top:16px">
+        <div class="mini c-purp"><h4>Gazebo / Isaac Sim</h4><p>Physics simulators run the <em>exact same</em> ROS 2 nodes against a virtual robot — test planning &amp; control before touching hardware.</p></div>
+        <div class="mini c-sky"><h4>RViz 2</h4><p>The 3-D visualiser: see TF2 frames, sensor clouds, planned paths and the robot model live — the robotics debugger.</p></div>
+        <div class="mini c-org"><h4>Digital twin link</h4><p>The sim model + live telemetry is a <em>digital twin</em> — connecting robotics straight to <span style="color:var(--accent-soft)">Industry 4.0</span> (A31).</p></div>
+      </div>
+      <div class="pro" style="margin-top:14px"><div class="pt">Sim-to-real — the modern workflow</div><p>Develop and test entirely in Gazebo/Isaac, then deploy the identical node graph to the real arm by swapping only the hardware-interface node. This "sim-first" loop is how teams ship reliable robots fast — and how reinforcement-learning policies are trained safely before ever touching a real, expensive, breakable machine.</p></div>
+    </div>
+  </section>
+
+  <!-- PAGE 10 -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 · Engineering Practice</span>
+    <h2 class="page-title">Interactive FK, Failures &amp; Quick Check</h2>
+    <div class="card">
+      <div class="label">Try it — 2-link forward-kinematics &amp; reach</div>
+      <p class="body">Drag the two joint angles and the link lengths. Watch the tool (x,y) and whether the target sits inside the reachable annulus — the FK and reachability maths of pages 4–5, live.</p>
+      <div class="demo-row" style="margin-top:12px">
+        <div class="slider-box"><label>θ₁ <span class="val" id="t1V">30°</span></label><input id="t1" type="range" min="0" max="180" step="1" value="30"></div>
+        <div class="slider-box"><label>θ₂ <span class="val" id="t2V">45°</span></label><input id="t2" type="range" min="-150" max="150" step="1" value="45"></div>
+        <div class="slider-box"><label>L₁ / L₂ <span class="val" id="lV">0.50 m</span></label><input id="ll" type="range" min="0.2" max="0.8" step="0.05" value="0.5"></div>
+      </div>
+      <div class="stage" style="margin-top:10px">
+        <svg class="illus" viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg">
+          <line x1="60" y1="200" x2="560" y2="200" stroke="#334155" stroke-width="1"/>
+          <line x1="120" y1="20" x2="120" y2="220" stroke="#334155" stroke-width="1"/>
+          <circle id="j0" cx="120" cy="200" r="7" fill="#f472b6"/>
+          <line id="link1" x1="120" y1="200" x2="240" y2="120" stroke="#a3e635" stroke-width="8" stroke-linecap="round"/>
+          <circle id="j1" cx="240" cy="120" r="6" fill="#38bdf8"/>
+          <line id="link2" x1="240" y1="120" x2="360" y2="90" stroke="#2dd4bf" stroke-width="8" stroke-linecap="round"/>
+          <circle id="tcp" cx="360" cy="90" r="7" fill="#facc15"/>
+          <text id="posTxt" x="380" y="86" font-size="13" fill="#facc15" font-family="ui-monospace,monospace" font-weight="700">(0.56, 0.73)</text>
+        </svg>
+      </div>
+      <div class="verdict" id="verdict">Tool at <strong>x=0.562, y=0.733 m</strong> · reach used <strong>92%</strong> · status: approaching reach limit</div>
+
+      <div class="label" style="margin-top:24px">What actually goes wrong on the floor</div>
+      <div class="fail-grid" style="margin-top:6px">
+        <div class="fail"><div class="ft">⚠️ Robot lurches mid-path</div><p>IK branch flip (elbow-up ↔ down) or a wrist singularity. Plan in joint space or constrain the configuration; slow through near-singular poses.</p></div>
+        <div class="fail"><div class="ft">⚠️ "No IK solution" / unreachable</div><p>Target outside workspace or past a joint limit. Check reach (|L₁−L₂|…L₁+L₂) and the URDF joint limits before blaming the planner.</p></div>
+        <div class="fail"><div class="ft">⚠️ Nodes can't see each other</div><p>ROS 2 DDS discovery: mismatched ROS_DOMAIN_ID, firewall blocking multicast, or QoS incompatibility (reliable vs best-effort). Check with <span class="mono">ros2 topic list/info</span>.</p></div>
+        <div class="fail"><div class="ft">⚠️ Jerky or laggy motion</div><p>Control loop missing deadlines — too much on the RT path, GC pauses, or a slow transform lookup. Profile the executor; push the fast loop onto the drive.</p></div>
+      </div>
+
+      <div class="label" style="margin-top:22px">Real Industrial Example — full circle to Micro 15</div>
+      <p class="body">A <strong>6-axis arm tending a CNC cell</strong> (the very setup behind Micro 15) runs entirely on ROS 2: a <a href="../16_Machine_Vision.html" style="color:var(--accent-soft)">vision</a> node publishes the part pose on a topic; <strong>MoveIt 2</strong> solves IK (picking elbow-up to dodge the chuck), checks collisions against a live world model and returns a trajectory; a <em>FollowJointTrajectory</em> <strong>action</strong> streams it to <strong>ros2_control</strong>, which drives six <a href="A09_Servo_Motion_Deep_Dive.html" style="color:var(--accent-soft)">servo</a> joints each closing a 4&nbsp;kHz <a href="A10_PID_Control_Deep_Dive.html" style="color:var(--accent-soft)">PID</a> loop; <strong>TF2</strong> keeps the gripper-to-machine transform exact; and the whole cell is validated in Gazebo first. Every page on this deep dive, working at once.</p>
+
+      <div class="card quiz" style="margin-top:18px">
+        <div class="label">Quick Check</div>
+        <p class="quiz-q">A 2-link planar arm has <b>L₁ = L₂ = 0.4 m</b>. (a) Can it reach a point <b>0.95 m</b> from its base? Show why. (b) For a point it <em>can</em> reach, why are there usually <em>two</em> joint solutions, and what is the danger of switching between them during a move?</p>
+        <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+          <span class="tap">▸ Tap to reveal answer</span>
+          <div class="hidden"><b>(a)</b> Max reach = L₁ + L₂ = 0.8 m. Since 0.95 m &gt; 0.8 m, the point is <b>outside the workspace — no IK solution exists</b>. (Reachable band: |L₁−L₂| = 0 up to 0.8 m.) <b>(b)</b> The IK term <b>θ₂ = ±acos(…)</b> has two signs → "elbow-up" and "elbow-down" both land the tool on the target. The danger: if a path forces the controller to <b>switch branch mid-move</b>, the elbow flips through a large, fast reconfiguration — the robot lurches unpredictably and may hit something or fault out. Planners must stay within one configuration branch.</div>
+        </div>
+      </div>
+
+      <div class="card memory" style="margin-top:18px">
+        <div class="label">Memory Hook</div>
+        <div class="quote">“Forward is easy and unique, inverse is hard and many — and ROS 2 is the postal system that wires sense, plan and act together.”</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Advanced Micro Learning · A15 Robotics &amp; ROS 2 · companion to Micro 15<br>
+      Links across to A09 Servo · A10 PID · A11 Sensors · forward to A16 Machine Vision &amp; A31 Industry 4.0<br>
+      ROS 2 LTS as of 2026: Jazzy Jalisco (to 2029) &amp; Humble (to 2027) · Optimized for iPad Pro 11″ M4 · keratoconus-friendly
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // ---- Interactive 2-link forward kinematics ----
+  const t1=document.getElementById('t1'), t2=document.getElementById('t2'), ll=document.getElementById('ll');
+  const t1V=document.getElementById('t1V'), t2V=document.getElementById('t2V'), lV=document.getElementById('lV');
+  const j0=document.getElementById('j0'), j1=document.getElementById('j1'), tcp=document.getElementById('tcp');
+  const link1=document.getElementById('link1'), link2=document.getElementById('link2');
+  const posTxt=document.getElementById('posTxt'), verdict=document.getElementById('verdict');
+
+  // SVG mapping: base at (120,200); 1 m -> 200 px; y up
+  const OX=120, OY=200, SCALE=200;
+
+  function upd(){
+    const a1=+t1.value*Math.PI/180, a2=+t2.value*Math.PI/180, L=+ll.value;
+    t1V.textContent=t1.value+'°';
+    t2V.textContent=t2.value+'°';
+    lV.textContent=L.toFixed(2)+' m';
+    // forward kinematics (metres)
+    const jx = L*Math.cos(a1);
+    const jy = L*Math.sin(a1);
+    const x  = jx + L*Math.cos(a1+a2);
+    const y  = jy + L*Math.sin(a1+a2);
+    // reach: distance from base vs max reach (2L)
+    const r = Math.hypot(x,y), rmax = 2*L;
+    const pct = Math.round(r/rmax*100);
+    // pixel coords (y up -> minus)
+    const jpx=OX+jx*SCALE, jpy=OY-jy*SCALE, tpx=OX+x*SCALE, tpy=OY-y*SCALE;
+    j1.setAttribute('cx',jpx); j1.setAttribute('cy',jpy);
+    tcp.setAttribute('cx',tpx); tcp.setAttribute('cy',tpy);
+    link1.setAttribute('x2',jpx); link1.setAttribute('y2',jpy);
+    link2.setAttribute('x1',jpx); link2.setAttribute('y1',jpy);
+    link2.setAttribute('x2',tpx); link2.setAttribute('y2',tpy);
+    posTxt.setAttribute('x', Math.min(tpx+12, 470));
+    posTxt.setAttribute('y', Math.max(tpy, 20));
+    posTxt.textContent='('+x.toFixed(2)+', '+y.toFixed(2)+')';
+    // colour by how close to full stretch (singularity risk)
+    let col='#a3e635', note='in workspace ✓';
+    if(pct>=98){ col='#f87171'; note='near full stretch → singular ✗'; }
+    else if(pct>=88){ col='#facc15'; note='approaching reach limit'; }
+    tcp.setAttribute('fill',col);
+    verdict.innerHTML='Tool at <strong style="color:'+col+'">x='+x.toFixed(3)+', y='+y.toFixed(3)+' m</strong> · reach used <strong>'+pct+'%</strong> · status: '+note;
+  }
+  [t1,t2,ll].forEach(s=>s.addEventListener('input',upd));
+  upd();
+
+  document.querySelectorAll('.toc a, .back').forEach(a=>{
+    a.addEventListener('click',e=>{
+      const href=a.getAttribute('href');
+      if(href && href.startsWith('#')){ e.preventDefault(); document.querySelector(href).scrollIntoView({behavior:'smooth'}); }
+    });
+  });
+</script>
+
+<!-- ===== AUTO-ANIM: universal reveal-on-scroll SVG animation (self-contained, reduced-motion aware) ===== -->
+<style>
+  @media (prefers-reduced-motion: no-preference){
+    svg.illus [data-anim]{ opacity:0; }
+    svg.illus.anim-in [data-anim]{ animation: aaFade .55s ease forwards; }
+    svg.illus.anim-in [data-anim-draw]{ animation: aaDraw .9s ease forwards; }
+    @keyframes aaFade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+    @keyframes aaDraw{ from{stroke-dashoffset:var(--aaLen);} to{stroke-dashoffset:0;} }
+  }
+</style>
+<script>
+(function(){
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  function prep(svg){
+    var step=0;
+    svg.querySelectorAll('line, path, polyline').forEach(function(el){
+      var sw = el.getAttribute('stroke') || (el.style && el.style.stroke);
+      if(!sw || sw==='none') return;
+      var len;
+      try { len = (el.getTotalLength && el.getTotalLength()) || 0; } catch(e){ len = 0; }
+      if(len>0 && len<5000){
+        el.style.strokeDasharray = len; el.style.strokeDashoffset = len;
+        el.style.setProperty('--aaLen', len);
+        el.setAttribute('data-anim-draw','');
+        el.style.animationDelay = (0.05 + step*0.05).toFixed(2)+'s';
+        step++;
+      }
+    });
+    svg.querySelectorAll('text, circle, rect, ellipse, polygon, use, image').forEach(function(el){
+      el.setAttribute('data-anim','');
+      el.style.animationDelay = (0.05 + (step++)*0.03).toFixed(2)+'s';
+    });
+  }
+  var svgs = document.querySelectorAll('svg.illus');
+  svgs.forEach(prep);
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){ en.target.classList.add('anim-in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.18 });
+  svgs.forEach(function(s){ io.observe(s); });
+})();
+</script>
+</body>
+</html>

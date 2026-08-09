@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>OEE — Overall Equipment Effectiveness · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #34d399;       /* emerald — matches micro card 22 OEE theme */
+    --accent-soft: #6ee7b7;
+    --accent-2: #60a5fa;     /* blue — Availability */
+    --accent-3: #fbbf24;     /* amber — Performance */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(52,211,153,0.11), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(96,165,250,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--bg); background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(52,211,153,0.30);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(52,211,153,0.12), rgba(96,165,250,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent); background: rgba(52,211,153,0.12); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-emer { border-top-color: var(--accent)!important; } .c-emer .big{color:var(--accent)}
+  .c-amb  { border-top-color: var(--accent-3)!important; } .c-amb .big{color:var(--accent-3)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .pro { background: linear-gradient(145deg, rgba(52,211,153,0.08), transparent); border:1px solid rgba(52,211,153,0.22); border-radius:14px; padding:16px; }
+  .pro .pt { font-weight:700; color:var(--accent-soft); margin-bottom:6px; font-size:15px; }
+  .pro p { font-size:13.5px; color:var(--text-dim); }
+  .pro em { color:var(--accent-3); font-style:normal; font-weight:600; }
+
+  .memory { background: linear-gradient(135deg, #34d399, #047857); color: #04140d; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(0,0,0,0.55); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(52,211,153,0.08); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo-row { display:flex; gap:18px; flex-wrap:wrap; align-items:center; justify-content:center; margin-top:8px; }
+  .slider-box { background:var(--card-2); border-radius:12px; padding:14px 18px; min-width:200px; flex:1; }
+  .slider-box label { font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); display:block; margin-bottom:8px; }
+  .slider-box .val { font-family:ui-monospace,monospace; font-weight:800; color:var(--accent-soft); font-size:18px; }
+  input[type=range]{ width:100%; accent-color:var(--accent); }
+  .slider-box.avail input{accent-color:var(--accent-2)} .slider-box.avail .val{color:var(--accent-2)}
+  .slider-box.perf input{accent-color:var(--accent-3)} .slider-box.perf .val{color:var(--accent-3)}
+  .slider-box.qual input{accent-color:var(--green)} .slider-box.qual .val{color:var(--green)}
+  .verdict { text-align:center; margin-top:14px; font-family:ui-monospace,monospace; font-size:15px; color:var(--text-dim); }
+  .verdict strong{ color:var(--accent-soft); }
+
+  .oee-big { text-align:center; margin-top:18px; }
+  .oee-big .num { font-family:ui-monospace,monospace; font-size:clamp(54px,11vw,88px); font-weight:900; line-height:1; color:var(--accent); text-shadow:0 0 28px rgba(52,211,153,0.35); }
+  .oee-big .grade { font-size:17px; font-weight:800; margin-top:6px; }
+
+  @keyframes fadeUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.4);opacity:.65;} }
+  @media (max-width: 620px){ .grid-2,.grid-3,.fail-grid{grid-template-columns:1fr;} .container{padding:26px 16px 70px;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Track · MSc-Level Deep Dive · ~10 pages</span></div>
+  <h1 class="hero"><span class="emoji">📈</span>OEE — Overall Equipment Effectiveness</h1>
+  <p class="hero-sub">The full theory behind manufacturing's master KPI: the six big losses, the time-bucket ladder, the multiplicative trap, the data sources, the TEEP / utilisation family, and the improvement loop that turns a number into money.</p>
+
+  <div class="connect">
+    <span class="pill">↔ MICRO 22</span>
+    <span>This deep dive expands the 90-second card <a href="../22_OEE.html">“OEE”</a>. The card gave you the headline — <em>OEE = Availability × Performance × Quality</em>, world-class ≈ 85%. Here we open the number up: where every minute and every part is accounted for, why the three factors multiply (and why that is brutal), the six big losses mapped to each factor, the difference between OEE / OOE / TEEP, how SCADA &amp; MES compute it live, and the Pareto-driven loop that lifts it. It feeds directly into <a href="A23_TPM_Deep_Dive.html">A23 TPM</a> (the system that attacks losses), <a href="A14_SCADA_HMI_Deep_Dive.html">A14 SCADA/HMI</a> (where the data is captured) and <a href="A31_Digital_Twins_I40_Deep_Dive.html">A31 Digital Twins</a> (OEE as the headline factory metric).</span>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · Why OEE exists</a>
+    <a href="#p2">2 · The time ladder</a>
+    <a href="#p3">3 · The three factors</a>
+    <a href="#p4">4 · The multiplicative trap</a>
+    <a href="#p5">5 · The six big losses</a>
+    <a href="#p6">6 · OEE vs OOE vs TEEP</a>
+    <a href="#p7">7 · Measuring it for real</a>
+    <a href="#p8">8 · Benchmarks &amp; targets</a>
+    <a href="#p9">9 · Pitfalls &amp; gaming</a>
+    <a href="#p10">10 · Improvement loop + recall</a>
+  </div>
+
+  <!-- PAGE 1 -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 · Foundations</span>
+    <h2 class="page-title">Why OEE Exists — One Number for a Whole Machine</h2>
+    <div class="card">
+      <div class="label">Precise Definition</div>
+      <p class="lead"><span class="hl">OEE</span> is the fraction of <strong>Planned Production Time</strong> that a machine spends making <strong>good parts at its ideal rate</strong> — a single dimensionless ratio (0–100%) that fuses three independent loss families into one score.</p>
+      <p class="body">The micro card stated the result. Let us make it rigorous. A machine can look “busy” and still waste most of its value: it can be running but stopped half the shift (availability loss), running but slow (performance loss), or running fast but making scrap (quality loss). Counting any one of these alone misleads. OEE was coined by <strong>Seiichi Nakajima</strong> as the central metric of <span class="hl">Total Productive Maintenance (TPM)</span> precisely so that one number cannot hide a problem behind another.</p>
+      <div class="eqn">OEE = Availability × Performance × Quality       <span class="v2">the master identity</span>
+    = (Good Count × Ideal Cycle Time) / Planned Production Time   <span class="v3">the “simple” equivalent</span></div>
+      <p class="body">The two forms are identical — and the second reveals what OEE really measures: <strong>the ratio of fully-productive time to the time you planned to produce.</strong> Every minute lost to a stop, a slow-down, or a reject is one minute that does not appear in the numerator.</p>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="mini c-emer"><h4>One honest score</h4><p>Three loss types cannot mask each other — multiplication exposes the weakest.</p></div>
+        <div class="mini c-blue"><h4>Comparable</h4><p>Dimensionless 0–100% lets you compare lines, shifts and plants fairly.</p></div>
+        <div class="mini c-amb"><h4>Actionable</h4><p>It decomposes — a low score points straight at A, P or Q to fix.</p></div>
+        <div class="mini c-teal"><h4>Capacity, free</h4><p>Lifting OEE adds output with <em>no new machine</em> — hidden capacity unlocked.</p></div>
+      </div>
+      <div class="label" style="margin-top:22px">The engineer's mindset</div>
+      <p class="body">OEE is never “a percentage on a dashboard.” It is a <strong>capacity argument in disguise</strong>: a line at 60% OEE running near-flat already contains the equivalent of a second line, waiting to be recovered through loss reduction. The chapters ahead turn “OEE = 84.6%” into “where exactly did the other 15.4% go, and what is it worth?”</p>
+    </div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 · The Time Ladder</span>
+    <h2 class="page-title">The Time Buckets — Where Every Minute Goes</h2>
+    <div class="card">
+      <p class="body">OEE is built on a strict accounting of time. You start from all the time in the calendar and subtract, step by step, until only fully-productive time remains. Each subtraction is a loss bucket, and each bucket maps to exactly one OEE factor. Get the buckets right and the rest is arithmetic.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 540 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Time loss waterfall from all time down to fully productive time">
+          <defs>
+            <linearGradient id="b0" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#475569"/><stop offset="100%" stop-color="#334155"/></linearGradient>
+            <linearGradient id="b1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#64748b"/><stop offset="100%" stop-color="#475569"/></linearGradient>
+            <linearGradient id="b2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient>
+            <linearGradient id="b3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#d97706"/></linearGradient>
+            <linearGradient id="b4" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#059669"/></linearGradient>
+          </defs>
+          <!-- ladder bars -->
+          <rect x="40" y="24"  width="460" height="34" rx="6" fill="url(#b0)"/>
+          <text x="50" y="46" fill="#e2e8f0" font-size="13" font-weight="700">All Time (calendar — 24/7)</text>
+
+          <rect x="70" y="74" width="430" height="34" rx="6" fill="url(#b1)"/>
+          <text x="80" y="96" fill="#e2e8f0" font-size="13" font-weight="700">Planned Production Time</text>
+          <text x="505" y="96" fill="#94a3b8" font-size="11" text-anchor="end" transform="translate(0,0)"></text>
+          <line x1="40" y1="58" x2="70" y2="74" stroke="#64748b" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="250" y="70" fill="#94a3b8" font-size="10.5">− Schedule loss (no orders, no shift, planned maintenance)</text>
+
+          <rect x="100" y="124" width="360" height="34" rx="6" fill="url(#b2)"/>
+          <text x="110" y="146" fill="#04121f" font-size="13" font-weight="800">Run Time</text>
+          <text x="250" y="120" fill="#60a5fa" font-size="10.5">− Availability loss (breakdowns, changeovers) → A</text>
+
+          <rect x="130" y="174" width="270" height="34" rx="6" fill="url(#b3)"/>
+          <text x="140" y="196" fill="#1a1207" font-size="13" font-weight="800">Net Run Time</text>
+          <text x="250" y="170" fill="#fbbf24" font-size="10.5">− Performance loss (minor stops, slow cycles) → P</text>
+
+          <rect x="160" y="224" width="180" height="34" rx="6" fill="url(#b4)"/>
+          <text x="170" y="246" fill="#04140d" font-size="13" font-weight="800">Fully Productive Time</text>
+          <text x="250" y="220" fill="#34d399" font-size="10.5">− Quality loss (scrap, rework, startup rejects) → Q</text>
+
+          <text x="40" y="292" fill="#cbd5e1" font-size="12">OEE =</text>
+          <rect x="86" y="280" width="180" height="16" rx="4" fill="url(#b4)"/>
+          <rect x="86" y="280" width="430" height="16" rx="4" fill="none" stroke="#475569" stroke-width="1.5"/>
+          <text x="280" y="292" fill="#94a3b8" font-size="11">Fully Productive Time ÷ Planned Production Time</text>
+        </svg>
+        <div class="cap">The OEE waterfall. Start from Planned Production Time (calendar minus schedule loss), then peel off Availability, Performance and Quality losses. What survives — Fully Productive Time — over Planned Production Time is the OEE.</div>
+      </div>
+      <p class="body" style="margin-top:6px">The crucial choice is the <strong>top of the ladder</strong>. OEE conventionally starts at <span class="hl">Planned Production Time</span> — it deliberately excludes time you never intended to run (no orders, weekends, planned PM). That keeps OEE a measure of <em>how well you ran when you meant to</em>, not a measure of demand. Move the top bar up to <em>All Time</em> and you get TEEP instead (Page 6).</p>
+      <div class="eqn">Planned Production Time (PPT) = All Time − Schedule Loss
+Run Time      = PPT − Availability Loss
+Net Run Time  = Run Time − Performance Loss      <span class="v2">(= Good+Bad parts × Ideal Cycle Time)</span>
+Fully Productive Time = Net Run Time − Quality Loss   <span class="v3">(= Good parts × Ideal Cycle Time)</span></div>
+    </div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 · The Three Factors</span>
+    <h2 class="page-title">Availability, Performance &amp; Quality — Defined Exactly</h2>
+    <div class="card">
+      <p class="body">Each factor is a clean ratio bounded by 0–1, and each isolates one loss family. Knowing the exact definitions stops the most common OEE arguments before they start.</p>
+
+      <div class="label" style="margin-top:4px">Availability (A) — did it run when it should?</div>
+      <div class="eqn">A = Run Time / Planned Production Time     <span class="v2">captures every unplanned stop &amp; changeover</span></div>
+      <p class="body">Availability falls for <strong>down events</strong>: breakdowns, jams long enough to log, material starvation, and — importantly — <strong>changeovers/setup</strong>. Whether planned maintenance counts against A is a definition choice: classic Nakajima OEE excludes it from PPT (so PM does not hurt A); some plants include it. Be consistent and state your rule.</p>
+
+      <div class="label" style="margin-top:18px">Performance (P) — did it run at full speed?</div>
+      <div class="eqn">P = (Ideal Cycle Time × Total Count) / Run Time
+  = Actual rate / Ideal rate            <span class="v3">captures small stops &amp; reduced speed</span></div>
+      <p class="body">Performance is the trickiest factor because it depends on a trustworthy <span class="hl">Ideal Cycle Time (ICT)</span> — the fastest sustainable cycle the machine was designed for, often the nameplate rate. It captures losses too small to log as downtime: micro-stops under the logging threshold, and running below design speed. <strong>P should never exceed 100%</strong>; if it does, your ICT is wrong (set too slow) — a classic data error.</p>
+
+      <div class="label" style="margin-top:18px">Quality (Q) — was the output good?</div>
+      <div class="eqn">Q = Good Count / Total Count          <span class="v2">captures scrap, rework &amp; startup rejects</span></div>
+      <p class="body">Quality counts <em>first-pass</em> good parts only — reworked parts are <strong>not</strong> good for OEE, because the rework consumed capacity. This is why a part that needs touch-up still costs you twice.</p>
+
+      <div class="grid-3" style="margin-top:16px">
+        <div class="mini c-blue"><div class="big">A</div><h4>Availability</h4><p>Run Time ÷ Planned. Stops &amp; changeovers.</p></div>
+        <div class="mini c-amb"><div class="big">P</div><h4>Performance</h4><p>Actual ÷ Ideal rate. Micro-stops &amp; slow cycles.</p></div>
+        <div class="mini c-emer"><div class="big">Q</div><h4>Quality</h4><p>Good ÷ Total. Scrap, rework, startup rejects.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 · The Math Trap</span>
+    <h2 class="page-title">Why the Factors Multiply — and Why It's Brutal</h2>
+    <div class="card">
+      <p class="body">The single most misunderstood thing about OEE is that the three factors <strong>multiply, not average</strong>. This is not a convention — it is forced by the time ladder. Each factor is the surviving fraction after the previous loss, so they chain like a series of leaky pipes.</p>
+      <div class="eqn">Three “good-looking” 90% factors:
+  Average would say:  (90 + 90 + 90) / 3 = <b>90%</b>   ✗ wrong
+  Reality multiplies: 0.90 × 0.90 × 0.90 = <b>72.9%</b>  ✓ correct</div>
+      <p class="body">The averaging instinct hides a fifth of your capacity. Because losses compound, OEE is always lower than your best-looking factor — and the gap widens fast. This is also why <strong>chasing the lowest factor pays most</strong>: lifting a 70% factor to 80% multiplies the whole score by 80/70 ≈ +14%, while polishing a 98% factor barely moves it.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 520 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three pipes in series each passing a fraction of flow, illustrating multiplicative OEE">
+          <defs>
+            <linearGradient id="flow" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#059669"/></linearGradient>
+          </defs>
+          <!-- input -->
+          <rect x="20" y="60" width="70" height="100" fill="#1e293b" stroke="#475569"/>
+          <text x="55" y="115" fill="#cbd5e1" font-size="12" text-anchor="middle">100%</text>
+          <text x="55" y="180" fill="#94a3b8" font-size="11" text-anchor="middle">Planned</text>
+          <!-- A pipe -->
+          <rect x="90" y="74" width="110" height="72" fill="url(#flow)" opacity="0.85"/>
+          <rect x="90" y="60" width="110" height="14" fill="#3b82f6"/>
+          <text x="145" y="50" fill="#60a5fa" font-size="12" text-anchor="middle" font-weight="700">A 90%</text>
+          <!-- P pipe (narrower) -->
+          <rect x="200" y="82" width="110" height="56" fill="url(#flow)" opacity="0.85"/>
+          <rect x="200" y="68" width="110" height="14" fill="#fbbf24"/>
+          <text x="255" y="58" fill="#fbbf24" font-size="12" text-anchor="middle" font-weight="700">P 90%</text>
+          <!-- Q pipe (narrowest) -->
+          <rect x="310" y="90" width="110" height="40" fill="url(#flow)"/>
+          <rect x="310" y="76" width="110" height="14" fill="#34d399"/>
+          <text x="365" y="66" fill="#34d399" font-size="12" text-anchor="middle" font-weight="700">Q 90%</text>
+          <!-- output -->
+          <rect x="420" y="96" width="80" height="34" fill="#064e3b" stroke="#34d399" stroke-width="2"/>
+          <text x="460" y="118" fill="#6ee7b7" font-size="14" text-anchor="middle" font-weight="800">72.9%</text>
+          <text x="460" y="150" fill="#94a3b8" font-size="11" text-anchor="middle">OEE</text>
+          <!-- arrows -->
+          <text x="270" y="205" fill="#94a3b8" font-size="11.5" text-anchor="middle">Each stage passes only a fraction — losses compound in series.</text>
+        </svg>
+        <div class="cap">Series pipes. The throughput surviving all three stages is the product 0.90×0.90×0.90 = 72.9%, never the average 90%. OEE is a chain — its weakest link governs.</div>
+      </div>
+      <div class="pro" style="margin-top:14px">
+        <div class="pt">💡 The leverage rule</div>
+        <p>Differentiating OEE = A·P·Q shows the <em>marginal gain from any factor is proportional to the product of the other two</em>. Translation: improve your <strong>lowest</strong> factor first — it has the most headroom and the steepest payoff. This is why a Pareto of losses (Page 10) almost always beats a blanket “run faster” order.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 5 -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 · The Losses</span>
+    <h2 class="page-title">The Six Big Losses — Mapped to A · P · Q</h2>
+    <div class="card">
+      <p class="body">Nakajima's framework names <span class="hl">six big losses</span>, two feeding each factor. They are the vocabulary of every improvement event — name the loss, find its cause, and you know which factor will rise.</p>
+      <div class="tbl-wrap" style="margin-top:8px">
+        <table>
+          <thead><tr><th>Factor</th><th>Loss</th><th>What it is</th><th>Typical cause &amp; cure</th></tr></thead>
+          <tbody>
+            <tr><td><b style="color:var(--accent-2)">A</b></td><td><b>1 · Breakdowns</b></td><td>Unplanned stops logged as downtime.</td><td>Failure, jam, tool break → TPM, autonomous maintenance, CBM.</td></tr>
+            <tr><td><b style="color:var(--accent-2)">A</b></td><td><b>2 · Setup &amp; Changeover</b></td><td>Time lost switching product/recipe.</td><td>Long setups → <em>SMED</em> (single-minute exchange of die).</td></tr>
+            <tr><td><b style="color:var(--accent-3)">P</b></td><td><b>3 · Minor Stops</b></td><td>Brief stops &amp; idling &lt; logging threshold.</td><td>Misfeeds, sensor blocks → poka-yoke, line balancing.</td></tr>
+            <tr><td><b style="color:var(--accent-3)">P</b></td><td><b>4 · Reduced Speed</b></td><td>Running below ideal cycle rate.</td><td>Wear, conservative settings → restore design speed.</td></tr>
+            <tr><td><b style="color:var(--accent)">Q</b></td><td><b>5 · Startup Rejects</b></td><td>Scrap while warming up / dialing in.</td><td>Slow stabilisation → recipe control, quick-to-quality start.</td></tr>
+            <tr><td><b style="color:var(--accent)">Q</b></td><td><b>6 · Production Rejects</b></td><td>Scrap &amp; rework at steady state.</td><td>Process drift → SPC, RCA, mistake-proofing.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="stage" style="margin-top:14px">
+        <svg class="illus" viewBox="0 0 520 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Six big losses grouped under Availability, Performance and Quality">
+          <!-- A group -->
+          <rect x="20" y="30" width="150" height="150" rx="12" fill="rgba(96,165,250,0.10)" stroke="#3b82f6"/>
+          <text x="95" y="52" fill="#60a5fa" font-size="14" text-anchor="middle" font-weight="800">AVAILABILITY</text>
+          <rect x="34" y="66" width="122" height="44" rx="8" fill="#1e293b" stroke="#3b82f6"/><text x="95" y="93" fill="#cbd5e1" font-size="12" text-anchor="middle">1 Breakdowns</text>
+          <rect x="34" y="118" width="122" height="44" rx="8" fill="#1e293b" stroke="#3b82f6"/><text x="95" y="145" fill="#cbd5e1" font-size="12" text-anchor="middle">2 Changeovers</text>
+          <!-- P group -->
+          <rect x="185" y="30" width="150" height="150" rx="12" fill="rgba(251,191,36,0.10)" stroke="#d97706"/>
+          <text x="260" y="52" fill="#fbbf24" font-size="14" text-anchor="middle" font-weight="800">PERFORMANCE</text>
+          <rect x="199" y="66" width="122" height="44" rx="8" fill="#1e293b" stroke="#d97706"/><text x="260" y="93" fill="#cbd5e1" font-size="12" text-anchor="middle">3 Minor stops</text>
+          <rect x="199" y="118" width="122" height="44" rx="8" fill="#1e293b" stroke="#d97706"/><text x="260" y="145" fill="#cbd5e1" font-size="12" text-anchor="middle">4 Reduced speed</text>
+          <!-- Q group -->
+          <rect x="350" y="30" width="150" height="150" rx="12" fill="rgba(52,211,153,0.10)" stroke="#059669"/>
+          <text x="425" y="52" fill="#34d399" font-size="14" text-anchor="middle" font-weight="800">QUALITY</text>
+          <rect x="364" y="66" width="122" height="44" rx="8" fill="#1e293b" stroke="#059669"/><text x="425" y="93" fill="#cbd5e1" font-size="12" text-anchor="middle">5 Startup rejects</text>
+          <rect x="364" y="118" width="122" height="44" rx="8" fill="#1e293b" stroke="#059669"/><text x="425" y="145" fill="#cbd5e1" font-size="12" text-anchor="middle">6 Prod. rejects</text>
+        </svg>
+        <div class="cap">Six losses, three factors. Every minute of waste belongs to exactly one box — which is how an OEE drop tells you precisely where to look.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 6 -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 · The Family</span>
+    <h2 class="page-title">OEE vs OOE vs TEEP — Choosing the Denominator</h2>
+    <div class="card">
+      <p class="body">OEE has cousins that differ only in <strong>where the time ladder starts</strong> (the denominator). Confusing them is the most common way two reports “disagree.” The factors A·P·Q are the same; the question is what time you measure against.</p>
+      <div class="tbl-wrap" style="margin-top:8px">
+        <table>
+          <thead><tr><th>Metric</th><th>Denominator (time base)</th><th>Question it answers</th><th>Typical use</th></tr></thead>
+          <tbody>
+            <tr><td><b>OEE</b></td><td>Planned Production Time</td><td>How well did we run <em>when we meant to</em>?</td><td>Equipment &amp; shift improvement (default).</td></tr>
+            <tr><td><b>OOE</b></td><td>Operating Time (incl. some schedule loss)</td><td>How well did we use the time we staffed?</td><td>Operations-level view.</td></tr>
+            <tr><td><b>TEEP</b></td><td>All Time (24 × 7 = 168 h/week)</td><td>What's our <em>total capacity utilisation</em>?</td><td>Capex/“buy a new machine?” decisions.</td></tr>
+            <tr><td><b>Utilisation</b></td><td>—</td><td>Schedule loss only (PPT ÷ All Time)</td><td>Demand &amp; staffing, not equipment health.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="eqn">TEEP = Utilisation × OEE
+     = (Planned Production Time / All Time) × (A × P × Q)   <span class="v2">total effective equipment performance</span></div>
+      <p class="body">Worked contrast: a line at <span class="mono">OEE 85%</span> but only scheduled 5 days × 1 shift has <span class="mono">Utilisation ≈ 30%</span>, so <span class="mono">TEEP ≈ 0.30 × 0.85 = 25%</span>. OEE says “the equipment runs beautifully”; TEEP says “you own a machine that sits idle 75% of the week.” <strong>Use OEE to improve the process, TEEP to decide whether you even need more iron.</strong></p>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="mini c-emer"><div class="big">OEE</div><p>vs Planned time → fix the process.</p></div>
+        <div class="mini c-blue"><div class="big">TEEP</div><p>vs All time → reveal hidden capacity before buying.</p></div>
+        <div class="mini c-amb"><div class="big">Util.</div><p>Schedule loss only → a demand/staffing signal.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 7 -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 · Measurement</span>
+    <h2 class="page-title">Measuring OEE for Real — From Sensor to SCADA</h2>
+    <div class="card">
+      <p class="body">An OEE number is only as good as its data. Three streams must be captured automatically and reconciled: <strong>state</strong> (running/down + reason), <strong>count</strong> (parts produced), and <strong>reject</strong> (good vs bad). This is exactly where the automation stack you already know — sensors, PLC, SCADA/MES — earns its keep.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data pipeline from machine sensors through PLC and SCADA to an OEE dashboard">
+          <defs>
+            <linearGradient id="node" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#232d3f"/><stop offset="100%" stop-color="#161d2a"/></linearGradient>
+          </defs>
+          <!-- machine -->
+          <rect x="24" y="90" width="96" height="70" rx="10" fill="url(#node)" stroke="#475569"/>
+          <text x="72" y="120" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="700">Machine</text>
+          <text x="72" y="138" fill="#94a3b8" font-size="10" text-anchor="middle">sensors</text>
+          <!-- PLC -->
+          <rect x="160" y="90" width="96" height="70" rx="10" fill="url(#node)" stroke="#3b82f6"/>
+          <text x="208" y="116" fill="#60a5fa" font-size="12" text-anchor="middle" font-weight="700">PLC</text>
+          <text x="208" y="134" fill="#94a3b8" font-size="9.5" text-anchor="middle">state · count</text>
+          <!-- SCADA/MES -->
+          <rect x="296" y="90" width="110" height="70" rx="10" fill="url(#node)" stroke="#2dd4bf"/>
+          <text x="351" y="116" fill="#2dd4bf" font-size="12" text-anchor="middle" font-weight="700">SCADA / MES</text>
+          <text x="351" y="134" fill="#94a3b8" font-size="9.5" text-anchor="middle">reason codes</text>
+          <!-- dashboard -->
+          <rect x="446" y="84" width="70" height="82" rx="10" fill="#064e3b" stroke="#34d399" stroke-width="2"/>
+          <text x="481" y="112" fill="#6ee7b7" font-size="11" text-anchor="middle" font-weight="800">OEE</text>
+          <text x="481" y="132" fill="#6ee7b7" font-size="15" text-anchor="middle" font-weight="900">84.6%</text>
+          <!-- arrows -->
+          <g stroke="#64748b" stroke-width="2" fill="#64748b">
+            <line x1="120" y1="125" x2="158" y2="125"/><polygon points="152,120 152,130 162,125"/>
+            <line x1="256" y1="125" x2="294" y2="125"/><polygon points="288,120 288,130 298,125"/>
+            <line x1="406" y1="125" x2="444" y2="125"/><polygon points="438,120 438,130 448,125"/>
+          </g>
+          <!-- reason code callout -->
+          <rect x="296" y="184" width="220" height="46" rx="8" fill="rgba(45,212,191,0.08)" stroke="#2dd4bf"/>
+          <text x="406" y="204" fill="#5eead4" font-size="11" text-anchor="middle" font-weight="700">Reason codes turn a stop into a Pareto</text>
+          <text x="406" y="220" fill="#94a3b8" font-size="10" text-anchor="middle">“jam”, “starved”, “changeover”, “no operator”…</text>
+        </svg>
+        <div class="cap">The OEE data pipeline. Machine sensors → PLC tags (state + count) → SCADA/MES which adds operator-entered or rule-based <em>reason codes</em>. The dashboard is the easy part; trustworthy reason codes are the hard part.</div>
+      </div>
+      <p class="body" style="margin-top:6px">Two engineering truths. First, <strong>downtime reason codes are where OEE lives or dies</strong>: an automatic stop detector without a reason is just a number; with a reason it becomes a Pareto chart that points at the fix. Second, the <strong>Ideal Cycle Time must be governed</strong> — locked, audited, and tied to the nameplate — or Performance becomes fiction (see Page 9). The micro card noted “SCADA &amp; MES calculate OEE automatically” (links <a href="A14_SCADA_HMI_Deep_Dive.html" style="color:var(--accent-soft)">A14 SCADA/HMI</a>); the catch is that they automate the <em>arithmetic</em>, not the <em>truth</em> of the inputs.</p>
+      <div class="eqn">Minimum data model per work order:
+  ts_start, ts_end                     <span class="v2">defines Run vs Down intervals</span>
+  state ∈ {run, down}, reason_code      <span class="v3">Availability + loss Pareto</span>
+  total_count, good_count, ideal_cycle_time   <span class="v2">→ P and Q</span></div>
+    </div>
+  </section>
+
+  <!-- PAGE 8 -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 · Benchmarks</span>
+    <h2 class="page-title">Benchmarks, World-Class &amp; Sane Targets</h2>
+    <div class="card">
+      <p class="body">The famous <span class="hl">“world-class 85%”</span> is not arbitrary — it is the product of three world-class factors, and it is a discrete-manufacturing yardstick, not a universal law.</p>
+      <div class="eqn">World-class OEE = A 90% × P 95% × Q 99.9% ≈ <b>85%</b>
+Typical (unmonitored) plant ≈ <b>60%</b>   <span class="v3">huge hidden capacity</span>
+Below ~40% → urgent, systemic problem</div>
+      <div class="grid-3" style="margin-top:6px">
+        <div class="mini c-blue"><div class="big">90%</div><h4>Availability</h4><p>World-class — few breakdowns, fast SMED changeovers.</p></div>
+        <div class="mini c-amb"><div class="big">95%</div><h4>Performance</h4><p>World-class — runs near design speed, few micro-stops.</p></div>
+        <div class="mini c-emer"><div class="big">99.9%</div><h4>Quality</h4><p>World-class — first-pass yield essentially perfect.</p></div>
+      </div>
+      <p class="body" style="margin-top:14px"><strong>Context matters more than the trophy number.</strong> A high-mix job shop with constant changeovers will never see 85% and shouldn't be judged against it; a continuous process plant may demand 95%+. The right benchmark is <em>your own trend</em> and a realistic, segment-specific target. Three honest rules:</p>
+      <ul class="tips" style="margin-top:8px">
+        <li><span class="num">1</span><div><b>Compare like with like.</b> Same product family, same definition of PPT and ICT. Cross-plant OEE “league tables” mislead unless the rules are identical.</div></li>
+        <li><span class="num">2</span><div><b>Trend beats absolute.</b> A line moving 58 → 64 → 71% is winning; a static 80% may be coasting. Watch the slope.</div></li>
+        <li><span class="num">3</span><div><b>Target the bottleneck.</b> Only the constraint's OEE caps throughput (Goldratt). Lifting a non-bottleneck's OEE often just builds inventory.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PAGE 9 -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 · Pitfalls</span>
+    <h2 class="page-title">Pitfalls &amp; How OEE Gets Gamed</h2>
+    <div class="card">
+      <p class="body">OEE is a powerful lens and a tempting target. When a number becomes a goal it tends to get manipulated (Goodhart's law). Knowing the failure modes lets you read a suspiciously good dashboard like a forensic report.</p>
+      <div class="fail-grid">
+        <div class="fail">
+          <div class="ft">🐢 Sandbagged Ideal Cycle Time</div>
+          <p>Set ICT slower than reality and Performance magically hits ~100%. The classic fudge. <em>Cure:</em> lock ICT to nameplate, audit, flag P &gt; 100% as an error.</p>
+        </div>
+        <div class="fail">
+          <div class="ft">🕳️ Hidden / unlogged micro-stops</div>
+          <p>Stops below the logging threshold vanish from Availability and quietly sink Performance instead — or disappear entirely. <em>Cure:</em> tight stop-detection, low threshold.</p>
+        </div>
+        <div class="fail">
+          <div class="ft">📅 Shrinking the denominator</div>
+          <p>Move losses into “planned” schedule loss (out of PPT) and OEE rises without any real improvement. <em>Cure:</em> a strict, audited PPT definition.</p>
+        </div>
+        <div class="fail">
+          <div class="ft">♻️ Counting rework as good</div>
+          <p>Inflates Quality and ignores the capacity the rework burned. <em>Cure:</em> Q = first-pass good only.</p>
+        </div>
+        <div class="fail">
+          <div class="ft">📈 Optimising a non-bottleneck</div>
+          <p>High OEE on a non-constraint machine just over-produces WIP — a local win, a system loss. <em>Cure:</em> focus on the constraint.</p>
+        </div>
+        <div class="fail">
+          <div class="ft">🎯 OEE as a stick</div>
+          <p>Used to punish operators, it breeds under-reporting and fear. <em>Cure:</em> OEE is a diagnostic for the team, not a scoreboard against them.</p>
+        </div>
+      </div>
+      <div class="pro" style="margin-top:14px">
+        <div class="pt">🔧 The integrity test</div>
+        <p>A trustworthy OEE system has three properties: a <em>governed ICT</em>, <em>complete reason-coded downtime</em>, and <em>first-pass-only quality</em>. If any one is loose, the headline number is decoration. Check those three before you ever act on an OEE trend.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 10 -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 · Consolidate</span>
+    <h2 class="page-title">Practice &amp; Active Recall</h2>
+
+    <div class="card">
+      <div class="label">Try It — Live OEE Calculator</div>
+      <p class="body">Drag the three factors. Watch OEE update — and feel the multiplicative trap: pull any one factor down and the whole number collapses. Try three 90s, then fix the lowest.</p>
+      <div class="stage">
+        <div class="demo-row">
+          <div class="slider-box avail">
+            <label>Availability A</label>
+            <input type="range" id="a" min="40" max="100" value="90" step="1">
+            <div class="val"><span id="va">90</span>%</div>
+          </div>
+          <div class="slider-box perf">
+            <label>Performance P</label>
+            <input type="range" id="p" min="40" max="100" value="95" step="1">
+            <div class="val"><span id="vp">95</span>%</div>
+          </div>
+          <div class="slider-box qual">
+            <label>Quality Q</label>
+            <input type="range" id="q" min="40" max="100" value="99" step="1">
+            <div class="val"><span id="vq">99</span>%</div>
+          </div>
+        </div>
+        <div class="oee-big">
+          <div class="num" id="oeeNum">84.6%</div>
+          <div class="grade" id="oeeGrade">⭐ Good — near industry-leading</div>
+        </div>
+        <div class="verdict">
+          Lost capacity = <strong id="lost">15.4%</strong> of planned time &nbsp;·&nbsp; weakest link = <strong id="weak">A</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Improvement loop — the 5 steps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><b>Measure honestly:</b> governed ICT, reason-coded stops, first-pass quality. No trust, no traction.</div></li>
+        <li><span class="num">2</span><div><b>Decompose:</b> split OEE into A, P, Q — find the lowest factor (the headroom).</div></li>
+        <li><span class="num">3</span><div><b>Pareto the losses:</b> rank the six big losses by lost minutes; attack the tallest bar first.</div></li>
+        <li><span class="num">4</span><div><b>Match the tool:</b> SMED for changeovers, TPM/CBM for breakdowns, SPC/RCA for rejects, line-balancing for micro-stops.</div></li>
+        <li><span class="num">5</span><div><b>Sustain:</b> standardise the gain, re-baseline, and watch the trend — then return to the new weakest factor.</div></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check 1</div>
+      <p class="quiz-q">Q: A line ran 7 h of an 8 h planned shift, produced 90% of target output, and scrapped 2%. What is the OEE?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal answer ↓</span>
+        <span class="hidden"><strong>A:</strong> A = 7/8 = 87.5%. P = 90%. Q = 98%. OEE = 0.875 × 0.90 × 0.98 = <b>77.2%</b>. Decent, ~8 points below world-class. The biggest single bite was the lost hour (Availability).</span>
+      </div>
+      <div class="label">Quick Check 2</div>
+      <p class="quiz-q">Q: Why do the three factors multiply instead of averaging — and what does that imply for where to improve?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal answer ↓</span>
+        <span class="hidden"><strong>A:</strong> Each factor is the surviving fraction <b>after</b> the previous loss, so they chain in series (leaky pipes). Three 90%s give 0.9³ = 72.9%, not 90%. Implication: improve the <b>lowest</b> factor first — its marginal payoff (∝ product of the other two) is highest.</span>
+      </div>
+      <div class="label">Quick Check 3</div>
+      <p class="quiz-q">Q: A machine shows OEE 88% but is scheduled only 40 h of a 168 h week. Roughly what is TEEP, and what does the gap mean?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal answer ↓</span>
+        <span class="hidden"><strong>A:</strong> Utilisation = 40/168 ≈ 24%. TEEP = 0.24 × 0.88 ≈ <b>21%</b>. The equipment runs beautifully <em>when used</em>, but sits idle ~76% of the week. Before buying a second machine, fill the schedule — the capacity is already paid for.</span>
+      </div>
+      <div class="label">Quick Check 4</div>
+      <p class="quiz-q">Q: Your Performance factor reads 104%. What is almost certainly wrong, and why does it matter?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal answer ↓</span>
+        <span class="hidden"><strong>A:</strong> P can't physically exceed 100% — the <b>Ideal Cycle Time is set too slow</b> (sandbagged). It matters because it inflates OEE and hides real speed loss; every Performance gain you “see” is fiction until ICT is corrected to the true nameplate rate.</span>
+      </div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"OEE = Available × Fast × Good — and they multiply, so fix the weakest first."</p>
+    </div>
+
+    <div class="footer">
+      Advanced Deep Dive A22 · companion to Micro Card 22 “OEE”<br>
+      Links forward to A23 TPM · A14 SCADA/HMI · A31 Digital Twins<br>
+      Optimized for iPad Pro 11″ M4 · keratoconus-friendly · self-contained HTML
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const a=document.getElementById('a'), p=document.getElementById('p'), q=document.getElementById('q');
+  const va=document.getElementById('va'), vp=document.getElementById('vp'), vq=document.getElementById('vq');
+  const oeeNum=document.getElementById('oeeNum'), oeeGrade=document.getElementById('oeeGrade');
+  const lost=document.getElementById('lost'), weak=document.getElementById('weak');
+
+  function update(){
+    const av=+a.value, pv=+p.value, qv=+q.value;
+    va.textContent=av; vp.textContent=pv; vq.textContent=qv;
+    const oee=(av/100)*(pv/100)*(qv/100)*100;
+    oeeNum.textContent=oee.toFixed(1)+'%';
+    lost.textContent=(100-oee).toFixed(1)+'%';
+
+    // weakest link
+    const m=Math.min(av,pv,qv);
+    weak.textContent = (m===av)?'A (Availability)':(m===pv)?'P (Performance)':'Q (Quality)';
+
+    let g, c;
+    if(oee>=85){ g='🏆 World-Class'; c='var(--accent)'; }
+    else if(oee>=60){ g='⭐ Good — industry average'; c='var(--accent-3)'; }
+    else { g='😟 Below average — systemic loss'; c='#f87171'; }
+    oeeGrade.textContent=g;
+    oeeNum.style.color=c;
+    oeeGrade.style.color=c;
+  }
+  [a,p,q].forEach(el=>el.addEventListener('input',update));
+  update();
+</script>
+</body>
+</html>

@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>GD&amp;T &amp; Tolerances — Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #818cf8;        /* indigo — matches Micro Card 21 GD&T */
+    --accent-soft: #a5b4fc;
+    --accent-2: #a3e635;      /* lime — "linked to micro" colour */
+    --accent-3: #fb923c;
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(129,140,248,0.16), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(163,230,53,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page, .card { animation: fadeUp 0.6s ease both; }
+  .page { margin-bottom: 30px; }
+
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--bg); background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(129,140,248,0.35);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge { display: inline-flex; align-items: center; gap: 10px; background: var(--card); padding: 10px 18px; border-radius: 999px; font-size: 14px; color: var(--text-dim); border: 1px solid var(--border); margin-bottom: 22px; }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect { display:flex; align-items:center; gap:12px; flex-wrap:wrap; background: linear-gradient(135deg, rgba(129,140,248,0.12), rgba(163,230,53,0.06)); border:1px solid var(--border); border-left:4px solid var(--accent-2); border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px; }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-2); background: rgba(163,230,53,0.12); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .toc { background: var(--card); border:1px solid var(--border); border-radius:18px; padding:22px 24px; margin-bottom:30px; }
+  .toc h3 { font-size:13px; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); margin-bottom:14px; }
+  .toc ol { list-style:none; counter-reset:toc; display:grid; grid-template-columns:1fr 1fr; gap:8px 18px; }
+  .toc li { counter-increment:toc; font-size:14px; color:var(--text-dim); display:flex; gap:10px; }
+  .toc li::before { content:counter(toc,decimal-leading-zero); font-family:ui-monospace,monospace; color:var(--accent); font-weight:700; }
+  @media(max-width:600px){ .toc ol{grid-template-columns:1fr;} }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media(max-width:600px){ .grid-2,.grid-3{grid-template-columns:1fr;} }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:24px; font-weight:800; color: var(--accent); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-lime { border-top-color: var(--accent-2)!important; } .c-lime .big{color:var(--accent-2)}
+  .c-amb  { border-top-color: var(--accent-3)!important; } .c-amb .big{color:var(--accent-3)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-green{ border-top-color: var(--green)!important; } .c-green .big{color:var(--green)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .callout { border-radius:14px; padding:16px 18px; margin-top:14px; font-size:14px; border:1px solid var(--border); }
+  .callout.key { background: linear-gradient(135deg, rgba(129,140,248,0.12), rgba(96,165,250,0.04)); border-left:4px solid var(--accent); }
+  .callout.warn { background: linear-gradient(135deg, rgba(248,113,113,0.10), transparent); border-left:4px solid var(--danger); }
+  .callout.win { background: linear-gradient(135deg, rgba(52,211,153,0.10), transparent); border-left:4px solid var(--green); }
+  .callout b { color: var(--text); }
+
+  .steps { counter-reset:step; display:grid; gap:12px; }
+  .step { background:var(--card-2); border-radius:14px; padding:16px 18px 16px 54px; position:relative; font-size:15px; color:#d7dee8; }
+  .step::before { counter-increment:step; content:counter(step); position:absolute; left:16px; top:16px; width:26px; height:26px; background:var(--accent); color:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+  .step b { color: var(--text); }
+
+  /* symbol chip row */
+  .symrow { display:grid; grid-template-columns:repeat(auto-fit,minmax(108px,1fr)); gap:10px; margin-top:6px; }
+  .symchip { background:var(--card-2); border:1px solid var(--border); border-radius:12px; padding:12px 8px; text-align:center; }
+  .symchip .g { font-family:ui-monospace,monospace; font-size:26px; display:block; color:var(--accent); line-height:1; margin-bottom:6px; }
+  .symchip .n { font-size:12px; color:var(--text-dim); }
+
+  .quiz { background: var(--card); border: 2px dashed var(--accent); }
+  .quiz-q { font-size: 19px; font-weight: 500; margin-bottom: 16px; }
+  .quiz-answer { background: var(--card-2); padding: 16px; border-radius: 12px; font-size: 15px; color: var(--text-dim); cursor: pointer; user-select: none; transition: all 0.3s ease; }
+  .quiz-answer.revealed { color: var(--text); border-left:4px solid var(--accent-2); }
+  .quiz-answer b { color: var(--accent-2); }
+  .quote { font-size: clamp(20px,3vw,28px); font-weight:700; text-align:center; line-height:1.4; background:linear-gradient(135deg,var(--accent),var(--accent-2)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; padding:8px 0; }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:14px; margin-top:40px; line-height:1.9; }
+  .footer a { color: var(--accent-soft); text-decoration:none; }
+
+  @keyframes fadeUp { from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:none;} }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="badge"><span class="dot"></span><span>Advanced Track · A21 · MSc-Level Deep Dive</span></div>
+  <h1 class="hero"><span class="emoji">📐</span>GD&amp;T &amp; Tolerances</h1>
+  <p class="hero-sub">The full grammar of the engineering drawing — why ± fails, the 14 characteristics, datum reference frames, material condition modifiers, tolerance stack-up math, bonus &amp; shift tolerance, and how a single Position callout decides whether 10,000 parts assemble.</p>
+
+  <div class="connect">
+    <span class="pill">↔ LINKS</span>
+    <span>This deep dive expands <a href="../21_GD_and_T.html">Micro Card 21 — GD&amp;T</a>. It is the inspection language behind
+    <a href="A18_Additive_3D_Printing_Deep_Dive.html">Additive / 3D Printing (A18)</a>, the acceptance basis verified by
+    <a href="A16_Machine_Vision_Deep_Dive.html">Machine Vision (A16)</a> &amp; CMMs, and the quality backbone of
+    Six&nbsp;Sigma capability (Micro 27).</span>
+  </div>
+
+  <div class="toc">
+    <h3>What this deep dive covers</h3>
+    <ol>
+      <li>Why ± tolerancing fails — the square-zone &amp; ambiguity problem</li>
+      <li>Anatomy of the Feature Control Frame (FCF)</li>
+      <li>The 14 geometric characteristics across 5 types</li>
+      <li>Datums &amp; the Datum Reference Frame (DRF) — 6 degrees of freedom</li>
+      <li>Material condition: MMC, LMC, RFS &amp; bonus tolerance</li>
+      <li>Position — the workhorse, true position math &amp; the 57% gain</li>
+      <li>Datum shift &amp; the virtual condition boundary</li>
+      <li>Profile — the universal control &amp; the GPS future</li>
+      <li>Tolerance stack-up: worst-case vs RSS vs Monte&nbsp;Carlo</li>
+      <li>Inspection, gauging &amp; a complete selection workflow</li>
+      <li>MSc practice: four worked examples (bonus, fasteners, stack-up, CMM)</li>
+      <li>MSc practice: 10-problem set with revealed solutions</li>
+      <li>MSc practice: key derivations, glossary &amp; seven traps</li>
+      <li>MSc practice: reference shelf, hands-on ladder &amp; self-assessment</li>
+    </ol>
+  </div>
+
+  <!-- ===== PAGE 1 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 1 · The Problem</span>
+    <h2 class="page-title">Why plain ± tolerancing quietly fails</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">Quick Recap → Going Deeper</div>
+    <p class="lead">The micro card said: <span class="hl">"GD&amp;T = What it Must Be, Not Just How Big."</span> The MSc reason is that a part has a <em>function</em>, and plain coordinate (±) tolerancing controls <strong>size</strong> while leaving <span class="hl2">form, orientation and location</span> ambiguous or wrongly shaped.</p>
+    <p class="body">Consider a hole located by two ± dimensions, <span class="mono">50 ±0.25</span> and <span class="mono">30 ±0.25</span>. That defines a <strong>square</strong> tolerance zone 0.5&nbsp;mm on a side. But the hole's <em>function</em> — letting a bolt pass — is radially symmetric: it does not care about X and Y separately, only about distance from the true position. The square zone both <span class="hl3">over-constrains</span> the diagonal direction and <span class="hl3">under-controls</span> the axial direction. GD&amp;T replaces it with a <span class="hl">round zone</span> sized to the actual clearance, recovering area the shop can use.</p>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 280" role="img" aria-label="Square coordinate tolerance zone versus round GD&amp;T position zone">
+        <defs>
+          <linearGradient id="p1a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e293b"/><stop offset="1" stop-color="#0b0f14"/></linearGradient>
+        </defs>
+        <!-- LEFT: square zone -->
+        <g transform="translate(60,40)">
+          <rect x="0" y="0" width="260" height="200" rx="10" fill="url(#p1a)" stroke="#334155"/>
+          <text x="130" y="26" text-anchor="middle" fill="#f87171" font-size="14" font-weight="700">± Coordinate — SQUARE zone</text>
+          <!-- crosshair true pos -->
+          <line x1="130" y1="60" x2="130" y2="170" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="4 3"/>
+          <line x1="55" y1="115" x2="205" y2="115" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="4 3"/>
+          <!-- square zone -->
+          <rect x="90" y="75" width="80" height="80" fill="rgba(248,113,113,0.12)" stroke="#f87171" stroke-width="1.5" stroke-dasharray="5 3"/>
+          <!-- inscribed round (lost area) -->
+          <circle cx="130" cy="115" r="40" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2 3"/>
+          <!-- corner part -->
+          <circle cx="164" cy="149" r="14" fill="#0f172a" stroke="#94a3b8" stroke-width="2"/>
+          <text x="130" y="186" text-anchor="middle" fill="#94a3b8" font-size="11">corners allow √2× more error diagonally</text>
+        </g>
+        <!-- RIGHT: round zone -->
+        <g transform="translate(440,40)">
+          <rect x="0" y="0" width="260" height="200" rx="10" fill="url(#p1a)" stroke="#334155"/>
+          <text x="130" y="26" text-anchor="middle" fill="#a3e635" font-size="14" font-weight="700">⌖ Position — ROUND zone</text>
+          <line x1="130" y1="60" x2="130" y2="170" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="4 3"/>
+          <line x1="55" y1="115" x2="205" y2="115" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="4 3"/>
+          <circle cx="130" cy="115" r="48" fill="rgba(163,230,53,0.14)" stroke="#a3e635" stroke-width="1.6" stroke-dasharray="5 3"/>
+          <circle cx="150" cy="132" r="14" fill="#0f172a" stroke="#94a3b8" stroke-width="2"/>
+          <text x="130" y="186" text-anchor="middle" fill="#94a3b8" font-size="11">uniform radial control = matches function</text>
+        </g>
+        <text x="380" y="270" text-anchor="middle" fill="#818cf8" font-size="13" font-weight="700">Same diagonal limit → the round zone gives ≈57% more usable area</text>
+      </svg>
+      <div class="cap">A round position zone of diameter = diagonal of the square gives 1.57× the area: π(√2·t/2)² ⁄ t² ≈ 1.571. Cheaper parts, identical fit.</div>
+    </div>
+    <div class="grid-3" style="margin-top:16px">
+      <div class="mini c-pink"><h4>Ambiguity</h4><p>± leaves form &amp; orientation undefined — two inspectors can both "pass" and "fail" the same part.</p></div>
+      <div class="mini c-amb"><h4>Wrong shape</h4><p>Square/rectangular zones don't match round functional requirements.</p></div>
+      <div class="mini c-lime"><h4>No origin</h4><p>± gives no rule for <em>where to measure from</em> — GD&amp;T fixes this with datums.</p></div>
+    </div>
+    <div class="callout key"><b>MSc framing:</b> GD&amp;T is a <span class="hl">functional language</span>. Every callout should answer one question — <em>"what does the part have to do, and what geometry guarantees it?"</em> Governed by <span class="hl">ASME&nbsp;Y14.5-2018</span> (USA) and the <span class="hl">ISO&nbsp;GPS</span> system (ISO&nbsp;1101, 5458, 2692, 8015…) internationally.</div>
+  </div>
+
+  <!-- ===== PAGE 2 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 2 · The Grammar</span>
+    <h2 class="page-title">Reading a Feature Control Frame</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">Anatomy of the FCF</div>
+    <p class="body">The <strong>Feature Control Frame (FCF)</strong> is one "sentence" of GD&amp;T. Read it left-to-right: <span class="hl">geometric symbol</span> → <span class="hl">tolerance zone shape &amp; value</span> (a leading <span class="mono">⌀</span> means a cylindrical/round zone) → optional <span class="hl">material-condition modifier</span> → up to three <span class="hl">datum references</span> in order of precedence (primary, secondary, tertiary), each with its own optional modifier.</p>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 230" role="img" aria-label="Labelled feature control frame">
+        <defs><linearGradient id="fcfg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#818cf8"/><stop offset="1" stop-color="#4f46e5"/></linearGradient></defs>
+        <!-- frame -->
+        <g transform="translate(150,70)" font-family="ui-monospace, monospace" font-weight="800" font-size="26">
+          <rect x="0" y="0" width="460" height="62" rx="4" fill="none" stroke="#f1f5f9" stroke-width="2.5"/>
+          <!-- cells dividers -->
+          <line x1="80" y1="0" x2="80" y2="62" stroke="#f1f5f9" stroke-width="2.5"/>
+          <line x1="240" y1="0" x2="240" y2="62" stroke="#f1f5f9" stroke-width="2.5"/>
+          <line x1="320" y1="0" x2="320" y2="62" stroke="#f1f5f9" stroke-width="2.5"/>
+          <line x1="400" y1="0" x2="400" y2="62" stroke="#f1f5f9" stroke-width="2.5"/>
+          <!-- symbol cell -->
+          <rect x="2" y="2" width="76" height="58" fill="url(#fcfg)"/>
+          <text x="40" y="42" text-anchor="middle" fill="#0f1419">⌖</text>
+          <text x="160" y="41" text-anchor="middle" fill="#fbbf24">⌀0.25</text>
+          <text x="280" y="42" text-anchor="middle" fill="#a3e635">Ⓜ</text>
+          <text x="360" y="41" text-anchor="middle" fill="#60a5fa">A</text>
+          <text x="430" y="41" text-anchor="middle" fill="#60a5fa">B</text>
+        </g>
+        <!-- callouts -->
+        <g font-size="12" fill="#94a3b8" text-anchor="middle">
+          <text x="190" y="50">Characteristic</text><line x1="190" y1="56" x2="190" y2="68" stroke="#818cf8"/>
+          <text x="310" y="50">Zone Ø &amp; value</text><line x1="310" y1="56" x2="310" y2="68" stroke="#fbbf24"/>
+          <text x="430" y="180">Material modifier</text><line x1="430" y1="168" x2="430" y2="138" stroke="#a3e635"/>
+          <text x="560" y="180">Datums (order = precedence)</text><line x1="540" y1="168" x2="540" y2="138" stroke="#60a5fa"/>
+        </g>
+        <text x="380" y="212" text-anchor="middle" fill="#cbd5e1" font-size="14">"The axis must lie in a ⌀0.25 cylinder at true position, relative to A then B, with a bonus at MMC."</text>
+      </svg>
+      <div class="cap">Datum order matters: A is contacted first (primary, locks the most DOF), then B, then C. Swapping them changes the measured result.</div>
+    </div>
+    <div class="callout win"><b>Two attachment rules:</b> if the leader/frame points at a <em>surface or extension line</em>, the control applies to that <span class="hl">surface</span>. If it is placed under a <em>size dimension</em> or aligned with the dimension line / on the diameter, it applies to the <span class="hl">feature of size's axis or center plane</span>. This single distinction changes the whole meaning.</div>
+  </div>
+
+  <!-- ===== PAGE 3 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 3 · The Vocabulary</span>
+    <h2 class="page-title">14 characteristics · 5 families</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">The full symbol set (ASME Y14.5)</div>
+    <p class="body">Every geometric control belongs to one of five families. <strong>Form</strong> controls need <span class="hl3">no datum</span> (a surface is judged against itself). <strong>Orientation</strong> and <strong>location</strong> always need datums. <strong>Profile</strong> and <strong>runout</strong> can do both depending on references.</p>
+    <div class="grid-2">
+      <div class="mini c-pink"><h4>① Form — no datum</h4>
+        <div class="symrow">
+          <div class="symchip"><span class="g">▭</span><span class="n">Straightness</span></div>
+          <div class="symchip"><span class="g">▱</span><span class="n">Flatness</span></div>
+          <div class="symchip"><span class="g">○</span><span class="n">Circularity</span></div>
+          <div class="symchip"><span class="g">⌭</span><span class="n">Cylindricity</span></div>
+        </div>
+      </div>
+      <div class="mini c-blue"><h4>② Orientation — needs datum</h4>
+        <div class="symrow">
+          <div class="symchip"><span class="g">⊥</span><span class="n">Perpendicularity</span></div>
+          <div class="symchip"><span class="g">∠</span><span class="n">Angularity</span></div>
+          <div class="symchip"><span class="g">∥</span><span class="n">Parallelism</span></div>
+        </div>
+      </div>
+      <div class="mini c-lime"><h4>③ Location — needs datum</h4>
+        <div class="symrow">
+          <div class="symchip"><span class="g">⌖</span><span class="n">Position</span></div>
+          <div class="symchip"><span class="g">◎</span><span class="n">Concentricity*</span></div>
+          <div class="symchip"><span class="g">⌯</span><span class="n">Symmetry*</span></div>
+        </div>
+      </div>
+      <div class="mini c-amb"><h4>④ Profile &nbsp;·&nbsp; ⑤ Runout</h4>
+        <div class="symrow">
+          <div class="symchip"><span class="g">⌒</span><span class="n">Profile of line</span></div>
+          <div class="symchip"><span class="g">⌓</span><span class="n">Profile of surface</span></div>
+          <div class="symchip"><span class="g">↗</span><span class="n">Circular runout</span></div>
+          <div class="symchip"><span class="g">⌰</span><span class="n">Total runout</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="callout warn"><b>*Deprecated in Y14.5-2018:</b> Concentricity and Symmetry were <span class="hl3">removed</span> because they control the derived median points — expensive to measure and almost always better replaced by <span class="hl">Position</span> (for axes/center planes) or <span class="hl">Runout/Profile</span> (for surfaces). Modern drawings should avoid them.</div>
+    <div class="callout key"><b>Tolerance-zone shapes vary by control:</b> Flatness → two parallel planes; Circularity → two concentric circles; Cylindricity → two coaxial cylinders; Position of a hole → one cylinder; Profile → a boundary offset around the true profile. Knowing the <em>zone</em> is knowing the control.</div>
+  </div>
+
+  <!-- ===== PAGE 4 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 4 · The Origin</span>
+    <h2 class="page-title">Datums &amp; immobilizing 6 degrees of freedom</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">The Datum Reference Frame (DRF)</div>
+    <p class="body">A datum is a <strong>theoretically perfect</strong> plane, axis or point derived from a real (imperfect) feature called the <em>datum feature</em>. The three mutually-perpendicular datum planes form the <span class="hl">Datum Reference Frame</span> — the part's coordinate origin. Constraining a rigid body means removing all <span class="hl2">6 degrees of freedom</span>: 3 translations (X, Y, Z) and 3 rotations (u, v, w).</p>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 300" role="img" aria-label="3-2-1 datum location scheme constraining six degrees of freedom">
+        <defs>
+          <linearGradient id="pp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#475569"/><stop offset="1" stop-color="#1e293b"/></linearGradient>
+        </defs>
+        <!-- part block (iso-ish) -->
+        <g transform="translate(70,40)">
+          <polygon points="0,160 200,160 260,110 60,110" fill="#334155" stroke="#60a5fa" stroke-width="2"/>
+          <polygon points="0,160 0,70 60,20 60,110" fill="#283549" stroke="#60a5fa" stroke-width="2"/>
+          <polygon points="60,20 260,20 260,110 60,110" fill="#3b4a63" stroke="#60a5fa" stroke-width="2"/>
+          <!-- Datum A: primary (3 pts on top) -->
+          <circle cx="110" cy="65" r="6" fill="#a3e635"/><circle cx="180" cy="55" r="6" fill="#a3e635"/><circle cx="150" cy="90" r="6" fill="#a3e635"/>
+          <text x="150" y="40" text-anchor="middle" fill="#a3e635" font-size="13" font-weight="700">A · primary (3 pts)</text>
+          <!-- Datum B: secondary (2 pts on side face) -->
+          <circle cx="22" cy="120" r="6" fill="#fbbf24"/><circle cx="22" cy="145" r="6" fill="#fbbf24"/>
+          <text x="-4" y="175" fill="#fbbf24" font-size="13" font-weight="700">B (2 pts)</text>
+          <!-- Datum C: tertiary (1 pt on end) -->
+          <circle cx="232" cy="100" r="6" fill="#f472b6"/>
+          <text x="220" y="135" fill="#f472b6" font-size="13" font-weight="700">C (1 pt)</text>
+        </g>
+        <!-- DOF table -->
+        <g transform="translate(440,50)" font-size="13">
+          <rect x="0" y="0" width="290" height="200" rx="12" fill="#11161f" stroke="#334155"/>
+          <text x="20" y="30" fill="#818cf8" font-weight="700">3-2-1 locks 6 DOF</text>
+          <text x="20" y="62" fill="#a3e635" font-weight="700">A → 3 points</text><text x="150" y="62" fill="#cbd5e1">1 trans + 2 rot</text>
+          <text x="20" y="92" fill="#fbbf24" font-weight="700">B → 2 points</text><text x="150" y="92" fill="#cbd5e1">1 trans + 1 rot</text>
+          <text x="20" y="122" fill="#f472b6" font-weight="700">C → 1 point</text><text x="150" y="122" fill="#cbd5e1">1 trans</text>
+          <line x1="20" y1="138" x2="270" y2="138" stroke="#334155"/>
+          <text x="20" y="166" fill="#f1f5f9" font-weight="700">Σ = 6 DOF fully constrained</text>
+          <text x="20" y="190" fill="#94a3b8" font-size="11">3 translations + 3 rotations = repeatable origin</text>
+        </g>
+      </svg>
+      <div class="cap">The classic 3-2-1 location scheme: the primary datum touches at 3 points, the secondary at 2, the tertiary at 1 — a unique, repeatable seating that any inspector or fixture reproduces identically.</div>
+    </div>
+    <div class="callout key"><b>Why order is sacred:</b> the primary datum is established <em>first</em> and contacts the high points of the datum feature; the secondary is then made perpendicular to the primary, the tertiary perpendicular to both. Re-order the datums and the part rocks onto different high points → a different coordinate frame → different pass/fail.</div>
+    <div class="callout win"><b>Datum targets</b> (Ⓧ symbols with point/line/area targets) handle rough, cast or warped surfaces where full-surface contact is meaningless — defining exactly where the fixture's locators touch.</div>
+  </div>
+
+  <!-- ===== PAGE 5 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 5 · The Modifiers</span>
+    <h2 class="page-title">MMC · LMC · RFS and bonus tolerance</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">Material condition modifiers</div>
+    <p class="body">A <em>feature of size</em> (hole, pin, slot, tab) has a tolerance on its <strong>size</strong> as well as its geometry. The modifier links the two. <span class="hl">Ⓜ MMC</span> = Maximum Material Condition (smallest hole / largest pin — most material). <span class="hl3">Ⓛ LMC</span> = Least Material Condition (largest hole / smallest pin). <span class="hl2">RFS</span> = Regardless of Feature Size (the default — no bonus).</p>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 250" role="img" aria-label="Bonus tolerance grows as a hole departs from MMC">
+        <defs><linearGradient id="bt" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#818cf8"/><stop offset="1" stop-color="#a3e635"/></linearGradient></defs>
+        <!-- axes -->
+        <line x1="90" y1="200" x2="700" y2="200" stroke="#475569" stroke-width="2"/>
+        <line x1="90" y1="200" x2="90" y2="40" stroke="#475569" stroke-width="2"/>
+        <text x="395" y="235" text-anchor="middle" fill="#94a3b8" font-size="13">Actual hole size →  (departs from MMC)</text>
+        <text x="44" y="120" fill="#94a3b8" font-size="13" transform="rotate(-90 44 120)">Total position tol →</text>
+        <!-- staircase / ramp -->
+        <polyline points="90,170 90,170 700,80" fill="none" stroke="url(#bt)" stroke-width="4"/>
+        <!-- base tol -->
+        <line x1="90" y1="170" x2="700" y2="170" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5 4"/>
+        <text x="120" y="190" fill="#818cf8" font-size="12">geometric tol (at MMC)</text>
+        <!-- bonus arrow -->
+        <line x1="560" y1="170" x2="560" y2="98" stroke="#a3e635" stroke-width="2"/>
+        <text x="572" y="135" fill="#a3e635" font-size="12" font-weight="700">+ bonus</text>
+        <!-- labels -->
+        <circle cx="90" cy="170" r="5" fill="#818cf8"/><text x="90" y="35" text-anchor="middle" fill="#818cf8" font-size="12" font-weight="700">MMC</text>
+        <circle cx="700" cy="80" r="5" fill="#a3e635"/><text x="690" y="62" text-anchor="middle" fill="#a3e635" font-size="12" font-weight="700">LMC</text>
+        <text x="395" y="120" text-anchor="middle" fill="#cbd5e1" font-size="13">Total tol = geometric tol + (actual size − MMC size)</text>
+      </svg>
+      <div class="cap">Bonus tolerance: every 0.01&nbsp;mm the hole grows past MMC adds 0.01&nbsp;mm to the allowable position error — because a bigger hole still passes the same fixed-size pin. Free, functional, and legal.</div>
+    </div>
+    <div class="eqn">⌖ <b>⌀0.10 Ⓜ A B C</b>   hole spec ⌀10.00 / 10.20
+
+MMC size      = <b>10.00</b>  → geometric tol = 0.10
+Actual hole   = 10.14
+Bonus         = 10.14 − 10.00 = <span class="v2">0.14</span>
+Total position tol = 0.10 + 0.14 = <span class="v2">0.24 mm</span></div>
+    <div class="grid-3" style="margin-top:14px">
+      <div class="mini c-blue"><h4>Use Ⓜ when…</h4><p>The function is <em>assembly/clearance</em> — bolts through holes. Maximizes yield, enables hard gauges.</p></div>
+      <div class="mini c-amb"><h4>Use Ⓛ when…</h4><p>You must guarantee <em>minimum wall</em> or thread engagement — keep material, no thin spots.</p></div>
+      <div class="mini c-lime"><h4>Use RFS when…</h4><p>Dynamic balance, press fits, sealing — the geometry must hold at <em>every</em> size.</p></div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 6 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 6 · The Workhorse</span>
+    <h2 class="page-title">Position — true position math</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">Calculating true position error</div>
+    <p class="body">Position is the most-used location control. The actual feature axis is measured as a deviation (Δx, Δy) from its <span class="hl">theoretically exact (basic) dimension</span> — basic dimensions are boxed and carry <em>no</em> tolerance of their own. The radial error is converted to a diameter and compared to the zone.</p>
+    <div class="eqn">True position deviation (diametral):
+
+  <b>TP = 2 · √(Δx² + Δy²)</b>
+
+Example:  Δx = 0.06,  Δy = 0.08
+  TP = 2·√(0.0036 + 0.0064) = 2·√0.01 = 2·0.10 = <span class="v2">0.20 mm</span>
+
+Accept if  TP ≤ (geometric tol + bonus).</div>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 250" role="img" aria-label="Measured axis offset from true position inside a cylindrical zone">
+        <!-- grid -->
+        <g transform="translate(300,30)">
+          <rect x="-180" y="0" width="360" height="190" rx="10" fill="#11161f" stroke="#334155"/>
+          <!-- true position -->
+          <line x1="0" y1="20" x2="0" y2="170" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="4 3"/>
+          <line x1="-150" y1="95" x2="150" y2="95" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="4 3"/>
+          <text x="0" y="14" text-anchor="middle" fill="#fbbf24" font-size="11">basic (true) position</text>
+          <!-- zone -->
+          <circle cx="0" cy="95" r="60" fill="rgba(129,140,248,0.14)" stroke="#818cf8" stroke-width="1.8" stroke-dasharray="6 4"/>
+          <text x="0" y="178" text-anchor="middle" fill="#818cf8" font-size="11">⌀ tolerance zone</text>
+          <!-- measured axis -->
+          <circle cx="34" cy="62" r="6" fill="#a3e635"/>
+          <line x1="0" y1="95" x2="34" y2="62" stroke="#a3e635" stroke-width="2.5"/>
+          <text x="56" y="58" fill="#a3e635" font-size="12" font-weight="700">measured axis</text>
+          <!-- delta legs -->
+          <line x1="0" y1="95" x2="34" y2="95" stroke="#60a5fa" stroke-width="1.6"/>
+          <line x1="34" y1="95" x2="34" y2="62" stroke="#f472b6" stroke-width="1.6"/>
+          <text x="17" y="110" fill="#60a5fa" font-size="11">Δx</text>
+          <text x="40" y="82" fill="#f472b6" font-size="11">Δy</text>
+        </g>
+      </svg>
+      <div class="cap">The radial vector √(Δx²+Δy²) doubles to a diameter so it can be compared directly to the cylindrical zone written in the FCF.</div>
+    </div>
+    <div class="callout win"><b>The 57% payoff, quantified:</b> a ±0.25/±0.25 square zone (side 0.5) has area 0.25&nbsp;mm². Replacing it with a round Position zone whose diameter equals the square's diagonal (⌀0.707) keeps the same worst-case corner limit but gives area π(0.707/2)² = 0.393&nbsp;mm² — <span class="hl2">0.393/0.25 ≈ 1.57, i.e. +57% usable area</span>. Same fit, directly fewer rejects on the same machine.</div>
+  </div>
+
+  <!-- ===== PAGE 7 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 7 · The Boundary</span>
+    <h2 class="page-title">Virtual condition &amp; datum shift</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">The constant boundary that guarantees assembly</div>
+    <p class="body">When Ⓜ is used, GD&amp;T quietly creates a single fixed worst-case boundary — the <span class="hl">Virtual Condition (VC)</span>. For an external feature (pin): <span class="mono">VC = MMC + geometric tol</span>. For an internal feature (hole): <span class="mono">VC = MMC − geometric tol</span>. If every part respects its VC, mating is mathematically guaranteed and you can check it with a <span class="hl2">hard "go" gauge</span> built to the VC size.</p>
+    <div class="eqn">Hole  ⌀10.00/10.20,  ⌖ ⌀0.10 Ⓜ
+  Internal VC = MMC − tol = 10.00 − 0.10 = <span class="v2">9.90 mm</span>
+
+Pin   ⌀9.80/9.70,   ⌖ ⌀0.10 Ⓜ
+  External VC = MMC + tol = 9.80 + 0.10 = <span class="v3">9.90 mm</span>
+
+VC(hole) ≥ VC(pin)  →  9.90 ≥ 9.90  →  assembles ✔</div>
+    <p class="body"><strong>Datum shift</strong> is the partner concept: when a datum feature is referenced at Ⓜ, the part can <em>float</em> within the looseness between its actual size and the gauge — an extra location allowance on top of bonus. Both arise from the same idea: real clearance is usable tolerance.</p>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 180" role="img" aria-label="Functional go-gauge built to virtual condition">
+        <g transform="translate(60,30)">
+          <!-- plate with hole -->
+          <rect x="0" y="20" width="220" height="110" rx="6" fill="#334155" stroke="#818cf8" stroke-width="2"/>
+          <circle cx="110" cy="75" r="40" fill="#0f1419" stroke="#a3e635" stroke-width="2"/>
+          <text x="110" y="150" text-anchor="middle" fill="#94a3b8" font-size="12">part (hole)</text>
+          <!-- gauge pin -->
+          <g transform="translate(360,0)">
+            <rect x="60" y="40" width="60" height="20" rx="3" fill="#fbbf24"/>
+            <rect x="78" y="60" width="24" height="90" rx="4" fill="#fbbf24"/>
+            <text x="90" y="170" text-anchor="middle" fill="#fbbf24" font-size="12">GO gauge pin = ⌀VC (9.90)</text>
+          </g>
+          <text x="320" y="80" fill="#a3e635" font-size="22">→</text>
+          <text x="300" y="20" fill="#cbd5e1" font-size="12">If the pin enters every good hole, all parts assemble.</text>
+        </g>
+      </svg>
+      <div class="cap">A fixed-limit functional gauge is the physical embodiment of virtual condition — fast, operator-proof attribute inspection at the line.</div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 8 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 8 · The Universal Tool</span>
+    <h2 class="page-title">Profile &amp; the ISO GPS future</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">Profile of a surface — one control to rule them all</div>
+    <p class="body">Profile <span class="mono">⌓</span> defines a <strong>3D boundary</strong> offset around the <em>true (basic) profile</em>. By choosing the zone distribution it can simultaneously control <span class="hl">size, form, orientation and location</span> — which is why model-based-definition (MBD) drawings lean on it heavily. Default zone is <em>bilateral</em> (½ either side); it can be made <em>unilateral</em> or <em>unequally disposed</em> (the Ⓤ symbol with a value).</p>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 220" role="img" aria-label="Profile tolerance band around a curved true profile">
+        <defs>
+          <path id="tp" d="M60,150 C200,40 360,40 500,150 S720,200 700,120" />
+        </defs>
+        <!-- band -->
+        <path d="M60,135 C200,25 360,25 500,135 S720,185 700,105" fill="none" stroke="#a3e635" stroke-width="1.6" stroke-dasharray="6 4"/>
+        <path d="M60,165 C200,55 360,55 500,165 S720,215 700,135" fill="none" stroke="#a3e635" stroke-width="1.6" stroke-dasharray="6 4"/>
+        <!-- true profile -->
+        <use href="#tp" fill="none" stroke="#818cf8" stroke-width="3"/>
+        <text x="120" y="110" fill="#818cf8" font-size="13" font-weight="700">true profile (basic)</text>
+        <text x="430" y="70" fill="#a3e635" font-size="13" font-weight="700">tolerance band</text>
+        <text x="380" y="208" text-anchor="middle" fill="#94a3b8" font-size="12">The actual surface must lie entirely within the band — controlling form, orientation &amp; location at once.</text>
+      </svg>
+      <div class="cap">Profile is the natural language of CAD-driven inspection: the CMM compares scanned points to the nominal model surface and reports deviation against the band.</div>
+    </div>
+    <div class="callout key"><b>ASME vs ISO — the philosophy split:</b> ASME Y14.5 follows the <span class="hl">Independency Principle by default for surfaces but envelope (Rule&nbsp;#1)</span> for features of size — size limits also bound form. ISO GPS follows <span class="hl2">Independency by default (ISO&nbsp;8015)</span>, requiring an explicit Ⓔ envelope modifier to couple form to size. <em>Always state which standard governs the drawing.</em></div>
+    <div class="callout win"><b>GPS / MBD direction:</b> ISO Geometrical Product Specification is converging tolerancing, measurement and uncertainty into one chain. With Model-Based Definition the 3D model <em>is</em> the drawing, and Profile + datums carry nearly all the semantics — exactly the skills tested at MSc level.</div>
+  </div>
+
+  <!-- ===== PAGE 9 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 9 · The Math of Assembly</span>
+    <h2 class="page-title">Tolerance stack-up — 3 methods</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">Will it always fit? Worst-case vs statistical</div>
+    <p class="body">A stack-up adds the tolerances along an assembly's dimension chain to predict the gap at the end. Three methods trade safety for cost.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Formula (n contributors)</th><th>Predicts</th><th>When to use</th></tr></thead>
+        <tbody>
+          <tr><td><b>Worst-Case (WC)</b></td><td class="mono">T = Σ |tᵢ|</td><td>100% fit, no rejects ever</td><td>Safety-critical, low volume, few parts</td></tr>
+          <tr><td><b>RSS (statistical)</b></td><td class="mono">T = √(Σ tᵢ²)</td><td>~99.73% fit (±3σ)</td><td>High volume, independent, centered processes</td></tr>
+          <tr><td><b>Monte&nbsp;Carlo</b></td><td class="mono">simulate N parts</td><td>Real yield + shape of gap dist.</td><td>Skewed/shifted processes, mixed Ⓜ effects</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="eqn">4 plates, each thickness 10 ±0.10 stacked in a 41.00 slot:
+
+Nominal stack = 40.00,  nominal gap = 1.00
+WC  : T = 4 × 0.10 = <b>0.40</b>   → gap = 1.00 ± 0.40  (0.60 … 1.40)
+RSS : T = √(4 × 0.10²) = <span class="v2">0.20</span> → gap = 1.00 ± 0.20  (0.80 … 1.20)
+
+WC needs 2× the gap budget RSS does — RSS frees tolerance back to the shop.</div>
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 760 150" role="img" aria-label="Worst case versus RSS tolerance bands">
+        <!-- WC -->
+        <text x="20" y="40" fill="#f87171" font-size="13" font-weight="700">WC ±0.40</text>
+        <rect x="120" y="26" width="520" height="20" rx="5" fill="rgba(248,113,113,0.5)"/>
+        <line x1="380" y1="20" x2="380" y2="52" stroke="#fff" stroke-width="1.5"/>
+        <!-- RSS -->
+        <text x="20" y="100" fill="#a3e635" font-size="13" font-weight="700">RSS ±0.20</text>
+        <rect x="250" y="86" width="260" height="20" rx="5" fill="rgba(163,230,53,0.5)"/>
+        <line x1="380" y1="80" x2="380" y2="112" stroke="#fff" stroke-width="1.5"/>
+        <text x="380" y="135" text-anchor="middle" fill="#94a3b8" font-size="12">same nominal centre — statistics shrinks the spread</text>
+      </svg>
+    </div>
+    <div class="callout warn"><b>RSS pitfalls:</b> it assumes contributors are <span class="hl3">independent, normal and centered</span>. A tool-worn process that drifts toward one limit, or a bimodal supplier mix, breaks the assumption — that is where Monte&nbsp;Carlo (or a Cpk-weighted RSS) earns its keep. Never apply RSS to a 3-part safety stack.</div>
+  </div>
+
+  <!-- ===== PAGE 10 ===== -->
+  <div class="page">
+    <span class="page-tag">Page 10 · Putting It To Work</span>
+    <h2 class="page-title">Inspection, gauging &amp; a selection workflow</h2>
+  </div>
+
+  <div class="card">
+    <div class="label">How GD&amp;T is actually verified</div>
+    <div class="grid-3">
+      <div class="mini c-teal"><h4>CMM</h4><p class="big">µm</p><p>Touch-probe or scanning; software fits datums &amp; reports each FCF. The default for Position/Profile.</p></div>
+      <div class="mini c-blue"><h4>Functional gauge</h4><p class="big">VC</p><p>Hard go-gauge at virtual condition — instant attribute check at MMC, no math.</p></div>
+      <div class="mini c-purp"><h4>Vision / scanner</h4><p class="big">3D</p><p>Structured-light &amp; CT compare a point cloud to the model — links straight to <a href="A16_Machine_Vision_Deep_Dive.html" style="color:var(--accent-soft)">A16</a>.</p></div>
+    </div>
+    <div class="callout key" style="margin-top:16px"><b>Measurement uncertainty is part of the spec:</b> ISO&nbsp;14253-1 says the measurement uncertainty must be <em>subtracted</em> from the tolerance when deciding conformance — a part near the limit can be rejected because the gauge can't prove it passes. MSc-level tolerancing always budgets the metrology, not just the part.</div>
+
+    <div class="label" style="margin-top:24px">A repeatable callout workflow</div>
+    <div class="steps">
+      <div class="step"><b>Find the function.</b> What must this feature do — locate, seal, rotate, clear a fastener? The function picks the characteristic.</div>
+      <div class="step"><b>Choose &amp; order datums.</b> Reference the surfaces that seat the part in assembly, in the order they contact (3-2-1). This is the single biggest source of drawing errors.</div>
+      <div class="step"><b>Pick the control &amp; zone.</b> Position for clearance holes, Profile for surfaces, Perpendicularity for seats, Runout for rotating parts.</div>
+      <div class="step"><b>Apply a modifier only if it adds function.</b> Ⓜ for clearance/assembly (and enables hard gauges); RFS for press/seal/balance; Ⓛ to protect minimum wall.</div>
+      <div class="step"><b>Verify with a stack-up.</b> Prove the chosen tolerances assemble (WC for safety, RSS for volume), then confirm the gauge or CMM routine can measure it within ISO 14253 uncertainty.</div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="card quiz">
+    <div class="label">Quick Check</div>
+    <p class="quiz-q">A hole is specified ⌀12.00/12.30 with ⌖ ⌀0.20 Ⓜ A B C. A part measures ⌀12.18 with a true-position deviation of TP = 0.34 mm. Pass or fail?</p>
+    <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+      <span class="tap" style="display:block;text-align:center;color:var(--accent);font-weight:600">Tap to reveal answer ↓</span>
+      <span class="hidden">
+        <b>PASS.</b> MMC = 12.00, so bonus = 12.18 − 12.00 = 0.18 mm. Total allowable position = geometric 0.20 + bonus 0.18 = <b>0.38 mm</b>. The measured TP of 0.34 ≤ 0.38, so the part conforms — and a functional GO gauge at the internal virtual condition (12.00 − 0.20 = ⌀11.80) would also accept it. This is exactly why Ⓜ recovers yield without risking the fit.
+      </span>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 11 — WORKED EXAMPLES ============ -->
+  <div class="page" id="wk">
+    <span class="page-tag">Page 11 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade numericals, solved step by step.</p>
+
+    <div class="card">
+      <div class="label">Worked Example 1 — Bonus, acceptance and the gauge</div>
+      <p class="body"><b>Given:</b> hole ⌀10.00–10.40 with ⌖ ⌀0.25 Ⓜ | A | B | C. A part measures ⌀10.32 with true-position deviation 0.50 mm. Accept? What functional gauge verifies this?</p>
+      <div class="eqn">MMC = 10.00   bonus = actual − MMC = 10.32 − 10.00 = <b>0.32</b>
+allowable TP = 0.25 + 0.32 = <b>0.57 mm</b>   measured 0.50 ≤ 0.57 → <b>ACCEPT</b>
+
+virtual condition (internal) = MMC − geo tol = 10.00 − 0.25 = <b>⌀9.75</b>
+gauge: GO pin ⌀9.75 at true position, datum-seated on A|B|C</div>
+      <p class="body"><i>Discussion:</i> the part failed the "0.25 on the drawing" reading but passes the standard — because Ⓜ promises only that the <b>⌀9.75 boundary stays clear</b>, and a larger hole can wander further while keeping it clear. The gauge checks that boundary directly: no arithmetic, no CMM, one insertion. This is the economic heart of MMC: yield recovered with zero functional risk.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 2 — Floating vs fixed fastener sizing</div>
+      <p class="body"><b>Given:</b> two plates joined by M6 bolts (max ⌀6.0) through clearance holes ⌀6.6 min. Size the position tolerances for (a) both plates with clearance holes (floating), (b) one plate tapped (fixed).</p>
+      <div class="eqn">floating fastener:  T = H − F = 6.6 − 6.0 = <b>⌀0.6</b>  for EACH plate
+
+fixed fastener:     T₁ + T₂ = H − F = 0.6
+  even split: <b>0.3 / 0.3</b>  ·  common split: 0.4 (clearance) / 0.2 (tapped)
+  tapped-hole tolerance carried in a <b>projected tolerance zone Ⓟ</b>
+  extending the zone through the mating plate&#39;s thickness</div>
+      <p class="body"><i>Discussion:</i> floating gets the full clearance per part because each bolt can drift with its own pair of holes; fixed shares one budget because the stud dictates from the tapped side. The Ⓟ modifier is not decoration — a tilted tapped hole passes an in-plate check yet the protruding stud misses the clearance hole; projecting the zone measures the tilt where it actually bites.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 3 — Stack-up: worst case vs RSS</div>
+      <p class="body"><b>Given:</b> four spacers 25.0 ± 0.1 stack inside a housing bore 100.6 ± 0.15. Find the minimum end gap worst-case, and statistically (RSS, tolerances ≈ 3σ).</p>
+      <div class="eqn">nominal gap = 100.6 − 4×25.0 = 0.6 mm
+
+worst case:  gap_min = (100.6−0.15) − (100.0+4×0.1) = 100.45 − 100.4 = <b>0.05 mm</b>
+
+RSS: T_gap = √(4×0.1² + 0.15²) = √0.0625 = <b>0.25 mm</b>
+     gap = 0.6 ± 0.25  →  min ≈ <b>0.35 mm</b> at the 3σ level (~99.7%)</div>
+      <p class="body"><i>Discussion:</i> worst case guarantees assembly at ±0.05 breathing room; RSS says the realistic 3σ minimum is 0.35 — seven times more comfortable — because four independent ±0.1 errors almost never align. Design rule: <b>WC for safety-critical or low-volume; RSS for high-volume with process control</b> (and Monte Carlo when distributions are non-normal or contributions nonlinear). Quote which method the drawing note assumes.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 4 — CMM result to true position</div>
+      <p class="body"><b>Given:</b> CMM reports a hole axis at dx = +0.12, dy = −0.09 from true position; hole measures ⌀12.18; callout ⌖ ⌀0.20 Ⓜ, MMC ⌀12.00. Conformance?</p>
+      <div class="eqn">radial offset r = √(0.12² + 0.09²) = √0.0225 = 0.15 mm
+<b>TP (diametral) = 2r = 0.30 mm</b>              ← the ×2 is mandatory
+
+bonus = 12.18 − 12.00 = 0.18
+allowable = 0.20 + 0.18 = 0.38 ≥ 0.30  →  <b>ACCEPT</b></div>
+      <p class="body"><i>Discussion:</i> position is a <b>cylindrical zone diameter</b>, so the radial deviation is doubled — forgetting the ×2 is the most common CMM-report misreading in industry (it flips accept/reject decisions in both directions). Note the workflow is identical to Example 1: geometry → bonus → boundary. One method, every position callout.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 12 — PROBLEM SET ============ -->
+  <div class="page" id="ps">
+    <span class="page-tag">Page 12 · MSc Practice</span>
+    <h2 class="page-title">Problem Set — 10 Questions</h2>
+    <p class="page-sub">Work each one before revealing — the FCF grammar and the boundary algebra answer everything.</p>
+
+    <div class="card quiz">
+      <div class="label">Problem 1</div>
+      <p class="quiz-q">CMM: dx = 0.05, dy = 0.12. True position?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap" style="display:block;text-align:center;color:var(--accent);font-weight:600">Tap to reveal answer ↓</span>
+        <span class="hidden"><b>A:</b> TP = 2√(0.05²+0.12²) = 2×0.13 = <b>⌀0.26 mm</b>. Radial 0.13, diametral 0.26 — always report which.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 2</div>
+      <p class="quiz-q">Hole ⌀12.00–12.30, ⌖ ⌀0.20 Ⓛ A B C. Part at ⌀12.05 — allowable TP?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap" style="display:block;text-align:center;color:var(--accent);font-weight:600">Tap to reveal answer ↓</span>
+        <span class="hidden"><b>A:</b> LMC = 12.30; bonus = LMC − actual = 12.30 − 12.05 = 0.25; allowable = 0.20 + 0.25 = <b>0.45 mm</b>. Ⓛ pays bonus as the feature departs from LMC — used to protect minimum wall/edge distance, mirror-image of Ⓜ.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 3</div>
+      <p class="quiz-q">Pin ⌀7.8–8.0 with ⊥ ⌀0.10 Ⓜ A. Virtual condition, and what does the mating hole need?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap" style="display:block;text-align:center;color:var(--accent);font-weight:600">Tap to reveal answer ↓</span>
+        <span class="hidden"><b>A:</b> External feature: VC = MMC + geo = 8.0 + 0.10 = <b>⌀8.10</b>. The mating hole&#39;s own virtual condition must be ≥ 8.10 — i.e. hole MMC minus its geometric tolerance ≥ 8.10. Fits are designed boundary-to-boundary, not size-to-size.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 4</div>
+      <p class="quiz-q">M8 bolts (max ⌀8.0), both plates clearance-holed at ⌀8.9 min. Position tolerance per plate?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap" style="display:block;text-align:center;color:var(--accent);font-weight:600">Tap to reveal answer ↓</span>
+        <span class="hidden"><b>A:</b> Floating fastener: T = H − F = 8.9 − 8.0 = <b>⌀0.9 each plate</b> (at MMC, with bonus growing from there).</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 5</div>
+      <p class="quiz-q">Flatness, parallelism, perpendicularity: which need a datum, and what does each control?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap" style="display:block;text-align:center;color:var(--accent);font-weight:600">Tap to reveal answer ↓</span>
+        <span class="hidden"><b>A:</b> <b>Flatness</b> — form only, NO datum, zone floats with the surface. <b>Parallelism / perpendicularity</b> — orientation, datum required, zone locked to 0°/90° from the datum but free in location. All three are two-parallel-plane zones; only the anchoring differs. (Orientation controls also cap form as a by-product.)</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 6</div>
+      <p class="quiz-q">Under ASME Rule #1, a shaft ⌀10 ± 0.2 measures ⌀9.8 everywhere. How much can it bow?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap" style="display:block;text-align:center;color:var(--accent);font-weight:600">Tap to reveal answer ↓</span>
+        <span class="hidden"><b>A:</b> Rule #1: perfect form at MMC — the ⌀10.2 envelope may not be violated. At ⌀9.8 the form error may consume the full departure: bow up to <b>0.4 mm</b>. ISO defaults to independency (ISO 8015) — size and form separate unless Ⓔ is added: the classic trans-Atlantic drawing trap.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 7</div>
+      <p class="quiz-q">Five dimensions each ±0.1 stack linearly. Worst-case vs RSS total?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap" style="display:block;text-align:center;color:var(--accent);font-weight:600">Tap to reveal answer ↓</span>
+        <span class="hidden"><b>A:</b> WC = 5×0.1 = <b>±0.5</b>; RSS = √5 × 0.1 ≈ <b>±0.224</b>. The √n saving is why statistical tolerancing exists — and why it must be backed by process control (each ±0.1 really ≈ 3σ) before you spend it.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 8</div>
+      <p class="quiz-q">Why does datum ORDER (|A|B|C| vs |B|A|C|) change measurement results on the same part?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap" style="display:block;text-align:center;color:var(--accent);font-weight:600">Tap to reveal answer ↓</span>
+        <span class="hidden"><b>A:</b> The order is the 3-2-1 seating sequence: primary takes 3 points of contact (kills 3 DOF), secondary 2, tertiary 1. Swap the order and the part physically seats differently in the DRF — every measured coordinate shifts. The correct order is the ASSEMBLY contact order, which is why datum selection is a functional decision, not a drafting one.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 9</div>
+      <p class="quiz-q">A shaft seal surface needs its rotation error controlled. Circular runout vs total runout — choose and justify.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap" style="display:block;text-align:center;color:var(--accent);font-weight:600">Tap to reveal answer ↓</span>
+        <span class="hidden"><b>A:</b> <b>Total runout</b> — it sweeps the full surface (all circular elements simultaneously) about the datum axis, catching taper and cylindricity error as well as eccentricity, which a lip seal cares about along its whole contact band. Circular runout checks one section at a time — adequate for a groove, not for a seal land. Both are measured as TIR on rotation.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 10</div>
+      <p class="quiz-q">Tolerance zone 0.20; CMM expanded uncertainty U = 0.02. Per ISO 14253-1, what is the guaranteed-conformance zone?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap" style="display:block;text-align:center;color:var(--accent);font-weight:600">Tap to reveal answer ↓</span>
+        <span class="hidden"><b>A:</b> U is subtracted at BOTH limits: conformance zone = 0.20 − 2×0.02 = <b>0.16</b>. Parts measuring in the two 0.02 guard bands are neither provably good nor provably bad — the metrology eats 20% of this tolerance, which is why gauges are chosen with U ≤ ~10% of the zone (the 10:1 rule).</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 13 — DERIVATIONS & TRAPS ============ -->
+  <div class="page" id="dv">
+    <span class="page-tag">Page 13 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">The algebra behind the boundaries — and the misreadings that scrap good parts.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 — why TP = 2√(dx²+dy²), and the 57% gain</div>
+      <div class="eqn">the tolerance zone is a CYLINDER of diameter T about true position
+axis offset r = √(dx²+dy²) conforms iff r ≤ T/2  ⇔  2r ≤ T
+
+vs the old ±t square zone: the circle circumscribing the square has
+diameter √2·(2t) — a round zone of that size accepts every part the
+square did PLUS the corners:  area gain = (π(√2t)²)/(4t²) − 1 ≈ <b>57%</b></div>
+      <p class="body"><i>Why it matters:</i> the ×2 convention and the 57% argument are the twin justifications you must produce in any design review that still tolerances holes with ±. Function is radial; the zone should be too.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 — the constant boundary (bonus &amp; VC are one fact)</div>
+      <div class="eqn">internal feature at Ⓜ:  worst intrusion into the assembly space
+  = (actual size) − (allowed TP)/1 … minimised when smallest &amp; most displaced
+  VC = MMC − T_geo                       (constant, size-independent)
+
+conformance ⇔ surface stays outside VC
+⇔ TP_allowed(actual) = T_geo + (actual − MMC)   ← "bonus" is just algebra</div>
+      <p class="body"><i>Why it matters:</i> bonus tolerance is not a gift or a loophole — it is the SAME acceptance criterion re-expressed per part size. Understanding this collapses MMC, bonus, virtual condition and functional gauging into one sentence: <b>keep the fixed boundary clear</b>. (At Ⓛ, mirror everything: VC = LMC + T_geo, protecting material minimum instead of clearance.)</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 — RSS from variance addition</div>
+      <div class="eqn">independent dimensions:  Var(ΣXᵢ) = Σ Var(Xᵢ)
+σ_gap = √(Σσᵢ²) ;  with each tolerance tᵢ ≈ 3σᵢ:
+<b>T_RSS = √(Σ tᵢ²)</b>   (same 3σ confidence as the inputs)
+
+correlated or non-normal contributors → Monte Carlo, not RSS</div>
+      <p class="body"><i>Why it matters:</i> RSS is legitimate exactly as far as its assumptions: independent processes, centred and capable (Cpk ≥ 1 → A27 Six Sigma). A shifted process (the 1.5σ shift!) or a common fixture error correlates the terms and quietly re-creates the worst case you thought you had engineered away.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol glossary</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Symbol / term</th><th>Meaning</th><th>Note</th></tr>
+        <tr><td class="mono">FCF</td><td>Feature control frame — characteristic | zone | modifiers | datums</td><td>read left to right</td></tr>
+        <tr><td class="mono">⌖ / ⌀</td><td>Position / diametral zone</td><td>⌀ in the FCF = cylindrical zone</td></tr>
+        <tr><td class="mono">MMC · LMC · RFS</td><td>Max / least material condition · regardless of feature size</td><td>RFS is the default</td></tr>
+        <tr><td class="mono">Ⓜ Ⓛ Ⓟ Ⓔ</td><td>MMC / LMC modifier · projected zone · envelope (ISO)</td><td>Ⓜ on a DATUM = shift, not bonus</td></tr>
+        <tr><td class="mono">VC</td><td>Virtual condition = MMC ∓ geo tol (internal −, external +)</td><td>the gauge size</td></tr>
+        <tr><td class="mono">DRF · 3-2-1</td><td>Datum reference frame · seating point pattern</td><td>kills 6 DOF in order</td></tr>
+        <tr><td class="mono">TP</td><td>True-position deviation = 2√(dx²+dy²)</td><td>diametral!</td></tr>
+        <tr><td class="mono">TIR</td><td>Total indicator reading (runout measurement)</td><td>full rotation</td></tr>
+        <tr><td class="mono">WC · RSS</td><td>Worst-case · root-sum-square stack methods</td><td>√n advantage</td></tr>
+        <tr><td class="mono">U (ISO 14253)</td><td>Expanded measurement uncertainty</td><td>subtracted from the zone</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven exam &amp; field traps</div>
+      <div class="steps">
+        <div class="step"><b>The missing ×2.</b> CMM radial deviation vs diametral TP — the single most common cause of wrong accept/reject calls.</div>
+        <div class="step"><b>Ⓜ on a datum feature ≠ bonus.</b> It grants <em>datum shift</em> — the whole pattern may translate as the datum departs from MMC; individual zones do not grow.</div>
+        <div class="step"><b>ASME Rule #1 vs ISO 8015.</b> ASME: perfect form at MMC by default. ISO: independency by default (add Ⓔ for envelope). State the governing standard in the title block — parts legal in one system fail the other.</div>
+        <div class="step"><b>Profile zones are bilateral by default.</b> A 0.5 profile zone is ±0.25 about true profile unless unilaterally disposed (U modifier / unequally-disposed note).</div>
+        <div class="step"><b>Position needs a ⌀ to be cylindrical.</b> Omit it and the zone is two parallel planes per direction — a different (and usually unintended) requirement.</div>
+        <div class="step"><b>Tapped holes without Ⓟ.</b> In-plate verification passes, the protruding stud still misses — always project the zone through the mating thickness.</div>
+        <div class="step"><b>Datum features are imperfect too.</b> Measurements simulate datums with gauges/fitting algorithms (max-inscribed, minimax); two labs fitting differently can disagree on the same part — specify the fitting method for tight work.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 14 — STUDY & PRACTICE ============ -->
+  <div class="page" id="sp">
+    <span class="page-tag">Page 14 · MSc Practice</span>
+    <h2 class="page-title">Study &amp; Practice Path</h2>
+    <p class="page-sub">The canon, a hands-on ladder, and an honest self-check.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Resource</th><th>What it gives you</th><th>Level</th></tr>
+        <tr><td><b>ASME Y14.5-2018</b></td><td>The rulebook itself — definitions, defaults, every figure argued over on shop floors</td><td>Standard</td></tr>
+        <tr><td><b>ISO 1101 + 8015 + 2692 + 5458/5459</b></td><td>The ISO GPS stack: characteristics, independency, MMR/LMR, patterns &amp; datums</td><td>Standard</td></tr>
+        <tr><td><b>Krulikowski</b> — <i>Fundamentals of GD&amp;T</i></td><td>The teaching text: graded exercises, answer keys, exam-style drills</td><td>Core</td></tr>
+        <tr><td><b>Meadows</b> — <i>Geometric Dimensioning and Tolerancing</i></td><td>Applications depth: gauge design, datum strategies, real assemblies</td><td>MSc</td></tr>
+        <tr><td><b>Fischer</b> — <i>Mechanical Tolerance Stackup and Analysis</i></td><td>The stack-up book: WC, RSS, Monte Carlo, GD&amp;T-aware chains</td><td>MSc</td></tr>
+        <tr><td><b>GD&amp;T Basics / Tec-Ease resources</b></td><td>Free symbol-by-symbol explainers and monthly tips for quick recall</td><td>All levels</td></tr>
+        <tr><td><b>ISO 14253-1 &amp; GUM</b></td><td>Decision rules and uncertainty budgets — where metrology meets the spec</td><td>Reference</td></tr>
+        <tr><td><b>Your CAD&#39;s tolerancing module</b> (SOLIDWORKS DimXpert / Creo GD&amp;T Advisor)</td><td>Model-based definition practice — annotate a real model, not a sketch</td><td>Practice</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder — eight exercises</div>
+      <div class="steps">
+        <div class="step"><b>Read ten drawings.</b> Pull ten real FCFs from your plant&#39;s drawings and translate each into one plain-English sentence (zone, shape, anchor, modifier).</div>
+        <div class="step"><b>Bonus tables.</b> For one Ⓜ hole callout, tabulate allowable TP for five actual sizes MMC→LMC — the bonus line becomes muscle memory.</div>
+        <div class="step"><b>Boundary sketch.</b> Draw the VC boundaries for a mating pin+hole pair and prove the fit clearance boundary-to-boundary.</div>
+        <div class="step"><b>Fastener drill.</b> Size position tolerances for a 4-bolt floating joint and an 8-bolt fixed joint from the fastener/hole specs alone.</div>
+        <div class="step"><b>Stack one gap.</b> Build the WC and RSS chain for a real assembly gap in a spreadsheet; watch which contributor dominates and re-budget it.</div>
+        <div class="step"><b>Seat a part.</b> On a surface plate with gauge pins and a height gauge, physically 3-2-1 a bracket and feel datum order change the numbers.</div>
+        <div class="step"><b>Shadow a CMM run.</b> Watch (or write) the datum-fitting sequence for one part program; find where the report says radial vs diametral.</div>
+        <div class="step"><b>Re-tolerance a bad drawing.</b> Take one ±-everything legacy drawing and convert its critical features to functional GD&amp;T — then defend it in a design review.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment — can you…?</div>
+      <div class="grid-2">
+        <div class="mini c-blue"><h4>◔ Recall</h4><p>Write the FCF grammar, TP = 2√(dx²+dy²), VC = MMC ∓ geo, and the floating/fixed fastener formulas from memory.</p></div>
+        <div class="mini c-teal"><h4>◑ Apply</h4><p>Compute bonus and accept/reject any Ⓜ/Ⓛ callout from a CMM report, and size a functional gauge.</p></div>
+        <div class="mini c-purp"><h4>◕ Analyse</h4><p>Build a WC and RSS stack for an assembly gap, defend which method applies, and identify the dominant contributor.</p></div>
+        <div class="mini c-amb"><h4>● Design</h4><p>Choose datums from assembly function, pick characteristic + modifier per feature, and survive both an ASME and an ISO audit of the same drawing.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEMORY HOOK -->
+  <div class="card">
+    <div class="label">Memory Hook</div>
+    <p class="quote">"Datums set the origin · the FCF sets the rule · MMC pays the bonus."</p>
+  </div>
+
+  <div class="footer">
+    <b>A21 · GD&amp;T &amp; Tolerances — Advanced Deep Dive</b><br>
+    Companion to <a href="../21_GD_and_T.html">Micro Card 21</a> · Standards: ASME Y14.5-2018 · ISO 1101 · ISO 5458 (position) · ISO 2692 (MMR/LMR) · ISO 8015 (independency) · ISO 14253-1 (decision rules)<br>
+    Advanced Micro Learning Library · Optimized for iPad Pro 11″ M4 · keratoconus-friendly · self-contained HTML<br>
+    <a href="index.html">← Back to the Advanced Library</a>
+  </div>
+
+</div>
+</body>
+</html>

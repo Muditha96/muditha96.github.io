@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Instrumentation, Calibration &amp; P&amp;ID · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #10b981;       /* loop emerald — the 4–20 mA green */
+    --accent-soft: #6ee7b7;
+    --accent-2: #fbbf24;      /* signal amber */
+    --accent-3: #38bdf8;      /* P&ID sky */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(16,185,129,0.13), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(56,189,248,0.06), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(16,185,129,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(16,185,129,0.14), rgba(56,189,248,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(16,185,129,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-3)!important; } .c-sky .big{color:var(--accent-3)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #10b981, #065f46); color: #ecfdf5; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(236,253,245,0.8); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(16,185,129,0.10); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:70px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Industrial Automation · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🎛️</span>Instrumentation, Calibration &amp; P&amp;ID</h1>
+  <p class="hero-sub">The measurement backbone of every automated plant: the sensing chain from process to controller, static and dynamic instrument characteristics, why the world runs on 4–20 mA, the four great process variables (pressure, temperature, flow, level) measured properly, calibration as a traceable science — as-found/as-left, error in %span, uncertainty and TUR — and how to read any P&amp;ID with ISA-5.1 tags like a native.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>A full advanced module. Related:</span>
+    <a href="A11_Industrial_Sensors_Deep_Dive.html">A11 Sensors →</a>
+    <a href="A10_PID_Control_Deep_Dive.html">A10 PID →</a>
+    <a href="A07_PLC_Deep_Dive.html">A07 PLC →</a>
+    <a href="A14_SCADA_HMI_Deep_Dive.html">A14 SCADA →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · The Measurement Chain</a>
+    <a href="#p2">2 · Instrument Characteristics</a>
+    <a href="#p3">3 · 4–20 mA &amp; Signals</a>
+    <a href="#p4">4 · Pressure</a>
+    <a href="#p5">5 · Temperature</a>
+    <a href="#p6">6 · Flow</a>
+    <a href="#p7">7 · Level</a>
+    <a href="#p8">8 · Calibration</a>
+    <a href="#p9">9 · Uncertainty &amp; TUR</a>
+    <a href="#p10">10 · Reading P&amp;IDs</a>
+    <a href="#p11">11 · Valves &amp; Loop Checks</a>
+    <a href="#p12">12 · Recap &amp; Quiz</a>
+    <a href="#p13">13 · Worked Examples</a>
+    <a href="#p14">14 · Problem Set</a>
+    <a href="#p15">15 · Derivations &amp; Traps</a>
+    <a href="#p16">16 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ============ PAGE 1 ============ -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 16 · Foundations</span>
+    <h2 class="page-title">The Measurement &amp; Control Chain</h2>
+    <p class="page-sub">Control quality can never exceed measurement quality — the loop starts at the tapping point, not at the PID block.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead"><span class="hl">Instrumentation</span> is the engineering of measuring process variables — pressure, temperature, flow, level, and analytical values — and delivering them as trustworthy signals to indication, control and safety systems. Every control loop is a chain: <span class="hl">primary element → transmitter → signal → controller → final element</span>, and the chain is only as honest as its weakest link.</p>
+      <p class="body">The classic split: the <strong>primary element</strong> touches the process (orifice plate, RTD, diaphragm); the <strong>transmitter</strong> converts its tiny raw signal into a standard transmission signal (4–20 mA, digital); the <strong>controller</strong> (PLC/DCS — <a href="A07_PLC_Deep_Dive.html" style="color:var(--accent-soft)">A07</a>, PID law — <a href="A10_PID_Control_Deep_Dive.html" style="color:var(--accent-soft)">A10</a>) computes; the <strong>final element</strong> (control valve, VFD — <a href="A08_VFD_Deep_Dive.html" style="color:var(--accent-soft)">A08</a>) acts. Operators watch it all through SCADA (<a href="A14_SCADA_HMI_Deep_Dive.html" style="color:var(--accent-soft)">A14</a>).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The chain, drawn</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="arG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6ee7b7"/></marker></defs>
+          <g font-size="12" text-anchor="middle" font-weight="600">
+            <rect x="15" y="55" width="110" height="66" rx="12" fill="#232d3f" stroke="#fb923c" stroke-width="2"/>
+            <text x="70" y="82" fill="#fdba74">PROCESS</text>
+            <text x="70" y="100" fill="#94a3b8" font-size="10.5">pipe · vessel · machine</text>
+            <rect x="150" y="55" width="110" height="66" rx="12" fill="#232d3f" stroke="#10b981" stroke-width="2"/>
+            <text x="205" y="76" fill="#6ee7b7">PRIMARY</text>
+            <text x="205" y="92" fill="#6ee7b7">ELEMENT</text>
+            <text x="205" y="108" fill="#94a3b8" font-size="10.5">orifice · RTD · cell</text>
+            <rect x="285" y="55" width="110" height="66" rx="12" fill="#10b981"/>
+            <text x="340" y="82" fill="#052e22">TRANSMITTER</text>
+            <text x="340" y="100" fill="#065f46" font-size="10.5">4–20 mA + HART</text>
+            <rect x="420" y="55" width="110" height="66" rx="12" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+            <text x="475" y="76" fill="#7dd3fc">CONTROLLER</text>
+            <text x="475" y="92" fill="#7dd3fc">PLC / DCS</text>
+            <text x="475" y="108" fill="#94a3b8" font-size="10.5">PID → A10</text>
+            <rect x="555" y="55" width="130" height="66" rx="12" fill="#232d3f" stroke="#fbbf24" stroke-width="2"/>
+            <text x="620" y="76" fill="#fde68a">FINAL ELEMENT</text>
+            <text x="620" y="94" fill="#94a3b8" font-size="10.5">control valve · VFD</text>
+            <line x1="125" y1="88" x2="146" y2="88" stroke="#6ee7b7" stroke-width="2.5" marker-end="url(#arG)"/>
+            <line x1="260" y1="88" x2="281" y2="88" stroke="#6ee7b7" stroke-width="2.5" marker-end="url(#arG)"/>
+            <line x1="395" y1="88" x2="416" y2="88" stroke="#6ee7b7" stroke-width="2.5" marker-end="url(#arG)"/>
+            <line x1="530" y1="88" x2="551" y2="88" stroke="#6ee7b7" stroke-width="2.5" marker-end="url(#arG)"/>
+            <path d="M 620 121 L 620 165 L 70 165 L 70 121" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arG)"/>
+            <text x="345" y="182" fill="#94a3b8" font-size="11" font-weight="400">the final element changes the process — and the measurement sees the result: the loop closes</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Five links, one loop. This module lives in the first three; A10 and A08 own the last two.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The big four (plus one)</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Variable</th><th>Symbol (ISA)</th><th>Share of plant tags</th><th>Workhorse technologies</th></tr>
+          <tr><td><b>Pressure</b></td><td class="mono">P</td><td>~25%</td><td>piezoresistive / capacitive DP cells</td></tr>
+          <tr><td><b>Temperature</b></td><td class="mono">T</td><td>~30%</td><td>Pt100 RTD, type-K/J thermocouples</td></tr>
+          <tr><td><b>Flow</b></td><td class="mono">F</td><td>~20%</td><td>DP-orifice, magmeter, Coriolis, vortex</td></tr>
+          <tr><td><b>Level</b></td><td class="mono">L</td><td>~15%</td><td>DP, guided-wave radar, ultrasonic</td></tr>
+          <tr><td><b>Analytical</b></td><td class="mono">A</td><td>~10%</td><td>pH, conductivity, O₂, gas analysers</td></tr>
+        </table>
+      </div>
+      <p class="body">Master P, T, F, L and you can commission most of a factory. Each has its own physics, its own installation traps, and its own page in this module. Sensor <em>device physics</em> (proximity switches, encoders, vision) lives in <a href="A11_Industrial_Sensors_Deep_Dive.html" style="color:var(--accent-soft)">A11</a> — this module is about <em>process measurement as a discipline</em>.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><h4>Golden rule</h4><p class="big">GIGO</p><p>A perfect PID on a lying transmitter controls the lie. Measurement first, tuning second.</p></div>
+      <div class="mini c-amb"><h4>Language</h4><p class="big">ISA-5.1</p><p>Tags like FT-101 and PIC-203 are a universal grammar — decoded on page 10.</p></div>
+      <div class="mini c-sky"><h4>Scope</h4><p class="big">P T F L</p><p>Four variables, four measurement pages, one calibration science.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 ============ -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 16 · Metrology Basics</span>
+    <h2 class="page-title">Instrument Characteristics — Static &amp; Dynamic</h2>
+    <p class="page-sub">Datasheet literacy: what accuracy, turndown and time constant actually promise.</p>
+
+    <div class="card">
+      <div class="label">Static characteristics</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Term</th><th>Meaning</th><th>Watch for</th></tr>
+          <tr><td><b>Range / LRV–URV</b></td><td>lowest and highest measurable values (e.g. 0–10 bar)</td><td>range ≠ span when zero is elevated/suppressed</td></tr>
+          <tr><td><b>Span</b></td><td>URV − LRV</td><td>errors are quoted in <b>% of span</b>, not % of reading</td></tr>
+          <tr><td><b>Accuracy</b></td><td>max total deviation from true value</td><td>"±0.1%" — of what? span, reading, or full scale?</td></tr>
+          <tr><td><b>Repeatability</b></td><td>same input, same direction → same output?</td><td>you can control with poor accuracy, never with poor repeatability</td></tr>
+          <tr><td><b>Hysteresis</b></td><td>up-scale vs down-scale disagreement</td><td>exposed only by a proper up-down calibration run</td></tr>
+          <tr><td><b>Linearity</b></td><td>closeness to the ideal straight line</td><td>independent vs terminal-based definitions differ</td></tr>
+          <tr><td><b>Resolution</b></td><td>smallest detectable change</td><td>fine resolution ≠ accuracy (a lie with many digits)</td></tr>
+          <tr><td><b>Turndown (rangeability)</b></td><td>max span ÷ min usable span</td><td>a 100:1 transmitter re-ranged 10:1 keeps its %-span accuracy on the new span</td></tr>
+          <tr><td><b>Drift</b></td><td>slow change over time/temperature</td><td>sets the calibration interval (page 8)</td></tr>
+        </table>
+      </div>
+      <div class="eqn">Error (%span) = (measured − true) / (URV − LRV) × 100
+A "±0.25 % span" transmitter ranged 0–100 °C may be wrong by ±0.25 °C anywhere —
+re-ranged 0–400 °C the same ±0.25 % becomes <span class="v2">±1.0 °C</span>. Range tight, measure right.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Dynamic characteristics — the instrument as a filter</div>
+      <p class="body">Most sensors respond as a <strong>first-order lag</strong>: a step change in the process produces an exponential approach in the reading. The <strong>time constant τ</strong> is the time to reach 63.2% of the change; practical completeness (98%) takes ≈ 4τ. A bare thermocouple may have τ ≈ 1 s; the same element inside a heavy thermowell can be 30–90 s — and that lag sits <em>inside your control loop</em>, eating phase margin exactly like the filter lags in <a href="A10_PID_Control_Deep_Dive.html" style="color:var(--accent-soft)">A10</a>.</p>
+      <div class="eqn">First-order response:  PV(t) = PV₀ + ΔPV·(1 − e^(−t/τ))
+t = τ → 63.2 %   t = 2τ → 86.5 %   t = 3τ → 95.0 %   t = <b>4τ → 98.2 %</b>
+Rule: measurement τ should be ≲ 1/10 of the process time constant it watches —
+otherwise you are tuning the sensor, not the process.</div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">Two datasheets: transmitter A "±0.075% of span", transmitter B "±0.15% of reading". Ranged 0–100 °C and operating at 20 °C, which reads truer?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">A: ±0.075% × 100 °C span = ±0.075 °C — everywhere. B: ±0.15% × 20 °C reading = ±0.03 °C at this point. <b>B wins at low readings</b>, loses above 50 °C (±0.075 vs A's constant ±0.075 at 50; B grows to ±0.15 at 100). %-of-reading specs flatter the bottom of the range; %-of-span specs are honest but constant. Always convert both to engineering units at YOUR operating point.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 ============ -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 16 · Signals</span>
+    <h2 class="page-title">4–20 mA, Live Zero &amp; the Smart Transmitter</h2>
+    <p class="page-sub">Seventy years old and still running the world's plants — for very good electrical reasons.</p>
+
+    <div class="card">
+      <div class="label">Why current, why 4, why 20</div>
+      <p class="body"><strong>Why current, not voltage?</strong> In a series loop the same current flows everywhere — cable resistance and moderate contact resistance <em>cannot</em> change the reading (they only consume voltage headroom). A voltage signal would drop along every metre of copper. <strong>Why 4 mA and not 0?</strong> The <span class="hl">live zero</span>: a healthy loop never sits at 0 mA, so 0 mA unambiguously means <em>broken wire / dead transmitter</em> — measurement and diagnostics in one signal. And the 4 mA floor <strong>powers the transmitter itself</strong> (2-wire loop-powered device: signal and supply share one pair). NAMUR NE 43 refines it: ≤ 3.6 mA = fault-low, ≥ 21 mA = fault-high — the transmitter can deliberately signal its own failure.</p>
+      <div class="eqn">Scaling:   I = 4 + 16 · (PV − LRV)/(URV − LRV)   [mA]
+Inverse:   PV = LRV + (I − 4)/16 · (URV − LRV)
+Checkpoints: 4 = 0 %   8 = 25 %   <b>12 = 50 %</b>   16 = 75 %   20 = 100 %
+DCS input: 250 Ω sense resistor → 1–5 V   ·   NAMUR NE 43: &lt;3.6 fault ↓ / &gt;21 fault ↑</div>
+    </div>
+
+    <div class="card">
+      <div class="label">The 2-wire loop, drawn</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" font-weight="600">
+            <rect x="30" y="55" width="140" height="80" rx="12" fill="#232d3f" stroke="#10b981" stroke-width="2"/>
+            <text x="100" y="85" fill="#6ee7b7" text-anchor="middle">TRANSMITTER</text>
+            <text x="100" y="103" fill="#94a3b8" font-size="10.5" text-anchor="middle">2-wire · loop-powered</text>
+            <text x="100" y="120" fill="#94a3b8" font-size="10.5" text-anchor="middle">regulates I = f(PV)</text>
+            <rect x="300" y="30" width="110" height="50" rx="10" fill="#232d3f" stroke="#fbbf24" stroke-width="2"/>
+            <text x="355" y="52" fill="#fde68a" text-anchor="middle">24 V DC</text>
+            <text x="355" y="68" fill="#94a3b8" font-size="10.5" text-anchor="middle">loop supply</text>
+            <rect x="520" y="55" width="150" height="80" rx="12" fill="#232d3f" stroke="#38bdf8" stroke-width="2"/>
+            <text x="595" y="85" fill="#7dd3fc" text-anchor="middle">PLC / DCS INPUT</text>
+            <text x="595" y="103" fill="#94a3b8" font-size="10.5" text-anchor="middle">250 Ω → 1–5 V</text>
+            <text x="595" y="120" fill="#94a3b8" font-size="10.5" text-anchor="middle">ADC → A07</text>
+            <line x1="170" y1="75" x2="300" y2="55" stroke="#10b981" stroke-width="2.5"/>
+            <line x1="410" y1="55" x2="520" y2="75" stroke="#10b981" stroke-width="2.5"/>
+            <line x1="170" y1="115" x2="520" y2="115" stroke="#10b981" stroke-width="2.5"/>
+            <text x="345" y="105" fill="#6ee7b7" font-size="11" text-anchor="middle">→ same 4–20 mA everywhere in the series loop →</text>
+            <text x="345" y="160" fill="#94a3b8" font-size="11" text-anchor="middle" font-weight="400">voltage headroom: 24 V − 250 Ω·20 mA (5 V) − cable drop must still exceed the transmitter's minimum lift-off voltage (~10–12 V)</text>
+            <text x="345" y="180" fill="#fbbf24" font-size="11" text-anchor="middle">HART: 1200 Hz/2200 Hz FSK ripple superimposed on the same DC current — digital diagnostics riding an analogue signal</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">One pair of wires: power out, measurement back, HART digital data on top. Elegant since 1957.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Beyond analogue</div>
+      <p class="body"><strong>HART</strong> superimposes FSK digital data on the 4–20 mA line: range, tag, diagnostics, secondary variables — readable with a handheld communicator or clamp-on modem, and the reason "smart transmitter" means re-rangeable without a screwdriver. <strong>Fieldbuses</strong> (PROFIBUS PA, FOUNDATION Fieldbus) and <strong>Ethernet-APL</strong> go fully digital; <strong>IO-Link</strong> (<a href="A05_IO_Link_Deep_Dive.html" style="color:var(--accent-soft)">A05</a>) does the same for discrete/factory sensors. The engineering logic never changes: a standard signal, a live zero, and diagnostics beat a perfect-precision signal that cannot tell you it is lying.</p>
+    </div>
+
+    <div class="card demo">
+      <div class="label">🧮 Interactive — 4–20 mA scaling (with elevated zero)</div>
+      <div class="demo-row"><span>LRV (engineering units)</span><b><span id="lrvv">0</span></b></div>
+      <input type="range" id="lrvR" min="-100" max="200" step="5" value="0">
+      <div class="demo-row"><span>URV (engineering units)</span><b><span id="urvv">100</span></b></div>
+      <input type="range" id="urvR" min="-50" max="500" step="5" value="100">
+      <div class="demo-row"><span>Loop current I (mA)</span><b><span id="mav">12.0</span></b></div>
+      <input type="range" id="maR" min="3.4" max="21.0" step="0.1" value="12">
+      <div class="demo-out" id="maOut">—</div>
+      <p class="cap">Drag LRV negative (elevated zero — e.g. a −50…+150 °C range) and watch the 4 mA point move below zero. NAMUR fault bands flagged automatically.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 ============ -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 16 · Pressure</span>
+    <h2 class="page-title">Pressure Measurement</h2>
+    <p class="page-sub">The most versatile variable: measured directly, and borrowed to infer flow and level.</p>
+
+    <div class="card">
+      <div class="label">Three references, three instruments</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Type</th><th>Reference</th><th>Reads</th><th>Classic use</th></tr>
+          <tr><td><b>Gauge (barg)</b></td><td>local atmosphere</td><td>p − p_atm</td><td>pumps, compressors, utilities</td></tr>
+          <tr><td><b>Absolute (bara)</b></td><td>vacuum</td><td>p</td><td>vacuum processes, boiling-point math</td></tr>
+          <tr><td><b>Differential (DP)</b></td><td>a second process point</td><td>p₁ − p₂</td><td>flow (orifice), level, filter blockage</td></tr>
+        </table>
+      </div>
+      <div class="eqn">Hydrostatics (the equation instrumentation borrows everywhere):
+<b>p = ρ·g·h</b>   →  10 m of water ≈ 0.981 bar ≈ 98.1 kPa
+1 bar = 100 kPa = 10.197 mH₂O = 750 mmHg = 14.50 psi</div>
+      <p class="body"><strong>Sensing elements:</strong> the classic <strong>Bourdon tube</strong> (a flattened C-tube straightens under pressure — still on every mechanical gauge), and for transmitters the <strong>diaphragm</strong> read electronically: <span class="hl">piezoresistive</span> (silicon strain bridge, cheap, fast) or <span class="hl">capacitive</span> (metal diaphragm between capacitor plates — the architecture of the classic DP cell, superbly stable). The DP cell is the multitool of the plant: flow across an orifice, level from hydrostatic head, filter health from ΔP across the element.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Installation is half the measurement</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Impulse lines carry the process to the cell — and its lies.</strong> Gas service: tap on top, lines slope <em>up</em> to the transmitter (condensate drains back). Liquid: tap on the side, lines slope <em>down</em> (bubbles rise back). Steam: condensate-filled lines with equal heads on both sides.</div></li>
+        <li><span class="num">2</span><div><strong>The 3-valve / 5-valve manifold</strong> (block-block-equalise) lets you zero a DP cell in place: block both, equalise → the cell must read 0. Every DP commissioning starts here.</div></li>
+        <li><span class="num">3</span><div><strong>Diaphragm seals + capillaries</strong> for corrosive, viscous or hygienic service — at the price of added τ and temperature-driven fill-fluid errors (keep capillaries short, symmetric, shaded).</div></li>
+        <li><span class="num">4</span><div><strong>Overrange &amp; static pressure ratings differ.</strong> A 0–250 mbar DP cell may sit on a 40 bar line: it measures millibars of difference while surviving the full static pressure — two different specs on the datasheet.</div></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A gauge on a pump discharge reads 6.0 barg on a day when atmospheric pressure is 1.01 bar. The vacuum gauge on the suction reads −0.4 barg. What absolute pressures do the two ports see, and what does the pump add?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Discharge: 6.0 + 1.01 = <b>7.01 bara</b>. Suction: −0.4 + 1.01 = <b>0.61 bara</b>. The pump adds Δp = 7.01 − 0.61 = <b>6.4 bar</b> (≈ 65 m of water head — see A47 for the head language). Gauge readings subtract cleanly only because both share the same atmosphere; mixing barg and bara is the classic datasheet accident.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 ============ -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 16 · Temperature</span>
+    <h2 class="page-title">Temperature: RTDs, Thermocouples &amp; Thermowells</h2>
+    <p class="page-sub">Two rival technologies, one cold junction, and a steel finger that slows everything down.</p>
+
+    <div class="card">
+      <div class="label">Pt100 RTD — resistance as a thermometer</div>
+      <div class="eqn">IEC 60751 (Callendar–Van Dusen, T ≥ 0 °C):
+R(T) = R₀·(1 + A·T + B·T²)    R₀ = 100 Ω
+A = 3.9083×10⁻³ /°C    B = −5.775×10⁻⁷ /°C²
+R(100 °C) = <b>138.51 Ω</b>  →  mean sensitivity ≈ 0.385 Ω/°C  ("α = 0.00385")
+Class A tolerance: ±(0.15 + 0.002·|T|) °C   Class B: ±(0.30 + 0.005·|T|) °C</div>
+      <p class="body">A platinum element's resistance rises predictably with temperature — stable, repeatable, linear-ish, the precision choice from −200 to ~600 °C. Its enemy is <strong>lead resistance</strong>: 0.385 Ω of copper looks like 1 °C. Hence the wiring ladder: <strong>2-wire</strong> (leads add straight into the reading — short runs only), <strong>3-wire</strong> (the standard: measurement cancels one lead pair, assuming equal leads), <strong>4-wire</strong> (true Kelvin sensing, leads fully excluded — labs and custody). Excitation current must stay small (≈1 mA) or the element self-heats.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Thermocouples — the Seebeck workhorses</div>
+      <p class="body">Two dissimilar metals joined at the hot end generate a µV-level EMF proportional to the temperature <em>difference</em> between hot junction and the meter's terminals. That means every thermocouple reading needs <strong>cold-junction compensation (CJC)</strong> — the input card measures its own terminal temperature and adds it back. TCs win on <span class="hl">range (to +1700 °C), speed, ruggedness and price</span>; RTDs win on <span class="hl">accuracy and stability</span>. Extension/compensating cable must match the TC type all the way to the CJC point — a copper splice creates two parasitic junctions and a silent offset.</p>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Type</th><th>Materials</th><th>Range (cont.)</th><th>Sensitivity</th><th>Note</th></tr>
+          <tr><td><b>K</b></td><td>NiCr–NiAl</td><td>−40…+1100 °C</td><td>≈41 µV/°C</td><td>the default; green (IEC)</td></tr>
+          <tr><td><b>J</b></td><td>Fe–CuNi</td><td>−40…+750 °C</td><td>≈55 µV/°C</td><td>legacy machines; iron leg rusts</td></tr>
+          <tr><td><b>T</b></td><td>Cu–CuNi</td><td>−200…+350 °C</td><td>≈43 µV/°C</td><td>cryogenic &amp; food</td></tr>
+          <tr><td><b>N</b></td><td>NiCrSi–NiSi</td><td>−40…+1200 °C</td><td>≈39 µV/°C</td><td>drift-hardened K successor</td></tr>
+          <tr><td><b>S / R / B</b></td><td>Pt–PtRh</td><td>to 1600–1700 °C</td><td>≈10 µV/°C</td><td>furnaces, kilns — costly, fragile signal</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Thermowells — protection at a price</div>
+      <p class="body">The sensor almost never touches the process: it sits in a <strong>thermowell</strong> — a drilled or fabricated steel finger that permits sensor replacement under pressure. The costs: added <strong>time constant</strong> (τ jumps from ~2 s bare to 30–90 s in a heavy well — the dynamic lag of page 2), <strong>conduction error</strong> (a short well conducts pipe-wall temperature into the tip; immerse ≥ 10× tip diameter), and in high-velocity lines <strong>vortex-induced vibration</strong> — flow sheds vortices off the well and can snap it at resonance, which is why ASME PTC 19.3 TW wake-frequency calculations exist for critical installations. Spring-loaded inserts pressing the element to the well tip and thermal paste reclaim response time.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A 2-wire Pt100 runs 40 m on 0.5 mm² copper (≈0.036 Ω/m per conductor). How large is the temperature lie, and which two fixes remove it?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Two conductors in series: R_leads = 2 × 40 × 0.036 = <b>2.88 Ω</b> → 2.88/0.385 ≈ <b>+7.5 °C</b> of pure fiction. Fixes: (1) go <b>3-wire</b> (or 4-wire) so the input cancels lead resistance; (2) better — mount a <b>head transmitter</b> in the sensor connection head and run 4–20 mA instead of raw ohms: current loops don't care about cable resistance (page 3).</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 ============ -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 16 · Flow</span>
+    <h2 class="page-title">Flow: the Square-Root Family &amp; Its Rivals</h2>
+    <p class="page-sub">Half the art of flow measurement is remembering that an orifice measures ΔP, not flow.</p>
+
+    <div class="card">
+      <div class="label">DP flow — Bernoulli put to work</div>
+      <div class="eqn">Orifice / venturi / nozzle (ISO 5167):   Q = C·ε·A₂·√(2ΔP/ρ(1−β⁴))
+Engineering shorthand:  <b>Q ∝ √ΔP</b>   with β = d/D (typ. 0.2–0.75)
+→ 100 % flow = 100 % ΔP;  50 % flow = 25 % ΔP;  <span class="v2">10 % flow = 1 % ΔP</span>
+The transmitter (or DCS) applies square-root extraction to linearise.</div>
+      <p class="body">A restriction accelerates the fluid; the pressure it loses is recoverable head converted to velocity (<a href="A47_Fluid_Mechanics_Pumps_Deep_Dive.html" style="color:var(--accent-soft)">A47</a> Bernoulli). The DP cell reads that drop. Because ΔP falls with the <em>square</em> of flow, low-flow readings starve: at 10% flow the cell works on 1% of its span, and its fixed %-span error is magnified 50× in flow terms (interactive below). Practical turndown: ~3–4:1 classic, ~8–10:1 with a smart multivariable cell. Orifice plates demand <strong>straight pipe runs</strong> (rule-of-thumb 10D upstream / 5D downstream, more after double bends) and square, sharp edges — a nicked edge is a calibration change nobody logged.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The selection table</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Meter</th><th>Principle</th><th>Turndown</th><th>Accuracy (typ.)</th><th>Limits &amp; notes</th></tr>
+          <tr><td><b>Orifice + DP</b></td><td>√ΔP restriction</td><td>4:1 (10:1 smart)</td><td>±1–2 % rate</td><td>cheap, standardised, permanent ΔP loss, straight runs</td></tr>
+          <tr><td><b>Magmeter</b></td><td>Faraday E = kBvD</td><td>40:1</td><td>±0.2–0.5 % rate</td><td>conductive liquids only (&gt;5 µS/cm); no obstruction, no loss</td></tr>
+          <tr><td><b>Coriolis</b></td><td>tube twist ∝ mass flow</td><td>100:1</td><td>±0.1 % mass</td><td>true mass + density; costly, size limits</td></tr>
+          <tr><td><b>Vortex</b></td><td>shedding f = St·v/d</td><td>20:1</td><td>±0.75–1 % rate</td><td>gas/steam/liquid; cuts off at low Re</td></tr>
+          <tr><td><b>Ultrasonic (transit)</b></td><td>Δt up vs downstream</td><td>50:1</td><td>±0.5–1 % rate</td><td>clamp-on retrofit possible; profile-sensitive</td></tr>
+          <tr><td><b>Turbine / PD</b></td><td>rotor speed / chambers</td><td>10–30:1</td><td>±0.25 % rate</td><td>custody classics; moving parts, clean fluids</td></tr>
+          <tr><td><b>Thermal mass</b></td><td>heat carried away</td><td>50:1</td><td>±1–2 %</td><td>gases, low flows, compressed-air audits</td></tr>
+        </table>
+      </div>
+      <p class="body">Selection logic: <strong>conductive liquid → magmeter</strong> first (nothing in the pipe, superb turndown). <strong>Custody/mass-critical → Coriolis.</strong> <strong>Steam → vortex or orifice.</strong> <strong>Retrofit without cutting pipe → clamp-on ultrasonic.</strong> The orifice survives everywhere because it is cheap, understood, and ISO-standardised — with its square-root tax always attached.</p>
+    </div>
+
+    <div class="card demo">
+      <div class="label">🧮 Interactive — the square-root turndown tax</div>
+      <div class="demo-row"><span>Actual flow (% of full scale)</span><b><span id="qfv">30</span> %</b></div>
+      <input type="range" id="qfR" min="5" max="100" step="1" value="30">
+      <div class="demo-row"><span>DP transmitter accuracy (% of DP span)</span><b><span id="qav">0.075</span> %</b></div>
+      <input type="range" id="qaR" min="0.04" max="0.5" step="0.005" value="0.075">
+      <div class="demo-out" id="qOut">—</div>
+      <p class="cap">Flow error ≈ ½ × (DP error ÷ DP fraction). Watch a superb 0.075 %-span cell become a mediocre flowmeter below 15 % flow — the mathematical case for re-ranging, stacked cells, or a magmeter.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 7 ============ -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 16 · Level</span>
+    <h2 class="page-title">Level: Hydrostatics, Radar &amp; the Wet Leg</h2>
+    <p class="page-sub">Level is pressure wearing a disguise — until radar removed the disguise entirely.</p>
+
+    <div class="card">
+      <div class="label">DP level — p = ρgh again</div>
+      <div class="eqn">Open tank:            ΔP = ρ·g·h                 (LP port vented)
+Closed tank, dry leg: ΔP = ρ·g·h + (p_vap cancels via LP line)
+Closed tank, <b>wet leg</b>: ΔP = ρ·g·h − ρ_fill·g·H     (LP leg permanently full, height H)
+→ at h = 0 the cell reads <span class="v2">−ρ_fill·g·H</span>: a NEGATIVE number.
+Fix by ranging, not plumbing:  LRV = −ρ_fill·g·H  (zero <b>elevation</b>)
+(The mirror case — transmitter mounted below the tap — needs zero <b>suppression</b>.)</div>
+      <p class="body">In a pressurised vessel the LP side must see the vapour space so vapour pressure cancels. If that reference line can condense (steam drum, hot hydrocarbons), it is deliberately kept <em>full</em> — the <strong>wet leg</strong> — and its constant hydrostatic head is subtracted by ranging the transmitter with an elevated zero. Get ρ wrong (density changes with temperature or product grade) and the "level" moves while the surface doesn't — the classic DP-level lie, and the reason density-critical tanks graduate to radar or add a second cell for density compensation.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The vessel, drawn</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" font-weight="600">
+            <rect x="120" y="30" width="220" height="170" rx="10" fill="none" stroke="#64748b" stroke-width="2.5"/>
+            <rect x="122" y="110" width="216" height="88" fill="rgba(16,185,129,0.18)"/>
+            <line x1="122" y1="110" x2="338" y2="110" stroke="#10b981" stroke-width="2.5"/>
+            <text x="230" y="160" fill="#6ee7b7" text-anchor="middle">liquid  ρ, h</text>
+            <text x="230" y="70" fill="#94a3b8" text-anchor="middle" font-size="11">vapour space p_vap</text>
+            <!-- HP tap -->
+            <line x1="120" y1="190" x2="60" y2="190" stroke="#fbbf24" stroke-width="2.5"/>
+            <text x="88" y="182" fill="#fde68a" font-size="11" text-anchor="middle">HP</text>
+            <!-- wet leg -->
+            <line x1="340" y1="50" x2="420" y2="50" stroke="#38bdf8" stroke-width="2.5"/>
+            <line x1="420" y1="50" x2="420" y2="190" stroke="#38bdf8" stroke-width="4"/>
+            <text x="447" y="120" fill="#7dd3fc" font-size="11">wet leg, H</text>
+            <text x="447" y="136" fill="#94a3b8" font-size="10.5">always full (ρ_fill)</text>
+            <line x1="420" y1="190" x2="480" y2="190" stroke="#38bdf8" stroke-width="2.5"/>
+            <!-- transmitter -->
+            <rect x="480" y="165" width="130" height="50" rx="10" fill="#232d3f" stroke="#10b981" stroke-width="2"/>
+            <text x="545" y="186" fill="#6ee7b7" text-anchor="middle">DP CELL</text>
+            <text x="545" y="203" fill="#94a3b8" font-size="10" text-anchor="middle">LRV = −ρ_f·g·H (elevated)</text>
+            <line x1="60" y1="190" x2="60" y2="215" stroke="#fbbf24" stroke-width="2.5"/>
+            <line x1="60" y1="215" x2="480" y2="215" stroke="#fbbf24" stroke-width="2.5"/>
+            <text x="230" y="228" fill="#94a3b8" font-size="10.5" text-anchor="middle">HP: process head + vapour  ·  LP: wet leg + vapour → vapour cancels</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">The wet-leg closed-tank installation — the exam favourite because the zero lives below 4 mA until you range it.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The non-contact generation</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Technology</th><th>Principle</th><th>Strengths</th><th>Weak spots</th></tr>
+          <tr><td><b>Guided-wave radar (GWR)</b></td><td>TDR pulse down a probe</td><td>foam/vapour tolerant, interfaces, no density error</td><td>probe fouling, tall tanks need long probes</td></tr>
+          <tr><td><b>Free-space radar (80 GHz)</b></td><td>FMCW reflection</td><td>no contact, narrow beam, agitators OK</td><td>very low-ε liquids reflect weakly</td></tr>
+          <tr><td><b>Ultrasonic</b></td><td>sound time-of-flight</td><td>cheap, simple sumps/silos</td><td>vapour/temp change speed of sound, foam kills echo</td></tr>
+          <tr><td><b>Capacitance</b></td><td>probe C vs ε of contents</td><td>point + continuous, small vessels</td><td>coating, ε changes with product</td></tr>
+          <tr><td><b>Load cells</b></td><td>weigh the vessel</td><td>true mass — ignores foam, density, geometry</td><td>piping strain, cost, retrofit pain</td></tr>
+          <tr><td><b>Float / displacer / RF point</b></td><td>buoyancy / conductance</td><td>simple alarms &amp; interlocks</td><td>moving parts, single-point only</td></tr>
+        </table>
+      </div>
+      <p class="body">Modern default: <strong>radar for continuous level, vibrating-fork point switches for overfill protection</strong> (independent technology for the safety layer — a diversity habit that page 10's interlock symbols and IEC 61511 formalise). DP survives where density info is wanted, in remote-seal hygienic service, and wherever budgets vote.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A steam-drum DP level with a wet leg reads high after a cold start and drifts back over an hour. What's happening?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">The wet-leg fill was cold and dense at start; as the plant heats the leg, its fill warms, expands and <b>ρ_fill drops</b>, shrinking the subtracted head — the reading rises with no real level change (and partial leg boil-off does the same, violently). Cures: condensate pots that keep the leg topped and thermally stable, insulation, density-compensated ranging, or moving the duty to GWR. The instrument is honest; the reference column changed.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 8 ============ -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 16 · Calibration</span>
+    <h2 class="page-title">Calibration: As-Found, As-Left &amp; the 5-Point Run</h2>
+    <p class="page-sub">Calibration is comparison against a better standard, documented — everything else is adjustment folklore.</p>
+
+    <div class="card">
+      <div class="label">The vocabulary that audits check</div>
+      <p class="body"><strong>Calibration</strong> = comparing the instrument to a reference standard and <em>recording</em> the errors. <strong>Adjustment (trim)</strong> = changing the instrument to reduce those errors. The two records that matter: <span class="hl">as-found</span> (state on arrival — this is the data that tells you whether last year's production measurements were valid) and <span class="hl">as-left</span> (state after any trim — the new starting point). An instrument found outside tolerance triggers an <strong>out-of-tolerance investigation</strong>: what product shipped against the bad reading? That question is why as-found data is sacred and why "just tweak it to read right" without records is a quality-system offence (ISO 9001 ¸ 7.1.5, IATF, FDA alike).</p>
+      <div class="eqn">The 5-point up-down run: 0 % → 25 % → 50 % → 75 % → 100 % → 75 % → 50 % → 25 % → 0 %
+approach each point from ONE direction, never overshoot-and-back
+error_i (%span) = (reading_i − ideal_i)/span × 100
+hysteresis at a point = |error_up − error_down|
+zero error: uniform offset at all points → <b>zero trim</b>
+span error: error growing with input → <b>span trim</b> (re-check zero after!)</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Standards, traceability &amp; tools</div>
+      <p class="body"><strong>Traceability</strong> is an unbroken, documented chain: your working calibrator → the lab's reference standard → the national metrology institute (NIST, NPL, or Sri Lanka's <strong>MUSSD — Measurement Units, Standards &amp; Services Department</strong>) → the SI. Each link carries a stated uncertainty, and ISO/IEC 17025 is the accreditation that says a lab's chain and methods hold. Field toolkit: <strong>documenting loop calibrators</strong> (source/measure mA, V, Ω, TC types — Fluke 754, Beamex MC6), <strong>pressure pumps + reference modules</strong>, <strong>deadweight testers</strong> (primary pressure standard: p = F/A from real masses), <strong>dry-block calibrators</strong> for temperature, and the <strong>HART communicator</strong> for range/trim on smart devices. Rule of thumb for intervals: start at manufacturer recommendation (6–12 months), then let as-found drift history stretch or shrink it — calibrate the drifters often, the stable rarely.</p>
+    </div>
+
+    <div class="card demo">
+      <div class="label">🧮 Interactive — calibration verdict</div>
+      <div class="seg" id="ptSeg">
+        <button data-p="0">0 %</button>
+        <button data-p="25">25 %</button>
+        <button data-p="50" class="on">50 %</button>
+        <button data-p="75">75 %</button>
+        <button data-p="100">100 %</button>
+      </div>
+      <div class="demo-row"><span>Measured output at this point (mA)</span><b><span id="cmv">12.05</span></b></div>
+      <input type="range" id="cmR" min="3.8" max="20.4" step="0.01" value="12.05">
+      <div class="seg" id="tolSeg">
+        <button data-t="0.25">±0.25 %</button>
+        <button data-t="0.5" class="on">±0.5 %</button>
+        <button data-t="1">±1.0 %</button>
+      </div>
+      <div class="demo-out" id="calOut">—</div>
+      <p class="cap">Ideal mA = 4 + 16·(point %). Error in %span = (measured − ideal)/16 × 100. The verdict logic is exactly what a documenting calibrator prints.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">A transmitter's as-found run shows errors of +0.42, +0.44, +0.41, +0.43, +0.42 %span at the five points. Zero trim, span trim, or both?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>Zero trim only.</b> The error is uniform (~+0.42 %span everywhere) — a pure offset. A span error would grow with input (small at 0 %, large at 100 %). Trim zero, re-run the five points to produce a clean as-left, and log both tables. If the errors had been 0.0 / +0.2 / +0.4 / +0.6 / +0.8, that ramp is a span error: trim span at 100 %, then re-verify zero — the two adjustments interact.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 9 ============ -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 16 · Metrology</span>
+    <h2 class="page-title">Uncertainty, TUR &amp; the Loop Error Budget</h2>
+    <p class="page-sub">A measurement without an uncertainty is an opinion with digits.</p>
+
+    <div class="card">
+      <div class="label">Uncertainty in one card (GUM lite)</div>
+      <div class="eqn">Independent error sources u₁, u₂, … combine by root-sum-square:
+<b>u_c = √(u₁² + u₂² + u₃² + …)</b>            (combined standard uncertainty)
+<b>U = k·u_c</b>,  k = 2  →  ≈95 % confidence     (expanded uncertainty)
+Type A: evaluated statistically (repeat readings, s/√n)
+Type B: everything else (datasheets, cert values, resolution/√12)</div>
+      <p class="body">The RSS combination is the same variance algebra as the tolerance stacks in <a href="A21_GDT_Tolerances_Deep_Dive.html" style="color:var(--accent-soft)">A21</a> — uncorrelated errors add in quadrature, so one dominant term rules the budget: a 0.5 % error next to three 0.1 % errors gives √(0.25+0.03) ≈ 0.53 %, not 0.8 %. Improve the biggest term or improve nothing.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">TUR — is your standard good enough?</div>
+      <div class="eqn">Test Uncertainty Ratio:  <b>TUR = tolerance of unit-under-test ÷ uncertainty of the standard</b>
+Target: <b>TUR ≥ 4:1</b>  (ANSI/NCSL Z540 tradition)
+Checking a ±0.5 %-span transmitter needs a standard good to ≲0.125 % at the test points.
+Below 4:1 → guard-banding: shrink the acceptance limits so a "pass" still means pass
+(accept if |error| ≤ tolerance − U_standard — the ISO 14253 decision-rule idea).</div>
+      <p class="body">This is why a shop multimeter cannot "calibrate" a laboratory-grade transmitter: with TUR near 1:1 a pass verdict is a coin toss at the limits. The ratio, not the brand, decides what may calibrate what.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The whole-loop error budget</div>
+      <p class="body">The operator reads the sum of the chain: primary element error (orifice ±1 %), transmitter (±0.075 %), ADC input card (±0.1 %), and display quantisation. RSS them: √(1² + 0.075² + 0.1²) ≈ <strong>±1.006 %</strong> — the orifice owns the budget; polishing the transmitter is cosmetic. The professional habit: build the budget <em>before</em> buying, spend money on the dominant term, and quote the loop (not the transmitter) accuracy in the design dossier. For safety loops, this same arithmetic feeds the safety-accuracy claims in SIL verification (IEC 61511 — its own module, next in this series).</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><h4>Combine</h4><p class="big">RSS</p><p>Uncorrelated errors add in quadrature — the biggest term dominates the loop.</p></div>
+      <div class="mini c-amb"><h4>Standards ratio</h4><p class="big">4:1</p><p>Your reference must be ~4× better than the tolerance you certify — else guard-band.</p></div>
+      <div class="mini c-sky"><h4>Confidence</h4><p class="big">k = 2</p><p>Expanded uncertainty at ≈95 % — the number that belongs on the certificate.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 10 ============ -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 16 · P&amp;ID</span>
+    <h2 class="page-title">Reading P&amp;IDs — the ISA-5.1 Grammar</h2>
+    <p class="page-sub">A P&amp;ID is a sentence diagram of the plant. Learn the alphabet once, read every plant forever.</p>
+
+    <div class="card">
+      <div class="label">The tag: two letter groups + a loop number</div>
+      <div class="eqn"><b>F T - 101</b>
+│ │    └── loop number (all members of loop 101 share it)
+│ └────── succeeding letters = FUNCTION:  T transmitter · I indicator · C controller
+│          V valve · S switch · A alarm (with H/L) · E element · Y compute/relay · Q totalise
+└──────── first letter = VARIABLE:  F flow · P pressure · T temperature · L level
+           A analysis · S speed · W weight · Z position   (+ modifier: <span class="v2">D differential, F ratio</span>)
+Examples:  PDT = pressure-differential transmitter · TIC = temp indicating controller
+LSH = level switch high · FQI = flow totaliser indicator · PSV = pressure safety valve</div>
+      <p class="body">Read tags in order: <em>what is measured → what is done with it → which loop</em>. FT-101, FIC-101 and FV-101 are one sentence: flow is transmitted, controlled, and actuated in loop 101. The <strong>succeeding-letter Y</strong> (FY-101) is the quiet workhorse — square-root extractors, I/P converters, selectors and calculations all hide behind it.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Balloons &amp; lines — where the function lives</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="11.5" text-anchor="middle" font-weight="600">
+            <!-- field instrument -->
+            <circle cx="80" cy="55" r="26" fill="none" stroke="#6ee7b7" stroke-width="2.5"/>
+            <text x="80" y="52" fill="#6ee7b7">FT</text><text x="80" y="66" fill="#6ee7b7">101</text>
+            <text x="80" y="105" fill="#94a3b8" font-size="10.5">circle = field-mounted</text>
+            <!-- panel -->
+            <circle cx="240" cy="55" r="26" fill="none" stroke="#fbbf24" stroke-width="2.5"/>
+            <line x1="214" y1="55" x2="266" y2="55" stroke="#fbbf24" stroke-width="2.5"/>
+            <text x="240" y="50" fill="#fde68a">PI</text><text x="240" y="67" fill="#fde68a">102</text>
+            <text x="240" y="105" fill="#94a3b8" font-size="10.5">line = main panel</text>
+            <!-- shared display DCS -->
+            <rect x="366" y="29" width="52" height="52" rx="6" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+            <circle cx="392" cy="55" r="22" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+            <text x="392" y="51" fill="#7dd3fc">FIC</text><text x="392" y="65" fill="#7dd3fc">101</text>
+            <text x="392" y="105" fill="#94a3b8" font-size="10.5">circle-in-square = DCS/HMI</text>
+            <!-- PLC interlock -->
+            <rect x="524" y="29" width="52" height="52" rx="6" fill="none" stroke="#f472b6" stroke-width="2.5"/>
+            <path d="M 550 33 L 572 55 L 550 77 L 528 55 Z" fill="none" stroke="#f472b6" stroke-width="2.5"/>
+            <text x="550" y="60" fill="#f9a8d4">I-1</text>
+            <text x="550" y="105" fill="#94a3b8" font-size="10.5">diamond-in-square = interlock (PLC)</text>
+            <!-- line types -->
+            <line x1="40" y1="150" x2="220" y2="150" stroke="#e2e8f0" stroke-width="4"/>
+            <text x="130" y="140" fill="#94a3b8" font-size="10.5">process line (heavy)</text>
+            <line x1="40" y1="185" x2="220" y2="185" stroke="#94a3b8" stroke-width="2" stroke-dasharray="10 5"/>
+            <text x="130" y="175" fill="#94a3b8" font-size="10.5">electric signal ─ ─ ─</text>
+            <g stroke="#94a3b8" stroke-width="2"><line x1="260" y1="150" x2="440" y2="150"/><line x1="285" y1="144" x2="295" y2="156"/><line x1="305" y1="144" x2="315" y2="156"/><line x1="345" y1="144" x2="355" y2="156"/><line x1="365" y1="144" x2="375" y2="156"/><line x1="405" y1="144" x2="415" y2="156"/></g>
+            <text x="350" y="140" fill="#94a3b8" font-size="10.5">pneumatic ─//─//─</text>
+            <g stroke="#94a3b8" stroke-width="2"><line x1="260" y1="185" x2="440" y2="185" stroke-dasharray="3 4"/><circle cx="290" cy="185" r="3" fill="#94a3b8"/><circle cx="350" cy="185" r="3" fill="#94a3b8"/><circle cx="410" cy="185" r="3" fill="#94a3b8"/></g>
+            <text x="350" y="175" fill="#94a3b8" font-size="10.5">data link ···●···</text>
+            <!-- valve -->
+            <path d="M 500 150 L 530 165 L 500 180 Z M 560 150 L 530 165 L 560 180 Z" fill="none" stroke="#e2e8f0" stroke-width="2.5"/>
+            <path d="M 530 165 L 530 135 M 514 121 A 18 14 0 0 1 546 121" stroke="#6ee7b7" stroke-width="2.5" fill="none"/>
+            <text x="600" y="160" fill="#94a3b8" font-size="10.5" text-anchor="start">globe valve +</text>
+            <text x="600" y="175" fill="#94a3b8" font-size="10.5" text-anchor="start">diaphragm actuator</text>
+            <text x="350" y="235" fill="#94a3b8" font-size="11" font-weight="400">balloon shape tells WHERE the function runs; line style tells HOW the signal travels; the tag tells WHAT and WHY</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">The four balloon homes (field, panel, DCS, PLC) and the four signal line styles — 90 % of P&amp;ID literacy.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Reading discipline &amp; the valve fine print</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Walk the loop, not the page:</strong> find the primary element, follow its signal through Y-functions to the controller balloon, then out to the final element. One loop = one story; highlight it.</div></li>
+        <li><span class="num">2</span><div><strong>Failure position is on the drawing:</strong> FC (fail closed), FO (fail open), FL (fail last) under each control valve — chosen for process safety on air/power loss, not convenience (cooling water FO, fuel FC). It pairs with actuator action and positioner config; commissioning must verify it physically.</div></li>
+        <li><span class="num">3</span><div><strong>SIS lives apart:</strong> interlock balloons (diamond) and their sensors/valves form the safety instrumented system — deliberately separate from control instruments (page 7's diverse point switches; IEC 61511 module next). Never "borrow" a control transmitter for a trip without the study saying so.</div></li>
+        <li><span class="num">4</span><div><strong>Cross-references are the plot:</strong> off-page connectors, note flags and the line list carry half the design intent. The instrument index + loop diagrams (ISA-5.4) turn one P&amp;ID line into wiring reality.</div></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick check</div>
+      <p class="quiz-q">Decode: LT-204 → LY-204 → LIC-204 (circle-in-square) → LV-204 (FC). Then: what is LSH-205 doing on the same vessel, and why is it a separate loop number?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Level transmitter 204 feeds a compute/relay function (LY — perhaps damping or a characteriser), then a level indicating controller running in the DCS, which drives level valve 204 that fails closed on air loss. LSH-205 is an independent <b>level switch high</b> — a separate device on a separate loop number because it belongs to the protection layer (alarm or trip), deliberately independent of the 204 control loop so one failure cannot silence both control and alarm. Diversity by design.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 11 ============ -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 / 16 · Closing the Loop</span>
+    <h2 class="page-title">Final Elements &amp; Loop Commissioning</h2>
+    <p class="page-sub">The measurement chain earns its keep only when the valve moves right and the loop folder proves it.</p>
+
+    <div class="card">
+      <div class="label">Control valves in one card</div>
+      <div class="eqn">Valve capacity:  Q = C_v·√(ΔP/SG)   [US gpm, psi]  (metric K_v = 0.865·C_v)
+Inherent characteristics: quick-opening · linear · <b>equal-percentage</b> (=% most common:
+equal increments of travel → equal % increases of flow — compensates the
+installed ΔP collapse as flow rises, keeping loop gain roughly constant)
+Sizing habit: normal flow at 60–80 % open; never buy the line size by default.</div>
+      <p class="body">The valve stack: body + trim (sets C_v and characteristic), <strong>actuator</strong> (spring-diaphragm or piston; spring direction sets the fail position on the P&amp;ID), and <strong>positioner</strong> — a feedback controller on stem position, today a smart digital device whose diagnostics (stiction, air leakage, travel deviation) feed predictive maintenance (<a href="A23_TPM_Deep_Dive.html" style="color:var(--accent-soft)">A23</a>). <strong>Stiction + deadband</strong> in a valve produce the tell-tale sawtooth limit cycle no PID tuning can remove (<a href="A10_PID_Control_Deep_Dive.html" style="color:var(--accent-soft)">A10</a>) — fix the valve, then tune. I/P converters (4–20 mA → 0.2–1 bar) and the plant air quality behind them (<a href="A12_Pneumatic_Systems_Deep_Dive.html" style="color:var(--accent-soft)">A12</a>) are part of the measurement chain's last metre.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Loop check &amp; commissioning ritual</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>The loop folder:</strong> P&amp;ID extract, loop diagram (ISA-5.4), instrument datasheet, range/units, cal certificate, alarm/trip list. If it isn't written, it isn't ranged.</div></li>
+        <li><span class="num">2</span><div><strong>Wire check (cold):</strong> continuity, screen landed one end, loop resistance, insulation — then power and confirm the live zero: 4.0 mA at LRV, not 0.</div></li>
+        <li><span class="num">3</span><div><strong>Simulate at the source:</strong> inject pressure/temperature/mA at the field end and confirm 0-25-50-75-100 % arrives correct at HMI, in engineering units, with alarms firing at listed values — this catches scaling errors the bench never sees (A07's 0–27648 raw counts, byte order, √ extraction on the wrong side).</div></li>
+        <li><span class="num">4</span><div><strong>Stroke the valve:</strong> 0/25/50/75/100 % commands both directions — verify travel, speed, fail action (dump the air!), and positioner autotune report filed.</div></li>
+        <li><span class="num">5</span><div><strong>Bump before closing the permit:</strong> a small controller-in-manual step; watch PV respond in the right direction with sane dynamics. Only then hand the loop to auto and to A10's tuning rules.</div></li>
+      </ul>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><h4>Valve law</h4><p class="big">=%</p><p>Equal-percentage trim keeps installed gain flat as line ΔP collapses with flow.</p></div>
+      <div class="mini c-amb"><h4>Loop killer</h4><p class="big">stiction</p><p>Sawtooth PV + square OP = valve stem sticking. No tuning cures mechanics.</p></div>
+      <div class="mini c-sky"><h4>Proof</h4><p class="big">5-point</p><p>Source-to-screen simulation at five points — the only scaling test that counts.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 ============ -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 / 16 · Recap</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Self-Test</h2>
+    <p class="page-sub">The discipline in eight lines — then the six classic ways measurements lie.</p>
+
+    <div class="card">
+      <div class="label">Eight ideas to keep</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>The chain is the instrument.</strong> Primary element → transmitter → signal → controller → valve; the loop reads the sum of all of them.</div></li>
+        <li><span class="num">2</span><div><strong>Errors live in %span.</strong> Range tight: the same ±0.25 % is 4× more °C on a 4× wider span.</div></li>
+        <li><span class="num">3</span><div><strong>4–20 mA endures for reasons:</strong> immunity to cable resistance, loop power on two wires, live zero + NAMUR fault bands, HART on top.</div></li>
+        <li><span class="num">4</span><div><strong>Each variable has its physics and its traps:</strong> impulse-line slopes (P), lead resistance &amp; CJC (T), √ΔP turndown (F), wet-leg density (L).</div></li>
+        <li><span class="num">5</span><div><strong>Calibration = comparison + record.</strong> 5-point up-down, as-found/as-left, zero vs span diagnosis, traceable standards, TUR ≥ 4:1.</div></li>
+        <li><span class="num">6</span><div><strong>Uncertainty adds RSS</strong> — find and fix the dominant term; quote the loop, not the transmitter.</div></li>
+        <li><span class="num">7</span><div><strong>ISA-5.1 is a grammar:</strong> variable-function-loop tags, balloon homes, line styles, fail positions — read the loop as a sentence.</div></li>
+        <li><span class="num">8</span><div><strong>Commissioning is a ritual:</strong> loop folder, live zero, source-to-screen 5-point, valve stroke + fail action, bump test. Then — and only then — tune.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Six ways measurements lie</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">⚠ Plugged / wrong-slope impulse line</div><p>Frozen reading or slow lies while the process moves. Blowdown routines and correct slopes (gas up, liquid down) are maintenance, not options.</p></div>
+        <div class="fail"><div class="ft">⚠ The %-of-span stretch</div><p>Transmitter re-ranged 4× wider "to cover the new case" — every error and alarm deadband silently 4× worse in engineering units.</p></div>
+        <div class="fail"><div class="ft">⚠ Copper in the thermocouple run</div><p>A terminal-block "repair" with copper wire creates parasitic junctions; the reading offsets by the cabinet-to-field temperature difference and drifts daily.</p></div>
+        <div class="fail"><div class="ft">⚠ Square-root twice (or never)</div><p>Extraction enabled in both transmitter and DCS → flow reads √ of itself; enabled in neither → parabolic lies. One √, one place, documented.</p></div>
+        <div class="fail"><div class="ft">⚠ Wet leg half empty</div><p>Boiled-off or leak-drained reference column shrinks the subtracted head — level reads high, operators drain a "full" drum. Condensate pots exist for this.</p></div>
+        <div class="fail"><div class="ft">⚠ Calibrated to a worse standard</div><p>TUR ~1:1 "calibration" with a shop meter stamps uncertainty as compliance. As-found data against a real standard later rewrites a year of production.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final quiz — 5 questions</div>
+      <p class="quiz-q">1 · Why does a broken wire read differently from a true zero-flow signal on a 4–20 mA loop?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Zero flow = 4.0 mA (the live zero). A broken wire = 0 mA — below the NAMUR 3.6 mA fault threshold, so the system declares sensor failure instead of displaying a fake 0 % reading. That's the whole point of not starting the scale at 0 mA.</span>
+      </div>
+      <p class="quiz-q">2 · A Pt100 reads 138.51 Ω on a 4-wire bench check. What temperature is that, and why did the technician insist on 4-wire?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">138.51 Ω is the IEC 60751 value for exactly <b>100 °C</b>. 4-wire (Kelvin) sensing drives current down one pair and measures voltage on the other, excluding all lead resistance — on a bench verification you want the element's truth, not the test-lead story (0.4 Ω of leads would masquerade as +1 °C).</span>
+      </div>
+      <p class="quiz-q">3 · An orifice flow loop must work from 20 t/h down to 2 t/h. Why is one DP transmitter not enough, and what are two engineering outs?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">10:1 flow turndown = 100:1 DP turndown (ΔP ∝ Q²): at 2 t/h the cell sees 1 % of its DP span, where its %-span error is amplified ~50× in flow. Outs: (1) <b>stacked transmitters</b> — a high-range and a low-range cell on the same taps with automatic switchover; (2) change technology — <b>Coriolis or magmeter</b> with genuine 40–100:1 turndown. (A smart multivariable cell stretches to ~10:1 but not 100:1.)</span>
+      </div>
+      <p class="quiz-q">4 · The as-found run shows errors 0.0 / +0.1 / +0.3 / +0.6 / +1.0 %span with 0.3 % hysteresis between up and down at mid-scale. Diagnose.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">The ramp growing with input is a <b>span error (gain too high)</b> → span trim, then re-check zero. The 0.3 % up-down gap is <b>hysteresis</b> — mechanical (linkage, diaphragm set) — which no trim removes; if it exceeds the tolerance the instrument is repaired or replaced, not adjusted. Two different diseases in one table: that's why the run is five points, both directions.</span>
+      </div>
+      <p class="quiz-q">5 · On the P&amp;ID, FV-301 carries "FO". The loop cools a reactor. Why FO, and what must commissioning physically verify?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden">Fail Open: on instrument-air or signal loss the valve springs open so cooling water keeps flowing — the safe direction for an exothermic process. Commissioning must dump the air at the actuator and watch the valve actually travel to open (and time it): fail action lives in spring orientation and positioner/actuator hardware, not in software, and a wrong-sprung actuator passes every electronic test until the day it matters.</span>
+      </div>
+    </div>
+
+    <!-- MEMORY HOOK -->
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"Live zero, tight span, traceable trim —<br>the loop is only as honest as its weakest link."</p>
+      <p style="margin-top:14px; font-size:15px; opacity:0.85;">4 mA means alive · errors live in %span · calibrate against something 4× better · and read the P&amp;ID like a sentence.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 ============ -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 / 16 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade numericals — elevated-zero scaling, RTD arithmetic, DP-flow ranging and the wet-leg level.</p>
+
+    <div class="card">
+      <div class="label">WE-1 · Elevated-zero temperature loop</div>
+      <div class="eqn">Range: −50 … +150 °C  →  LRV = −50, URV = +150, span = 200 °C
+(a) I at PV = 25 °C:
+    I = 4 + 16·(25 − (−50))/200 = 4 + 16·0.375 = <b>10.0 mA</b>
+(b) PV at I = 17.6 mA:
+    PV = −50 + (17.6 − 4)/16 · 200 = −50 + 0.85·200 = <b>+120 °C</b>
+(c) The 4 mA point IS −50 °C — a live, valid reading, not a fault:
+    fault-low is ≤ 3.6 mA (NAMUR), fully below the scale.</div>
+      <p class="body"><strong>Discussion:</strong> elevated zeros are where scaling mistakes hide. A technician who assumes "4 mA = 0 °C" mis-enters alarms by 50 °C. Always state LRV/URV on the loop sheet and check the 0-25-50-75-100 % table in <em>engineering units</em>: −50 / 0 / +50 / +100 / +150 °C here.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-2 · Pt100 arithmetic + the unequal-lead lie</div>
+      <div class="eqn">(a) R at 60 °C (IEC 60751):
+    R = 100·(1 + 3.9083×10⁻³·60 − 5.775×10⁻⁷·60²)
+      = 100·(1 + 0.23450 − 0.00208) = <b>123.24 Ω</b>
+(b) 3-wire circuit assumes equal leads. Real leads: 1.2 Ω and 1.0 Ω
+    → uncompensated residual = 1.2 − 1.0 = 0.2 Ω
+    → error = 0.2 / 0.385 ≈ <b>+0.52 °C</b>
+(c) Class A element tolerance at 60 °C: ±(0.15 + 0.002·60) = <b>±0.27 °C</b>
+    → the lead imbalance is 2× the sensor's own tolerance!</div>
+      <p class="body"><strong>Discussion:</strong> 3-wire compensation is only as good as lead symmetry — corroded terminals and mixed cable batches break it. Where the number matters, go 4-wire or head-mounted transmitter (WE-1's loop), and record which wiring scheme the calibration used.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-3 · Orifice ranging &amp; low-flow error</div>
+      <div class="eqn">DP cell ranged 0–250 mbar ≙ 0–40 m³/h (√ extraction in the transmitter).
+(a) Flow at ΔP = 90 mbar:
+    Q = 40·√(90/250) = 40·0.60 = <b>24 m³/h</b>
+(b) ΔP at 10 m³/h:
+    ΔP = (10/40)²·250 = 0.0625·250 = <b>15.6 mbar</b>  (6.25 % of DP span!)
+(c) Cell accuracy ±0.1 % span = ±0.25 mbar
+    → flow error = ½ · (0.25/15.6) ×100 = <b>±0.8 %</b> at 25 % flow
+    at 10 % flow (2.5 mbar): ½·(0.25/2.5) = <b>±5 %</b> — the turndown wall.</div>
+      <p class="body"><strong>Discussion:</strong> part (c) is the page-6 demo in exam form. The ½ factor comes from differentiating Q ∝ √ΔP: dQ/Q = ½·dΔP/ΔP (Derivation 2). State it, use it, and you will justify stacked cells or a Coriolis without hand-waving.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-4 · Wet-leg level ranging</div>
+      <div class="eqn">Vessel: level span h = 0–2.0 m of product, ρ = 850 kg/m³.
+Wet leg: H = 2.5 m, fill ρ_f = 1000 kg/m³. Transmitter at bottom-tap height.
+LRV (h = 0):   ΔP = 0 − 1000·9.81·2.5 = <b>−24.53 kPa</b>
+URV (h = 2 m): ΔP = 850·9.81·2.0 − 24 525 = 16 677 − 24 525 = <b>−7.85 kPa</b>
+Span = 16.68 kPa; the whole range is NEGATIVE (elevated zero).
+Half tank (h = 1 m): ΔP = −16.19 kPa → I = 4 + 16·(−16.19+24.53)/16.68 = <b>12.0 mA</b> ✓</div>
+      <p class="body"><strong>Discussion:</strong> the sanity check is always the 50 % point: half the product head above LRV must give 12.0 mA. If the technician "zeroes" this transmitter at h = 0 with the equalising valve open instead of entering the calculated LRV, the wet leg's −24.5 kPa gets erased and the range is fiction. Range by arithmetic, verify by manifold.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 ============ -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 / 16 · MSc Practice</span>
+    <h2 class="page-title">Problem Set — 10 Questions</h2>
+    <p class="page-sub">Scaling, sensors, calibration verdicts and P&amp;ID grammar. Work first, reveal second.</p>
+
+    <div class="card quiz">
+      <p class="quiz-q">P1 · A 0–16 bar transmitter reads 13.2 mA. What pressure — and what % of span?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">(13.2−4)/16 = 57.5 % → PV = 0.575 × 16 = <b>9.2 bar</b>. The %-first habit catches gross errors instantly (13.2 mA must be a bit above mid-scale; 12 mA would be exactly 8 bar).</span></div>
+      <p class="quiz-q">P2 · The DCS shows a temperature frozen at −62 °C on a −50…+150 °C loop. mA meter reads 3.2 mA. Diagnosis?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">3.2 mA is below the NAMUR 3.6 mA fault-low band: the transmitter is <b>signalling its own failure</b> (or the loop is starving — supply/wiring). The −62 °C is just 3.2 mA pushed through the scaling math. Treat as diagnostics, not data; check supply voltage, loop resistance, then the device via HART.</span></div>
+      <p class="quiz-q">P3 · Type-K thermocouple, 25 m to the panel. The stores had no K-extension cable, so copper instrument cable was used "temporarily". The panel sits 18 °C cooler than the field head. What error appears?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">The copper splice moves the effective cold junction from the panel (where CJC measures) to the field head. The uncompensated span is the head-to-panel difference: reading ≈ <b>18 °C low</b>, varying with weather and cabinet heating. Fix: K-extension (KX) or compensating (KCA/KCB) cable end-to-end, or a head transmitter converting to mA at the sensor.</span></div>
+      <p class="quiz-q">P4 · A thermowell upgrade doubles the well mass and the measured τ goes from 8 s to 45 s on a process whose dominant time constant is 60 s. Consequence for the control loop?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">The sensor lag is now ~75 % of the process lag — far beyond the ≤1/10 rule. The loop's apparent dead time and phase lag balloon; the PID must be detuned (slower Ti, lower Kc) and disturbance rejection degrades badly (A10's phase-margin budget eaten by the well). Cures: spring-loaded tip-contact insert, thermal paste, thinner/tapered well within PTC 19.3 limits, or accept slower control and say so in the design.</span></div>
+      <p class="quiz-q">P5 · Why will a magmeter not read demineralised water or diesel, and what property draws the line?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">Faraday's law needs the fluid itself to be the moving conductor: E = k·B·v·D requires <b>conductivity above ~5 µS/cm</b>. Demin water (~0.1 µS/cm) and hydrocarbons (~pS/cm) can't complete the electrode circuit — the meter reads noise. Use Coriolis, ultrasonic, vortex or turbine instead.</span></div>
+      <p class="quiz-q">P6 · As-found errors: −0.9 / −0.7 / −0.4 / −0.2 / 0.0 %span at 0/25/50/75/100 %. Zero trim, span trim, or both — in which order?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>Both.</b> There's a −0.9 % offset at zero AND a +0.9 % ramp across the span (errors shrink as input rises → gain slightly high... actually output slope is high by +0.9 % of span across the range). Procedure: <b>zero trim first</b> (fix −0.9 at 0 %), then <b>span trim</b> at 100 %, then re-check zero (they interact), then a full clean as-left run. One-point "calibrations" cannot even see this pattern.</span></div>
+      <p class="quiz-q">P7 · Your reference standard has U = 0.15 %; you certify transmitters to ±0.5 %. TUR? Is a measured error of 0.45 % a pass?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">TUR = 0.5/0.15 ≈ <b>3.3:1</b> — below the 4:1 target, so guard-band: accept only if |error| ≤ 0.5 − 0.15 = <b>0.35 %</b>. The 0.45 % result lands in the grey zone — "undetermined": it may be conforming, but you cannot prove it with this standard. Options: better standard, or report with the decision rule stated (ISO 14253 logic).</span></div>
+      <p class="quiz-q">P8 · Loop budget: orifice ±1.0 %, DP cell ±0.075 %, input card ±0.1 %, √ extraction rounding ±0.05 %. Loop accuracy — and where would you spend an upgrade dollar?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">RSS = √(1.0² + 0.075² + 0.1² + 0.05²) = √(1.0 + 0.0056 + 0.01 + 0.0025) ≈ <b>±1.01 %</b>. The orifice IS the budget: replacing the transmitter with a ±0.04 % model changes nothing visible. Money goes to the primary element (better plate condition, meter run, or a magmeter/Coriolis) — or nowhere, if ±1 % meets the process need.</span></div>
+      <p class="quiz-q">P9 · Decode fully: PDIT-405 (circle-in-square), PDAH-405, and the dashed line joining them.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">PDIT-405: <b>P</b>ressure-<b>D</b>ifferential <b>I</b>ndicating <b>T</b>ransmitter, loop 405, displayed on the DCS (circle-in-square) — likely a filter ΔP monitor. PDAH-405: the associated <b>A</b>larm <b>H</b>igh on the same differential pressure. The dashed line is an electric signal. Sentence: "filter DP is transmitted and indicated; high DP raises an alarm" — a maintenance-planning instrument (A23's predictive input), not a control loop.</span></div>
+      <p class="quiz-q">P10 · During loop check, HMI shows exactly half the injected value at every point (50 % in → 25 % shown). Name the two classic culprits and the test that separates them.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden">A clean proportional halving means a <b>scaling mismatch</b>, not wiring: (1) PLC raw-count range wrong — e.g. configured 0–55296 instead of 0–27648 (S7 world, A07), or 4–20 mA entered as 0–20 mA; (2) engineering-units span entered double (URV 200 instead of 100). Separate them by reading the RAW counts at a known mA: if raw is right but EU is wrong → units/span entry; if raw itself is half → card range/jumper config. (If the relationship were √-shaped rather than ½-proportional, suspect double √ extraction.)</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 15 ============ -->
+  <section class="page" id="p15">
+    <span class="page-tag">Page 15 / 16 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations, Glossary &amp; Exam Traps</h2>
+    <p class="page-sub">Three derivations worth owning, the symbol table, and seven traps that separate technicians from engineers.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 · Why a current loop ignores cable resistance</div>
+      <div class="eqn">Series loop: 24 V supply, transmitter (a regulated current sink), cable R_c, sense R_s = 250 Ω.
+KVL:  24 = V_tx + I·R_c + I·R_s
+The transmitter electronically absorbs whatever V_tx the equation leaves over,
+holding I = f(PV) — <b>current is the regulated variable</b>, voltage is the slack.
+Reading at the DCS: V = I·R_s — depends only on I and the known R_s. R_c vanished.
+Limit: the compliance budget.  V_tx(min) ≈ 10–12 V, so
+R_c(max) = (24 − V_tx(min) − 20 mA·250 Ω)/20 mA ≈ (24 − 12 − 5)/0.02 = <b>350 Ω</b>
+— kilometres of copper before the loop even notices. A voltage signal would have
+divided itself across R_c from the first metre. QED, and quod erat 1957.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 · Q ∝ √ΔP and the ½ error factor</div>
+      <div class="eqn">Bernoulli between pipe (1) and vena contracta (2), incompressible, level line:
+p₁ + ½ρv₁² = p₂ + ½ρv₂²      Continuity: v₁A₁ = v₂A₂ → v₁ = v₂·(A₂/A₁)
+→ ΔP = ½ρv₂²·(1 − β⁴)        (β = d/D, A₂/A₁ = β²)
+→ v₂ = √( 2ΔP / ρ(1−β⁴) )    →  Q = C·ε·A₂·√(2ΔP/ρ(1−β⁴))  (C: discharge, ε: expansibility)
+Error propagation: ln Q = ½·ln ΔP + const → <b>dQ/Q = ½·dΔP/ΔP</b>
+— the factor that turned 0.1 % of DP span into 5 % of flow at 10 % rate (WE-3).</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 · How 3-wire RTD compensation works</div>
+      <div class="eqn">Leads a, b (current-carrying pair) and c (sense). Assume R_a = R_b = R_L.
+Measurement 1 (element path):  M₁ = R_RTD + R_a + R_b = R_RTD + 2R_L
+Measurement 2 (lead loop via c): M₂ = R_a + R_b = 2R_L   (modern inputs measure this directly)
+Compensated result: <b>R_RTD = M₁ − M₂</b> — exact IF the leads match.
+Unequal leads (R_a = R_b + δ): residual error = δ  → δ/0.385 °C per ohm (WE-2's 0.52 °C).
+4-wire: force I down one pair, read V on the other (no current in sense leads)
+→ R_RTD = V/I with <b>zero</b> lead sensitivity — why labs refuse anything less.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol &amp; term glossary</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Term</th><th>Meaning</th></tr>
+          <tr><td><b>LRV / URV / span</b></td><td>range endpoints; span = URV − LRV; errors quoted in %span</td></tr>
+          <tr><td><b>Live zero</b></td><td>4 mA = 0 % — keeps 0 mA free to mean "dead loop"</td></tr>
+          <tr><td><b>NAMUR NE 43</b></td><td>≤3.6 mA / ≥21 mA reserved as deliberate fault signals</td></tr>
+          <tr><td><b>HART</b></td><td>FSK digital protocol superimposed on 4–20 mA</td></tr>
+          <tr><td><b>CJC</b></td><td>cold-junction compensation — adds terminal temperature back to TC EMF</td></tr>
+          <tr><td><b>Elevation / suppression</b></td><td>ranging with LRV below / above true zero (wet legs, mounting offsets)</td></tr>
+          <tr><td><b>As-found / as-left</b></td><td>state before / after adjustment — the audit pair</td></tr>
+          <tr><td><b>TUR</b></td><td>tolerance ÷ standard uncertainty; ≥4:1 or guard-band</td></tr>
+          <tr><td><b>Traceability</b></td><td>unbroken calibration chain to SI via NMI (NIST/NPL/MUSSD)</td></tr>
+          <tr><td><b>ISA-5.1</b></td><td>the tag-and-symbol standard behind every P&amp;ID balloon</td></tr>
+          <tr><td><b>FC / FO / FL</b></td><td>valve failure position: closed / open / last — safety-chosen</td></tr>
+          <tr><td><b>C_v / K_v</b></td><td>valve flow coefficient (US gpm at 1 psi / m³/h at 1 bar)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven exam &amp; plant traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>% of span ≠ % of reading.</strong> Convert both to engineering units at the operating point before comparing datasheets — the page-2 quiz in disguise, and examiners' favourite bait.</div></li>
+        <li><span class="num">2</span><div><strong>barg vs bara vs ΔP.</strong> Pumps add differential; datasheets rate absolute or gauge; vacuum reads negative gauge. Write the suffix every single time.</div></li>
+        <li><span class="num">3</span><div><strong>One √, one place.</strong> Square-root extraction in transmitter OR DCS, never both, never neither — and the loop folder must say which.</div></li>
+        <li><span class="num">4</span><div><strong>Approach direction matters.</strong> Calibration points overshot-and-backed hide hysteresis; the 5-point run is up THEN down, monotonic approaches only.</div></li>
+        <li><span class="num">5</span><div><strong>Re-ranging is not calibrating.</strong> HART re-range moves LRV/URV in software; it adjusts nothing physical and needs no reference — a trim against a standard does. Confusing the two voids the certificate.</div></li>
+        <li><span class="num">6</span><div><strong>Two grounds, one loop, big noise.</strong> Screen landed at both ends → ground loop currents ride the signal. Screen: one end (panel), insulated at the field.</div></li>
+        <li><span class="num">7</span><div><strong>The instrument is rarely the liar.</strong> Impulse lines, wet legs, lead wires, CJC, scaling entries — the chain around the sensor causes most "instrument faults". Walk the chain before condemning the device.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 16 ============ -->
+  <section class="page" id="p16">
+    <span class="page-tag">Page 16 / 16 · MSc Practice</span>
+    <h2 class="page-title">Study Path &amp; Practice Ladder</h2>
+    <p class="page-sub">The shelf, the hands-on ladder, and the self-assessment.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Resource</th><th>What it gives you</th></tr>
+          <tr><td><b>Béla Lipták — <em>Instrument Engineers' Handbook</em> (Vol 1: Process Measurement)</b></td><td>the encyclopaedia — every measurement, every trap, forever the reference</td></tr>
+          <tr><td><b>ISA-5.1 / ISA-5.4</b></td><td>the tag &amp; symbol grammar; loop diagram practice</td></tr>
+          <tr><td><b>ISO 5167 (1–4)</b></td><td>orifice/venturi/nozzle law: β limits, straight runs, uncertainty clauses</td></tr>
+          <tr><td><b>IEC 60751 / IEC 60584</b></td><td>RTD and thermocouple classes, tables and tolerances</td></tr>
+          <tr><td><b>Beamex &amp; Fluke calibration white papers ("Calibration Essentials")</b></td><td>free, superb field-calibration practice: 5-point runs, TUR, intervals</td></tr>
+          <tr><td><b>JCGM 100 (GUM) + NIST TN 1297</b></td><td>uncertainty done properly — the k=2 mathematics behind certificates</td></tr>
+          <tr><td><b>ISA CCST / CAP study guides</b></td><td>certification-shaped problem practice from tags to trims</td></tr>
+          <tr><td><b>Local: MUSSD &amp; SLSI (Sri Lanka)</b></td><td>national traceability chain and accredited labs for your certificates</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Eight-exercise practice ladder</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Scaling drill:</strong> build a 0-25-50-75-100 % table (mA + engineering units) for five ranges including one elevated zero and one suppressed. One minute each, no calculator by the end.</div></li>
+        <li><span class="num">2</span><div><strong>Multimeter loop lab:</strong> wire a 2-wire simulator (or 250 Ω + supply), measure the loop at three points, prove the current is identical everywhere and the voltage is not.</div></li>
+        <li><span class="num">3</span><div><strong>RTD table sprint:</strong> compute R(T) at −40/0/60/100/200 °C from Callendar–Van Dusen; check against an IEC 60751 table; then do the reverse lookup by iteration.</div></li>
+        <li><span class="num">4</span><div><strong>5-point paper calibration:</strong> take WE-style as-found data (invent a zero+span+hysteresis cocktail), diagnose, "trim", produce the as-left table and verdict.</div></li>
+        <li><span class="num">5</span><div><strong>Orifice notebook:</strong> for a real pipe at work, size the DP range for 120 % of max flow, then compute the flow error at 20 % rate — decide honestly if DP is the right meter.</div></li>
+        <li><span class="num">6</span><div><strong>Wet-leg ranging:</strong> re-derive WE-4 with your own vessel numbers; sanity-check the 12 mA mid-point; write the commissioning note a technician could follow.</div></li>
+        <li><span class="num">7</span><div><strong>P&amp;ID safari:</strong> take any plant P&amp;ID (or a textbook one), highlight three loops end-to-end, decode every tag, list fail positions, and find the SIS diamonds.</div></li>
+        <li><span class="num">8</span><div><strong>Loop-check rehearsal:</strong> write the full source-to-screen procedure for one loop — injection points, expected values, alarm checks, valve stroke, sign-offs — then execute it on site or in simulation (A07 + A14).</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment — can you honestly say…</div>
+      <div class="grid-2">
+        <div class="mini"><h4>Signal fluency</h4><p class="big">mA↔EU</p><p>I convert current, %, and engineering units in my head, elevated zeros included.</p></div>
+        <div class="mini c-amb"><h4>Sensor judgement</h4><p class="big">P T F L</p><p>I can pick and install the right technology for each variable and name its failure story.</p></div>
+        <div class="mini c-sky"><h4>Calibration rigour</h4><p class="big">4:1</p><p>I run 5-point up-down, diagnose zero vs span vs hysteresis, and respect TUR/guard-bands.</p></div>
+        <div class="mini c-purp"><h4>Drawing literacy</h4><p class="big">ISA-5.1</p><p>I read any P&amp;ID loop as a sentence — tags, balloons, lines, fail positions, SIS diamonds.</p></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p><strong>A50 · Instrumentation, Calibration &amp; P&amp;ID</strong> — Advanced Deep Dive · Industrial Automation</p>
+      <p>◆ STANDALONE — related: <a href="A11_Industrial_Sensors_Deep_Dive.html" style="color:var(--accent-soft)">A11 Sensors</a> · <a href="A10_PID_Control_Deep_Dive.html" style="color:var(--accent-soft)">A10 PID</a> · <a href="A07_PLC_Deep_Dive.html" style="color:var(--accent-soft)">A07 PLC</a> · <a href="A14_SCADA_HMI_Deep_Dive.html" style="color:var(--accent-soft)">A14 SCADA</a> · <a href="A47_Fluid_Mechanics_Pumps_Deep_Dive.html" style="color:var(--accent-soft)">A47 Fluids &amp; Pumps</a></p>
+      <p><a href="index.html" style="color:var(--accent-soft)">← Back to the Advanced Library</a></p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  // ---- 4-20 mA scaling demo ----
+  var lrv=document.getElementById('lrvR'),urv=document.getElementById('urvR'),ma=document.getElementById('maR');
+  function sc(){
+    var L=+lrv.value,U=+urv.value,I=+ma.value;
+    if(U<=L){ U=L+5; urv.value=U; }
+    document.getElementById('lrvv').textContent=L;
+    document.getElementById('urvv').textContent=U;
+    document.getElementById('mav').textContent=I.toFixed(1);
+    var span=U-L;
+    var pct=(I-4)/16*100;
+    var pv=L+(I-4)/16*span;
+    var flag='';
+    if(I<=3.6) flag='<b style="color:#f87171">≤3.6 mA — NAMUR fault-LOW: treat as device failure, not data</b><br>';
+    else if(I>=21) flag='<b style="color:#f87171">≥21 mA — NAMUR fault-HIGH: device signalling failure</b><br>';
+    else if(I<4) flag='<b style="color:#fbbf24">below live zero — under-range</b><br>';
+    else if(I>20) flag='<b style="color:#fbbf24">above 20 mA — over-range saturation</b><br>';
+    document.getElementById('maOut').innerHTML=
+      'span = '+U+' − ('+L+') = <b>'+span+'</b> EU<br>'+
+      flag+
+      '% of span = (I−4)/16 = <b>'+pct.toFixed(1)+' %</b><br>'+
+      'PV = '+L+' + '+pct.toFixed(1)+'%·'+span+' = <b>'+pv.toFixed(1)+' EU</b><br>'+
+      'checkpoints: 4→'+L+' · 8→'+(L+0.25*span).toFixed(0)+' · 12→'+(L+0.5*span).toFixed(0)+' · 16→'+(L+0.75*span).toFixed(0)+' · 20→'+U;
+  }
+  [lrv,urv,ma].forEach(function(r){r.addEventListener('input',sc);}); sc();
+
+  // ---- sqrt turndown demo ----
+  var qf=document.getElementById('qfR'),qa=document.getElementById('qaR');
+  function sq(){
+    var Q=+qf.value, acc=+qa.value;
+    document.getElementById('qfv').textContent=Q;
+    document.getElementById('qav').textContent=acc.toFixed(3);
+    var dp=Q*Q/100; // % of DP span
+    var relDP=acc/dp*100;
+    var flowErr=0.5*relDP;
+    var verdict = flowErr<=0.5 ? '<b style="color:#4ade80">excellent</b>'
+                : flowErr<=2 ? '<b style="color:#fbbf24">usable</b>'
+                : '<b style="color:#f87171">poor — re-range, stack cells, or change technology</b>';
+    document.getElementById('qOut').innerHTML=
+      'DP = ('+Q+'%)² = <b>'+dp.toFixed(2)+' %</b> of DP span<br>'+
+      'DP relative error = '+acc.toFixed(3)+' / '+dp.toFixed(2)+' = <b>'+relDP.toFixed(2)+' %</b><br>'+
+      'flow error = ½ × '+relDP.toFixed(2)+' = <b>'+flowErr.toFixed(2)+' %</b> of rate → '+verdict;
+  }
+  [qf,qa].forEach(function(r){r.addEventListener('input',sq);}); sq();
+
+  // ---- calibration verdict demo ----
+  var point=50, tol=0.5;
+  var cm=document.getElementById('cmR');
+  var ptSeg=document.getElementById('ptSeg'), tolSeg=document.getElementById('tolSeg');
+  ptSeg.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    ptSeg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); point=+b.dataset.p;
+    var ideal=4+16*point/100;
+    cm.value=ideal.toFixed(2);
+    cal();
+  });
+  tolSeg.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    tolSeg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); tol=+b.dataset.t; cal();
+  });
+  function cal(){
+    var M=+cm.value;
+    document.getElementById('cmv').textContent=M.toFixed(2);
+    var ideal=4+16*point/100;
+    var err=(M-ideal)/16*100;
+    var pass=Math.abs(err)<=tol;
+    var hint = Math.abs(err)<0.05 ? 'spot on' :
+      (point===0 ? 'offset at 0 % → zero trim territory' :
+       point===100 ? 'error at 100 % → span trim (then re-check zero)' :
+       'compare with the 0 % point: uniform → zero, growing → span');
+    document.getElementById('calOut').innerHTML=
+      'test point '+point+' % → ideal = 4 + 16·'+(point/100)+' = <b>'+ideal.toFixed(2)+' mA</b><br>'+
+      'error = ('+M.toFixed(2)+' − '+ideal.toFixed(2)+')/16 = <b>'+err.toFixed(2)+' %span</b> (tolerance ±'+tol+' %)<br>'+
+      (pass?'<b style="color:#4ade80">PASS ✓</b>':'<b style="color:#f87171">FAIL ✗ — out of tolerance, investigate & trim</b>')+
+      ' · '+hint;
+  }
+  cm.addEventListener('input',cal); cal();
+})();
+</script>
+</body>
+</html>

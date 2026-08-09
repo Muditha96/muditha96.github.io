@@ -1,0 +1,1190 @@
+/*
+  Muditha Priyasad Portfolio Design System
+  Hierarchy: Page title > Section title > Card title > Body > Supporting text > Metadata.
+  This file is intentionally loaded after page-specific styles.
+*/
+
+:root {
+  --ds-ink: #102b3b;
+  --ds-text: #405665;
+  --ds-muted: #667b87;
+  --ds-accent: #0b7894;
+  --ds-accent-soft: #e9f6f9;
+  --ds-surface: #ffffff;
+  --ds-surface-soft: #f5f9fb;
+  --ds-line: #d7e2e8;
+  --ds-line-strong: #bfd2dc;
+  --ds-success: #16845d;
+  --ds-radius-sm: 8px;
+  --ds-radius-md: 14px;
+  --ds-radius-lg: 20px;
+  --ds-shadow-card: 0 8px 24px rgba(18, 47, 63, .07);
+  --ds-shadow-lift: 0 14px 30px rgba(18, 47, 63, .11);
+  --ds-page-title: clamp(1.7rem, 2.6vw, 2.35rem);
+  --ds-section-title: clamp(1.15rem, 1.55vw, 1.5rem);
+  --ds-card-title: clamp(.98rem, 1.05vw, 1.1rem);
+  --ds-lead: clamp(.9rem, 1vw, .98rem);
+  --ds-body: .9rem;
+  --ds-small: .78rem;
+  --ds-label: .66rem;
+  --ds-section-gap: .8rem;
+  --ds-card-gap: .72rem;
+}
+
+body {
+  color: var(--ds-text);
+  line-height: 1.55;
+}
+
+.portfolio-shell {
+  padding-top: .01rem;
+  padding-bottom: 1.25rem;
+}
+
+/* Level 0 — persistent site identity and navigation. */
+.brand-copy strong {
+  color: var(--ds-ink);
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
+.brand-copy small {
+  color: var(--ds-muted);
+  font-size: .72rem;
+  line-height: 1.2;
+}
+
+.nav-menu a {
+  font-size: .76rem;
+  font-weight: 850;
+  letter-spacing: .025em;
+}
+
+/* Metadata / evidence labels — always smaller than the title they introduce. */
+.eyebrow,
+.project-facts dt,
+.experience-period,
+.learning-domain-grid article > span {
+  margin-top: 0;
+  margin-bottom: .18rem;
+  color: var(--ds-accent) !important;
+  font-size: var(--ds-label) !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+  letter-spacing: .09em !important;
+  text-transform: uppercase;
+}
+
+/* Level 1 — one page title per route. */
+.page-hero {
+  margin: .55rem 0 .75rem !important;
+  padding: clamp(.82rem, 1.5vw, 1rem) !important;
+  border: 1px solid var(--ds-line) !important;
+  border-radius: var(--ds-radius-lg) !important;
+  background: linear-gradient(125deg, #f9fcfe, #eef6fa) !important;
+  box-shadow: var(--ds-shadow-card) !important;
+}
+
+.page-hero h1,
+.project-detail-hero h1,
+.learning-page .learning-hero h1 {
+  max-width: 980px;
+  margin: 0 !important;
+  color: var(--ds-ink) !important;
+  font-size: var(--ds-page-title) !important;
+  font-weight: 900 !important;
+  line-height: 1.08 !important;
+  letter-spacing: -.025em !important;
+}
+
+.page-hero > p:last-child,
+.project-detail-hero > div > p:not(.eyebrow),
+.learning-lead {
+  max-width: 900px;
+  margin: .38rem 0 0 !important;
+  color: var(--ds-text) !important;
+  font-size: var(--ds-lead) !important;
+  line-height: 1.45 !important;
+}
+
+/* Level 2 — section titles and the rhythm between major content groups. */
+.section-head,
+.proofs-head,
+.skills-section-heading {
+  margin-top: var(--ds-section-gap) !important;
+  margin-bottom: .42rem !important;
+}
+
+.section-head h2,
+.proofs-head h2,
+.skills-section-heading h2,
+.safe-panel > h2,
+.note-panel > h2,
+.cta-panel h2,
+.contact-card > h2,
+.skills-learning-link h2,
+.skills-experience > h2,
+.learning-purpose h2,
+.learning-featured h2 {
+  margin: 0 !important;
+  color: var(--ds-ink) !important;
+  font-size: var(--ds-section-title) !important;
+  font-weight: 850 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.02em !important;
+}
+
+.section-head > p:last-child,
+.skills-section-heading > p:last-child,
+.proofs-head > div > p:last-child {
+  max-width: 840px;
+  margin: .22rem 0 0 !important;
+  color: var(--ds-muted) !important;
+  font-size: var(--ds-body) !important;
+  line-height: 1.5 !important;
+}
+
+/* Level 3 — card and item titles. */
+.glass-card h2,
+.about-layout h2,
+.detail-card h2 {
+  margin: 0 0 .32rem !important;
+  color: var(--ds-ink) !important;
+  font-size: var(--ds-card-title) !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -.012em !important;
+}
+
+.glass-card h3,
+.machine-card h3,
+.gallery-item h3,
+.skills-list-group h3,
+.learning-domain-grid h3,
+.experience-item h3 {
+  margin: 0 0 .28rem !important;
+  color: var(--ds-ink) !important;
+  font-size: var(--ds-card-title) !important;
+  font-weight: 850 !important;
+  line-height: 1.22 !important;
+  letter-spacing: -.012em !important;
+}
+
+.project-entry-heading h2 {
+  margin: .12rem 0 0 !important;
+  color: var(--ds-ink) !important;
+  font-size: clamp(1.05rem, 1.25vw, 1.2rem) !important;
+  font-weight: 900 !important;
+  line-height: 1.18 !important;
+  letter-spacing: -.02em !important;
+}
+
+/* Level 4 and 5 — body and supporting copy. */
+.glass-card p,
+.machine-card p,
+.gallery-item p,
+.detail-card p,
+.safe-panel p,
+.note-panel p,
+.cta-panel p,
+.skills-list-group li,
+.learning-domain-grid p,
+.experience-item p {
+  color: var(--ds-text) !important;
+  font-size: var(--ds-body) !important;
+  line-height: 1.48 !important;
+}
+
+.machine-card p,
+.gallery-item p,
+.detail-card p {
+  margin-top: .38rem !important;
+  margin-bottom: 0 !important;
+}
+
+.project-entry-summary {
+  margin: .42rem 0 .62rem !important;
+  color: var(--ds-text) !important;
+  font-size: var(--ds-body) !important;
+  line-height: 1.48 !important;
+}
+
+.project-facts dd,
+.skills-tool-list span,
+.learning-note p,
+.footer small {
+  color: var(--ds-muted) !important;
+  font-size: var(--ds-small) !important;
+  line-height: 1.45 !important;
+}
+
+/* Shared surfaces — consistent border, radius, shadow and internal rhythm. */
+.glass-card,
+.safe-panel,
+.note-panel,
+.cta-panel,
+.contact-privacy,
+.skills-credentials,
+.skills-capabilities,
+.skills-strengths,
+.skills-certifications,
+.skills-experience,
+.skills-learning-link,
+.learning-purpose,
+.learning-featured,
+.learning-note {
+  border: 1px solid var(--ds-line) !important;
+  border-radius: var(--ds-radius-md) !important;
+  background: var(--ds-surface) !important;
+  box-shadow: var(--ds-shadow-card) !important;
+}
+
+.glass-card,
+.safe-panel,
+.note-panel,
+.cta-panel,
+.contact-privacy,
+.skills-experience {
+  padding: clamp(.78rem, 1.35vw, .95rem) !important;
+}
+
+.safe-panel,
+.note-panel,
+.cta-panel,
+.contact-privacy {
+  margin-top: .65rem !important;
+  margin-bottom: .65rem !important;
+}
+
+.note-panel,
+.learning-note {
+  border-left: 4px solid var(--ds-accent) !important;
+}
+
+/* Repeating evidence cards. */
+.machine-grid,
+.gallery-grid,
+.cert-grid,
+.skill-grid,
+.learning-domain-grid,
+.detail-layout,
+.about-layout {
+  gap: var(--ds-card-gap) !important;
+}
+
+.machine-card,
+.gallery-item,
+.cert-card,
+.skills-list-group,
+.learning-domain-grid article,
+.project-entry {
+  overflow: hidden;
+  border: 1px solid var(--ds-line) !important;
+  border-radius: var(--ds-radius-md) !important;
+  background: var(--ds-surface) !important;
+  box-shadow: var(--ds-shadow-card) !important;
+}
+
+.machine-card > div:last-child,
+.gallery-item > div:last-child,
+.skills-list-group,
+.learning-domain-grid article {
+  padding: .82rem !important;
+}
+
+.machine-card,
+.gallery-item,
+.project-entry,
+.project-entry-thumb {
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.machine-card:hover,
+.machine-card:focus-visible,
+.project-entry:hover,
+.gallery-item:hover {
+  border-color: var(--ds-line-strong) !important;
+  box-shadow: var(--ds-shadow-lift) !important;
+  transform: translateY(-2px);
+}
+
+/* Project catalogue: one stable Problem > Contribution > Result hierarchy. */
+.project-catalogue {
+  gap: .8rem !important;
+  margin: .65rem 0 1.1rem !important;
+}
+
+.project-entry {
+  grid-template-columns: minmax(270px, 330px) minmax(0, 1fr) !important;
+}
+
+.project-entry-media {
+  padding: .8rem !important;
+  background: var(--ds-surface-soft) !important;
+}
+
+.project-entry-content {
+  padding: .85rem .95rem !important;
+}
+
+.project-entry-heading {
+  gap: .8rem !important;
+}
+
+.project-case-link {
+  color: var(--ds-accent) !important;
+  font-size: var(--ds-small) !important;
+  font-weight: 850 !important;
+  white-space: nowrap;
+}
+
+.project-facts {
+  gap: .55rem !important;
+}
+
+.project-facts > div {
+  padding: .68rem !important;
+  border-left: 3px solid #7dbccc !important;
+  border-radius: 0 var(--ds-radius-sm) var(--ds-radius-sm) 0;
+  background: var(--ds-surface-soft) !important;
+}
+
+.project-media-actions {
+  gap: .4rem !important;
+}
+
+.project-media-action {
+  min-height: 42px !important;
+  border-color: var(--ds-line-strong) !important;
+  border-radius: var(--ds-radius-sm) !important;
+}
+
+.project-entry-details {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.project-summary-toggle {
+  display: none;
+}
+
+/* Detail pages: overview first, evidence cards second, navigation last. */
+.project-detail-hero {
+  margin: .55rem 0 .75rem !important;
+  padding: clamp(.85rem, 1.5vw, 1.05rem) !important;
+  border: 1px solid var(--ds-line) !important;
+  border-radius: var(--ds-radius-lg) !important;
+  background: linear-gradient(125deg, #f9fcfe, #eef6fa) !important;
+  box-shadow: var(--ds-shadow-card) !important;
+}
+
+.detail-layout {
+  margin-top: .8rem !important;
+}
+
+.detail-card {
+  min-width: 0;
+}
+
+.page-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .55rem;
+  margin-top: .9rem;
+}
+
+/* Skills hierarchy: section heading > capability group > tool > evidence. */
+.skills-credentials,
+.skills-capabilities,
+.skills-strengths,
+.skills-certifications,
+.skills-experience,
+.skills-learning-link {
+  margin-top: .7rem !important;
+}
+
+.skills-list {
+  gap: .7rem !important;
+}
+
+.skills-tool-list {
+  gap: .38rem !important;
+}
+
+.skills-tool-list li,
+.skills-credential-list li,
+.skills-strength-list li {
+  border-color: var(--ds-line) !important;
+  border-radius: var(--ds-radius-sm) !important;
+  background: var(--ds-surface-soft) !important;
+}
+
+.skills-evidence {
+  margin-top: .7rem;
+  padding-top: .65rem;
+  border-top: 1px solid var(--ds-line);
+}
+
+.skills-evidence > strong {
+  color: var(--ds-accent);
+  font-size: var(--ds-label);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* Images and media follow consistent proportions. */
+.machine-card > img,
+.machine-no-media {
+  aspect-ratio: 16 / 9 !important;
+}
+
+.gallery-item > img,
+.gallery-item > video,
+.gallery-item > .yt-lite,
+.gallery-video {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.project-detail-hero > img {
+  border-radius: var(--ds-radius-md) !important;
+  object-fit: cover;
+}
+
+/* Buttons, filters, text links and tags use one interaction language. */
+.button,
+.more-btn,
+.filter-btn,
+.project-media-action {
+  min-height: 42px;
+  border-radius: 10px !important;
+  font-size: .8rem !important;
+  font-weight: 850 !important;
+  line-height: 1.2;
+}
+
+.button,
+.more-btn {
+  padding: .62rem .9rem !important;
+}
+
+.text-link,
+.project-case-link,
+.learning-domain-grid a,
+.skills-evidence a {
+  color: var(--ds-accent) !important;
+  font-weight: 800 !important;
+  text-underline-offset: 3px;
+}
+
+.tag-row {
+  gap: .38rem !important;
+}
+
+.tag-row > span,
+.large-tags > span {
+  padding: .32rem .52rem !important;
+  border: 1px solid #c6dce5 !important;
+  border-radius: 999px !important;
+  background: var(--ds-accent-soft) !important;
+  color: #17657a !important;
+  font-size: .68rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+}
+
+/* Learning Lab adopts the same hierarchy while retaining its knowledge-map layout. */
+.learning-hero-copy,
+.learning-metrics,
+.learning-purpose,
+.learning-featured,
+.learning-note,
+.learning-domain-grid article {
+  border-color: var(--ds-line) !important;
+}
+
+.learning-metrics dt {
+  color: var(--ds-accent) !important;
+}
+
+.learning-metrics dd {
+  color: var(--ds-muted) !important;
+  font-size: var(--ds-small) !important;
+}
+
+/* Home keeps its one-window proportions but follows the same type hierarchy. */
+.home-page .home-summary-copy h1 {
+  color: var(--ds-ink) !important;
+  font-size: clamp(2rem, 3vw, 3rem) !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: -.04em !important;
+}
+
+.home-page .home-summary-role {
+  color: var(--ds-accent) !important;
+  font-weight: 850 !important;
+}
+
+.home-page .home-summary-lead {
+  color: var(--ds-text) !important;
+}
+
+.home-page .home-capability-strip article,
+.home-page .home-video-card,
+.home-page .summary-card {
+  border-color: var(--ds-line) !important;
+  background: var(--ds-surface) !important;
+}
+
+/* Footer is supporting information, never a competing section. */
+.footer {
+  color: var(--ds-muted) !important;
+  font-size: var(--ds-small) !important;
+  line-height: 1.45 !important;
+}
+
+/* One accessible focus rule for every interactive component. */
+:where(a, button, [role="button"]):focus-visible {
+  outline: 3px solid rgba(11, 120, 148, .28) !important;
+  outline-offset: 3px !important;
+}
+
+@media (max-width: 980px) {
+  :root {
+    --ds-section-gap: .72rem;
+    --ds-card-gap: .64rem;
+  }
+
+  .project-entry {
+    grid-template-columns: minmax(240px, 290px) minmax(0, 1fr) !important;
+  }
+
+  .project-facts {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 700px) {
+  :root {
+    --ds-page-title: clamp(1.55rem, 7.8vw, 1.95rem);
+    --ds-section-title: clamp(1.08rem, 5.2vw, 1.32rem);
+    --ds-card-title: .96rem;
+    --ds-body: .87rem;
+    --ds-small: .74rem;
+    --ds-section-gap: .65rem;
+  }
+
+  .portfolio-shell {
+    padding-bottom: .8rem;
+  }
+
+  .page-hero,
+  .project-detail-hero {
+    margin: .4rem 0 .6rem !important;
+    padding: .72rem !important;
+    border-radius: var(--ds-radius-md) !important;
+  }
+
+  .project-entry {
+    grid-template-columns: 1fr !important;
+  }
+
+  .project-entry-content,
+  .machine-card > div:last-child,
+  .gallery-item > div:last-child,
+  .skills-list-group,
+  .learning-domain-grid article {
+    padding: .72rem !important;
+  }
+
+  .home-page .home-summary-copy h1 {
+    font-size: clamp(1.85rem, 8.5vw, 2.4rem) !important;
+  }
+
+  .project-entry-heading {
+    align-items: flex-start !important;
+  }
+
+  .project-case-link {
+    white-space: normal;
+  }
+
+  .button,
+  .more-btn,
+  .filter-btn,
+  .project-media-action {
+    min-height: 44px;
+  }
+
+  .machine-card:hover,
+  .machine-card:focus-visible,
+  .project-entry:hover,
+  .gallery-item:hover {
+    transform: none;
+  }
+}
+
+/* Gallery: dense visual index with category-first scanning and no long card copy. */
+.gallery-page .portfolio-shell {
+  padding-bottom: .8rem;
+}
+
+.gallery-page .gallery-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 1rem;
+  row-gap: .2rem;
+  margin-top: .8rem !important;
+  padding: .9rem 1.1rem !important;
+}
+
+.gallery-page .gallery-hero .eyebrow {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.gallery-page .gallery-hero h1 {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: clamp(1.45rem, 2.2vw, 2rem) !important;
+  margin: 0 !important;
+}
+
+.gallery-page .gallery-hero > p:last-child {
+  grid-column: 2;
+  margin: 0 !important;
+  font-size: var(--ds-small) !important;
+}
+
+.gallery-safety-note {
+  margin: .55rem 0 0;
+  color: var(--ds-muted);
+  font-size: .78rem;
+}
+
+.gallery-page .gallery-filters {
+  gap: .42rem;
+  margin: .55rem 0 .3rem !important;
+  padding: .5rem !important;
+}
+
+.gallery-page .filter-btn {
+  min-height: 34px;
+  padding: .35rem .65rem;
+  font-size: .72rem;
+}
+
+.gallery-count {
+  margin: 0 0 .42rem;
+  color: var(--ds-muted);
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+.gallery-page .gallery-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: .58rem !important;
+}
+
+.gallery-page .gallery-item {
+  min-width: 0;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 250px;
+}
+
+.gallery-page .gallery-item > .gallery-image-button {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: #e9eef5;
+  color: inherit;
+  cursor: zoom-in;
+}
+
+.gallery-page .gallery-item > .gallery-image-button:focus-visible {
+  outline: 3px solid var(--ds-accent);
+  outline-offset: -3px;
+}
+
+.gallery-page .gallery-item > .gallery-image-button img,
+.gallery-page .gallery-item > img,
+.gallery-page .gallery-item > video,
+.gallery-page .gallery-item > .yt-lite,
+.gallery-page .gallery-video {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+.gallery-page .gallery-item > .gallery-caption {
+  min-height: 64px;
+  padding: .5rem .58rem !important;
+}
+
+.gallery-page .gallery-caption .eyebrow {
+  overflow: hidden;
+  font-size: .61rem !important;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gallery-page .gallery-caption h3 {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: .2rem 0 0 !important;
+  font-size: .84rem !important;
+  line-height: 1.25 !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+@media (max-width: 1280px) {
+  .gallery-page .gallery-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 980px) {
+  .gallery-page .gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .gallery-page .gallery-hero {
+    display: block;
+    padding: .75rem .82rem !important;
+  }
+
+  .gallery-page .gallery-hero h1 {
+    margin-top: .15rem !important;
+  }
+
+  .gallery-page .gallery-hero > p:last-child {
+    margin-top: .28rem !important;
+  }
+
+  .gallery-page .gallery-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .gallery-page .filter-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .gallery-page .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: .45rem !important;
+  }
+
+  .gallery-page .gallery-item > .gallery-caption {
+    min-height: 58px;
+    padding: .42rem .48rem !important;
+  }
+
+  .gallery-page .gallery-caption h3 {
+    font-size: .78rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* CV format selector */
+.cv-download-section {
+  margin-bottom: var(--ds-section-gap);
+  scroll-margin-top: 6rem;
+}
+
+.cv-section-head {
+  margin-bottom: .65rem !important;
+}
+
+.cv-download-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ds-card-gap);
+}
+
+.cv-download-card {
+  display: flex;
+  min-width: 0;
+  min-height: 220px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .85rem;
+}
+
+.cv-download-card h2 {
+  margin: .18rem 0 .42rem !important;
+}
+
+.cv-format-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-top: .72rem !important;
+}
+
+.cv-format-meta span {
+  padding: .22rem .5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(14, 116, 144, .08);
+  color: #0e7490;
+  font-size: var(--ds-small);
+  font-weight: 800;
+}
+
+.cv-download-card .button {
+  min-width: 190px;
+}
+
+@media (max-width: 700px) {
+  .cv-download-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cv-download-card {
+    min-height: 0;
+  }
+
+  .cv-download-card .button {
+    width: 100%;
+  }
+}
+
+/* Scan-first simplification for Skills, CV and Learning Lab. */
+.brand {
+  min-width: clamp(300px, 27vw, 365px);
+}
+
+.brand-copy {
+  min-width: 0;
+}
+
+.brand-copy small {
+  max-width: 285px;
+  white-space: normal;
+}
+
+.skills-page .page-hero,
+.contact-page .page-hero {
+  margin-top: .5rem !important;
+  margin-bottom: .6rem !important;
+}
+
+.skills-page .page-hero {
+  padding: clamp(.82rem, 1.5vw, 1rem) !important;
+}
+
+.skills-page .page-hero h1 {
+  font-size: var(--ds-page-title) !important;
+  line-height: 1.08 !important;
+  letter-spacing: -.025em !important;
+}
+
+.skills-page .page-hero > p:last-child {
+  margin-top: .38rem !important;
+  font-size: var(--ds-lead) !important;
+  line-height: 1.45 !important;
+}
+
+.skills-page .skills-credentials,
+.skills-page .skills-capabilities,
+.skills-page .skills-strengths,
+.skills-page .skills-certifications {
+  margin-top: .58rem !important;
+  padding: .78rem !important;
+}
+
+.skills-page .skills-section-heading {
+  margin: 0 0 .48rem !important;
+}
+
+.skills-page .skills-credential-list,
+.skills-page .skills-list,
+.skills-page .skills-strength-list {
+  gap: .55rem !important;
+}
+
+.skills-page .skills-list-group {
+  padding: .72rem .78rem !important;
+}
+
+.skills-page .skills-tool-list {
+  margin-top: .32rem !important;
+}
+
+.skills-page .skills-tool-list li {
+  padding-top: .2rem !important;
+  padding-bottom: .2rem !important;
+}
+
+.skills-page .skills-experience {
+  margin-top: .58rem !important;
+  padding: .68rem .78rem !important;
+}
+
+.contact-page .cv-download-section,
+.contact-page .contact-layout {
+  margin-top: .58rem !important;
+  margin-bottom: .58rem !important;
+}
+
+.contact-page .cv-download-card {
+  min-height: 0;
+  padding: .82rem !important;
+  gap: .65rem;
+}
+
+.contact-page .cv-format-meta {
+  margin-top: .5rem !important;
+}
+
+.contact-page .contact-card {
+  padding: .82rem !important;
+}
+
+.contact-page .contact-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .45rem;
+  margin-top: .55rem;
+}
+
+.contact-page .contact-list li {
+  min-width: 0;
+  padding: .58rem !important;
+}
+
+.contact-page .contact-list a {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.contact-page .contact-list li:last-child {
+  grid-column: 1 / -1;
+}
+
+.contact-page .large-tags .primary-role {
+  border-color: #8fc6d3 !important;
+  background: #dceff5 !important;
+  color: #0b5c72 !important;
+}
+
+.contact-page .contact-experience,
+.contact-page .contact-privacy {
+  margin-top: .6rem !important;
+  font-size: var(--ds-small) !important;
+  line-height: 1.45 !important;
+}
+
+.contact-page .contact-notes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .8rem;
+}
+
+.contact-page .contact-notes p {
+  margin: 0 !important;
+}
+
+.learning-page .learning-shell {
+  padding-bottom: .8rem;
+}
+
+.learning-page .learning-hero {
+  grid-template-columns: minmax(0, 1.4fr) minmax(270px, .6fr);
+  gap: .65rem;
+  margin-top: .5rem;
+}
+
+.learning-page .learning-hero-copy {
+  padding: .88rem !important;
+}
+
+.learning-page .learning-hero .hero-actions {
+  margin-top: .65rem;
+}
+
+.learning-page .learning-metrics {
+  padding: .32rem;
+}
+
+.learning-page .learning-metrics div {
+  grid-template-columns: 72px 1fr;
+  gap: .45rem;
+  padding: .58rem;
+}
+
+.learning-page .learning-metrics dt {
+  font-size: 1.42rem;
+}
+
+.learning-page .learning-purpose,
+.learning-page .learning-featured {
+  gap: .72rem;
+  margin-top: .62rem;
+  padding: .78rem .85rem;
+}
+
+.learning-page .learning-purpose li {
+  padding: .52rem;
+  font-size: var(--ds-small);
+  line-height: 1.42;
+}
+
+.learning-page .learning-section-head {
+  margin-top: .72rem !important;
+  margin-bottom: .42rem !important;
+}
+
+.learning-page .learning-domain-grid {
+  gap: .55rem !important;
+}
+
+.learning-page .learning-domain-grid article {
+  padding: .68rem !important;
+}
+
+.learning-page .learning-domain-grid p {
+  line-height: 1.42 !important;
+}
+
+.learning-page .learning-domain-grid a {
+  margin-top: .48rem;
+}
+
+.learning-page .learning-note {
+  margin-top: .62rem;
+  padding: .72rem .82rem;
+}
+
+@media (min-width: 981px) and (max-width: 1180px) {
+  .brand {
+    min-width: 195px;
+  }
+
+  .brand-copy small {
+    display: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .brand {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  :root {
+    --ds-body: .92rem;
+    --ds-small: .82rem;
+    --ds-label: .75rem;
+  }
+
+  .filter-bar {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem !important;
+    overflow: visible !important;
+    padding-bottom: .4rem !important;
+  }
+
+  .filter-btn {
+    width: 100%;
+    min-width: 0;
+    padding-inline: .55rem !important;
+    white-space: normal !important;
+  }
+
+  .project-entry-content {
+    order: 1;
+  }
+
+  .project-entry-media {
+    order: 2;
+  }
+
+  .project-summary-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    margin: .05rem 0 .7rem;
+    padding: .55rem .7rem;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: var(--ds-radius-sm);
+    background: var(--ds-accent-soft);
+    color: var(--ds-accent);
+    font: inherit;
+    font-size: var(--ds-small);
+    font-weight: 850;
+    cursor: pointer;
+  }
+
+  .project-summary-toggle:hover,
+  .project-summary-toggle:focus-visible {
+    border-color: var(--ds-accent);
+    outline: 2px solid rgba(11, 120, 148, .2);
+    outline-offset: 2px;
+  }
+
+  .project-media-action strong,
+  .tag-row > span,
+  .large-tags > span {
+    font-size: .75rem !important;
+  }
+
+  .skills-page .skills-credentials,
+  .skills-page .skills-capabilities,
+  .skills-page .skills-strengths,
+  .skills-page .skills-certifications {
+    padding: .68rem !important;
+  }
+
+  .contact-page .contact-list,
+  .contact-page .contact-notes,
+  .learning-page .learning-purpose,
+  .learning-page .learning-purpose ul,
+  .learning-page .learning-metrics,
+  .learning-page .learning-domain-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-page .contact-list li:last-child {
+    grid-column: auto;
+  }
+
+  .contact-page .cv-download-card .button,
+  .learning-page .learning-hero .button {
+    width: 100%;
+  }
+
+  .learning-page .learning-metrics div {
+    border-right: 0;
+    border-bottom: 1px solid var(--ds-line);
+  }
+}

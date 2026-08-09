@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Thermal Imaging &amp; IR Thermography · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #f472b6;       /* thermal hot pink */
+    --accent-soft: #f9a8d4;
+    --accent-2: #fbbf24;     /* hot amber */
+    --accent-3: #38bdf8;     /* cold sky blue */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(244,114,182,0.14), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(251,191,36,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(244,114,182,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(244,114,182,0.16), rgba(251,191,36,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(244,114,182,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-3)!important; } .c-sky .big{color:var(--accent-3)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #f472b6, #db2777); color: #38091f; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(56,9,31,0.75); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(244,114,182,0.12); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:110px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Thermal Imaging &amp; Condition Monitoring · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🌡️</span>Thermal Imaging &amp; IR Thermography</h1>
+  <p class="hero-sub">From Planck's law to the plant floor: the radiation physics a camera really measures, emissivity and why it lies to you, camera technology and spot-size limits, ΔT severity criteria for electrical gear, and the survey discipline that turns pretty pictures into predictive maintenance.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>No micro card yet — a full advanced module. Related:</span>
+    <a href="A19_Bearings_Deep_Dive.html">A19 Bearings →</a>
+    <a href="A23_TPM_Deep_Dive.html">A23 TPM →</a>
+    <a href="A11_Industrial_Sensors_Deep_Dive.html">A11 Sensors →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · What Is Thermography?</a>
+    <a href="#p2">2 · Radiation Physics</a>
+    <a href="#p3">3 · Emissivity</a>
+    <a href="#p4">4 · Camera Technology</a>
+    <a href="#p5">5 · Resolution &amp; Spot Size</a>
+    <a href="#p6">6 · Electrical Inspection</a>
+    <a href="#p7">7 · Mechanical &amp; Process</a>
+    <a href="#p8">8 · Buildings &amp; Electronics</a>
+    <a href="#p9">9 · Survey Practice</a>
+    <a href="#p10">10 · Recap, Faults &amp; Quiz</a>
+    <a href="#p11">11 · Worked Examples</a>
+    <a href="#p12">12 · Problem Set</a>
+    <a href="#p13">13 · Derivations &amp; Traps</a>
+    <a href="#p14">14 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ===== PAGE 1 ===== -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 14</span>
+    <h2 class="page-title">Seeing Heat Instead of Light</h2>
+    <p class="page-sub">A thermal camera does not measure temperature. It measures infrared radiation — and everything in this module flows from that distinction.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead"><span class="hl">Infrared thermography</span> is the non-contact measurement and mapping of surface temperature by detecting the <span class="hl2">thermal radiation</span> every object above absolute zero emits, converting radiance into a calibrated temperature image called a <span class="hl3">thermogram</span>.</p>
+      <p class="body">Every surface warmer than 0&nbsp;K radiates electromagnetic energy. At everyday temperatures (−20&nbsp;°C to a few hundred °C) that radiation peaks in the <strong>long-wave infrared</strong>, around 8–14&nbsp;µm — a wavelength our eyes cannot see but a microbolometer detector can. The camera converts the radiance arriving at each pixel into an <strong>apparent temperature</strong>, then paints the result with a false-colour palette.</p>
+      <p class="body">Why does industry care? Because <strong>almost every failure mode announces itself thermally first</strong>: a loose lug heats from I²R, a failing bearing heats from friction, a blocked cooling channel heats from lost convection, a failed steam trap changes the temperature signature of the line. Thermography lets you find all of this <strong>from a distance, energized, at line speed</strong> — the ultimate non-intrusive condition-monitoring tool (the P in the P-F curve of A23 TPM).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Where infrared sits — the electromagnetic spectrum</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sp1" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#c084fc"/><stop offset="0.18" stop-color="#60a5fa"/>
+            <stop offset="0.34" stop-color="#4ade80"/><stop offset="0.46" stop-color="#fbbf24"/>
+            <stop offset="0.56" stop-color="#f87171"/><stop offset="0.75" stop-color="#f472b6"/>
+            <stop offset="1" stop-color="#7c3aed" stop-opacity="0.6"/>
+          </linearGradient>
+          <linearGradient id="sp2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f472b6" stop-opacity="0.35"/><stop offset="1" stop-color="#f472b6" stop-opacity="0.05"/></linearGradient>
+        </defs>
+        <rect x="30" y="60" width="700" height="46" rx="8" fill="url(#sp1)" opacity="0.85"/>
+        <text x="55" y="50" fill="#c084fc" font-size="11" font-weight="700">UV</text>
+        <text x="150" y="50" fill="#94a3b8" font-size="11" font-weight="700">VISIBLE 0.4–0.7 µm</text>
+        <text x="330" y="50" fill="#fbbf24" font-size="11" font-weight="700">NIR / SWIR</text>
+        <text x="470" y="50" fill="#f87171" font-size="11" font-weight="700">MWIR 3–5 µm</text>
+        <text x="600" y="50" fill="#f9a8d4" font-size="11" font-weight="700">LWIR 8–14 µm</text>
+        <line x1="443" y1="60" x2="443" y2="106" stroke="#0b0f14" stroke-width="2"/>
+        <line x1="575" y1="60" x2="575" y2="106" stroke="#0b0f14" stroke-width="2"/>
+        <rect x="575" y="118" width="140" height="60" rx="10" fill="url(#sp2)" stroke="#f472b6" stroke-width="1.6"/>
+        <text x="645" y="142" text-anchor="middle" fill="#f9a8d4" font-size="12" font-weight="800">THERMOGRAPHY</text>
+        <text x="645" y="160" text-anchor="middle" fill="#94a3b8" font-size="10.5">most industrial cameras</text>
+        <rect x="440" y="118" width="125" height="60" rx="10" fill="rgba(248,113,113,0.10)" stroke="#f87171" stroke-width="1.4" stroke-dasharray="5 4"/>
+        <text x="502" y="142" text-anchor="middle" fill="#fca5a5" font-size="11.5" font-weight="700">MWIR (cooled)</text>
+        <text x="502" y="160" text-anchor="middle" fill="#94a3b8" font-size="10.5">R&amp;D · gas imaging</text>
+        <text x="380" y="215" text-anchor="middle" fill="#64748b" font-size="12">Wavelength → 0.01 µm ································· 0.4 ··· 0.7 ··············· 3 ····· 5 ········ 8 ·············· 14 µm</text>
+        <text x="380" y="238" text-anchor="middle" fill="#94a3b8" font-size="12.5" font-style="italic">A 30 °C surface radiates at a peak near 9.6 µm — deep in LWIR, invisible to any eye</text>
+      </svg>
+      </div>
+      <p class="cap">Thermal cameras work in atmospheric "windows" where air is transparent to IR: 3–5 µm (MWIR) and 8–14 µm (LWIR).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Why non-contact measurement wins</div>
+      <div class="grid-2">
+        <div class="mini c-amb"><h4>⚡ Energized &amp; safe</h4><p>Inspect live switchgear from metres away — the fault signature only exists <em>under load</em>.</p></div>
+        <div class="mini c-sky"><h4>🖼️ A full image, not a point</h4><p>76 800 temperature points in one 320×240 frame — patterns, not just values.</p></div>
+        <div class="mini c-grn"><h4>🏃 Fast &amp; non-intrusive</h4><p>No shutdown, no disassembly — scan an MCC room in minutes on a route.</p></div>
+        <div class="mini c-purp"><h4>📈 Trendable</h4><p>Same target, same angle, same load — thermograms become a time series for PdM.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 2 ===== -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 14</span>
+    <h2 class="page-title">The Physics: Planck, Wien &amp; Stefan-Boltzmann</h2>
+    <p class="page-sub">Three equations from 1900 explain everything your camera does.</p>
+
+    <div class="card">
+      <div class="label">Blackbody radiation — the three laws</div>
+      <p class="lead">A <span class="hl">blackbody</span> is a perfect emitter (ε&nbsp;=&nbsp;1). <span class="hl2">Planck's law</span> gives its full emission spectrum, <span class="hl3">Wien's law</span> locates the peak, and <span class="hl">Stefan-Boltzmann</span> integrates the total power.</p>
+      <div class="eqn"><b>Planck:</b>  M(λ,T) = (2πhc²/λ⁵) · 1/(e^(hc/λkT) − 1)     [W·m⁻²·µm⁻¹]
+<b>Wien:</b>    λ_max = <span class="v2">2898 / T</span>   → 300 K ⇒ 9.66 µm  ·  1000 K ⇒ 2.9 µm
+<b>Stefan-Boltzmann:</b>  M = <span class="v3">σ·T⁴</span>,  σ = 5.67×10⁻⁸ W·m⁻²·K⁻⁴  (grey body: M = ε·σ·T⁴)</div>
+      <p class="body">Two consequences run the whole trade. First, <strong>T⁴ is brutal</strong>: doubling absolute temperature multiplies radiated power sixteen-fold — which is why hot faults "glow" so obviously against background. Second, <strong>Wien's shift</strong> explains camera bands: room-temperature plant peaks near 10&nbsp;µm (buy LWIR), while furnaces and molten metal shift toward 1–3&nbsp;µm (short-wave furnace cameras see through flames).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Blackbody curves — hotter is higher AND bluer</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bb1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbbf24" stop-opacity="0.5"/><stop offset="1" stop-color="#fbbf24" stop-opacity="0.03"/></linearGradient>
+          <linearGradient id="bb2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f472b6" stop-opacity="0.5"/><stop offset="1" stop-color="#f472b6" stop-opacity="0.03"/></linearGradient>
+          <linearGradient id="bb3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.5"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.03"/></linearGradient>
+        </defs>
+        <line x1="60" y1="270" x2="720" y2="270" stroke="#334155" stroke-width="1.5"/>
+        <line x1="60" y1="270" x2="60" y2="30" stroke="#334155" stroke-width="1.5"/>
+        <text x="390" y="300" text-anchor="middle" fill="#94a3b8" font-size="12.5">Wavelength λ (µm)  →   2 ······ 4 ······ 6 ······ 8 ······ 10 ······ 12 ······ 14</text>
+        <text x="40" y="150" fill="#94a3b8" font-size="12.5" transform="rotate(-90 40 150)" text-anchor="middle">Spectral radiance</text>
+        <path d="M 70 268 Q 130 90 200 60 Q 300 45 420 150 Q 560 230 715 258" fill="url(#bb1)" stroke="#fbbf24" stroke-width="2.5"/>
+        <path d="M 70 269 Q 200 220 300 165 Q 380 135 460 160 Q 580 205 715 245" fill="url(#bb2)" stroke="#f472b6" stroke-width="2.5"/>
+        <path d="M 70 270 Q 260 262 400 235 Q 520 215 600 218 Q 660 222 715 230" fill="url(#bb3)" stroke="#38bdf8" stroke-width="2.5"/>
+        <circle cx="220" cy="57" r="5" fill="#fbbf24"/>
+        <text x="230" y="48" fill="#fbbf24" font-size="12" font-weight="700">800 K peak ≈ 3.6 µm</text>
+        <circle cx="405" cy="140" r="5" fill="#f472b6"/>
+        <text x="415" y="130" fill="#f9a8d4" font-size="12" font-weight="700">400 K peak ≈ 7.2 µm</text>
+        <circle cx="580" cy="216" r="5" fill="#38bdf8"/>
+        <text x="470" y="250" fill="#7dd3fc" font-size="12" font-weight="700">300 K peak ≈ 9.7 µm</text>
+        <rect x="540" y="30" width="150" height="240" fill="rgba(244,114,182,0.06)" stroke="#f472b6" stroke-width="1" stroke-dasharray="5 4"/>
+        <text x="615" y="46" text-anchor="middle" fill="#f9a8d4" font-size="11" font-weight="700">LWIR 8–14 µm</text>
+      </svg>
+      </div>
+      <p class="cap">Planck curves never cross: a hotter body out-radiates a colder one at <em>every</em> wavelength, and its peak slides to shorter λ (Wien).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">🎛 Interactive — Wien &amp; Stefan-Boltzmann calculator</div>
+      <div class="demo">
+        <div class="demo-row"><span>Surface temperature</span><b><span id="wtC">30</span> °C  (<span id="wtK">303</span> K)</b></div>
+        <input type="range" id="wT" min="-20" max="1200" step="5" value="30">
+        <div class="demo-row"><span>Emissivity ε</span><b><span id="wEps">0.95</span></b></div>
+        <input type="range" id="wE" min="0.05" max="1.0" step="0.05" value="0.95">
+        <div class="demo-out" id="wOut"></div>
+      </div>
+      <p class="cap">Notice how fast M grows: +10 °C at room temperature is ≈ +14 % radiated power. That is the camera's signal.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 3 ===== -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 14</span>
+    <h2 class="page-title">Emissivity — Why the Camera Lies</h2>
+    <p class="page-sub">The single largest error source in thermography. Master this page and you are ahead of half the people holding cameras.</p>
+
+    <div class="card">
+      <div class="label">The measurement equation</div>
+      <p class="lead">The camera receives <span class="hl">three</span> radiation streams, not one: <span class="hl2">emitted</span> by the target, <span class="hl3">reflected</span> from the surroundings, and transmitted through the atmosphere.</p>
+      <div class="eqn">W_received = <b>ε·τ·W(T_obj)</b>  +  <span class="v2">(1−ε)·τ·W(T_refl)</span>  +  <span class="v3">(1−τ)·W(T_atm)</span>
+          emitted (signal)      reflected (noise)         atmosphere (small at &lt;10 m)</div>
+      <p class="body">Kirchhoff's law says for an opaque surface <strong>ε + ρ = 1</strong>: what a surface doesn't emit, it reflects. A polished aluminium busbar with ε&nbsp;≈&nbsp;0.05 is a <strong>95&nbsp;% mirror in the infrared</strong> — the "temperature" you read off it is mostly a reflection of the room, the sky, or your own body heat. To solve the equation for the true object temperature, you must enter <strong>ε</strong> and the <strong>reflected apparent temperature T_refl</strong> into the camera. Garbage in, garbage out.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Typical emissivity values (8–14 µm, normal viewing)</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Surface</th><th>ε</th><th>Measurement reality</th></tr>
+        <tr><td><b>Human skin</b></td><td class="mono">0.98</td><td>Near-perfect emitter — why fever screening works</td></tr>
+        <tr><td><b>Matt paint (any colour)</b></td><td class="mono">0.90–0.96</td><td>Excellent target — visible colour is irrelevant in IR</td></tr>
+        <tr><td><b>Electrical tape (PVC)</b></td><td class="mono">0.95</td><td>The classic fix: stick it on shiny metal, measure the tape</td></tr>
+        <tr><td><b>Rubber, wood, concrete, brick</b></td><td class="mono">0.85–0.95</td><td>Good targets</td></tr>
+        <tr><td><b>Oxidised / rusted steel</b></td><td class="mono">0.60–0.85</td><td>Usable with care — value varies with oxide layer</td></tr>
+        <tr><td><b>Galvanised steel</b></td><td class="mono">0.20–0.30</td><td>Poor — expect big errors</td></tr>
+        <tr><td><b>Polished aluminium / copper</b></td><td class="mono">0.03–0.10</td><td><b>Do not measure directly.</b> It is an IR mirror.</td></tr>
+      </table></div>
+      <p class="body">Field fixes for low-ε surfaces: <strong>electrical tape</strong> (ε&nbsp;≈&nbsp;0.95), <strong>flat paint patch</strong>, a <strong>drilled cavity</strong> (acts like a blackbody, ε&nbsp;→&nbsp;0.98), or measure an adjacent <strong>oxidised/painted part of the same joint</strong>. For reflected temperature: crumpled-then-flattened aluminium foil at the target plane acts as a diffuse IR mirror — read its apparent temperature and enter that as T_refl.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">🎛 Interactive — how wrong ε makes you</div>
+      <div class="demo">
+        <div class="demo-row"><span>True surface temperature</span><b><span id="eT">80</span> °C</b></div>
+        <input type="range" id="eTr" min="30" max="200" step="5" value="80">
+        <div class="demo-row"><span>Actual surface ε</span><b><span id="eA">0.30</span></b></div>
+        <input type="range" id="eAr" min="0.05" max="1.0" step="0.05" value="0.30">
+        <div class="demo-row"><span>ε set in camera</span><b><span id="eS">0.95</span></b></div>
+        <input type="range" id="eSr" min="0.05" max="1.0" step="0.05" value="0.95">
+        <div class="demo-row"><span>Reflected / background temp</span><b><span id="eB">25</span> °C</b></div>
+        <input type="range" id="eBr" min="-10" max="60" step="5" value="25">
+        <div class="demo-out" id="eOut"></div>
+      </div>
+      <p class="cap">A shiny 80 °C busbar read with ε = 0.95 can indicate barely above room temperature — the classic missed fault.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 4 ===== -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 14</span>
+    <h2 class="page-title">Inside the Camera</h2>
+    <p class="page-sub">Uncooled microbolometers own the plant floor; cooled photon detectors own the lab. Know which physics you are buying.</p>
+
+    <div class="card">
+      <div class="label">Microbolometer — the industrial workhorse</div>
+      <p class="lead">Each pixel of an <span class="hl">uncooled microbolometer</span> is a microscopic <span class="hl2">resistor on a MEMS bridge</span> (vanadium oxide or amorphous silicon). Absorbed IR warms the bridge a few millikelvin; its resistance change is read out as signal.</p>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="cm1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f472b6" stop-opacity="0.35"/><stop offset="1" stop-color="#f472b6" stop-opacity="0.05"/></linearGradient>
+          <linearGradient id="cm2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.3"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.05"/></linearGradient>
+        </defs>
+        <!-- incoming IR arrows -->
+        <g stroke="#fbbf24" stroke-width="2.2" fill="none">
+          <path d="M 90 30 L 90 80"/><path d="M 130 30 L 130 80"/><path d="M 170 30 L 170 80"/>
+        </g>
+        <polygon points="90,88 84,76 96,76" fill="#fbbf24"/><polygon points="130,88 124,76 136,76" fill="#fbbf24"/><polygon points="170,88 164,76 176,76" fill="#fbbf24"/>
+        <text x="130" y="22" text-anchor="middle" fill="#fbbf24" font-size="11.5" font-weight="700">IR from scene (8–14 µm)</text>
+        <!-- absorber bridge -->
+        <rect x="60" y="92" width="140" height="16" rx="4" fill="url(#cm1)" stroke="#f472b6" stroke-width="1.8"/>
+        <text x="130" y="126" text-anchor="middle" fill="#f9a8d4" font-size="11.5" font-weight="700">VOx absorber bridge (ΔT → ΔR)</text>
+        <!-- legs -->
+        <line x1="72" y1="108" x2="72" y2="150" stroke="#94a3b8" stroke-width="3"/>
+        <line x1="188" y1="108" x2="188" y2="150" stroke="#94a3b8" stroke-width="3"/>
+        <text x="130" y="147" text-anchor="middle" fill="#64748b" font-size="10.5">thermally isolating legs · vacuum gap</text>
+        <!-- ROIC -->
+        <rect x="40" y="152" width="180" height="34" rx="6" fill="url(#cm2)" stroke="#38bdf8" stroke-width="1.6"/>
+        <text x="130" y="174" text-anchor="middle" fill="#7dd3fc" font-size="11.5" font-weight="700">ROIC readout (per-pixel bias)</text>
+        <!-- FPA -->
+        <g transform="translate(300,60)">
+          <rect x="0" y="0" width="180" height="140" rx="10" fill="#11161f" stroke="#334155" stroke-width="1.5"/>
+          <g fill="rgba(244,114,182,0.35)">
+            <rect x="12" y="12" width="18" height="18" rx="2"/><rect x="34" y="12" width="18" height="18" rx="2"/><rect x="56" y="12" width="18" height="18" rx="2"/><rect x="78" y="12" width="18" height="18" rx="2"/><rect x="100" y="12" width="18" height="18" rx="2"/><rect x="122" y="12" width="18" height="18" rx="2"/><rect x="144" y="12" width="18" height="18" rx="2"/>
+            <rect x="12" y="34" width="18" height="18" rx="2"/><rect x="34" y="34" width="18" height="18" rx="2" fill="#fbbf24"/><rect x="56" y="34" width="18" height="18" rx="2"/><rect x="78" y="34" width="18" height="18" rx="2"/><rect x="100" y="34" width="18" height="18" rx="2"/><rect x="122" y="34" width="18" height="18" rx="2"/><rect x="144" y="34" width="18" height="18" rx="2"/>
+            <rect x="12" y="56" width="18" height="18" rx="2"/><rect x="34" y="56" width="18" height="18" rx="2"/><rect x="56" y="56" width="18" height="18" rx="2"/><rect x="78" y="56" width="18" height="18" rx="2"/><rect x="100" y="56" width="18" height="18" rx="2"/><rect x="122" y="56" width="18" height="18" rx="2"/><rect x="144" y="56" width="18" height="18" rx="2"/>
+            <rect x="12" y="78" width="18" height="18" rx="2"/><rect x="34" y="78" width="18" height="18" rx="2"/><rect x="56" y="78" width="18" height="18" rx="2"/><rect x="78" y="78" width="18" height="18" rx="2"/><rect x="100" y="78" width="18" height="18" rx="2"/><rect x="122" y="78" width="18" height="18" rx="2"/><rect x="144" y="78" width="18" height="18" rx="2"/>
+            <rect x="12" y="100" width="18" height="18" rx="2"/><rect x="34" y="100" width="18" height="18" rx="2"/><rect x="56" y="100" width="18" height="18" rx="2"/><rect x="78" y="100" width="18" height="18" rx="2"/><rect x="100" y="100" width="18" height="18" rx="2"/><rect x="122" y="100" width="18" height="18" rx="2"/><rect x="144" y="100" width="18" height="18" rx="2"/>
+          </g>
+          <text x="90" y="132" text-anchor="middle" fill="#94a3b8" font-size="10.5">FPA — focal plane array (e.g. 640×480 px)</text>
+        </g>
+        <text x="390" y="40" text-anchor="middle" fill="#f9a8d4" font-size="12" font-weight="700">one bolometer per pixel</text>
+        <!-- signal chain -->
+        <g transform="translate(520,60)">
+          <rect x="0" y="0" width="210" height="42" rx="8" fill="rgba(251,191,36,0.10)" stroke="#fbbf24" stroke-width="1.4"/>
+          <text x="105" y="26" text-anchor="middle" fill="#fbbf24" font-size="11.5" font-weight="700">NUC — non-uniformity correction</text>
+          <rect x="0" y="52" width="210" height="42" rx="8" fill="rgba(56,189,248,0.10)" stroke="#38bdf8" stroke-width="1.4"/>
+          <text x="105" y="78" text-anchor="middle" fill="#7dd3fc" font-size="11.5" font-weight="700">Radiometric calibration → T per pixel</text>
+          <rect x="0" y="104" width="210" height="42" rx="8" fill="rgba(74,222,128,0.10)" stroke="#4ade80" stroke-width="1.4"/>
+          <text x="105" y="130" text-anchor="middle" fill="#4ade80" font-size="11.5" font-weight="700">Palette + fusion → thermogram</text>
+        </g>
+        <text x="380" y="245" text-anchor="middle" fill="#94a3b8" font-size="12.5" font-style="italic">The periodic "click" you hear is the shutter closing for a fresh NUC — a flat-field re-zero of all pixels.</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Uncooled vs cooled — selection table</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Property</th><th>Uncooled microbolometer</th><th>Cooled photon detector (InSb, MCT, T2SL)</th></tr>
+        <tr><td><b>Principle</b></td><td>Thermal — IR heats a resistor</td><td>Quantum — photons excite carriers directly</td></tr>
+        <tr><td><b>Band</b></td><td>LWIR 8–14 µm</td><td>MWIR 3–5 µm (typ.), needs ~77 K Stirling cooler</td></tr>
+        <tr><td><b>NETD (sensitivity)</b></td><td>30–60 mK</td><td>&lt;20 mK, often &lt;10 mK</td></tr>
+        <tr><td><b>Frame rate / integration</b></td><td>9–60 Hz, slow thermal time constant (~10 ms)</td><td>kHz possible, µs snapshots — stops motion</td></tr>
+        <tr><td><b>Cost &amp; maintenance</b></td><td>$ — no cooler, long life</td><td>$$$$ — cooler is a wear item (~10 000 h)</td></tr>
+        <tr><td><b>Use</b></td><td>PdM routes, electrical, buildings, fixed monitoring</td><td>R&amp;D, high-speed, gas imaging (OGI), long range</td></tr>
+      </table></div>
+      <p class="body"><strong>NETD</strong> (noise-equivalent temperature difference) is the smallest ΔT the detector can resolve above its own noise — the "sensitivity" spec. For finding a 20&nbsp;K electrical fault, 50&nbsp;mK is plenty. For medical or building science where 0.5&nbsp;K matters, buy better NETD. Key spec set: <strong>resolution × NETD × temperature range × lens FOV</strong> — in that order of scrutiny.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 5 ===== -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 14</span>
+    <h2 class="page-title">Resolution: IFOV &amp; the Spot-Size Rule</h2>
+    <p class="page-sub">The most common quantitative error after emissivity: measuring a target smaller than the camera can actually resolve.</p>
+
+    <div class="card">
+      <div class="label">IFOV — instantaneous field of view</div>
+      <p class="lead">Each pixel sees a cone of angle <span class="hl">IFOV = FOV / n_pixels</span>. At distance d, that cone covers a spot <span class="hl2">S = IFOV × d</span>. If your target is smaller than the <em>measurement</em> spot, the pixel averages target with background — and under-reads hot spots.</p>
+      <div class="eqn"><b>IFOV</b> (mrad) ≈ FOV(°) × 17.45 / n_pixels_horizontal
+<b>Spot size</b>  S = IFOV × d          (geometric — detection limit)
+<b>Measurement spot</b> ≈ <span class="v2">3 × IFOV × d</span>   (MFOV: need ~3×3 px on target for a true reading)</div>
+      <p class="body">Example: a 320×240 camera with a 24° lens → IFOV = 24×17.45/320 ≈ 1.3&nbsp;mrad. At 10&nbsp;m the geometric spot is 13&nbsp;mm, but a <strong>trustworthy temperature</strong> needs the target to fill ≈ 39&nbsp;mm. A 10&nbsp;mm cable lug at 10&nbsp;m will look warm but read <em>tens of degrees low</em>. Fix: get closer, use a telephoto lens, or buy more pixels. Distance-to-spot thinking is mandatory for outdoor substation work.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">🎛 Interactive — spot-size calculator</div>
+      <div class="demo">
+        <div class="demo-row"><span>Detector width</span><b><span id="sRes">320</span> px</b></div>
+        <div class="seg" id="sResSeg">
+          <button data-v="160">160×120</button>
+          <button data-v="320" class="on">320×240</button>
+          <button data-v="640">640×480</button>
+          <button data-v="1024">1024×768</button>
+        </div>
+        <div class="demo-row"><span>Lens horizontal FOV</span><b><span id="sFov">24</span>°</b></div>
+        <input type="range" id="sFovR" min="6" max="45" step="1" value="24">
+        <div class="demo-row"><span>Distance to target</span><b><span id="sD">5.0</span> m</b></div>
+        <input type="range" id="sDR" min="0.5" max="30" step="0.5" value="5">
+        <div class="demo-row"><span>Target size (e.g. lug, bolt head)</span><b><span id="sT">20</span> mm</b></div>
+        <input type="range" id="sTR" min="5" max="200" step="5" value="20">
+        <div class="demo-out" id="sOut"></div>
+      </div>
+      <p class="cap">Rule of thumb: measurement spot = 3 × geometric spot. If the verdict says "too far", the reading is not wrong — it is meaningless.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Focus, range &amp; palette — the other three image killers</div>
+      <div class="grid-3">
+        <div class="mini c-red"><h4>🎯 Focus</h4><p>An out-of-focus thermogram <em>cannot be fixed later</em> — blur spreads radiance across pixels and lowers every hot-spot reading. Focus is a radiometric parameter, not cosmetics.</p></div>
+        <div class="mini c-amb"><h4>📏 Range</h4><p>Saturated pixels clip at range top: a 400 °C fault on a 150 °C range reads "150 °C". Pick the range <em>before</em> judging severity.</p></div>
+        <div class="mini c-sky"><h4>🎨 Palette &amp; span</h4><p>Iron/rainbow/grey change perception, not data. Manually narrow the span around the target to reveal subtle ΔT — auto-span hides faults in busy scenes.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 6 ===== -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 14</span>
+    <h2 class="page-title">Electrical Inspection — The Bread &amp; Butter</h2>
+    <p class="page-sub">Loose connections don't fail quietly. They cook — following I²R — and thermography catches them months before the flashover.</p>
+
+    <div class="card">
+      <div class="label">The physics of a bad joint</div>
+      <p class="lead">A degraded connection (loose, corroded, work-hardened) raises contact resistance R. Power dissipated is <span class="hl">P = I²R</span> — heating scales with the <span class="hl2">square of load current</span>.</p>
+      <div class="eqn">P_joint = I² · R_contact          → doubling load ⇒ <b>4×</b> the heat
+ΔT_normalized ≈ ΔT_measured × <span class="v2">(I_rated / I_measured)²</span>   (normalize findings to full load!)</div>
+      <p class="body">The load-normalization line is the professional's edge: a joint showing a mild +8&nbsp;°C at 30&nbsp;% load projects to roughly <strong>+89&nbsp;°C at full load</strong> (×(100/30)²&nbsp;≈&nbsp;×11). Always record load current with every electrical finding, and never survey below ~40&nbsp;% load if you can help it. Compare <strong>like phases</strong> under the same load — a healthy three-phase set should be thermally symmetric; one warm phase is either load imbalance (check clamp meter) or a genuine defect.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">ΔT severity criteria — direct viewing, similar load</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>ΔT vs similar component</th><th>ΔT vs ambient</th><th>Classification</th><th>Action</th></tr>
+        <tr><td class="mono">1–3 °C</td><td class="mono">1–10 °C</td><td><b>Possible deficiency</b></td><td>Note; re-inspect next route</td></tr>
+        <tr><td class="mono">4–15 °C</td><td class="mono">11–20 °C</td><td><b>Probable deficiency</b></td><td>Repair at next scheduled outage</td></tr>
+        <tr><td class="mono">—</td><td class="mono">21–40 °C</td><td><b>Deficiency</b></td><td>Repair as soon as practical</td></tr>
+        <tr><td class="mono">&gt;15 °C</td><td class="mono">&gt;40 °C</td><td><b>Major deficiency</b></td><td><b>Repair immediately</b> — failure imminent</td></tr>
+      </table></div>
+      <p class="body">Criteria adapted from <strong>NETA MTS</strong> guidance (ISO 18434-1 defines the comparative method itself). Two comparisons matter: <strong>phase-to-phase</strong> (same load path) and <strong>component-to-ambient</strong>. Severity tables assume you already fixed ε, spot size and load — a mis-measured ΔT classified into a table is false confidence.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">A three-phase panel, as the camera sees it</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="ph1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.45"/><stop offset="1" stop-color="#0ea5e9" stop-opacity="0.10"/></linearGradient>
+          <radialGradient id="hot1" cx="0.5" cy="0.35" r="0.75">
+            <stop offset="0" stop-color="#fef08a"/><stop offset="0.35" stop-color="#fbbf24"/><stop offset="0.7" stop-color="#f87171"/><stop offset="1" stop-color="#f472b6" stop-opacity="0.25"/>
+          </radialGradient>
+        </defs>
+        <rect x="40" y="30" width="680" height="200" rx="12" fill="#0d1320" stroke="#334155" stroke-width="1.5"/>
+        <!-- breaker -->
+        <rect x="70" y="55" width="620" height="40" rx="8" fill="#1a2230" stroke="#475569"/>
+        <text x="380" y="80" text-anchor="middle" fill="#64748b" font-size="11.5">MCCB · load 82 % · lugs below</text>
+        <!-- three phases -->
+        <g>
+          <rect x="150" y="110" width="26" height="95" rx="6" fill="url(#ph1)" stroke="#38bdf8" stroke-width="1.4"/>
+          <text x="163" y="238" text-anchor="middle" fill="#7dd3fc" font-size="12" font-weight="700">L1 · 41 °C</text>
+          <rect x="370" y="110" width="26" height="95" rx="6" fill="url(#ph1)" stroke="#38bdf8" stroke-width="1.4"/>
+          <text x="383" y="238" text-anchor="middle" fill="#7dd3fc" font-size="12" font-weight="700">L2 · 42 °C</text>
+          <rect x="580" y="110" width="26" height="95" rx="6" fill="url(#ph1)" stroke="#38bdf8" stroke-width="1.4"/>
+          <text x="593" y="238" text-anchor="middle" fill="#7dd3fc" font-size="12" font-weight="700">L3 · 44 °C</text>
+        </g>
+        <!-- hot lug on L3 -->
+        <circle cx="593" cy="115" r="30" fill="url(#hot1)"/>
+        <text x="593" y="98" text-anchor="middle" fill="#fef08a" font-size="12.5" font-weight="800">96 °C</text>
+        <line x1="620" y1="120" x2="680" y2="150" stroke="#f87171" stroke-width="1.6"/>
+        <text x="686" y="146" fill="#fca5a5" font-size="11.5" font-weight="700" transform="rotate(0)">ΔT +54 °C</text>
+        <text x="686" y="162" fill="#fca5a5" font-size="11">vs L1 lug</text>
+        <text x="380" y="258" text-anchor="middle" fill="#94a3b8" font-size="12.5" font-style="italic">Classic signature: heat concentrated AT the joint, fading along the conductor — a resistance fault, not load imbalance.</text>
+      </svg>
+      </div>
+      <p class="cap">Load imbalance heats the <em>whole conductor</em> evenly; a bad joint heats <em>from a point</em>. The gradient tells you which.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Safety — thermography does not repeal arc-flash rules</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Opening energized panels is the hazard,</strong> not the camera. Follow NFPA 70E / EN 50110 arc-flash procedures, PPE categories and approach boundaries.</span></li>
+        <li><span class="num">2</span><span><strong>IR windows</strong> (crystal or polymer viewports) let you survey closed panels. Note: window transmission τ &lt; 1 — enter it in the camera or apply the correction factor, or every reading is low.</span></li>
+        <li><span class="num">3</span><span><strong>Never survey alone</strong> in HV areas; the thermographer's eyes are on the screen, not the surroundings — bring a qualified escort.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 7 ===== -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 14</span>
+    <h2 class="page-title">Mechanical &amp; Process Applications</h2>
+    <p class="page-sub">Anywhere friction, flow or insulation fails, a thermal pattern appears first.</p>
+
+    <div class="card">
+      <div class="label">Rotating machinery — read the pattern, not the number</div>
+      <div class="stage">
+      <svg class="illus" viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="mt1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.35"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.06"/></linearGradient>
+          <radialGradient id="hot2" cx="0.5" cy="0.5" r="0.6">
+            <stop offset="0" stop-color="#fef08a"/><stop offset="0.4" stop-color="#fbbf24"/><stop offset="0.8" stop-color="#f87171" stop-opacity="0.6"/><stop offset="1" stop-color="#f87171" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <!-- motor body -->
+        <rect x="80" y="80" width="200" height="110" rx="14" fill="url(#mt1)" stroke="#38bdf8" stroke-width="1.8"/>
+        <text x="180" y="215" text-anchor="middle" fill="#7dd3fc" font-size="12" font-weight="700">Motor frame · uniform warm = normal</text>
+        <!-- DE bearing hotspot -->
+        <circle cx="292" cy="135" r="26" fill="url(#hot2)"/>
+        <rect x="280" y="105" width="24" height="60" rx="6" fill="none" stroke="#f87171" stroke-width="1.6"/>
+        <text x="292" y="92" text-anchor="middle" fill="#fca5a5" font-size="11.5" font-weight="700">DE bearing hot</text>
+        <!-- coupling -->
+        <rect x="304" y="120" width="46" height="30" rx="5" fill="#1a2230" stroke="#475569"/>
+        <text x="327" y="168" text-anchor="middle" fill="#64748b" font-size="10.5">coupling</text>
+        <!-- pump -->
+        <rect x="350" y="90" width="150" height="90" rx="12" fill="rgba(74,222,128,0.10)" stroke="#4ade80" stroke-width="1.6"/>
+        <text x="425" y="215" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="700">Pump · check seal &amp; casing ΔT</text>
+        <!-- diagnostic notes -->
+        <g transform="translate(540,60)">
+          <rect x="0" y="0" width="200" height="150" rx="10" fill="#11161f" stroke="#334155"/>
+          <text x="100" y="24" text-anchor="middle" fill="#f9a8d4" font-size="12" font-weight="800">PATTERN → CAUSE</text>
+          <text x="14" y="48" fill="#cbd5e1" font-size="11">• Bearing housing hot → lube / load / fit</text>
+          <text x="14" y="70" fill="#cbd5e1" font-size="11">• One coupling half hot → misalignment</text>
+          <text x="14" y="92" fill="#cbd5e1" font-size="11">• Whole frame hot → overload, blocked fins</text>
+          <text x="14" y="114" fill="#cbd5e1" font-size="11">• Local stator patch → shorted lamination</text>
+          <text x="14" y="136" fill="#cbd5e1" font-size="11">• Confirm with vibration (route partner)</text>
+        </g>
+        <text x="380" y="242" text-anchor="middle" fill="#94a3b8" font-size="12.5" font-style="italic">Thermography locates; vibration analysis diagnoses. Together they own rotating PdM (→ A19 bearing defect stages).</text>
+      </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Process &amp; utility targets</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Target</th><th>Healthy signature</th><th>Fault signature</th></tr>
+        <tr><td><b>Steam trap</b></td><td>Hot inlet, distinctly cooler outlet</td><td>Both sides hot = blowing through (energy loss); both cold = failed shut / flooded</td></tr>
+        <tr><td><b>Refractory / furnace shell</b></td><td>Even external shell temperature</td><td>Local hot patch = lining wear — trend it; shell steel weakens fast above design temp</td></tr>
+        <tr><td><b>Tank / silo level</b></td><td>Clear liquid-vapour line (thermal capacity difference)</td><td>No line visible = fouling, foam, or agitation; sun-load the tank first (or scan at dawn)</td></tr>
+        <tr><td><b>Heat exchanger</b></td><td>Smooth in→out gradient</td><td>Cold streaks = blocked tubes / channelling</td></tr>
+        <tr><td><b>Pipe insulation / tracing</b></td><td>Uniform cool cladding, tracing line visible</td><td>Wet insulation shows cold (evaporation) or hot (conduction) bands; failed tracing = cold segment</td></tr>
+        <tr><td><b>Hydraulic system</b></td><td>Reservoir &lt; ~60 °C, even valve temps</td><td>One valve hot = internal leakage throttling flow (→ A13); relief valve hot = passing</td></tr>
+      </table></div>
+      <p class="body">These are mostly <strong>qualitative</strong> inspections — pattern recognition against a known-good baseline — which is why a library of <strong>reference thermograms</strong> of healthy equipment is the most valuable asset a PdM programme owns (→ A23 TPM planned-maintenance pillar).</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 8 ===== -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 14</span>
+    <h2 class="page-title">Buildings, Electronics &amp; R&amp;D</h2>
+    <p class="page-sub">The same physics, gentler temperatures — where NETD and technique matter more than range.</p>
+
+    <div class="card">
+      <div class="label">Building envelope</div>
+      <p class="lead">Building thermography hunts <span class="hl">ΔT of 1–5 °C</span>: insulation voids, thermal bridges, air leakage and moisture. It needs an <span class="hl2">inside–outside temperature difference of at least ~10 °C</span> and no direct sun on the façade.</p>
+      <div class="grid-2">
+        <div class="mini c-sky"><h4>🧱 Thermal bridges</h4><p>Studs, lintels, slab edges conduct heat past insulation — regular cold stripes inside, warm stripes outside. Geometry repeats; defects don't.</p></div>
+        <div class="mini c-amb"><h4>💨 Air leakage</h4><p>With a blower door depressurizing the building, infiltrating cold air paints feathery streaks at frames, penetrations and sockets — unmistakable versus conduction.</p></div>
+        <div class="mini c-teal"><h4>💧 Moisture</h4><p>Wet material has huge thermal capacity and evaporative cooling — flat roofs surveyed at dusk show wet insulation as warm islands (heat stored from the day).</p></div>
+        <div class="mini c-purp"><h4>📋 Standard</h4><p>ISO 6781 / EN 13187 govern qualitative envelope thermography — conditions, viewing, and reporting requirements.</p></div>
+      </div>
+      <p class="body">Beware <strong>solar loading</strong>: a façade in morning sun stores hours of radiant energy and will mask (or fake) every defect. Survey pre-dawn, after sustained overcast, or from the inside.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Electronics &amp; development benches</div>
+      <p class="body"><strong>PCB debugging:</strong> power a board and the thermogram instantly maps the current — a shorted decoupling cap or reversed diode lights up seconds after power-on, before it dies. Close-up lenses resolve 25–100&nbsp;µm per pixel for component-level work. Remember shiny solder and bare copper are low-ε: a thin matt lacquer or dye evens the surface for quantitative work.</p>
+      <p class="body"><strong>R&amp;D uses:</strong> motor and drive thermal validation against insulation class limits (Class B 130&nbsp;°C / F 155&nbsp;°C / H 180&nbsp;°C — tie-in A08 VFD derating), battery pack gradient mapping (→ A39: cell ΔT target &lt;5&nbsp;°C), weld nugget cooling analysis, injection-mould cooling balance, and <strong>active thermography</strong> (pulsed/lock-in): flash-heat a composite and watch the cooling transient — subsurface voids and delaminations change the local cooling curve. That is NDT with a camera.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 9 ===== -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 14</span>
+    <h2 class="page-title">Survey Practice, Standards &amp; Certification</h2>
+    <p class="page-sub">Cameras don't produce findings — disciplined thermographers do.</p>
+
+    <div class="card">
+      <div class="label">The route discipline</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Baseline first.</strong> Shoot every asset healthy, at known load, from a marked position and angle. All future severity is relative to this.</span></li>
+        <li><span class="num">2</span><span><strong>Fix the variables.</strong> Record load %, ambient temp, wind, and distance with every image. ΔT without load context is noise. Wind above ~5 m/s halves outdoor hot-spot ΔT.</span></li>
+        <li><span class="num">3</span><span><strong>ε and T_refl before reading.</strong> Set both per target (page 3). For comparative phase-to-phase work, identical wrong ε still ranks correctly — but absolute values need the full correction.</span></li>
+        <li><span class="num">4</span><span><strong>Verify spot size</strong> (page 5) — get closer rather than zooming the display; display zoom adds nothing radiometrically.</span></li>
+        <li><span class="num">5</span><span><strong>Report for action:</strong> IR + visual image pair, location, load, ΔT, severity class, recommended action &amp; deadline, and the repair-verification re-scan. A finding without a re-scan after repair is an open loop.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Standards &amp; certification map</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Standard</th><th>Scope</th></tr>
+        <tr><td class="mono"><b>ISO 18434-1</b></td><td>Condition monitoring by thermography — comparative methods, ΔT assessment, procedures</td></tr>
+        <tr><td class="mono"><b>ISO 18436-7</b></td><td>Thermographer competence &amp; certification — Category I (route collection), II (analysis &amp; setup), III (programme leadership)</td></tr>
+        <tr><td class="mono"><b>NETA MTS</b></td><td>Widely-used electrical ΔT severity guidance (page 6 table)</td></tr>
+        <tr><td class="mono"><b>ISO 6781 / EN 13187</b></td><td>Qualitative thermography of building envelopes</td></tr>
+        <tr><td class="mono"><b>ASTM E1934</b></td><td>Examining electrical &amp; mechanical equipment with IR</td></tr>
+        <tr><td class="mono"><b>IEC TS 62446-3</b></td><td>PV plant thermographic inspection (cell hot spots, bypass diodes, PID)</td></tr>
+      </table></div>
+      <p class="body">Certification levels mirror vibration analysis (same ISO 18436 family): <strong>Cat I</strong> collects on defined routes, <strong>Cat II</strong> sets criteria and diagnoses, <strong>Cat III</strong> designs the programme. For a plant PdM team, one Cat II leading several Cat I surveyors is the standard structure.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Fixed &amp; automated thermography</div>
+      <p class="body">The route camera is going <strong>permanent</strong>: fixed radiometric cameras now watch critical switchgear, conveyor bearings, storage silos and battery rooms 24/7, streaming per-ROI temperatures over <strong>Modbus TCP, REST or MQTT</strong> into the historian (→ A06 OPC-UA, A33 IIoT stack). Alarm logic = absolute limit + rate-of-rise + comparison between ROIs. Early-fire detection (waste bunkers, coal, biomass) is the same camera with different alarm mathematics. This turns thermography from a monthly snapshot into a continuous condition signal — the logical end state for critical assets.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 10 ===== -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 14</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Quiz</h2>
+    <p class="page-sub">The whole module in one page — then prove it.</p>
+
+    <div class="card">
+      <div class="label">The eight ideas that matter</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span>The camera measures <strong>radiation</strong>, not temperature — you supply ε, T_refl and distance to make it temperature.</span></li>
+        <li><span class="num">2</span><span><strong>Stefan-Boltzmann T⁴</strong> makes hot faults loud; <strong>Wien</strong> puts room-temperature plant in LWIR 8–14 µm.</span></li>
+        <li><span class="num">3</span><span><strong>ε + ρ = 1</strong>: shiny metal is an IR mirror. Tape it, paint it, or measure the oxidised part.</span></li>
+        <li><span class="num">4</span><span><strong>Microbolometer</strong> for the plant, <strong>cooled MWIR</strong> for speed &amp; science. NETD is the sensitivity spec.</span></li>
+        <li><span class="num">5</span><span><strong>Spot-size rule</strong>: need ~3×3 pixels on the target or the reading is fiction.</span></li>
+        <li><span class="num">6</span><span>Electrical severity = <strong>ΔT at known load</strong>, normalized by (I_rated/I_meas)² — phase-to-phase and vs-ambient.</span></li>
+        <li><span class="num">7</span><span>Mechanical/process work is <strong>pattern vs baseline</strong> — thermography locates, vibration &amp; oil analysis confirm.</span></li>
+        <li><span class="num">8</span><span>Programme &gt; camera: routes, baselines, load records, re-scans — ISO 18434 / 18436 structure.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Six classic thermography failures</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">🪞 The reflection ghost</div><p>A "hot spot" that moves when you move = your own body or a lamp reflected off low-ε metal. Change angle before believing any shiny-surface finding.</p></div>
+        <div class="fail"><div class="ft">🕶️ The low-ε under-read</div><p>Shiny busbar at 120 °C reads 40 °C with ε=0.95 set. The fault is invisible until the flashover. Tape/paint targets or use cavity readings.</p></div>
+        <div class="fail"><div class="ft">📏 Too far away</div><p>Target smaller than the measurement spot averages with background — a 10 mm lug at 10 m on 320 px reads tens of degrees low. Distance-to-spot first.</p></div>
+        <div class="fail"><div class="ft">🌞 Solar &amp; wind lies</div><p>Morning sun stores heat that fakes faults; wind &gt;5 m/s strips ΔT and hides real ones. Note both; survey at night/calm when severity matters.</p></div>
+        <div class="fail"><div class="ft">📉 Light-load all-clear</div><p>Panel surveyed at 20 % load shows nothing; joint fails at full summer load. Normalize by (I_r/I_m)² or re-survey above 40 % load.</p></div>
+        <div class="fail"><div class="ft">🔒 Saturated range</div><p>Pixels clipped at range maximum flatten every fault to the same value. If the hottest pixel equals range top, re-shoot on a higher range.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 1</div>
+      <p class="quiz-q">A polished aluminium bar sits at exactly 100 °C in a 25 °C room. The camera is set to ε = 0.95. Will it read high or low, and why?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><b>Low — drastically.</b> With ε ≈ 0.05 the bar emits almost nothing; 95 % of received radiation is the 25 °C room reflected. Telling the camera ε = 0.95 makes it interpret that weak signal as the object's emission, so it reports close to room temperature. Kirchhoff: ε + ρ = 1.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 2</div>
+      <p class="quiz-q">Why do plant thermal cameras use the 8–14 µm band rather than, say, 6–7 µm?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Two reasons: <b>Wien's law</b> puts the emission peak of ~300 K surfaces near 9.7 µm, and <b>the atmosphere is transparent</b> in the 8–14 µm window (water vapour absorbs heavily around 6–7 µm). Signal is maximal exactly where air doesn't eat it.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 3</div>
+      <p class="quiz-q">A breaker lug shows ΔT = +6 °C at 25 % load. Roughly what ΔT does that predict at full load, and what severity class is it really?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">P = I²R ⇒ scale by (100/25)² = <b>16×</b> → ≈ <b>+96 °C</b> at rated load. What looked like a "possible deficiency" is a <b>major deficiency</b>. This is why load current must be recorded with every electrical finding.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 4</div>
+      <p class="quiz-q">Your 320-px camera has a 24° lens (IFOV ≈ 1.3 mrad). What is the largest distance for a valid reading on a 13 mm bolt head?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Measurement spot ≈ 3 × IFOV × d ≤ 13 mm ⇒ d ≤ 0.013 / (3 × 0.0013) ≈ <b>3.3 m</b>. Beyond that the pixel averages bolt with background and under-reads. Detection is possible farther out — measurement is not.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 5</div>
+      <p class="quiz-q">Both sides of a steam trap image at nearly the same hot temperature. Diagnosis?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><b>Failed open — blowing steam straight through.</b> A healthy trap shows hot inlet and clearly cooler outlet (condensate). Hot–hot = live steam passing (energy loss); cold–cold = failed shut or flooded. Confirm with ultrasound before replacement.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 6</div>
+      <p class="quiz-q">Why is an out-of-focus thermogram a radiometric error, not just an ugly picture?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Defocus spreads each target's radiance over neighbouring pixels, so hot-spot pixels mix with cooler background — <b>every small hot target reads low</b>, and no software can restore the lost radiance afterwards. Focus, then freeze, then save.</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===== PAGE 11 · MSC PRACTICE PACK ===== -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 · Worked Examples</span>
+    <h2 class="page-title">Worked Examples — Full Solutions</h2>
+    <p class="page-sub">Exam-grade numericals, solved step by step. Cover the solution, attempt it, then compare line by line.</p>
+
+    <div class="card">
+      <div class="label">WE-1 · Correcting a low-emissivity reading</div>
+      <p class="body"><strong>Problem.</strong> A camera set to ε = 0.95 reads an <em>apparent</em> 38.0 °C on an oxidised copper busbar whose true emissivity is ε = 0.60. Reflected apparent temperature T_refl = 22 °C, τ ≈ 1. Find the true surface temperature.</p>
+      <div class="eqn"><b>Step 1</b> — camera's belief → received radiance (blackbody-equivalent, σT⁴ basis):
+W_rec = ε_set·W(311.15) + (1−ε_set)·W(295.15)
+      = 0.95·σ·311.15⁴ + 0.05·σ·295.15⁴
+      = σ·(0.95·9.374e9 + 0.05·7.589e9) = σ·9.285e9
+
+<b>Step 2</b> — invert with the TRUE ε:
+W_rec = ε_true·W(T_obj) + (1−ε_true)·W(295.15)
+σ·9.285e9 = 0.60·σ·T_obj⁴ + 0.40·σ·7.589e9
+T_obj⁴ = (9.285e9 − 3.036e9)/0.60 = 1.0416e10
+<b>T_obj = 319.5 K ≈ 46.4 °C</b></div>
+      <p class="body"><strong>Insight:</strong> the camera under-read by ~8.4 °C. At higher target temperatures the same ε mistake produces far larger errors (T⁴ leverage). Always re-solve — never "add a fudge factor".</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-2 · Camera selection for a substation survey</div>
+      <p class="body"><strong>Problem.</strong> You must measure 25 mm clamp connections from 25 m (minimum safe approach). Camera A: 640×480, 12° lens. Camera B: 320×240, 24° lens. Which (if either) gives a valid measurement?</p>
+      <div class="eqn"><b>Camera A:</b> IFOV = 12°×17.45/640 = 0.327 mrad
+  spot @25 m = 0.327×25 = 8.2 mm → measurement spot ≈ 3×8.2 = <b>24.5 mm ≤ 25 mm ✔</b>
+
+<b>Camera B:</b> IFOV = 24×17.45/320 = 1.31 mrad
+  spot @25 m = 32.7 mm → measurement spot ≈ <b>98 mm ✘</b> (4× too large)
+
+Camera B's max valid distance: d = 25 mm/(3×1.31 mrad) ≈ <b>6.4 m</b> — inside the safety boundary → unusable.</div>
+      <p class="body"><strong>Answer:</strong> only Camera A. Note the engineering pattern: the safety boundary fixes d, the target fixes S, so <em>resolution × lens</em> is the only free variable. This is how you write a camera procurement spec.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-3 · Load-normalized severity classification</div>
+      <p class="body"><strong>Problem.</strong> Route survey, MCC feeder: B-phase lug reads 41 °C, A and C read 34 °C, ambient 28 °C. Clamp meter: 120 A on a 400 A frame (30 % load). Classify now and at full load; state the action.</p>
+      <div class="eqn"><b>Measured:</b> ΔT_phase = 41−34 = 7 °C   ·   ΔT_amb = 13 °C
+Table (page 6): 4–15 °C phase → "probable deficiency" — repair at next outage.
+
+<b>Normalize to rated load:</b>  ΔT_full ≈ 7 × (400/120)² = 7 × 11.1 = <b>78 °C</b>
+78 °C ≫ 15 °C phase-criterion → <b>MAJOR deficiency at working load.</b></div>
+      <p class="body"><strong>Action:</strong> treat as major — schedule urgent repair, do not wait for the annual outage; re-scan after remediation. The severity table is only meaningful <em>after</em> normalization: this single habit separates Category II analysis from snapshot tourism.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-4 · Band selection by Wien &amp; signal ratio</div>
+      <p class="body"><strong>Problem.</strong> A kiln shell runs ≈ 350 °C. (a) Where does its emission peak? (b) How much more power does a 350 °C hot patch radiate than the 60 °C healthy shell around it (ε equal)? (c) LWIR or MWIR camera?</p>
+      <div class="eqn">(a) λ_max = 2898/623.15 = <b>4.65 µm</b>  → peak sits in the MWIR window
+(b) M₁/M₂ = (623.15/333.15)⁴ = 1.8705⁴ ≈ <b>12.2×</b>
+(c) Either band <i>detects</i> easily (12× contrast). MWIR captures the peak and
+    suits high-T ranges; LWIR still works and is cheaper — check the camera's
+    calibrated range covers 350 °C+ and fit a high-T filter if specified.</div>
+      <p class="body"><strong>Insight:</strong> band choice is rarely about "can I see it" — it is about calibrated range, atmospheric path, and cost. Reserve cooled MWIR for speed (kHz), long range, or gas imaging.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 12 ===== -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 · Problem Set</span>
+    <h2 class="page-title">Problem Set — Test Yourself</h2>
+    <p class="page-sub">Ten problems, roughly in exam order of difficulty. Work on paper first; tap to check. Target: 8/10 before moving on.</p>
+
+    <div class="card quiz">
+      <div class="label">P1 · Warm-up</div>
+      <p class="quiz-q">Convert: a surface at 85 °C — what is T⁴ in the Stefan-Boltzmann law? (Spot the trap.)</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to check</span>
+        <span class="hidden">T must be <b>kelvin</b>: (85+273.15)⁴ = 358.15⁴ ≈ 1.645×10¹⁰ K⁴. Using 85⁴ is the single most common exam error in radiation problems. M = εσT⁴ = ε × 5.67×10⁻⁸ × 1.645×10¹⁰ ≈ ε × 933 W/m².</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P2 · Wien</div>
+      <p class="quiz-q">A camera optimised for 3.9 µm peak emission is best matched to targets around what temperature?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to check</span>
+        <span class="hidden">T = 2898/λ_max = 2898/3.9 ≈ <b>743 K ≈ 470 °C</b> — furnace/kiln territory, hence MWIR high-temperature cameras.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P3 · Kirchhoff</div>
+      <p class="quiz-q">An opaque surface reflects 70 % of incident LWIR. Its emissivity is? And what fraction of the camera signal from it is scene reflection?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to check</span>
+        <span class="hidden">ε = 1 − ρ = <b>0.30</b>. Received signal = 0.30·W(T_obj) + 0.70·W(T_refl): <b>70 %</b> of what the camera sees is the surroundings, weighted by their radiance — measure T_refl or the reading is fiction.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P4 · Radiated power</div>
+      <p class="quiz-q">A joint rises from 40 °C to 80 °C (ε = 0.9). By what factor does its radiated power increase?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to check</span>
+        <span class="hidden">(353.15/313.15)⁴ = 1.1277⁴ ≈ <b>1.62×</b>. Only +62 % for +40 °C — near room temperature the T⁴ curve is locally shallow; the camera's NETD (mK-scale) is what makes such faults trivial to see, not raw contrast.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P5 · IFOV</div>
+      <p class="quiz-q">640×480 camera, 45° wide lens, target = 10 mm cable lug. Maximum distance for a valid measurement?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to check</span>
+        <span class="hidden">IFOV = 45×17.45/640 = 1.227 mrad. d_max = 0.010/(3×0.001227) ≈ <b>2.7 m</b>. Wide lenses are for context images — switch to tele for measurement.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P6 · Load normalization</div>
+      <p class="quiz-q">ΔT = 4 °C at 50 % load. Projected ΔT at rated current, and severity class before vs after normalization (phase-comparison criteria)?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to check</span>
+        <span class="hidden">×(100/50)² = 4× → <b>16 °C</b>. Raw: 4 °C = "probable deficiency" (low end). Normalized: 16 °C &gt; 15 °C → <b>major deficiency</b>. Classify on normalized values; record load every time.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P7 · Measurement equation</div>
+      <p class="quiz-q">Camera set ε = 0.85 reads 100 °C apparent. True ε = 0.85 but you forgot T_refl and left it at 20 °C default; actual surroundings are a 300 °C furnace wall behind you. Is the true target hotter or cooler than 100 °C?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to check</span>
+        <span class="hidden"><b>Cooler.</b> The real reflected component (from a 300 °C wall, W huge) is far larger than the camera assumed, so more of the received signal is reflection and less is emission — the camera over-attributed radiance to the target. Reflected-temperature errors flip sign with hot surroundings: under-read in cold rooms, over-read near furnaces.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P8 · NETD vs accuracy</div>
+      <p class="quiz-q">A camera lists NETD 40 mK and accuracy ±2 °C. You measure two adjacent lugs as 61.3 °C and 63.8 °C. Is the 2.5 °C ΔT trustworthy? Is "63.8 °C" trustworthy?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to check</span>
+        <span class="hidden">The <b>ΔT is trustworthy</b> (same camera, same scene, noise floor 0.04 °C ≪ 2.5 °C). The <b>absolute 63.8 °C is only ±2 °C</b> (calibration uncertainty). This is why comparative thermography is robust: systematic errors cancel in ΔT.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P9 · Pattern diagnosis</div>
+      <p class="quiz-q">A 3-phase cable run is uniformly warm along its whole length on one phase only — no point concentration. Bad joint or load imbalance? What single instrument settles it?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to check</span>
+        <span class="hidden"><b>Load imbalance</b> — I²R along distributed conductor resistance heats the whole run evenly; a joint fault concentrates at a point and fades along the conductor. A <b>clamp ammeter</b> on each phase settles it in seconds. Camera locates, meter confirms.</span></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">P10 · Design problem</div>
+      <p class="quiz-q">Specify a fixed monitoring setup for six busbar joints spread over 1.2 m width, mounted 2 m from the camera position, smallest joint 20 mm. Required: resolution &amp; lens FOV. (Assume 4:3 sensor options 320/640 wide.)</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to check</span>
+        <span class="hidden">FOV must cover 1.2 m @ 2 m → half-angle atan(0.6/2)=16.7° → <b>≥ 33.4° horizontal</b> (use 45° class). Validity: need 3×IFOV×2 m ≤ 20 mm → IFOV ≤ 3.33 mrad. 45° lens: 320 px → 2.45 mrad ✔ (margin 1.4×); 640 px → 1.23 mrad ✔✔. Choose <b>640×480 + 45°</b> for margin and per-joint ROI trending. Add τ correction if behind an IR window.</span></div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 13 ===== -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 · Derivations &amp; Traps</span>
+    <h2 class="page-title">Key Derivations, Symbols &amp; Exam Traps</h2>
+    <p class="page-sub">The theory an MSc examiner expects you to produce from scratch — and the mistakes that cost marks and findings.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 · Wien from Planck (the expected sketch)</div>
+      <div class="eqn">M(λ,T) = C₁/[λ⁵(e^{C₂/λT} − 1)],  C₁=2πhc², C₂=hc/k
+Set ∂M/∂λ = 0. With x = C₂/λT the condition reduces to:
+   <b>x·eˣ/(eˣ−1) = 5   ⇒   x ≈ 4.9651</b>  (transcendental, solved numerically)
+λ_max·T = C₂/4.9651 = (1.4388×10⁻² m·K)/4.9651 = <b>2.898×10⁻³ m·K</b>  ∎
+State: differentiate, substitute, transcendental root, constant. That earns the marks.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 · Stefan-Boltzmann from Planck</div>
+      <div class="eqn">M(T) = ∫₀^∞ M(λ,T) dλ   — substitute x = C₂/λT:
+M(T) = (C₁T⁴/C₂⁴)·∫₀^∞ x³/(eˣ−1) dx  and  ∫₀^∞ x³/(eˣ−1) dx = <b>π⁴/15</b>
+⇒ M = σT⁴ with σ = 2π⁵k⁴/(15h³c²) = <b>5.670×10⁻⁸ W·m⁻²·K⁻⁴</b>  ∎
+The π⁴/15 integral (Riemann ζ(4)·Γ(4)) may be quoted, not derived.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 · The measurement equation from energy balance</div>
+      <div class="eqn">Opaque surface: α + ρ = 1; Kirchhoff (thermal equilibrium): α = ε ⇒ <b>ρ = 1−ε</b>
+Radiance toward camera = emitted + reflected ambient:
+   L_surface = ε·L_bb(T_obj) + (1−ε)·L_bb(T_refl)
+Path through atmosphere (transmittance τ, emitting at T_atm):
+   <b>L_cam = τ·ε·L_bb(T_obj) + τ·(1−ε)·L_bb(T_refl) + (1−τ)·L_bb(T_atm)</b>  ∎
+Three unknowns you must supply: ε, T_refl, τ(d, humidity). The camera solves for T_obj.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol glossary</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Symbol</th><th>Meaning</th><th>Units / typical value</th></tr>
+        <tr><td class="mono">M, W</td><td>Radiant exitance (emitted power density)</td><td>W·m⁻²</td></tr>
+        <tr><td class="mono">L</td><td>Radiance (per solid angle)</td><td>W·m⁻²·sr⁻¹</td></tr>
+        <tr><td class="mono">σ</td><td>Stefan-Boltzmann constant</td><td>5.670×10⁻⁸ W·m⁻²·K⁻⁴</td></tr>
+        <tr><td class="mono">ε, ρ, τ, α</td><td>Emissivity, reflectance, transmittance, absorptance</td><td>0–1; opaque: ε+ρ=1</td></tr>
+        <tr><td class="mono">λ_max</td><td>Peak emission wavelength (Wien)</td><td>2898/T µm (T in K)</td></tr>
+        <tr><td class="mono">NETD</td><td>Noise-equivalent temperature difference</td><td>mK — sensitivity, not accuracy</td></tr>
+        <tr><td class="mono">IFOV</td><td>Instantaneous field of view (per pixel)</td><td>mrad; spot = IFOV×d</td></tr>
+        <tr><td class="mono">MFOV</td><td>Measurement FOV</td><td>≈ 3×IFOV — the honest spot</td></tr>
+        <tr><td class="mono">T_refl</td><td>Reflected apparent temperature</td><td>foil method, per scene</td></tr>
+        <tr><td class="mono">NUC</td><td>Non-uniformity correction (shutter "click")</td><td>flat-field re-zero</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">The seven exam &amp; field traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>Celsius in T⁴.</strong> Radiation laws take kelvin. 85⁴ vs 358.15⁴ is a ×300 000 error.</span></li>
+        <li><span class="num">2</span><span><strong>NETD ≠ accuracy.</strong> 40 mK sensitivity coexists with ±2 °C absolute accuracy. ΔT comparisons are precise; absolute values are not.</span></li>
+        <li><span class="num">3</span><span><strong>ε is not a material constant.</strong> It varies with surface finish, oxide, angle (drops steeply past ~60° viewing) and wavelength band. Quote it with conditions.</span></li>
+        <li><span class="num">4</span><span><strong>Display zoom ≠ optics.</strong> Digital zoom adds no pixels on target; only distance or lens changes IFOV.</span></li>
+        <li><span class="num">5</span><span><strong>Auto-span hides faults.</strong> A 300 °C flare in frame compresses a 15 °C fault into one colour step. Lock and narrow the span manually.</span></li>
+        <li><span class="num">6</span><span><strong>Glass is opaque in LWIR</strong> (and transmits in SWIR). You cannot shoot through a window with a plant camera — that "hot machine behind glass" is your own reflection.</span></li>
+        <li><span class="num">7</span><span><strong>IR windows have τ &lt; 1</strong> (crystal ~0.9, polymer varies with age). Skip the correction and every panel reading is systematically low.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 14 ===== -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 · Study &amp; Practice</span>
+    <h2 class="page-title">Further Study &amp; Hands-On Practice Path</h2>
+    <p class="page-sub">The canonical references, then a practice ladder you can run with any entry-level radiometric camera.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf (in reading order)</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Resource</th><th>What it gives you</th></tr>
+        <tr><td><b>Vollmer &amp; Möllmann — <i>Infrared Thermal Imaging: Fundamentals, Research and Applications</i></b></td><td>THE MSc text: full physics, detector technology, error budgets, applications. Read ch. 1–4 alongside pages 2–5 of this module.</td></tr>
+        <tr><td><b>Holst — <i>Common Sense Approach to Thermal Imaging</i></b></td><td>Systems view: MRTD, range performance, why specs mislead.</td></tr>
+        <tr><td><b>Incropera — <i>Fundamentals of Heat &amp; Mass Transfer</i></b> (radiation chapters)</td><td>Radiation heat transfer foundations: view factors, grey-body networks — the "why" under the camera.</td></tr>
+        <tr><td><b>ISO 18434-1 &amp; ISO 18436-7</b></td><td>The procedures standard and the certification syllabus — structure your practice to Cat I/II competencies.</td></tr>
+        <tr><td><b>NETA MTS Table (thermographic survey)</b></td><td>The ΔT severity criteria used across industry (page 6).</td></tr>
+        <tr><td><b>ITC / FLIR application notes &amp; guidebooks</b></td><td>Free, excellent field technique: electrical, building, R&amp;D booklets.</td></tr>
+        <tr><td><b>MIT OCW — Radiative Transfer segments (2.51 / 10.302)</b></td><td>Free lecture-grade derivations of Planck/Wien/S-B if you want the math slowly.</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder — 8 exercises, cheapest camera is fine</div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><strong>The ε experiment.</strong> Mug of hot water; put electrical tape on one side. Read tape vs bare ceramic vs a strip of foil. Explain all three numbers with the measurement equation.</span></li>
+        <li><span class="num">2</span><span><strong>Measure T_refl properly.</strong> Crumple-flatten foil, place at target plane, ε=1, read apparent temperature. Enter it; watch a shiny-target reading move.</span></li>
+        <li><span class="num">3</span><span><strong>Spot-size proof.</strong> Read a 10 mm hot screw head from 0.5 m, then 3 m, then 8 m. Plot indicated T vs distance — you will SEE the averaging error grow.</span></li>
+        <li><span class="num">4</span><span><strong>Palette &amp; span drill.</strong> Same scene: auto-span vs manual 5 °C span around the target. Count the faults visible in each.</span></li>
+        <li><span class="num">5</span><span><strong>Motor baseline.</strong> Thermogram a healthy motor at known load: frame, DE/NDE bearings, coupling. File it as your first baseline record (position, angle, load noted).</span></li>
+        <li><span class="num">6</span><span><strong>Panel survey (qualified escort, PPE).</strong> Survey one MCC section: phase-to-phase comparisons, record load %, classify with the page-6 table, write a one-page report with IR+visual pairs.</span></li>
+        <li><span class="num">7</span><span><strong>Building drill.</strong> On a cold morning, image a wall inside: find studs (regular), find a defect (irregular). Repeat with sun on the façade — document how solar loading destroys the survey.</span></li>
+        <li><span class="num">8</span><span><strong>Trend one asset for a month.</strong> Weekly image, same setup, log max ROI temperature vs load. This tiny dataset is a complete miniature PdM programme (→ A23).</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment — you have mastered this module when you can…</div>
+      <div class="grid-2">
+        <div class="mini c-grn"><h4>Physics</h4><p>Derive Wien from Planck; explain T⁴ leverage; state the 3-term measurement equation and every symbol from memory.</p></div>
+        <div class="mini c-sky"><h4>Instrument</h4><p>Choose band, resolution, lens and NETD for a stated job and defend the choice with IFOV arithmetic.</p></div>
+        <div class="mini c-amb"><h4>Field craft</h4><p>Correct ε and T_refl live; prove a reflection by moving; normalize ΔT by load; classify severity and prescribe action.</p></div>
+        <div class="mini c-purp"><h4>Programme</h4><p>Design a route with baselines, criteria, reporting and re-scan closure per ISO 18434 — and say what Cat I vs II staff do.</p></div>
+      </div>
+    </div>
+  </section>
+
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"The camera measures radiation — YOU make it temperature: ε first, focus second, spot size third, ΔT last."</p>
+    </div>
+
+    <div class="footer">
+      🌡️ Advanced Deep Dive · Thermal Imaging &amp; IR Thermography · Thermal Imaging &amp; Condition Monitoring<br>
+      Related: <a href="A19_Bearings_Deep_Dive.html" style="color:var(--text-dim)">A19 Bearings</a> ·
+      <a href="A23_TPM_Deep_Dive.html" style="color:var(--text-dim)">A23 TPM</a> ·
+      <a href="A11_Industrial_Sensors_Deep_Dive.html" style="color:var(--text-dim)">A11 Sensors</a> ·
+      <a href="A08_VFD_Deep_Dive.html" style="color:var(--text-dim)">A08 VFD</a> ·
+      <a href="A39_Battery_Cells_BMS_Deep_Dive.html" style="color:var(--text-dim)">A39 Batteries</a><br>
+      <a href="index.html" style="color:var(--accent-soft)">← Back to the Advanced Library</a>
+    </div>
+
+</div>
+
+<script>
+// ---- Page 2: Wien & Stefan-Boltzmann calculator ----
+(function(){
+  var T=document.getElementById('wT'), E=document.getElementById('wE');
+  function upd(){
+    var tC=parseFloat(T.value), eps=parseFloat(E.value), tK=tC+273.15;
+    document.getElementById('wtC').textContent=tC.toFixed(0);
+    document.getElementById('wtK').textContent=tK.toFixed(0);
+    document.getElementById('wEps').textContent=eps.toFixed(2);
+    var lam=2898/tK;
+    var M=eps*5.67e-8*Math.pow(tK,4);
+    var Mroom=eps*5.67e-8*Math.pow(298.15,4);
+    var band = lam>=8&&lam<=14 ? 'LWIR — standard plant camera' : (lam>=3&&lam<=5 ? 'MWIR — cooled camera territory' : (lam<3 ? 'SWIR/NIR — furnace / glass cameras' : 'between windows — camera still sees broadband'));
+    document.getElementById('wOut').innerHTML=
+      'λ_max = 2898 / '+tK.toFixed(0)+' = <b>'+lam.toFixed(2)+' µm</b>  → '+band+'<br>'+
+      'M = ε·σ·T⁴ = <b>'+(M).toFixed(0)+' W/m²</b>'+
+      (tC>25 ? '  (<b>'+(M/Mroom).toFixed(1)+'×</b> a 25 °C surface at same ε)' : '');
+  }
+  T.addEventListener('input',upd); E.addEventListener('input',upd); upd();
+})();
+
+// ---- Page 3: emissivity error demo ----
+(function(){
+  var SIG=5.67e-8;
+  function W(tC){ var k=tC+273.15; return SIG*Math.pow(k,4); }
+  function invW(w){ return Math.pow(w/SIG,0.25)-273.15; }
+  var Tr=document.getElementById('eTr'), Ar=document.getElementById('eAr'), Sr=document.getElementById('eSr'), Br=document.getElementById('eBr');
+  function upd(){
+    var t=parseFloat(Tr.value), ea=parseFloat(Ar.value), es=parseFloat(Sr.value), tb=parseFloat(Br.value);
+    document.getElementById('eT').textContent=t.toFixed(0);
+    document.getElementById('eA').textContent=ea.toFixed(2);
+    document.getElementById('eS').textContent=es.toFixed(2);
+    document.getElementById('eB').textContent=tb.toFixed(0);
+    // received radiance (tau=1): actual emission + reflection
+    var Wrec = ea*W(t) + (1-ea)*W(tb);
+    // camera solves: Wrec = es*W(Tind) + (1-es)*W(tb)
+    var Wobj = (Wrec-(1-es)*W(tb))/es;
+    var tInd = invW(Math.max(Wobj,1));
+    var err = tInd-t;
+    var verdict = Math.abs(err)<3 ? '✅ acceptable' : (Math.abs(err)<10 ? '⚠️ significant error' : '❌ dangerous — finding could be missed');
+    document.getElementById('eOut').innerHTML=
+      'Camera indicates: <b>'+tInd.toFixed(1)+' °C</b>  (true: '+t.toFixed(0)+' °C)<br>'+
+      'Error = <b>'+(err>0?'+':'')+err.toFixed(1)+' °C</b>   '+verdict+'<br>'+
+      '<span style="color:#94a3b8">Received W = ε·W(T) + (1−ε)·W(T_refl); camera inverts with the ε YOU set.</span>';
+  }
+  [Tr,Ar,Sr,Br].forEach(function(x){x.addEventListener('input',upd);}); upd();
+})();
+
+// ---- Page 5: spot size calculator ----
+(function(){
+  var res=320;
+  var seg=document.getElementById('sResSeg');
+  seg.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click',function(){
+      seg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on'); res=parseFloat(b.dataset.v);
+      document.getElementById('sRes').textContent=res; upd();
+    });
+  });
+  var F=document.getElementById('sFovR'), D=document.getElementById('sDR'), T=document.getElementById('sTR');
+  function upd(){
+    var fov=parseFloat(F.value), d=parseFloat(D.value), tg=parseFloat(T.value);
+    document.getElementById('sFov').textContent=fov;
+    document.getElementById('sD').textContent=d.toFixed(1);
+    document.getElementById('sT').textContent=tg;
+    var ifov=fov*17.45/res;                 // mrad
+    var spot=ifov*d;                        // mm  (mrad * m = mm)
+    var meas=3*spot;
+    var dmax=tg/(3*ifov);
+    var ok = tg>=meas;
+    document.getElementById('sOut').innerHTML=
+      'IFOV = '+fov+'°×17.45/'+res+' = <b>'+ifov.toFixed(2)+' mrad</b><br>'+
+      'Geometric spot @ '+d.toFixed(1)+' m = <b>'+spot.toFixed(1)+' mm</b> · measurement spot ≈ <b>'+meas.toFixed(1)+' mm</b><br>'+
+      (ok ? '✅ Target ('+tg+' mm) fills the measurement spot — reading is valid.'
+          : '❌ Target ('+tg+' mm) &lt; '+meas.toFixed(0)+' mm — reading will be LOW. Max valid distance ≈ <b>'+dmax.toFixed(1)+' m</b>.');
+  }
+  F.addEventListener('input',upd); D.addEventListener('input',upd); T.addEventListener('input',upd); upd();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Linkages &amp; Kinematics · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #8b5cf6;       /* mechanism violet */
+    --accent-soft: #c4b5fd;
+    --accent-2: #fbbf24;      /* transmission-angle amber */
+    --accent-3: #34d399;      /* velocity green */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(139,92,246,0.13), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(251,191,36,0.06), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(139,92,246,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(139,92,246,0.14), rgba(251,191,36,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(139,92,246,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-vel  { border-top-color: var(--accent-3)!important; } .c-vel .big{color:var(--accent-3)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #8b5cf6, #5b21b6); color: #f5f3ff; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(245,243,255,0.8); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(139,92,246,0.10); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:90px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Mechanisms &amp; Machine Elements · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🔗</span>Linkages &amp; Kinematics</h1>
+  <p class="hero-sub">The geometry of motion: links and joints, mobility by the Gruebler count, the four-bar and slider-crank families, Grashof&#39;s law and inversions, position–velocity–acceleration analysis with vector loops and instant centres, transmission angle and toggle, the classic special mechanisms, and how to synthesise a linkage to do exactly the job you want.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>A full advanced module. Related:</span>
+    <a href="A20_Gears_Deep_Dive.html">A20 Gears →</a>
+    <a href="A09_Servo_Motion_Deep_Dive.html">A09 Servo Motion →</a>
+    <a href="A17_End_Effectors_Deep_Dive.html">A17 End Effectors →</a>
+    <a href="A15_Robotics_ROS2_Deep_Dive.html">A15 Robotics →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · Mechanisms &amp; Pairs</a>
+    <a href="#p2">2 · Mobility (DOF)</a>
+    <a href="#p3">3 · Four-Bar &amp; Grashof</a>
+    <a href="#p4">4 · Inversions</a>
+    <a href="#p5">5 · Slider-Crank</a>
+    <a href="#p6">6 · Position Analysis</a>
+    <a href="#p7">7 · Velocity &amp; Instant Centres</a>
+    <a href="#p8">8 · Acceleration &amp; Coriolis</a>
+    <a href="#p9">9 · Transmission Angle</a>
+    <a href="#p10">10 · Special Mechanisms</a>
+    <a href="#p11">11 · Synthesis</a>
+    <a href="#p12">12 · Recap &amp; Quiz</a>
+    <a href="#p13">13 · Worked Examples</a>
+    <a href="#p14">14 · Problem Set</a>
+    <a href="#p15">15 · Derivations &amp; Traps</a>
+    <a href="#p16">16 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ============ PAGE 1 ============ -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 16 · Foundations</span>
+    <h2 class="page-title">Mechanisms, Links &amp; Kinematic Pairs</h2>
+    <p class="page-sub">Before motion comes vocabulary: what moves, how it is joined, and what that joint permits.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead">A <span class="hl">mechanism</span> is a set of rigid <span class="hl">links</span> connected by <span class="hl">joints (kinematic pairs)</span> so that a defined input motion produces a defined output motion. It transforms motion — rotary to linear, fast to slow, one path to another — while carrying force along the way.</p>
+      <p class="body">A <strong>machine</strong> is a mechanism that also transmits significant power to do work; the kinematics are identical, only the force scale differs. Kinematics studies motion (position, velocity, acceleration) <em>without</em> reference to the forces causing it; <strong>kinetics/dynamics</strong> adds the forces. This module is mostly kinematics — the geometry that must be right before any force calculation means anything.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Kinematic pairs — joints classified by freedom</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Pair</th><th>Symbol</th><th>DOF</th><th>Motion allowed</th><th>Example</th></tr>
+          <tr><td><b>Revolute (pin)</b></td><td class="mono">R</td><td>1</td><td>rotation about one axis</td><td>hinge, bearing</td></tr>
+          <tr><td><b>Prismatic (slider)</b></td><td class="mono">P</td><td>1</td><td>translation along one axis</td><td>piston, linear rail</td></tr>
+          <tr><td><b>Helical (screw)</b></td><td class="mono">H</td><td>1</td><td>coupled rotation + translation</td><td>lead screw</td></tr>
+          <tr><td><b>Cylindrical</b></td><td class="mono">C</td><td>2</td><td>rotate + slide, same axis</td><td>shaft in a sleeve</td></tr>
+          <tr><td><b>Spherical (ball)</b></td><td class="mono">S</td><td>3</td><td>rotation about 3 axes</td><td>ball joint, tie rod</td></tr>
+          <tr><td><b>Planar / cam (higher pair)</b></td><td class="mono">—</td><td>2</td><td>line/point contact, roll+slide</td><td>cam-follower, gear teeth</td></tr>
+        </table>
+      </div>
+      <p class="body"><strong>Lower pairs</strong> (R, P, H, C, S) touch over a surface — durable, low wear, the backbone of linkages. <strong>Higher pairs</strong> touch on a line or point (cams, gear teeth) — compact and versatile but higher contact stress (Hertzian — cross-ref <a href="A20_Gears_Deep_Dive.html" style="color:var(--accent-soft)">A20</a>, <a href="A19_Bearings_Deep_Dive.html" style="color:var(--accent-soft)">A19</a>).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Links, chains &amp; the ground</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" text-anchor="middle">
+            <!-- four bar labelled -->
+            <line x1="120" y1="160" x2="560" y2="160" stroke="#475569" stroke-width="6"/>
+            <g fill="#94a3b8"><text x="340" y="185">ground / frame (link 1)</text></g>
+            <!-- ground pins -->
+            <circle cx="160" cy="160" r="7" fill="#8b5cf6"/><circle cx="520" cy="160" r="7" fill="#8b5cf6"/>
+            <!-- crank -->
+            <line x1="160" y1="160" x2="210" y2="80" stroke="#c4b5fd" stroke-width="7"/>
+            <circle cx="210" cy="80" r="7" fill="#8b5cf6"/>
+            <text x="150" y="115" fill="#c4b5fd" font-size="11">crank (2)</text>
+            <!-- coupler -->
+            <line x1="210" y1="80" x2="470" y2="95" stroke="#34d399" stroke-width="7"/>
+            <circle cx="470" cy="95" r="7" fill="#8b5cf6"/>
+            <text x="340" y="72" fill="#6ee7b7" font-size="11">coupler (3) — floats</text>
+            <!-- rocker -->
+            <line x1="520" y1="160" x2="470" y2="95" stroke="#fbbf24" stroke-width="7"/>
+            <text x="545" y="120" fill="#fde68a" font-size="11">rocker (4)</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">A kinematic <strong>chain</strong> becomes a <strong>mechanism</strong> when one link is fixed (the ground/frame). The four-bar shown: ground (1), crank (2), coupler (3), rocker (4) — the archetype every later page builds on.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 1</div>
+      <p class="quiz-q">Why do designers favour lower pairs (pins, sliders) over higher pairs (cams, gears) wherever the motion allows?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Lower pairs make contact over an <strong>area</strong>, so the same force gives far lower contact stress, less wear, easier lubrication and long life. Higher pairs (line/point contact) concentrate load into Hertzian contact stresses — compact and able to produce arbitrary motion laws (a cam can do anything), but they wear faster and need harder materials and better lubrication. Use a linkage of lower pairs when it can do the job; reach for a cam or gear only when you need a motion a linkage can&#39;t easily give.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 ============ -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 16 · Mobility</span>
+    <h2 class="page-title">Mobility — Counting Degrees of Freedom</h2>
+    <p class="page-sub">How many inputs does a mechanism need? One formula answers it — and its exceptions teach the rest.</p>
+
+    <div class="card">
+      <div class="label">Gruebler / Kutzbach criterion</div>
+      <p class="lead">Mobility (DOF) is the number of independent inputs needed to fully position a mechanism. Count links and the freedom each joint <span class="hl">removes</span>.</p>
+      <div class="eqn"><b>Planar:  M = 3(n − 1) − 2j₁ − j₂</b>
+n = total links (including ground) · j₁ = lower pairs (1-DOF: R, P) · j₂ = higher pairs (2-DOF)
+<b>Spatial:  M = 6(n − 1) − Σ(6 − f<sub>i</sub>)</b>   f<sub>i</sub> = DOF of joint i</div>
+      <p class="body">The logic: each free planar body has 3 DOF; grounding one removes a body; every 1-DOF joint takes away 2 freedoms, every 2-DOF joint takes away 1. <strong>M = 1</strong> means one motor/input fully drives it — the target for most machines. M = 0 is a structure (truss); M &lt; 0 is over-constrained (statically indeterminate).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked counts</div>
+      <div class="grid-3">
+        <div class="mini"><h4>Four-bar</h4><p class="big">M=1</p><p>n=4, j₁=4, j₂=0 → 3(3) − 8 = 1. One input → determinate motion.</p></div>
+        <div class="mini c-vel"><h4>Slider-crank</h4><p class="big">M=1</p><p>n=4, j₁=4 (3R+1P) → 1. Same mobility, different geometry.</p></div>
+        <div class="mini c-amb"><h4>Five-bar</h4><p class="big">M=2</p><p>n=5, j₁=5 → 3(4) − 10 = 2. Needs TWO inputs (e.g. a 2-motor SCARA-like).</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">When Gruebler lies — and why that matters</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Redundant constraints:</strong> a parallel link that duplicates an existing constraint (e.g. the third rail on a locomotive coupling, or a parallelogram&#39;s extra bar) makes the formula predict M=0 while the real mechanism moves. The link is there for <em>load/stability</em>, not kinematics — subtract redundant constraints before trusting the count.</div></li>
+        <li><span class="num">2</span><div><strong>Idle DOF:</strong> a roller follower that spins on its own pin adds a DOF that doesn&#39;t affect output motion. Gruebler over-counts; recognise and discount it.</div></li>
+        <li><span class="num">3</span><div><strong>Special geometry (paradoxes):</strong> exact dimensions can grant motion the generic count forbids (a parallelogram in a singular alignment). Kinematics of the specific dimensions overrides the generic formula.</div></li>
+      </ul>
+      <p class="body">These aren&#39;t academic footnotes: a redundant-constraint mechanism binds if the extra bar isn&#39;t made to exact length, and an over-constrained (M≤0) assembly that &quot;should&quot; be rigid can jam or stress on tolerance — the daily reality of fixture and machine design.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 2</div>
+      <p class="quiz-q">A parallelogram linkage (crank, coupler, rocker all sized so opposite sides are equal) has M=1 by Gruebler. Add a fifth bar parallel to the coupler to steady it. What does Gruebler now say, and what actually happens?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Adding the parallel bar adds one link and two pins: ΔM = 3(1) − 2(2) = −1, so Gruebler drops M from 1 to <strong>0 (a structure)</strong>. But because the geometry is <em>exactly</em> parallel, the extra bar duplicates a constraint already present — it&#39;s <strong>redundant</strong> — and the mechanism <strong>still moves with M=1</strong>. The catch: it only works if the fifth bar is made to precise length; a small error over-constrains it and it binds. This is the classic Gruebler paradox and a real manufacturing warning.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 ============ -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 16 · Four-Bar</span>
+    <h2 class="page-title">The Four-Bar &amp; Grashof&#39;s Law</h2>
+    <p class="page-sub">The most useful mechanism ever devised — and the one inequality that predicts its behaviour.</p>
+
+    <div class="card">
+      <div class="label">Grashof&#39;s law</div>
+      <p class="lead">For a four-bar, whether any link can fully rotate depends on a single inequality between the <span class="hl">shortest (s)</span>, <span class="hl">longest (l)</span> and the <span class="hl">other two (p, q)</span> link lengths.</p>
+      <div class="eqn"><b>Grashof condition:  s + l ≤ p + q</b>
+If TRUE  → at least one link makes full revolutions (Grashof / Class I)
+If FALSE → no link fully rotates — all are rockers (non-Grashof / Class II)
+Special case s + l = p + q → change-point (folds through a singularity)</div>
+    </div>
+
+    <div class="card">
+      <div class="label">The four Grashof types — decided by which link is grounded</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Ground link is…</th><th>Result</th><th>Input→Output</th><th>Use</th></tr>
+          <tr><td>adjacent to shortest</td><td><b>Crank-rocker</b></td><td>crank rotates → rocker oscillates</td><td>oscillating fan, wipers, pumps</td></tr>
+          <tr><td>the shortest link</td><td><b>Double-crank (drag-link)</b></td><td>both side links rotate fully</td><td>continuous drive coupling</td></tr>
+          <tr><td>opposite the shortest</td><td><b>Double-rocker</b></td><td>both side links oscillate</td><td>steering, rocking platforms</td></tr>
+          <tr><td>(non-Grashof, any)</td><td><b>Triple-rocker</b></td><td>no full rotation</td><td>limited-swing links</td></tr>
+        </table>
+      </div>
+      <p class="body">This is the profound part: the <em>same four bars</em> give completely different machines depending on which link you bolt down — the four <strong>inversions</strong> (Page 4). Grashof tells you which link can be the crank; grounding chooses the behaviour.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">🎛 Interactive — Grashof classifier</div>
+      <div class="demo">
+        <div class="demo-row"><span>Link a (crank)</span><b><span id="lav">30</span></b></div>
+        <input type="range" id="laR" min="10" max="120" step="1" value="30">
+        <div class="demo-row"><span>Link b (coupler)</span><b><span id="lbv">80</span></b></div>
+        <input type="range" id="lbR" min="10" max="120" step="1" value="80">
+        <div class="demo-row"><span>Link c (rocker)</span><b><span id="lcv">70</span></b></div>
+        <input type="range" id="lcR" min="10" max="120" step="1" value="70">
+        <div class="demo-row"><span>Link d (ground)</span><b><span id="ldv">90</span></b></div>
+        <input type="range" id="ldR" min="10" max="120" step="1" value="90">
+        <div class="demo-out" id="grOut"></div>
+      </div>
+      <p class="cap">The classifier applies s+l vs p+q, then names the type from which link is shortest and grounded (link d is the ground here). Try s+l = p+q for the change-point warning.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 3</div>
+      <p class="quiz-q">Links 2, 4, 5, 8 (cm). You need a motor to drive a continuously-rotating input and get an oscillating output. Is it possible, and how do you ground it?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Check Grashof: s+l = 2+8 = 10; p+q = 4+5 = 9. Since 10 &gt; 9, this is <strong>non-Grashof</strong> — <em>no</em> link can fully rotate, so a rotating motor input is <strong>impossible</strong> whatever you ground; you&#39;d only get rocker-rocker motion. To get crank-rocker you need s+l ≤ p+q (e.g. change the 8 to a 6: 2+6=8 ≤ 4+5=9 ✓) then ground a link adjacent to the shortest (the 2 cm link).</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 ============ -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 16 · Inversions</span>
+    <h2 class="page-title">Kinematic Inversions</h2>
+    <p class="page-sub">Fix a different link, get a different machine — the same chain, four personalities.</p>
+
+    <div class="card">
+      <div class="label">The idea of inversion</div>
+      <p class="lead">An <span class="hl">inversion</span> is created by grounding a different link of the same kinematic chain. The <span class="hl2">relative motion between links is unchanged</span> — but the <em>absolute</em> motion, and hence the machine, transforms completely.</p>
+      <p class="body">A chain with n links has n possible inversions. They are not new mechanisms — the link lengths and joints are identical — yet each does a different job. Recognising that a puzzle mechanism is &quot;just an inversion of the slider-crank&quot; instantly imports everything you know about it.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Inversions of the slider-crank</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Grounded link</th><th>Mechanism</th><th>Real machine</th></tr>
+          <tr><td>Frame (cylinder block)</td><td><b>Standard slider-crank</b></td><td>IC engine, reciprocating pump/compressor</td></tr>
+          <tr><td>Crank</td><td><b>Whitworth / rotary engine</b></td><td>Whitworth quick-return, old rotary aero engines</td></tr>
+          <tr><td>Connecting rod</td><td><b>Oscillating cylinder</b></td><td>Oscillating-cylinder steam engine, toy engines</td></tr>
+          <tr><td>Slider</td><td><b>Hand pump / Pendulum</b></td><td>Hand water pump, some feed mechanisms</td></tr>
+        </table>
+      </div>
+      <p class="body">The <strong>Whitworth</strong> and <strong>crank-shaper</strong> quick-return mechanisms — where the cutting stroke is slow and the return fast — are slider-crank inversions; we quantify their time ratio on Page 10.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Inversions of the four-bar</div>
+      <p class="body">Grounding each of the four links of a Grashof chain yields the crank-rocker, drag-link and double-rocker of Page 3 — plus the double-slider chain gives the <strong>elliptical trammel</strong>, <strong>Scotch yoke</strong> (pure sine motion) and <strong>Oldham coupling</strong> (connects parallel offset shafts). One chain, a family of couplings and motion converters.</p>
+      <div class="grid-3">
+        <div class="mini c-purp"><h4>Scotch yoke</h4><p>Slider-crank cousin giving exact simple-harmonic motion x = r·cosθ. Used in valve actuators &amp; test rigs.</p></div>
+        <div class="mini c-teal"><h4>Oldham coupling</h4><p>Double-slider inversion transmitting torque between parallel, laterally-offset shafts.</p></div>
+        <div class="mini c-amb"><h4>Elliptical trammel</h4><p>Two sliders in perpendicular slots; any coupler point traces an ellipse.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 4</div>
+      <p class="quiz-q">A Scotch yoke and a standard slider-crank both convert rotation to reciprocation. Why does the Scotch yoke give pure sinusoidal motion while the slider-crank does not?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">The Scotch yoke&#39;s slot decouples the crank pin&#39;s transverse motion, so the slider position is <strong>exactly x = r·cosθ</strong> — pure SHM. The slider-crank&#39;s finite connecting rod adds a second-harmonic term: x ≈ r·cosθ + (r²/2L)·cos2θ. The rod&#39;s obliquity distorts the sinusoid (and creates the classic 1×/2× inertia forces engine balancers must handle). Shorter rod (small L/r) → more distortion. The Scotch yoke trades that rod for a sliding slot — cleaner motion, but higher wear in the slot.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 ============ -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 16 · Slider-Crank</span>
+    <h2 class="page-title">The Slider-Crank</h2>
+    <p class="page-sub">The mechanism that powers the industrial world — piston to crankshaft, exactly analysed.</p>
+
+    <div class="card">
+      <div class="label">Geometry</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12">
+            <line x1="80" y1="150" x2="640" y2="150" stroke="#334155" stroke-width="2" stroke-dasharray="4 4"/>
+            <circle cx="160" cy="150" r="8" fill="#8b5cf6"/><text x="150" y="175" fill="#94a3b8">O (crank centre)</text>
+            <!-- crank r -->
+            <line x1="160" y1="150" x2="230" y2="95" stroke="#c4b5fd" stroke-width="7"/>
+            <circle cx="230" cy="95" r="7" fill="#8b5cf6"/><text x="190" y="105" fill="#c4b5fd">r</text>
+            <text x="235" y="88" fill="#c4b5fd" font-size="11">A (crank pin)</text>
+            <!-- rod L -->
+            <line x1="230" y1="95" x2="520" y2="150" stroke="#34d399" stroke-width="7"/>
+            <text x="380" y="112" fill="#6ee7b7">L (rod)</text>
+            <!-- piston -->
+            <rect x="510" y="132" width="46" height="36" rx="5" fill="#232d3f" stroke="#fbbf24"/>
+            <text x="533" y="185" fill="#fde68a">B (piston)</text>
+            <!-- angle theta -->
+            <path d="M185 150 A25 25 0 0 0 178 132" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+            <text x="200" y="140" fill="#fde68a" font-size="11">θ</text>
+          </g>
+        </svg>
+      </div>
+      <div class="eqn">Piston position from crank centre (θ from dead-centre):
+<b>x = r·cosθ + √(L² − r²·sin²θ)</b>       exact
+<b>x ≈ (L + r) − r[(1−cosθ) + (r/4L)(1−cos2θ)]</b>   binomial approx (n = L/r)
+The (r/4L)cos2θ term is the <b>second harmonic</b> — the source of secondary inertia force.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Velocity &amp; acceleration of the piston</div>
+      <div class="eqn">With ω = crank speed (rad/s), n = L/r:
+<b>v ≈ r·ω·(sinθ + (sin2θ)/(2n))</b>
+<b>a ≈ r·ω²·(cosθ + (cos2θ)/n)</b>
+Primary inertia force ∝ cosθ (once per rev) · Secondary ∝ cos2θ/n (twice per rev)</div>
+      <p class="body">These two harmonics are why engines need <strong>balancing</strong>: the primary force can be balanced by counterweights, but the secondary (2×) needs Lanchester balance shafts. A longer rod (bigger n) shrinks the secondary term — smoother, but a taller, heavier engine. Every engine is this trade.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Offset (eccentric) slider-crank</div>
+      <p class="body">Offsetting the slider axis from the crank centre by <em>e</em> makes the mechanism a natural <strong>quick-return</strong> — the forward and return strokes take unequal crank angles, giving different average speeds. Small offsets also reduce side-thrust on one side of the piston. The trade is asymmetric wear and a slightly more complex position equation (add the offset term inside the square root).</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 5</div>
+      <p class="quiz-q">Two engines have rod/crank ratios n = 3 and n = 5. Which has larger secondary (2×) inertia forces, and what&#39;s the design cost of fixing it?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">The secondary acceleration term is (cos2θ)/n, so the <strong>n = 3 engine</strong> has larger secondary forces (1/3 vs 1/5 — about 67 % more). Fixing it means either a longer rod (raise n → taller, heavier, lower-revving engine) or adding <strong>balance shafts</strong> spinning at 2× crank speed (weight, cost, friction). Short-rod engines are compact but rougher; this is exactly why inline-4s over ~2 L usually get balance shafts.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 ============ -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 16 · Position</span>
+    <h2 class="page-title">Position Analysis — Vector Loops</h2>
+    <p class="page-sub">The systematic method: write the linkage as a closed chain of vectors and solve.</p>
+
+    <div class="card">
+      <div class="label">The vector-loop equation</div>
+      <p class="lead">Model each link as a position vector R = L∠θ. Going around a closed mechanism and back to the start, the vectors must sum to zero — the <span class="hl">loop-closure equation</span>. Split into real (x) and imaginary (y) parts and solve for the unknown angles.</p>
+      <div class="eqn">Four-bar (links 1 ground, 2 crank, 3 coupler, 4 rocker):
+<b>R₂ + R₃ − R₄ − R₁ = 0</b>
+x:  a·cosθ₂ + b·cosθ₃ − c·cosθ₄ − d = 0
+y:  a·sinθ₂ + b·sinθ₃ − c·sinθ₄ = 0
+Given θ₂ (input) → two equations, two unknowns (θ₃, θ₄).</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Freudenstein&#39;s equation</div>
+      <p class="body">Eliminating the coupler angle gives the elegant closed form relating input θ₂ and output θ₄ directly:</p>
+      <div class="eqn"><b>K₁·cosθ₄ − K₂·cosθ₂ + K₃ = cos(θ₂ − θ₄)</b>
+K₁ = d/a,  K₂ = d/c,  K₃ = (a² − b² + c² + d²)/(2ac)
+Solve for θ₄ via the half-angle/tangent substitution → two roots = the two assembly configurations (&quot;open&quot; and &quot;crossed&quot; circuits).</div>
+      <p class="body">The <strong>two solutions</strong> are physical: a four-bar can be assembled two ways (open or crossed) for the same link lengths, and it cannot jump between them without disassembly. Choosing the right branch — and staying on it through the motion — is a real synthesis constraint (Page 11).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Coupler point &amp; the coupler curve</div>
+      <p class="body">Any point rigidly attached to the floating coupler traces a <strong>coupler curve</strong> — often a complex figure-eight or D-shape. These curves are the secret weapon of linkage design: with the right geometry a coupler point can trace an approximate straight line, a dwell, or a specific path, doing with four bars what would otherwise need a cam. The <em>Hrones–Nelson atlas</em> catalogues thousands of them.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 6</div>
+      <p class="quiz-q">Freudenstein&#39;s equation gives two values of θ₄ for a given input. What do they represent physically, and can a running mechanism switch between them?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">The two roots are the <strong>two assembly configurations</strong> — the &quot;open&quot; and &quot;crossed&quot; circuits — the same bars can be pinned together in either mirror arrangement. A running mechanism <strong>cannot</strong> jump between them without passing through a change-point (singular) configuration or being disassembled; away from singularities each circuit is a separate continuous branch. Designers must pick the branch that keeps the transmission angle healthy (Page 9) throughout the cycle.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 7 ============ -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 16 · Velocity</span>
+    <h2 class="page-title">Velocity Analysis &amp; Instant Centres</h2>
+    <p class="page-sub">Two roads to velocity: differentiate the loop, or find the point a body is momentarily rotating about.</p>
+
+    <div class="card">
+      <div class="label">Method 1 — differentiate the vector loop</div>
+      <div class="eqn">Differentiate the loop-closure once w.r.t. time (ω = dθ/dt):
+x:  −a·ω₂·sinθ₂ − b·ω₃·sinθ₃ + c·ω₄·sinθ₄ = 0
+y:   a·ω₂·cosθ₂ + b·ω₃·cosθ₃ − c·ω₄·cosθ₄ = 0
+Given ω₂ → solve the linear pair for ω₃, ω₄:
+<b>ω₄ = a·ω₂·sin(θ₂−θ₃) / [c·sin(θ₄−θ₃)]</b>
+<b>ω₃ = a·ω₂·sin(θ₂−θ₄) / [b·sin(θ₃−θ₄)]</b></div>
+      <p class="body">Clean, exact and programmable — the method behind every kinematics solver. Note the <strong>sin(θ₄−θ₃)</strong> in the denominator: when coupler and rocker align (θ₄ = θ₃), it goes to zero and ω₄ blows up — a <strong>singularity / change-point</strong> (Page 9).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Method 2 — instant centres of rotation</div>
+      <p class="lead">At any instant, a rigid body in planar motion is <span class="hl">rotating about a single point</span> — its instant centre (IC). Velocities are then just IC = pivot: v = ω × r from that point.</p>
+      <div class="eqn"><b>Number of ICs:  N = n(n − 1)/2</b>    (n = number of links)
+Four-bar: N = 4·3/2 = 6 instant centres
+Primary ICs = the pin joints; secondary ICs found by Kennedy&#39;s theorem.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Kennedy&#39;s (three-centres) theorem</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" text-anchor="middle">
+            <circle cx="150" cy="100" r="6" fill="#8b5cf6"/><text x="150" y="85" fill="#c4b5fd">I₁₂</text>
+            <circle cx="420" cy="60" r="6" fill="#8b5cf6"/><text x="420" y="45" fill="#c4b5fd">I₂₃</text>
+            <circle cx="560" cy="150" r="6" fill="#fbbf24"/><text x="580" y="150" fill="#fde68a">I₁₃</text>
+            <line x1="150" y1="100" x2="560" y2="150" stroke="#34d399" stroke-width="2" stroke-dasharray="5 3"/>
+            <text x="330" y="140" fill="#6ee7b7" font-size="11">I₁₂, I₂₃, I₁₃ are collinear</text>
+          </g>
+        </svg>
+      </div>
+      <p class="body">Kennedy: <strong>the three instant centres of any three bodies in relative motion lie on one straight line.</strong> This lets you locate the elusive secondary ICs by intersecting lines — and once you have the IC of the coupler relative to ground (I₁₃), the coupler&#39;s angular velocity and every point&#39;s velocity follow instantly. It&#39;s the graphical shortcut that makes hand analysis of complex linkages tractable.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Mechanical advantage from ICs</div>
+      <div class="eqn"><b>MA = (output force)/(input force) = (ω_in/ω_out) = (r_out lever)/(r_in lever)</b>
+As a linkage approaches a toggle, the output lever → ∞ (ω_out → 0) → MA → ∞
+This is why toggle clamps and rock crushers can multiply force enormously near lock-up.</div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 7</div>
+      <p class="quiz-q">In velocity analysis of a four-bar, ω₄ has sin(θ₄−θ₃) in its denominator. What physically happens when coupler (3) and rocker (4) become collinear?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">sin(θ₄−θ₃) → 0, so the equation predicts ω₄ → ∞ for finite ω₂ — a <strong>singular / change-point configuration</strong>. Physically the mechanism is at a <strong>dead-centre / toggle</strong>: the output link momentarily can move very fast for tiny input (or, viewed as force, gives enormous mechanical advantage — ω_out→0 means MA→∞). It&#39;s the basis of toggle clamps and quick-return; but if it&#39;s <em>unwanted</em> it means loss of control of the output branch — a design flaw to avoid within the working range.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 8 ============ -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 16 · Acceleration</span>
+    <h2 class="page-title">Acceleration &amp; the Coriolis Term</h2>
+    <p class="page-sub">Differentiate twice — and meet the acceleration component that trips up every student.</p>
+
+    <div class="card">
+      <div class="label">Acceleration of a point on a rotating link</div>
+      <div class="eqn">For a point at radius r on a link with ω, α:
+<b>a = a_normal + a_tangential</b>
+a_normal = ω²·r   (centripetal, points to centre)   — exists even at constant speed
+a_tangential = α·r  (along motion, from angular acceleration)
+|a| = r·√(ω⁴ + α²)</div>
+      <p class="body">Differentiating the four-bar velocity equations again gives a linear pair for α₃, α₄ in terms of the known ω&#39;s and input α₂ — the same machine, one more derivative. This is what sizes bearing loads, inertia forces and vibration in high-speed mechanisms.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The Coriolis acceleration</div>
+      <p class="lead">When a point <span class="hl">slides along a link that is itself rotating</span> (a block in a rotating slot — Whitworth, shaper, any sliding pair on a moving body), a fourth acceleration term appears: <span class="hl3">Coriolis</span>.</p>
+      <div class="eqn"><b>a_Coriolis = 2·ω × v_rel</b>       magnitude = 2·ω·v_slip
+Full: a_B = a_A + a_rel + ω×(ω×r) + α×r + 2ω×v_rel
+                              normal    tangential   Coriolis</div>
+      <p class="body">Direction: rotate the sliding-velocity vector 90° in the direction of ω. Miss it and your acceleration (and therefore force/stress) analysis of any quick-return or governor is simply wrong. It only appears with the <strong>combination</strong> of sliding <em>and</em> rotation — a slider on the fixed frame has no Coriolis; a slider on a spinning arm does.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Why it matters in practice</div>
+      <div class="grid-3">
+        <div class="mini c-red"><h4>Force spikes</h4><p>Coriolis + normal + tangential can peak far above the &quot;obvious&quot; value → sized bearings &amp; pins.</p></div>
+        <div class="mini c-amb"><h4>Vibration</h4><p>High-speed mechanisms&#39; inertia forces drive shaking couples — the input to balancing.</p></div>
+        <div class="mini c-vel"><h4>Governors &amp; pumps</h4><p>Sliding-on-rotating parts (fly-ball governors, vane pumps) live on the Coriolis term.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 8</div>
+      <p class="quiz-q">A block slides outward at 0.5 m/s along an arm rotating at 20 rad/s. What is the Coriolis acceleration, and does it exist if the arm is NOT rotating?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">a_Cor = 2·ω·v_rel = 2×20×0.5 = <strong>20 m/s²</strong>, directed perpendicular to the slide (rotate v_rel 90° in the sense of ω). If the arm is <strong>not rotating (ω = 0), Coriolis is zero</strong> — it requires the combination of sliding motion <em>and</em> rotation of the frame it slides on. A piston sliding in a fixed cylinder has no Coriolis; the same block in a spinning slot does. Forgetting it is the classic acceleration-analysis error.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 9 ============ -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 16 · Force Transmission</span>
+    <h2 class="page-title">Transmission Angle &amp; Toggle</h2>
+    <p class="page-sub">The single geometric number that decides whether a linkage pushes smoothly or jams.</p>
+
+    <div class="card">
+      <div class="label">Transmission angle μ</div>
+      <p class="lead">The <span class="hl">transmission angle</span> μ is the angle between the coupler and the output link (rocker). It governs how much of the coupler force does <span class="hl2">useful work on the output</span> versus wasted radial load on the bearings.</p>
+      <div class="eqn">Useful output force ∝ sin μ · (coupler force)
+Ideal:  μ = 90° (all force drives the output)
+<b>Rule of thumb: keep 40° ≤ μ ≤ 140°</b>  (i.e. |90°−μ| ≤ 50°)
+μ → 0° or 180°: output force → 0, bearing load → ∞ → mechanism jams / stalls</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12">
+            <line x1="120" y1="150" x2="580" y2="150" stroke="#475569" stroke-width="5"/>
+            <circle cx="160" cy="150" r="6" fill="#8b5cf6"/><circle cx="520" cy="150" r="6" fill="#8b5cf6"/>
+            <line x1="160" y1="150" x2="240" y2="80" stroke="#c4b5fd" stroke-width="6"/>
+            <circle cx="240" cy="80" r="6" fill="#8b5cf6"/>
+            <line x1="240" y1="80" x2="470" y2="105" stroke="#34d399" stroke-width="6"/>
+            <circle cx="470" cy="105" r="6" fill="#8b5cf6"/>
+            <line x1="520" y1="150" x2="470" y2="105" stroke="#fbbf24" stroke-width="6"/>
+            <path d="M455 108 A20 20 0 0 0 490 128" fill="none" stroke="#f472b6" stroke-width="2"/>
+            <text x="500" y="100" fill="#f9a8d4" font-size="13">μ</text>
+            <text x="330" y="95" fill="#6ee7b7" font-size="11">coupler</text>
+            <text x="540" y="130" fill="#fde68a" font-size="11">rocker</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Toggle positions &amp; dead centre</div>
+      <p class="body">When the crank and coupler become collinear the mechanism is at a <strong>toggle (dead-centre)</strong>: the transmission angle is at an extreme, mechanical advantage spikes (Page 7), and the output momentarily stalls. Two faces of the same coin:</p>
+      <div class="grid-2">
+        <div class="mini c-grn"><h4>Toggle exploited</h4><p>Toggle clamps, riveters, rock crushers, knee-locks, switchgear over-centre springs — huge force from small input near lock-up, and the joint self-holds.</p></div>
+        <div class="mini c-red"><h4>Toggle avoided</h4><p>A drive linkage that hits dead-centre loses control of the output and may not restart — keep the whole working cycle away from μ extremes.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">🎛 Interactive — transmission angle sweep</div>
+      <div class="demo">
+        <div class="demo-row"><span>Crank a</span><b><span id="tav">40</span></b></div>
+        <input type="range" id="taR" min="15" max="90" step="1" value="40">
+        <div class="demo-row"><span>Coupler b</span><b><span id="tbv">100</span></b></div>
+        <input type="range" id="tbR" min="40" max="140" step="1" value="100">
+        <div class="demo-row"><span>Rocker c</span><b><span id="tcv">90</span></b></div>
+        <input type="range" id="tcR" min="40" max="140" step="1" value="90">
+        <div class="demo-row"><span>Ground d</span><b><span id="tdv">120</span></b></div>
+        <input type="range" id="tdR" min="60" max="180" step="1" value="120">
+        <div class="demo-row"><span>Crank angle θ₂</span><b><span id="thv">60</span>°</b></div>
+        <input type="range" id="thR" min="0" max="360" step="2" value="60">
+        <div class="demo-out" id="taOut"></div>
+      </div>
+      <p class="cap">μ is computed from the diagonal via the law of cosines. Sweep θ₂ through a full turn and watch μ dip toward its extremes — those are the tough spots the mechanism must survive.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 9</div>
+      <p class="quiz-q">A toggle clamp gives huge clamping force and holds itself shut with no continuous input. Explain both effects from the transmission angle.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Near the toggle the driving links are nearly collinear, so mechanical advantage → very high (ω_out→0 ⇒ MA→∞): a modest handle force becomes a large clamping force. <strong>Self-holding</strong> comes from going slightly <em>over-centre</em>: any reaction from the workpiece now tries to push the linkage further past dead-centre against a stop, not back toward release — the joint is locked by geometry, needing no holding force. The same physics runs circuit-breaker mechanisms and knee-lock stands.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 10 ============ -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 16 · Special Mechanisms</span>
+    <h2 class="page-title">The Classic Special Mechanisms</h2>
+    <p class="page-sub">A toolbox of named linkages — each solves a recurring motion problem elegantly.</p>
+
+    <div class="card">
+      <div class="label">Quick-return mechanisms</div>
+      <p class="body">A cutting tool should return faster than it cuts (idle time is wasted time). Quick-return linkages give an <strong>asymmetric stroke</strong>: slow forward, fast return. The <strong>time ratio</strong> is set by the crank angles of the two strokes:</p>
+      <div class="eqn"><b>Time ratio Q = α/β</b>    α = crank angle for cutting stroke, β = for return (α+β=360°)
+Whitworth &amp; crank-shaper: Q from the geometry of the driving crank &amp; slotted lever
+Offset slider-crank: offset e creates the asymmetry directly</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Straight-line mechanisms</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Mechanism</th><th>Type</th><th>Note</th></tr>
+          <tr><td><b>Watt</b></td><td>Approximate</td><td>Coupler midpoint traces a figure-8; near-straight over a short span. Historic (steam beam engines).</td></tr>
+          <tr><td><b>Chebyshev</b></td><td>Approximate</td><td>Simple 4-bar giving a good straight segment.</td></tr>
+          <tr><td><b>Roberts / Hoeken</b></td><td>Approximate</td><td>Hoeken gives near-constant-velocity straight run — popular in walkers &amp; pick-and-place.</td></tr>
+          <tr><td><b>Peaucellier–Lipkin</b></td><td>Exact</td><td>8-bar inversor — mathematically perfect straight line (1864). Elegant but complex.</td></tr>
+          <tr><td><b>Scott-Russell</b></td><td>Exact*</td><td>Exact via a slider; a linkage-with-slider solution.</td></tr>
+        </table>
+      </div>
+      <p class="body">Before precise linear guides, generating a straight line from pin joints was a famous engineering problem (guiding a piston rod). Today approximate straight-line linkages still shine where you want a straight stroke <em>plus</em> a clean return without rails — walking robots, film advance, packaging.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Motion-copying &amp; intermittent motion</div>
+      <div class="grid-2">
+        <div class="mini c-purp"><h4>Pantograph</h4><p>Parallelogram linkage that scales &amp; copies a path (engraving, drawing, some robot arms). Output = input path × fixed ratio.</p></div>
+        <div class="mini c-teal"><h4>Geneva mechanism</h4><p>Converts continuous rotation to precise <em>intermittent</em> indexing — film projectors, indexing tables, cap fillers. n slots → 1/n turn per cycle with dwell.</p></div>
+        <div class="mini c-amb"><h4>Ratchet &amp; pawl</h4><p>One-way intermittent motion &amp; holding — winches, tensioners, some indexers.</p></div>
+        <div class="mini c-grn"><h4>Toggle press</h4><p>Over-centre force multiplication for punching, clamping, moulding.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 10</div>
+      <p class="quiz-q">You need an indexing table that stops precisely at 6 stations while the drive motor runs continuously. Which classic mechanism, and what&#39;s the key design number?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">A <strong>Geneva mechanism</strong> (external Geneva) with <strong>6 slots</strong>: the driving pin enters each slot to rotate the driven wheel 1/6 turn (60°), then the locking arc holds it <em>dead still</em> for the rest of the cycle — precise intermittent indexing from continuous input, no clutch or servo. Key numbers: number of slots n = number of stations, and the driving-crank radius sets the ratio of motion time to dwell time. (A servo-indexer, A09, is the modern programmable alternative — but the Geneva is cheap, rugged and self-locking.)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 11 ============ -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 / 16 · Synthesis</span>
+    <h2 class="page-title">Linkage Synthesis</h2>
+    <p class="page-sub">Analysis finds motion from a given linkage. Synthesis is the reverse — and the real design job.</p>
+
+    <div class="card">
+      <div class="label">The three synthesis tasks</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Task</th><th>Goal</th><th>Example</th></tr>
+          <tr><td><b>Function generation</b></td><td>Output angle = f(input angle) at precision points</td><td>a linkage computing y = log x; steering ratio</td></tr>
+          <tr><td><b>Path generation</b></td><td>A coupler point follows a specified path</td><td>film-advance, mixing, pick-and-place curve</td></tr>
+          <tr><td><b>Motion (rigid-body) generation</b></td><td>The coupler passes through prescribed positions AND orientations</td><td>hatchback hinge, bucket levelling, container tilt</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Precision points &amp; two/three-position synthesis</div>
+      <p class="body">You can only satisfy a finite number of exact (<strong>precision</strong>) points; between them the linkage deviates (<strong>structural error</strong>). More precision points → more equations → but a four-bar has limited free parameters, so there&#39;s a ceiling (Freudenstein&#39;s equation gives 3 independent constants → up to 3 precision points for function generation without extra freedoms; up to 5 with all free choices — Burmester theory).</p>
+      <div class="eqn">Two-position: connect the two desired coupler poses; the moving pivot lies on the
+perpendicular bisector of its two locations → freedom to choose along it.
+Three-position (Burmester): the two bisectors&#39; intersection fixes the pivot circle;
+the centre-point &amp; circle-point curves give ALL valid pivots.</div>
+      <p class="body">Graphical Burmester construction and analytical (complex-number / matrix) methods both live here; modern practice runs it in software (MotionGen, GIM, SAM, Linkage) that also checks Grashof type, branch and transmission angle automatically.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The four checks every synthesised linkage must pass</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Grashof / rotatability:</strong> can the intended input actually rotate the way you need (Page 3)?</div></li>
+        <li><span class="num">2</span><div><strong>Branch (circuit) defect:</strong> do all precision points lie on the <em>same</em> assembly circuit? If not, the mechanism can&#39;t reach them all without disassembly (Page 6).</div></li>
+        <li><span class="num">3</span><div><strong>Order defect:</strong> does it reach the points in the required <em>sequence</em>, not out of order?</div></li>
+        <li><span class="num">4</span><div><strong>Transmission angle:</strong> stays within ~40–140° across the whole working range (Page 9) — else it jams under load.</div></li>
+      </ul>
+      <p class="body">A synthesis that nails the geometry but fails a branch or transmission-angle check is a common, expensive trap — the linkage works on paper and binds on the bench.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 11</div>
+      <p class="quiz-q">Your synthesised four-bar hits all three required coupler positions in simulation but physically won&#39;t reach the third without &quot;popping&quot; the assembly. Which defect, and how is it detected?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">A <strong>branch (circuit) defect</strong> — the third precision point lies on the <em>other</em> assembly circuit (the crossed vs open configuration), so the running mechanism, locked to one circuit, cannot reach it without disassembly or passing through a change-point. Detect it by checking the sign of the transmission-angle/coupler configuration at each precision point: if it flips, the points are on different branches. Cure: re-synthesise choosing pivots (from the Burmester curves) that keep all points on one branch, or accept a different linkage type.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 ============ -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 / 16 · Consolidate</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Quiz</h2>
+    <p class="page-sub">Ten ideas, six ways linkages fail, and the memory hook.</p>
+
+    <div class="card">
+      <div class="label">The ten ideas</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div>Mechanism = links + kinematic pairs; lower pairs (area contact) beat higher pairs (point/line) where motion allows.</div></li>
+        <li><span class="num">2</span><div>Mobility M = 3(n−1) − 2j₁ − j₂. Aim for M=1; beware redundant constraints &amp; idle DOF.</div></li>
+        <li><span class="num">3</span><div>Grashof: s+l ≤ p+q decides whether any link can fully rotate.</div></li>
+        <li><span class="num">4</span><div>Inversions: grounding a different link of one chain gives a different machine.</div></li>
+        <li><span class="num">5</span><div>Slider-crank: x = r·cosθ + √(L²−r²sin²θ); the 2× harmonic drives engine balancing.</div></li>
+        <li><span class="num">6</span><div>Position: vector-loop closure → Freudenstein; two roots = two assembly circuits.</div></li>
+        <li><span class="num">7</span><div>Velocity: differentiate the loop, or use instant centres + Kennedy&#39;s three-centres line.</div></li>
+        <li><span class="num">8</span><div>Acceleration: normal ω²r + tangential αr + <strong>Coriolis 2ωv</strong> when sliding on a rotating link.</div></li>
+        <li><span class="num">9</span><div>Transmission angle μ: keep 40–140°; toggle = MA spike, output stall, self-lock.</div></li>
+        <li><span class="num">10</span><div>Synthesis (function/path/motion) must pass Grashof, branch, order &amp; transmission-angle checks.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Six classic linkage failures</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">🔒 Bad transmission angle</div><p>μ strays near 0/180° in the working range → huge bearing loads, binding, stall. The #1 linkage design sin. Keep 40–140°.</p></div>
+        <div class="fail"><div class="ft">🪤 Dead-centre lock</div><p>Drive linkage reaches an unwanted toggle → output loses control &amp; may not restart. Design the cycle away from change-points (or add a flywheel/offset).</p></div>
+        <div class="fail"><div class="ft">🔀 Branch defect</div><p>Synthesised points on different circuits → mechanism can&#39;t reach them all. Simulation lies if branch isn&#39;t checked.</p></div>
+        <div class="fail"><div class="ft">🧩 Over-constraint</div><p>Redundant links (M≤0 by Gruebler) bind unless made to exact length → tolerance-sensitive jamming in fixtures &amp; frames.</p></div>
+        <div class="fail"><div class="ft">〰 Unbalanced inertia</div><p>High-speed 1×/2× shaking forces (slider-crank harmonics) → vibration, bearing &amp; mount fatigue. Balance or slow down.</p></div>
+        <div class="fail"><div class="ft">🧯 Coriolis ignored</div><p>Sliding-on-rotating force underestimated → under-sized pins/bearings in quick-returns &amp; governors fail early.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final Quiz</div>
+      <p class="quiz-q">Q1 — Links 3, 4, 5, 6. Classify (Grashof?) and, if a rotating input is possible, name the mechanism when a link adjacent to the shortest is grounded.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">s+l = 3+6 = 9; p+q = 4+5 = 9 → <strong>s+l = p+q: change-point mechanism</strong> (borderline Grashof). A link <em>can</em> rotate but the mechanism passes through singular (folded) configurations each cycle — usable but needs care (flywheel/guide) to pass dead-centres. Grounding a link adjacent to the shortest gives a <strong>crank-rocker</strong>-type motion, subject to those change-points. (Change 6→5 and it becomes cleanly Grashof: 3+5=8 &lt; 4+5.)</span>
+      </div>
+      <p class="quiz-q">Q2 — A five-bar planar chain with all revolute joints: how many inputs to control it, by Gruebler?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">n=5, j₁=5, j₂=0 → M = 3(5−1) − 2(5) = 12 − 10 = <strong>2</strong>. Two independent inputs (two motors) are needed — the basis of 2-DOF planar parallel manipulators &amp; five-bar pick-and-place arms.</span>
+      </div>
+      <p class="quiz-q">Q3 — In a Whitworth quick-return, why must Coriolis acceleration be included when finding the ram acceleration?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">Because the driving block <strong>slides along the slotted lever while that lever rotates</strong> — the exact sliding-on-rotating condition that generates Coriolis (2ωv_slip). Omitting it understates the true acceleration and the resulting inertia force on the slot and pins, under-sizing them. Quick-returns are the textbook home of the Coriolis term.</span>
+      </div>
+      <p class="quiz-q">Q4 — A four-bar&#39;s transmission angle drops to 12° at one point in its cycle under heavy load. Predict the symptom and two fixes.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">Symptom: near-toggle → output force collapses (∝ sin12° ≈ 0.21) while bearing/pin reaction soars → the mechanism <strong>binds, stalls or the motor over-currents</strong> at that point, with rapid wear. Fixes: (1) <strong>re-proportion the links</strong> (longer coupler/rocker or different ground length) to raise the minimum μ above ~40°; (2) restrict the working range to avoid the bad zone; (3) add a flywheel to carry inertia through it, or change the assembly circuit. Prevention is a min-μ check across the whole cycle at synthesis time.</span>
+      </div>
+      <p class="quiz-q">Q5 — Why can the same four link lengths build a crank-rocker, a drag-link, and a double-rocker?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">Because those are <strong>inversions</strong> — the behaviour depends on <em>which link is grounded</em>, not on the lengths alone. In a Grashof chain, grounding a link adjacent to the shortest → crank-rocker; grounding the shortest → drag-link (double-crank); grounding the link opposite the shortest → double-rocker. Same bars, same relative motion, three machines. It&#39;s the most economical idea in mechanism design.</span>
+      </div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">&quot;Count the freedoms, check Grashof, guard the angle — geometry rules before force.&quot;</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 ============ -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 / 16 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade numericals, fully worked.</p>
+
+    <div class="card">
+      <div class="label">WE 1 — Mobility of a compound mechanism</div>
+      <p class="body"><strong>Given:</strong> a mechanism has 6 links, 7 revolute joints, and 1 cam (higher) pair. One of the revolutes carries a roller follower with an idle spin. Find the mobility.</p>
+      <div class="eqn">M = 3(n−1) − 2j₁ − j₂ = 3(6−1) − 2(7) − 1(1)
+  = 15 − 14 − 1 = <b>0</b>  → Gruebler says &quot;structure&quot;
+Correct for the idle DOF (roller spin adds 1 real DOF not counted as output):
+Effective M = 0 + 1(idle) → the mechanism actually MOVES with M = <b>1</b> useful DOF</div>
+      <p class="body"><strong>Discussion:</strong> raw Gruebler gives 0, which would mean no motion — but the roller follower&#39;s free spin is an idle degree of freedom that the formula miscounts. Recognising idle DOF (and redundant constraints) is exactly why the count is a <em>starting</em> check, not the final word. Always sanity-check a &quot;structure&quot; result against physical intuition.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 2 — Grashof classification &amp; type</div>
+      <p class="body"><strong>Given:</strong> four-bar links a=40, b=120, c=80, d=100 mm; the crank (a) is the input, ground is d. Classify and name the mechanism.</p>
+      <div class="eqn">shortest s = 40 (=a), longest l = 120 (=b);  other two p,q = 80,100
+s + l = 40 + 120 = <b>160</b>;  p + q = 80 + 100 = <b>180</b>
+160 ≤ 180 → <b>Grashof (Class I)</b> — a link can fully rotate
+Shortest link a is a SIDE link (adjacent to ground d) → grounding a link adjacent
+to the shortest → <b>crank-rocker</b>: crank a rotates fully, rocker c oscillates ✓</div>
+      <p class="body"><strong>Discussion:</strong> exactly the recipe for an oscillating output from a rotating motor (wiper, agitator). Had we grounded link a (the shortest) instead, the same bars would give a drag-link (both cranks rotate). Grashof + choice-of-ground fully determines the behaviour.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 3 — Slider-crank velocity &amp; acceleration</div>
+      <p class="body"><strong>Given:</strong> r = 50 mm, L = 200 mm (n = 4), crank at θ = 90°, ω = 200 rad/s constant (α=0). Find piston velocity and acceleration.</p>
+      <div class="eqn">v ≈ rω(sinθ + sin2θ/2n) = 0.05×200×(sin90° + sin180°/8)
+  = 10×(1 + 0) = <b>10 m/s</b>
+a ≈ rω²(cosθ + cos2θ/n) = 0.05×200²×(cos90° + cos180°/4)
+  = 2000×(0 + (−1)/4) = 2000×(−0.25) = <b>−500 m/s²</b></div>
+      <p class="body"><strong>Discussion:</strong> at θ=90° the primary acceleration term (cosθ) vanishes, so the acceleration is <em>entirely</em> the secondary (2×) harmonic — a pure −500 m/s² from the cos2θ/n term. This is the acceleration engine designers must not forget: it exists even at mid-stroke and scales with ω², so it quadruples if you double the speed.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 4 — Transmission angle of a four-bar</div>
+      <p class="body"><strong>Given:</strong> a=40, b=100, c=90, d=120 mm; crank at θ₂=60°. Find the transmission angle μ.</p>
+      <div class="eqn">Diagonal from ground pivot O₂ to coupler-rocker pin (via crank):
+p² = a² + d² − 2ad·cosθ₂ = 40² + 120² − 2(40)(120)cos60°
+   = 1600 + 14400 − 9600×0.5 = 16000 − 4800 = 11200 → p = 105.8 mm
+μ from triangle (coupler b, rocker c, diagonal p), law of cosines:
+cos μ = (b² + c² − p²)/(2bc) = (10000 + 8100 − 11200)/(2×100×90)
+      = 6900/18000 = 0.3833 → <b>μ = 67.5°</b>  ✓ (within 40–140°, healthy)</div>
+      <p class="body"><strong>Discussion:</strong> 67.5° is comfortably in the good band, so the linkage transmits force efficiently at this position. To certify the design you&#39;d sweep θ₂ 0–360° (the interactive on Page 9 does this) and confirm the <em>minimum</em> μ over the whole cycle never dives below ~40°.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 ============ -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 / 16 · MSc Practice</span>
+    <h2 class="page-title">Problem Set</h2>
+    <p class="page-sub">Ten problems. Work each before revealing.</p>
+
+    <div class="card quiz">
+      <div class="label">Problems 1–10</div>
+
+      <p class="quiz-q">P1 — A planar mechanism: 8 links, 10 revolute joints, no higher pairs. Mobility?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">M = 3(8−1) − 2(10) = 21 − 20 = <strong>1</strong>. A single-DOF eight-bar — one motor drives it (e.g. many mechanical presses &amp; walking linkages).</span>
+      </div>
+
+      <p class="quiz-q">P2 — Links 25, 55, 40, 50 mm. Grashof? If so, which link should be the crank?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">s+l = 25+55 = 80; p+q = 40+50 = 90 → 80 ≤ 90 → <strong>Grashof</strong>. The <strong>shortest link (25)</strong> is the only one that can fully rotate, so it must be the crank; ground a link adjacent to it for a crank-rocker, or ground the 25 itself for a drag-link.</span>
+      </div>
+
+      <p class="quiz-q">P3 — Slider-crank r=60, L=240 mm. Find piston displacement from TDC at θ=90° (exact).</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">x(θ) from crank centre = r·cosθ + √(L²−r²sin²θ) = 0 + √(240²−60²) = √(57600−3600) = √54000 = 232.4 mm. At TDC (θ=0): x = 60+240 = 300 mm. Displacement from TDC = 300 − 232.4 = <strong>67.6 mm</strong>.</span>
+      </div>
+
+      <p class="quiz-q">P4 — Instant centres of a 6-link mechanism: how many?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">N = n(n−1)/2 = 6×5/2 = <strong>15</strong> instant centres. (Primary ones at the joints; the rest located by Kennedy&#39;s theorem — the reason six-bar hand analysis is tedious and software wins.)</span>
+      </div>
+
+      <p class="quiz-q">P5 — A block slides at 0.8 m/s along a link rotating at 15 rad/s. Coriolis acceleration?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">a_Cor = 2ωv = 2×15×0.8 = <strong>24 m/s²</strong>, perpendicular to the slide in the sense of ω. Add it vectorially to the normal (ω²r) and tangential (αr) terms for the true acceleration.</span>
+      </div>
+
+      <p class="quiz-q">P6 — A crank-rocker&#39;s output rocker swings 40°. Its instant-centre lever ratios give ω_out/ω_in = 0.25 at one instant. Mechanical advantage there?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">MA = ω_in/ω_out = 1/0.25 = <strong>4</strong>. Output force is 4× input force (ignoring friction) at that instant — but note MA <em>varies</em> through the cycle, peaking near toggle. Design force capacity for the worst (highest-load) position, not the average.</span>
+      </div>
+
+      <p class="quiz-q">P7 — Whitworth quick-return: cutting stroke uses 220° of crank rotation, return 140°. Time ratio and what it means for productivity?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">Q = α/β = 220/140 = <strong>1.57</strong>. The cutting stroke takes 1.57× as long as the return, so the tool spends more time cutting and returns quickly — the return is ~64 % of the cutting time, cutting idle time and raising strokes/min vs a symmetric mechanism.</span>
+      </div>
+
+      <p class="quiz-q">P8 — Why does a parallelogram four-bar keep the coupler at constant orientation, and where is that used?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">Opposite links are equal, so the coupler stays <strong>parallel to the ground link at all times</strong> — it translates in a curved path without rotating. Uses: level-luffing cranes, parallel-lift platforms, drafting machines, some robot arms, and camera/tool-levelling rigs. (Beware its change-point at full extension where it can flip to the anti-parallelogram branch — a branch defect.)</span>
+      </div>
+
+      <p class="quiz-q">P9 — A four-bar synthesised for 3 precision points reaches points 1 and 2 fine but only reaches point 3 after &quot;popping&quot; the assembly. Name and cure the defect.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Branch (circuit) defect</strong> — point 3 sits on the opposite assembly circuit. Cure: re-select the moving/fixed pivots from the Burmester centre-point &amp; circle-point curves so all three poses lie on one branch, or add link(s)/choose a different type. Detect by checking that the sign of the transmission angle (configuration) is consistent at all precision points.</span>
+      </div>
+
+      <p class="quiz-q">P10 — An offset slider-crank has offset e = 20 mm, r = 50, L = 180. Qualitatively, what does the offset buy and cost?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">Buys: a built-in <strong>quick-return</strong> (unequal forward/return crank angles) and reduced piston side-thrust on the major-force side. Costs: asymmetric wear, a slightly more complex position relation (offset term inside the root), and the two dead-centres are no longer at 0/180° so stroke geometry shifts. It&#39;s the simplest way to get quick-return without a slotted-lever mechanism.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 15 ============ -->
+  <section class="page" id="p15">
+    <span class="page-tag">Page 15 / 16 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">Three derivations, a symbol glossary, and seven traps.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 — Gruebler from body freedoms</div>
+      <div class="eqn">Each free planar rigid body has 3 DOF. With n links (one grounded):
+free DOF = 3(n − 1)
+Each 1-DOF joint (R or P) allows 1 relative motion, so removes 3−1 = 2 DOF.
+Each 2-DOF higher joint removes 3−2 = 1 DOF.
+→ <b>M = 3(n−1) − 2j₁ − j₂</b>
+Spatial analogue: bodies have 6 DOF, joint of freedom f removes (6−f):
+<b>M = 6(n−1) − Σ(6 − f<sub>i</sub>)</b></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 — slider-crank position &amp; the 2× harmonic</div>
+      <div class="eqn">Geometry: x = r·cosθ + L·cosφ, with L·sinφ = r·sinθ (same height at the pin)
+cosφ = √(1 − (r/L)²sin²θ)  → x = r·cosθ + L√(1 − (r/L)²sin²θ)
+Binomial expand the root (r/L = 1/n small):
+√(1 − k²sin²θ) ≈ 1 − ½k²sin²θ,  and sin²θ = (1−cos2θ)/2
+→ x ≈ L + r·cosθ − (r²/4L)(1 − cos2θ)
+The <b>(r²/4L)cos2θ</b> term is the second harmonic → 2× inertia force.
+Differentiate twice → a ≈ rω²(cosθ + cos2θ/n) (primary + secondary).</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 — Freudenstein&#39;s equation</div>
+      <div class="eqn">Vector loop (a crank, b coupler, c rocker, d ground):
+a·cosθ₂ + b·cosθ₃ = d + c·cosθ₄
+a·sinθ₂ + b·sinθ₃ = c·sinθ₄
+Isolate the b (coupler) terms, square &amp; add to eliminate θ₃:
+b² = a² + c² + d² − 2ad·cosθ₂ + 2cd·cosθ₄ − 2ac·cos(θ₂−θ₄)
+Divide by 2ac and group constants:
+<b>K₁cosθ₄ − K₂cosθ₂ + K₃ = cos(θ₂−θ₄)</b>
+K₁=d/a, K₂=d/c, K₃=(a²−b²+c²+d²)/2ac. Tangent half-angle → two roots (2 circuits).</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol glossary</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Symbol</th><th>Meaning</th><th>Symbol</th><th>Meaning</th></tr>
+          <tr><td class="mono">n</td><td>number of links (incl. ground)</td><td class="mono">M</td><td>mobility (DOF)</td></tr>
+          <tr><td class="mono">j₁, j₂</td><td>lower (1-DOF), higher (2-DOF) pairs</td><td class="mono">s,l,p,q</td><td>shortest, longest, other two links</td></tr>
+          <tr><td class="mono">θ, ω, α</td><td>angle, angular velocity, acceleration</td><td class="mono">r, L</td><td>crank radius, connecting-rod length</td></tr>
+          <tr><td class="mono">n=L/r</td><td>rod/crank ratio</td><td class="mono">μ</td><td>transmission angle</td></tr>
+          <tr><td class="mono">IC</td><td>instant centre of rotation</td><td class="mono">Q</td><td>quick-return time ratio</td></tr>
+          <tr><td class="mono">a_Cor</td><td>Coriolis accel = 2ωv_rel</td><td class="mono">K₁,₂,₃</td><td>Freudenstein constants</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven exam &amp; design traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Gruebler is a first guess:</strong> subtract redundant constraints and idle DOF before trusting M — paradox mechanisms move when the formula says &quot;structure.&quot;</div></li>
+        <li><span class="num">2</span><div><strong>Grashof needs the two shortest identified correctly:</strong> it&#39;s s+l vs p+q, not &quot;input vs output.&quot;</div></li>
+        <li><span class="num">3</span><div><strong>Two Freudenstein roots = two circuits:</strong> pick and keep one branch; don&#39;t mix precision points across circuits.</div></li>
+        <li><span class="num">4</span><div><strong>Coriolis only with sliding-on-rotating:</strong> present in slotted-lever/quick-return &amp; governors; absent for a slider on the fixed frame.</div></li>
+        <li><span class="num">5</span><div><strong>Transmission angle is measured coupler-to-output</strong>, and you must check the <em>minimum</em> over the whole cycle, not one position.</div></li>
+        <li><span class="num">6</span><div><strong>Toggle is friend and foe:</strong> exploit it for force/self-lock; avoid it in drive linkages that must keep output control.</div></li>
+        <li><span class="num">7</span><div><strong>Short rods are rough:</strong> small n magnifies the 2× harmonic → more vibration; a design trade, not a free lunch.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 16 ============ -->
+  <section class="page" id="p16">
+    <span class="page-tag">Page 16 / 16 · MSc Practice</span>
+    <h2 class="page-title">Study &amp; Practice Path</h2>
+    <p class="page-sub">The shelf, the ladder, and an honest self-check.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Resource</th><th>What it gives you</th></tr>
+          <tr><td><b>Norton — Design of Machinery</b></td><td>The modern standard: mobility, four-bar, synthesis, cams — with software. Start here.</td></tr>
+          <tr><td><b>Shigley / Uicker — Theory of Machines &amp; Mechanisms</b></td><td>Rigorous classic on kinematics, instant centres, analysis.</td></tr>
+          <tr><td><b>Hartenberg &amp; Denavit — Kinematic Synthesis of Linkages</b></td><td>The deep synthesis reference (Burmester theory).</td></tr>
+          <tr><td><b>Hrones &amp; Nelson — Atlas of Four-Bar Coupler Curves</b></td><td>Thousands of coupler curves to steal for path design.</td></tr>
+          <tr><td><b>Ghosh &amp; Mallik — Theory of Mechanisms and Machines</b></td><td>Excellent worked treatment (common in South-Asian syllabi).</td></tr>
+          <tr><td><b>MotionGen / GIM / SAM / Linkage (software)</b></td><td>Free/low-cost synthesis &amp; simulation — check Grashof, branch &amp; μ automatically.</td></tr>
+          <tr><td><b>KMODDL (Cornell) &amp; 507 Mechanical Movements</b></td><td>Animated mechanism libraries — build intuition fast.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div>Cut cardboard/Meccano strips and build a crank-rocker; find its two toggle positions by hand.</div></li>
+        <li><span class="num">2</span><div>Take four lengths, apply Grashof, predict the type, then build all four inversions and confirm.</div></li>
+        <li><span class="num">3</span><div>Write the vector-loop &amp; Freudenstein equations for a real four-bar; solve both circuits in a spreadsheet.</div></li>
+        <li><span class="num">4</span><div>Locate all 6 instant centres of a four-bar graphically using Kennedy&#39;s theorem; verify a velocity two ways.</div></li>
+        <li><span class="num">5</span><div>Plot piston x, v, a for a slider-crank over 360°; identify the 1× and 2× harmonics in the acceleration.</div></li>
+        <li><span class="num">6</span><div>Sweep the transmission angle of a four-bar over a full cycle; find the minimum μ and re-proportion to raise it.</div></li>
+        <li><span class="num">7</span><div>Do a 3-position motion synthesis (graphical Burmester or software) for a hatchback/bin-tip; check all four defects.</div></li>
+        <li><span class="num">8</span><div>Design a quick-return for a shaper: choose the time ratio, then the geometry that delivers it.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment</div>
+      <div class="grid-2">
+        <div class="mini"><h4>Concepts</h4><p>Explain mobility, Grashof, inversion, transmission angle &amp; Coriolis without notes.</p></div>
+        <div class="mini c-amb"><h4>Analysis</h4><p>Vector-loop position, ω/α by differentiation or instant centres — closed book.</p></div>
+        <div class="mini c-vel"><h4>Synthesis</h4><p>Two/three-position pivot construction &amp; the four validity checks.</p></div>
+        <div class="mini c-grn"><h4>Judgement</h4><p>Pick the right mechanism (quick-return, straight-line, Geneva, toggle) for a job.</p></div>
+      </div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Final Thought</div>
+      <p class="quote">A linkage is frozen geometry that comes alive on command — get the geometry right and the motion is free.</p>
+    </div>
+
+    <p class="footer">
+      Advanced Deep Dive A48 · Linkages &amp; Kinematics · Mechanisms &amp; Machine Elements<br>
+      Related: <a href="A20_Gears_Deep_Dive.html" style="color:var(--accent-soft)">A20 Gears</a> ·
+      <a href="A09_Servo_Motion_Deep_Dive.html" style="color:var(--accent-soft)">A09 Servo Motion</a> ·
+      <a href="A17_End_Effectors_Deep_Dive.html" style="color:var(--accent-soft)">A17 End Effectors</a> ·
+      <a href="A15_Robotics_ROS2_Deep_Dive.html" style="color:var(--accent-soft)">A15 Robotics</a><br>
+      Micro Learning · Advanced Library · optimised for iPad Pro 11&quot; · keratoconus-friendly high-contrast dark theme
+    </p>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  var DEG=Math.PI/180;
+  // Grashof classifier
+  var laR=document.getElementById('laR'),lbR=document.getElementById('lbR'),lcR=document.getElementById('lcR'),ldR=document.getElementById('ldR');
+  function gr(){
+    var a=+laR.value,b=+lbR.value,c=+lcR.value,d=+ldR.value;
+    document.getElementById('lav').textContent=a;document.getElementById('lbv').textContent=b;
+    document.getElementById('lcv').textContent=c;document.getElementById('ldv').textContent=d;
+    var arr=[a,b,c,d].slice().sort(function(x,y){return x-y;});
+    var s=arr[0],l=arr[3],sum1=s+l,sum2=arr[1]+arr[2];
+    var names=['a (crank)','b (coupler)','c (rocker)','d (ground)'];
+    var vals=[a,b,c,d]; var shortIdx=vals.indexOf(s);
+    var cls, type;
+    if(Math.abs(sum1-sum2)<0.5){ cls='CHANGE-POINT (s+l = p+q)'; type='folds through singular configs — needs care (flywheel/guide)'; }
+    else if(sum1<sum2){
+      cls='GRASHOF (Class I) — full rotation possible';
+      // ground is link d (index 3). type depends on where shortest is relative to ground
+      if(shortIdx===3) type='shortest is the GROUND → double-crank (drag-link)';
+      else if(shortIdx===1) type='shortest is the COUPLER (opposite ground) → double-rocker';
+      else type='shortest is a SIDE link → crank-rocker (rotating input → oscillating output)';
+    } else { cls='NON-GRASHOF (Class II)'; type='no link fully rotates — triple-rocker only'; }
+    document.getElementById('grOut').innerHTML=
+      's = '+s+', l = '+l+' → s+l = <b>'+sum1+'</b> vs p+q = <b>'+sum2+'</b><br>'+
+      '<b>'+cls+'</b><br>'+type;
+  }
+  [laR,lbR,lcR,ldR].forEach(function(r){r.addEventListener('input',gr);}); gr();
+
+  // Transmission angle demo
+  var taR=document.getElementById('taR'),tbR=document.getElementById('tbR'),tcR=document.getElementById('tcR'),tdR=document.getElementById('tdR'),thR=document.getElementById('thR');
+  function ta(){
+    var a=+taR.value,b=+tbR.value,c=+tcR.value,d=+tdR.value,th=+thR.value;
+    document.getElementById('tav').textContent=a;document.getElementById('tbv').textContent=b;
+    document.getElementById('tcv').textContent=c;document.getElementById('tdv').textContent=d;
+    document.getElementById('thv').textContent=th;
+    // diagonal from ground pivot O2 through crank pin to O4: p between crank-tip and O4
+    var p2=a*a+d*d-2*a*d*Math.cos(th*DEG);
+    var p=Math.sqrt(p2);
+    var cosmu=(b*b+c*c-p2)/(2*b*c);
+    var out;
+    if(cosmu<-1||cosmu>1){ out='<b style="color:#f87171">no assembly at this θ (links can’t close) — position unreachable on this circuit</b>'; }
+    else {
+      var mu=Math.acos(cosmu)/DEG;
+      var dev=Math.abs(90-mu);
+      var verdict = dev<=50 ? '<b style="color:#4ade80">healthy (40–140°)</b>'
+                  : mu<40||mu>140 ? '<b style="color:#f87171">POOR — near toggle, force collapses / bearing loads spike</b>'
+                  : '<b style="color:#fbbf24">marginal</b>';
+      out='diagonal p = <b>'+p.toFixed(1)+'</b><br>μ = acos[(b²+c²−p²)/2bc] = <b>'+mu.toFixed(1)+'°</b> → '+verdict;
+    }
+    document.getElementById('taOut').innerHTML=out;
+  }
+  [taR,tbR,tcR,tdR,thR].forEach(function(r){r.addEventListener('input',ta);}); ta();
+})();
+</script>
+</body>
+</html>

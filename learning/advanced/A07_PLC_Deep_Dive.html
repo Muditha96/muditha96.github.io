@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PLC — Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #a3e635;       /* lime — matches micro card 07 PLC theme */
+    --accent-soft: #bef264;
+    --accent-2: #60a5fa;
+    --accent-3: #fbbf24;
+    --teal: #2dd4bf;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #34d399;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(163,230,53,0.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(96,165,250,0.08), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  /* ---------- PAGE / SECTION SCAFFOLD ---------- */
+  .page {
+    margin-bottom: 30px;
+    animation: fadeUp 0.7s ease both;
+  }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--bg); background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(163,230,53,0.35);
+  }
+  .page-title {
+    font-size: clamp(26px, 4.2vw, 40px); font-weight: 800;
+    letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px;
+  }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot {
+    width: 8px; height: 8px; background: var(--accent);
+    border-radius: 50%; box-shadow: 0 0 12px var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  h1.hero {
+    font-size: clamp(38px, 6.5vw, 66px); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px;
+  }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(163,230,53,0.10), rgba(96,165,250,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill {
+    font-family: ui-monospace, monospace; font-size:12px; font-weight:700;
+    color: var(--accent); background: rgba(163,230,53,0.12);
+    padding:4px 10px; border-radius:8px;
+  }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 22px; padding: 30px 28px;
+    margin-bottom: 20px;
+  }
+  .label {
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 14px;
+  }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  /* ---------- GRIDS ---------- */
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini {
+    background: var(--card-2); border-radius:14px; padding:18px;
+    border-top:3px solid var(--accent);
+  }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--accent-2)!important; } .c-blue .big{color:var(--accent-2)}
+  .c-amb  { border-top-color: var(--accent-3)!important; } .c-amb .big{color:var(--accent-3)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+
+  /* ---------- HARDWARE SVG STAGE ---------- */
+  .stage {
+    background: linear-gradient(160deg, #11161f, #0a0d12);
+    border:1px solid var(--border); border-radius:16px;
+    padding:22px 16px; margin-top:6px;
+  }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  /* ---------- SCAN CYCLE ---------- */
+  .scan-controls { display:flex; gap:12px; justify-content:center; margin-top:16px; flex-wrap:wrap;}
+  .scan-controls button {
+    background: var(--card); border:2px solid var(--accent); color:var(--accent);
+    padding:11px 22px; border-radius:999px; font-size:15px; font-weight:700; cursor:pointer;
+    transition: all .2s ease;
+  }
+  .scan-controls button.run { background:var(--accent); color:var(--bg); box-shadow:0 0 16px var(--accent); }
+  .scan-status { text-align:center; margin-top:12px; font-family:ui-monospace,monospace; font-size:14px; color:var(--text-dim);}
+  .scan-status strong { color:var(--accent); }
+
+  /* ---------- TABLE ---------- */
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  /* ---------- LANGUAGES ---------- */
+  .lang { background: var(--card-2); border-radius:14px; padding:18px; border-left:4px solid var(--accent); }
+  .lang .tag { font-family:ui-monospace,monospace; font-weight:800; font-size:13px; color:var(--accent); }
+  .lang h4 { font-size:16px; margin:4px 0 6px; }
+  .lang p { font-size:14px; color:var(--text-dim); }
+  .code {
+    font-family: ui-monospace, monospace; font-size:13px; line-height:1.7;
+    background: var(--bg-2); border:1px solid var(--border); border-radius:10px;
+    padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre;
+  }
+  .code .k { color: var(--pink); } .code .c { color: var(--text-dim); } .code .n { color: var(--accent-3); } .code .f { color: var(--accent-2); }
+
+  /* tips */
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  /* failures */
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  /* pro */
+  .pro { background: linear-gradient(145deg, rgba(163,230,53,0.08), transparent); border:1px solid rgba(163,230,53,0.22); border-radius:14px; padding:16px; }
+  .pro .pt { font-weight:700; color:var(--accent); margin-bottom:6px; font-size:15px; }
+  .pro p { font-size:13.5px; color:var(--text-dim); }
+  .pro em { color:var(--accent-3); font-style:normal; font-weight:600; }
+
+  .memory {
+    background: linear-gradient(135deg, var(--accent), #4d7c0f);
+    color: #0a0d12; text-align:center; padding:38px 26px; border:none; border-radius:22px;
+  }
+  .memory .label { color: rgba(0,0,0,0.55); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(163,230,53,0.08); }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background:#0b0f14; border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); }
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent); border-color:var(--accent); }
+
+  @keyframes fadeUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.4);opacity:0.7;} }
+
+  @media (max-width: 600px) {
+    .container { padding:24px 16px 60px; }
+    .card { padding:24px 18px; border-radius:18px; }
+    .grid-2,.grid-3,.fail-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ============ HERO ============ -->
+  <div class="page">
+    <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · A07 · Industrial Automation</span></div>
+    <h1 class="hero"><span class="emoji">🧠</span>The PLC, In Depth</h1>
+    <p class="hero-sub">Architecture, the scan cycle, IEC 61131-3, memory & addressing, redundancy — MSc-level, every concept explained.</p>
+
+    <div class="connect">
+      <span class="pill">↔ LINKED</span>
+      <span>This is the advanced companion to <b>Micro Lesson 07 — PLC Basics</b>. Read the 90-second card first, then go deep here.</span>
+    </div>
+
+    <div class="toc">
+      <a href="#what">1 · What a PLC Really Is</a>
+      <a href="#hw">2 · Hardware Anatomy</a>
+      <a href="#scan">3 · The Scan Cycle</a>
+      <a href="#mem">4 · Memory & Addressing</a>
+      <a href="#lang">5 · IEC 61131-3 Languages</a>
+      <a href="#io">6 · I/O & Signal Conditioning</a>
+      <a href="#net">7 · Determinism & Redundancy</a>
+      <a href="#tips">8 · Engineering Practice</a>
+      <a href="#wk">9 · Worked Examples</a>
+      <a href="#ps">10 · Problem Set</a>
+      <a href="#dv">11 · Derivations &amp; Traps</a>
+      <a href="#sp">12 · Study &amp; Practice</a>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 1 — WHAT IT IS ============ -->
+  <div class="page" id="what">
+    <span class="page-tag">Page 1 · Foundations</span>
+    <h2 class="page-title">What a PLC Really Is</h2>
+    <p class="page-sub">A ruggedized, deterministic computer that trades raw speed for <em>guaranteed timing</em>.</p>
+
+    <div class="card">
+      <div class="label">Precise Definition</div>
+      <p class="lead">A <strong>Programmable Logic Controller</strong> is an industrial digital computer that continuously <span class="hl">reads inputs</span>, executes a stored user program, and <span class="hl">drives outputs</span> in a fixed, repeating loop — engineered for reliability in electrically hostile environments (heat, vibration, EMI, dust).</p>
+      <p class="body">It replaced banks of <strong>hard-wired relays</strong>. The genius is not speed — a desktop CPU is faster — but <span class="hl2">determinism</span>: the PLC guarantees that the loop completes within a bounded time, every single time. That predictability is what makes a machine safe and repeatable.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini">
+        <h4>Born from relays</h4>
+        <p>1968, GM's request to replace relay panels → the <b>Modicon 084</b>, the first PLC.</p>
+      </div>
+      <div class="mini c-blue">
+        <h4>Deterministic</h4>
+        <p>Bounded scan time. The same inputs always produce the same outputs in the same time.</p>
+      </div>
+      <div class="mini c-amb">
+        <h4>Ruggedized</h4>
+        <p>Rated 0–60 °C, vibration, 24 V industrial logic, isolated I/O, no fans/HDD.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="label">Why not just use a PC?</div>
+      <p class="body">A general-purpose OS (Windows/Linux) is <strong>non-deterministic</strong> — background tasks, garbage collection, and interrupts cause jitter. A PLC runs a stripped real-time executive (a <span class="hl">firmware-level scheduler</span>) with a <span class="hl3">watchdog timer</span> that faults the CPU if a scan ever overruns. In a press or a robot cell, a 50 ms unexpected delay can wreck a part or injure an operator — so bounded timing is a hard requirement, not a nicety.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 2 — HARDWARE ANATOMY ============ -->
+  <div class="page" id="hw">
+    <span class="page-tag">Page 2 · Hardware</span>
+    <h2 class="page-title">Hardware Anatomy</h2>
+    <p class="page-sub">A modular rack: power supply, CPU, and snap-in I/O on a shared backplane bus.</p>
+
+    <div class="card">
+      <div class="stage">
+        <!-- Colorful realistic modular PLC rack -->
+        <svg class="illus" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Modular PLC rack illustration">
+          <defs>
+            <linearGradient id="rail" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#3a4658"/><stop offset="1" stop-color="#222b3a"/>
+            </linearGradient>
+            <linearGradient id="psu" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#475569"/><stop offset="1" stop-color="#2f3a4c"/>
+            </linearGradient>
+            <linearGradient id="cpu" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#365314"/><stop offset="1" stop-color="#1f3309"/>
+            </linearGradient>
+            <linearGradient id="di" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#1e3a5f"/><stop offset="1" stop-color="#13263f"/>
+            </linearGradient>
+            <linearGradient id="do" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#5a3210"/><stop offset="1" stop-color="#3a1f08"/>
+            </linearGradient>
+            <linearGradient id="ai" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#4a1d52"/><stop offset="1" stop-color="#2e1234"/>
+            </linearGradient>
+          </defs>
+
+          <!-- DIN rail / backplane -->
+          <rect x="20" y="40" width="720" height="200" rx="8" fill="url(#rail)" stroke="#0b0f14" stroke-width="2"/>
+          <rect x="20" y="232" width="720" height="14" rx="4" fill="#161c26"/>
+          <text x="380" y="243" text-anchor="middle" fill="#64748b" font-size="11" font-family="ui-monospace,monospace">◄────────── BACKPLANE BUS (power + data to every slot) ──────────►</text>
+
+          <!-- PSU -->
+          <g>
+            <rect x="36" y="54" width="96" height="170" rx="6" fill="url(#psu)" stroke="#0b0f14" stroke-width="1.5"/>
+            <rect x="48" y="66" width="72" height="40" rx="3" fill="#0b0f14"/>
+            <circle cx="60" cy="120" r="5" fill="#34d399"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></circle>
+            <text x="74" y="124" fill="#94a3b8" font-size="10" font-family="ui-monospace,monospace">DC OK</text>
+            <rect x="50" y="150" width="68" height="10" rx="2" fill="#1f2937"/>
+            <rect x="50" y="166" width="68" height="10" rx="2" fill="#1f2937"/>
+            <text x="84" y="210" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="700" font-family="ui-monospace,monospace">PSU</text>
+            <text x="84" y="46" text-anchor="middle" fill="#94a3b8" font-size="10">120/230 VAC→24 VDC</text>
+          </g>
+
+          <!-- CPU -->
+          <g>
+            <rect x="140" y="54" width="110" height="170" rx="6" fill="url(#cpu)" stroke="#0b0f14" stroke-width="1.5"/>
+            <rect x="152" y="66" width="86" height="34" rx="3" fill="#0b0f14"/>
+            <text x="195" y="88" text-anchor="middle" fill="#a3e635" font-size="11" font-family="ui-monospace,monospace">RUN ▸</text>
+            <circle cx="162" cy="116" r="5" fill="#a3e635"><animate attributeName="opacity" values="1;0.2;1" dur="0.8s" repeatCount="indefinite"/></circle>
+            <text x="174" y="120" fill="#cbd5e1" font-size="9" font-family="ui-monospace,monospace">RUN</text>
+            <circle cx="162" cy="134" r="5" fill="#f87171"/>
+            <text x="174" y="138" fill="#cbd5e1" font-size="9" font-family="ui-monospace,monospace">ERR</text>
+            <rect x="156" y="152" width="78" height="20" rx="3" fill="#1f2937"/>
+            <text x="195" y="166" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="ui-monospace,monospace">SD / MEM</text>
+            <text x="195" y="210" text-anchor="middle" fill="#bef264" font-size="12" font-weight="800" font-family="ui-monospace,monospace">CPU</text>
+            <text x="195" y="46" text-anchor="middle" fill="#94a3b8" font-size="10">processor + OS + RAM</text>
+          </g>
+
+          <!-- DI -->
+          <g>
+            <rect x="258" y="54" width="78" height="170" rx="6" fill="url(#di)" stroke="#0b0f14" stroke-width="1.5"/>
+            <text x="297" y="70" text-anchor="middle" fill="#60a5fa" font-size="10" font-weight="700" font-family="ui-monospace,monospace">DI 16x</text>
+            <g fill="#60a5fa">
+              <circle cx="276" cy="92" r="4"/><circle cx="297" cy="92" r="4" opacity="0.3"/><circle cx="318" cy="92" r="4"/>
+              <circle cx="276" cy="110" r="4" opacity="0.3"/><circle cx="297" cy="110" r="4"/><circle cx="318" cy="110" r="4" opacity="0.3"/>
+              <circle cx="276" cy="128" r="4"/><circle cx="297" cy="128" r="4"/><circle cx="318" cy="128" r="4" opacity="0.3"/>
+            </g>
+            <rect x="270" y="150" width="54" height="60" rx="3" fill="#0b0f14"/>
+            <text x="297" y="186" text-anchor="middle" fill="#475569" font-size="9" font-family="ui-monospace,monospace">24V IN</text>
+            <text x="297" y="46" text-anchor="middle" fill="#94a3b8" font-size="10">sensors</text>
+          </g>
+
+          <!-- DO -->
+          <g>
+            <rect x="344" y="54" width="78" height="170" rx="6" fill="url(#do)" stroke="#0b0f14" stroke-width="1.5"/>
+            <text x="383" y="70" text-anchor="middle" fill="#fb923c" font-size="10" font-weight="700" font-family="ui-monospace,monospace">DO 16x</text>
+            <g fill="#fb923c">
+              <circle cx="362" cy="92" r="4"/><circle cx="383" cy="92" r="4"/><circle cx="404" cy="92" r="4" opacity="0.3"/>
+              <circle cx="362" cy="110" r="4" opacity="0.3"/><circle cx="383" cy="110" r="4"/><circle cx="404" cy="110" r="4"/>
+              <circle cx="362" cy="128" r="4"/><circle cx="383" cy="128" r="4" opacity="0.3"/><circle cx="404" cy="128" r="4"/>
+            </g>
+            <rect x="356" y="150" width="54" height="60" rx="3" fill="#0b0f14"/>
+            <text x="383" y="186" text-anchor="middle" fill="#475569" font-size="9" font-family="ui-monospace,monospace">RELAY</text>
+            <text x="383" y="46" text-anchor="middle" fill="#94a3b8" font-size="10">actuators</text>
+          </g>
+
+          <!-- AI -->
+          <g>
+            <rect x="430" y="54" width="78" height="170" rx="6" fill="url(#ai)" stroke="#0b0f14" stroke-width="1.5"/>
+            <text x="469" y="70" text-anchor="middle" fill="#c084fc" font-size="10" font-weight="700" font-family="ui-monospace,monospace">AI 8x</text>
+            <rect x="442" y="84" width="54" height="50" rx="3" fill="#0b0f14"/>
+            <polyline points="446,120 454,100 462,116 470,96 478,112 486,98 492,114" fill="none" stroke="#c084fc" stroke-width="2"/>
+            <text x="469" y="150" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="ui-monospace,monospace">4–20 mA</text>
+            <text x="469" y="166" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="ui-monospace,monospace">0–10 V</text>
+            <text x="469" y="210" text-anchor="middle" fill="#d8b4fe" font-size="11" font-weight="700" font-family="ui-monospace,monospace">ADC</text>
+            <text x="469" y="46" text-anchor="middle" fill="#94a3b8" font-size="10">analog</text>
+          </g>
+
+          <!-- COMMS -->
+          <g>
+            <rect x="516" y="54" width="78" height="170" rx="6" fill="url(#di)" stroke="#0b0f14" stroke-width="1.5"/>
+            <text x="555" y="70" text-anchor="middle" fill="#2dd4bf" font-size="10" font-weight="700" font-family="ui-monospace,monospace">COMM</text>
+            <rect x="540" y="92" width="30" height="24" rx="2" fill="#0b0f14" stroke="#2dd4bf" stroke-width="1"/>
+            <rect x="540" y="124" width="30" height="24" rx="2" fill="#0b0f14" stroke="#2dd4bf" stroke-width="1"/>
+            <circle cx="555" cy="166" r="5" fill="#2dd4bf"><animate attributeName="opacity" values="1;0.3;1" dur="1.2s" repeatCount="indefinite"/></circle>
+            <text x="555" y="210" text-anchor="middle" fill="#5eead4" font-size="10" font-weight="700" font-family="ui-monospace,monospace">PROFINET</text>
+            <text x="555" y="46" text-anchor="middle" fill="#94a3b8" font-size="10">network</text>
+          </g>
+
+          <!-- empty expansion slot -->
+          <g>
+            <rect x="602" y="54" width="124" height="170" rx="6" fill="#11161f" stroke="#334155" stroke-width="1.5" stroke-dasharray="6 5"/>
+            <text x="664" y="145" text-anchor="middle" fill="#475569" font-size="12" font-family="ui-monospace,monospace">+ EXPAND</text>
+            <text x="664" y="163" text-anchor="middle" fill="#475569" font-size="10" font-family="ui-monospace,monospace">snap-in slots</text>
+          </g>
+        </svg>
+        <div class="cap">A real modular PLC: power supply → CPU → digital in → digital out → analog in → comms, all sharing one backplane bus.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="mini"><h4>🔌 Power Supply (PSU)</h4><p>Converts plant AC (or 24 V) to clean, isolated logic voltage. Sized for total backplane current draw.</p></div>
+      <div class="mini c-blue"><h4>🧠 CPU Module</h4><p>Processor + real-time OS + RAM + retentive memory. Holds the program and the <b>process image</b>.</p></div>
+      <div class="mini c-amb"><h4>↘ Digital I/O</h4><p>On/off signals: 24 V sinking/sourcing inputs; relay or transistor outputs.</p></div>
+      <div class="mini c-purp"><h4>📈 Analog I/O</h4><p>Continuous signals via ADC/DAC: 4–20 mA, 0–10 V, RTD, thermocouple.</p></div>
+      <div class="mini c-teal"><h4>🌐 Comms Module</h4><p>Fieldbus & Ethernet: PROFINET, EtherCAT, Modbus, EtherNet/IP.</p></div>
+      <div class="mini c-org"><h4>🧱 Backplane Bus</h4><p>The rail that carries power + a fast data bus so the CPU can address each slot.</p></div>
+    </div>
+    <div class="connect" style="margin-top:14px">
+      <span class="pill">↔ SEE ALSO</span>
+      <span>Comms modules connect to the protocols in lessons <b>01–06</b> (Modbus, PROFINET, EtherCAT, IO-Link, OPC-UA). I/O signals are the <b>sensors of lesson 11</b>.</span>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 3 — SCAN CYCLE ============ -->
+  <div class="page" id="scan">
+    <span class="page-tag">Page 3 · The Heartbeat</span>
+    <h2 class="page-title">The Scan Cycle</h2>
+    <p class="page-sub">The single most important PLC concept. Master this and everything else clicks.</p>
+
+    <div class="card">
+      <p class="lead">A PLC does <strong>not</strong> react to inputs the instant they change. It works in a strict repeating loop — the <span class="hl">scan cycle</span> — with four phases.</p>
+
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" id="scanSvg" role="img" aria-label="PLC scan cycle">
+          <defs>
+            <marker id="arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94a3b8"/></marker>
+          </defs>
+          <!-- circular flow of 4 phases -->
+          <g font-family="-apple-system,sans-serif">
+            <!-- Phase 1 -->
+            <g class="ph" id="ph1">
+              <rect x="40" y="90" width="130" height="70" rx="12" fill="#13263f" stroke="#60a5fa" stroke-width="2"/>
+              <text x="105" y="118" text-anchor="middle" fill="#60a5fa" font-size="13" font-weight="800">1 · INPUT SCAN</text>
+              <text x="105" y="138" text-anchor="middle" fill="#cbd5e1" font-size="10">read all inputs →</text>
+              <text x="105" y="151" text-anchor="middle" fill="#cbd5e1" font-size="10">process image</text>
+            </g>
+            <!-- Phase 2 -->
+            <g class="ph" id="ph2">
+              <rect x="220" y="40" width="130" height="70" rx="12" fill="#1f3309" stroke="#a3e635" stroke-width="2"/>
+              <text x="285" y="68" text-anchor="middle" fill="#a3e635" font-size="13" font-weight="800">2 · EXECUTE</text>
+              <text x="285" y="88" text-anchor="middle" fill="#cbd5e1" font-size="10">run program,</text>
+              <text x="285" y="101" text-anchor="middle" fill="#cbd5e1" font-size="10">rung by rung</text>
+            </g>
+            <!-- Phase 3 -->
+            <g class="ph" id="ph3">
+              <rect x="400" y="40" width="130" height="70" rx="12" fill="#3a1f08" stroke="#fb923c" stroke-width="2"/>
+              <text x="465" y="68" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">3 · OUTPUT</text>
+              <text x="465" y="88" text-anchor="middle" fill="#cbd5e1" font-size="10">write image →</text>
+              <text x="465" y="101" text-anchor="middle" fill="#cbd5e1" font-size="10">physical outputs</text>
+            </g>
+            <!-- Phase 4 -->
+            <g class="ph" id="ph4">
+              <rect x="560" y="90" width="130" height="70" rx="12" fill="#2e1234" stroke="#c084fc" stroke-width="2"/>
+              <text x="625" y="114" text-anchor="middle" fill="#c084fc" font-size="13" font-weight="800">4 · HOUSEKEEP</text>
+              <text x="625" y="133" text-anchor="middle" fill="#cbd5e1" font-size="10">diagnostics,</text>
+              <text x="625" y="146" text-anchor="middle" fill="#cbd5e1" font-size="10">comms, watchdog</text>
+            </g>
+            <!-- arrows -->
+            <path d="M150 95 Q200 60 218 78" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
+            <path d="M350 75 L398 75" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
+            <path d="M530 78 Q580 60 612 92" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
+            <path d="M620 162 Q400 230 110 162" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+            <text x="365" y="225" text-anchor="middle" fill="#64748b" font-size="11" font-family="ui-monospace,monospace">↺ repeat forever — one loop = one SCAN (typ. 1–50 ms)</text>
+          </g>
+        </svg>
+        <div class="scan-controls"><button id="scanBtn">▶ Animate one scan</button></div>
+        <div class="scan-status">Phase: <strong id="phName">idle</strong> · Scan #<strong id="scanN">0</strong></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="mini c-blue"><h4>① Input Scan</h4><p>All physical inputs are copied <b>at once</b> into the <b>input process image (PII)</b>. ~0.1–0.5 ms.</p></div>
+      <div class="mini"><h4>② Program Execute</h4><p>Logic runs <b>top→bottom, left→right</b>, reading only the frozen image — never live pins.</p></div>
+      <div class="mini c-org"><h4>③ Output Update</h4><p>The <b>output process image (PIQ)</b> is written to physical terminals in one block.</p></div>
+      <div class="mini c-purp"><h4>④ Housekeeping</h4><p>Comms, self-test, and the <b>watchdog</b> reset. Then the loop restarts.</p></div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="label">⚠ The consequence you must internalise</div>
+      <p class="body">Because inputs are <strong>frozen</strong> for the whole execute phase, a signal that changes mid-scan is <span class="hl">not seen until the next scan</span>. Worst-case input latency ≈ <span class="hl3">2 × scan time</span> (one scan to catch it, one to act). This is why a 20 µs pulse can be missed by a 10 ms scan — and why fast events need <span class="hl2">hardware interrupts (HSC / event tasks)</span>, not the normal scan.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 4 — MEMORY & ADDRESSING ============ -->
+  <div class="page" id="mem">
+    <span class="page-tag">Page 4 · Data Model</span>
+    <h2 class="page-title">Memory & Addressing</h2>
+    <p class="page-sub">Where data lives, and how a tag maps to a physical bit.</p>
+
+    <div class="card">
+      <div class="label">The process image — the key idea</div>
+      <p class="body">The CPU keeps a <strong>mirror of the I/O in RAM</strong>. Your program talks to this mirror, not the wires. Reading <span class="mono">%I0.3</span> reads a bit in the input image; writing <span class="mono">%Q1.0</span> sets a bit in the output image that gets flushed to the terminal in phase 3.</p>
+      <div class="tbl-wrap" style="margin-top:14px">
+        <table>
+          <tr><th>Area</th><th>IEC symbol</th><th>Example</th><th>Holds</th></tr>
+          <tr><td><b>Inputs</b></td><td class="mono">%I</td><td class="mono">%I0.3 / %IW64</td><td>Image of physical inputs (read-only in logic)</td></tr>
+          <tr><td><b>Outputs</b></td><td class="mono">%Q</td><td class="mono">%Q1.0 / %QW80</td><td>Image written to physical outputs</td></tr>
+          <tr><td><b>Memory / Flags</b></td><td class="mono">%M</td><td class="mono">%M10.2 / %MW20</td><td>Internal bits & words (scratchpad)</td></tr>
+          <tr><td><b>Data Blocks</b></td><td class="mono">DB</td><td class="mono">DB5.DBW4</td><td>Structured user data, recipes, buffers</td></tr>
+          <tr><td><b>Timers / Counters</b></td><td class="mono">T / C</td><td class="mono">T1, C3</td><td>Timing & counting instances</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="mini"><h4>Bit addressing</h4><p><span class="mono hl">%I0.3</span> = byte 0, <b>bit 3</b>. 8 bits per byte; <span class="mono">.0</span>–<span class="mono">.7</span>.</p></div>
+      <div class="mini c-blue"><h4>Byte / Word / DWord</h4><p><span class="mono">%IB</span>=8 bit, <span class="mono">%IW</span>=16 bit, <span class="mono">%ID</span>=32 bit. Words overlap two bytes.</p></div>
+      <div class="mini c-amb"><h4>Retentive memory</h4><p>Battery/flash-backed area survives power loss — for counts, setpoints, totals.</p></div>
+      <div class="mini c-teal"><h4>Symbolic tags</h4><p>Modern IDEs map <span class="mono">Motor_Run</span> → <span class="mono">%Q1.0</span> so logic reads in plain language.</p></div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="label">Data types you'll actually use (IEC 61131-3)</div>
+      <p class="body"><span class="mono hl">BOOL</span> (1 bit) · <span class="mono hl">BYTE/WORD/DWORD</span> (bit strings) · <span class="mono hl">INT/DINT</span> (signed 16/32-bit) · <span class="mono hl">REAL</span> (32-bit float) · <span class="mono hl">TIME</span> · <span class="mono hl">STRING</span>. Choosing the right width matters: a flow total in an <span class="mono">INT</span> overflows at 32 767 — a classic field bug. Use <span class="mono">DINT</span> or <span class="mono">REAL</span> for accumulators.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 5 — IEC 61131-3 LANGUAGES ============ -->
+  <div class="page" id="lang">
+    <span class="page-tag">Page 5 · Programming</span>
+    <h2 class="page-title">The 5 IEC 61131-3 Languages</h2>
+    <p class="page-sub">One standard, five notations. Pick the right tool for the logic.</p>
+
+    <div class="grid-2">
+      <div class="lang">
+        <div class="tag">LD</div><h4>Ladder Diagram</h4>
+        <p>Power rails + contacts + coils. Reads like a relay schematic — loved by electricians, dominant for discrete logic.</p>
+        <div class="code"><span class="c">// Start/Stop seal-in</span>
+ |--[ Start ]--+--[/Stop]--( Motor )--|
+ |--[ Motor ]--+</div>
+      </div>
+      <div class="lang" style="border-left-color:var(--accent-2)">
+        <div class="tag" style="color:var(--accent-2)">FBD</div><h4>Function Block Diagram</h4>
+        <p>Boxes wired together (AND, OR, PID, timers). Excellent for signal flow and process/analog control.</p>
+        <div class="code"><span class="f">[ Start ]──┐</span>
+          <span class="f">AND ├──[ TON ]──( Q )</span>
+<span class="f">[/Stop ]──┘</span></div>
+      </div>
+      <div class="lang" style="border-left-color:var(--accent-3)">
+        <div class="tag" style="color:var(--accent-3)">ST</div><h4>Structured Text</h4>
+        <p>High-level, Pascal-like. Best for math, loops, strings, state machines — compact and powerful.</p>
+        <div class="code"><span class="k">IF</span> Start <span class="k">AND NOT</span> Stop <span class="k">THEN</span>
+   Motor := <span class="n">TRUE</span>;
+<span class="k">END_IF</span>;</div>
+      </div>
+      <div class="lang" style="border-left-color:var(--pink)">
+        <div class="tag" style="color:var(--pink)">SFC</div><h4>Sequential Function Chart</h4>
+        <p>Steps + transitions — a visual state machine. Ideal for batch & sequential machine cycles.</p>
+        <div class="code"><span class="c">Step1 ─[t:done]→ Step2</span>
+<span class="c">Step2 ─[part?]→ Step3</span>
+<span class="c">      ↺ loop back</span></div>
+      </div>
+    </div>
+    <div class="lang" style="margin-top:14px; border-left-color:var(--text-dim)">
+      <div class="tag" style="color:var(--text-dim)">IL</div><h4>Instruction List (deprecated)</h4>
+      <p>Assembly-like mnemonics (LD, AND, ST). Legacy only — removed in the 3rd edition of the standard, but you'll still meet it in old code.</p>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="label">POUs — how big programs stay sane</div>
+      <p class="body">Code is organised into <strong>Program Organisation Units</strong>: <span class="hl">Functions (FC)</span> — stateless, return a value; <span class="hl2">Function Blocks (FB)</span> — keep internal state (a PID, a timer); and <span class="hl3">Programs (PRG)</span> — the top level assigned to a task. Reusable FBs are the heart of clean, testable PLC code.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 6 — I/O & SIGNAL CONDITIONING ============ -->
+  <div class="page" id="io">
+    <span class="page-tag">Page 6 · The Edge</span>
+    <h2 class="page-title">I/O & Signal Conditioning</h2>
+    <p class="page-sub">Where the digital world meets copper, current, and the real machine.</p>
+
+    <div class="grid-2">
+      <div class="mini c-blue"><h4>Sinking vs Sourcing</h4><p><b>Sourcing (PNP)</b> input expects +24 V; <b>sinking (NPN)</b> input expects 0 V. Mismatch = dead I/O. Match sensor type to card type.</p></div>
+      <div class="mini c-org"><h4>Relay vs Transistor out</h4><p>Relay: any load, slow, wears out. Transistor: DC only, fast, silent, long-lived. (See lesson 28.)</p></div>
+      <div class="mini c-purp"><h4>Analog: 4–20 mA</h4><p>Current loop is noise-immune & "live-zero": 4 mA = 0 %, so a broken wire (0 mA) is detectable as a fault.</p></div>
+      <div class="mini c-teal"><h4>Resolution</h4><p>A 12-bit ADC = 4096 steps. Over 0–10 V that's ~2.4 mV/step — set engineering scaling accordingly.</p></div>
+      <div class="mini c-amb"><h4>Isolation</h4><p>Optocouplers/transformers keep field surges off the CPU. Galvanic isolation protects the backplane.</p></div>
+      <div class="mini"><h4>Filtering & debounce</h4><p>Input filter time (e.g. 3 ms) rejects contact bounce & EMI — but adds latency. Tune per signal.</p></div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="label">Scaling — the everyday analog task</div>
+      <p class="body">A 4–20 mA pressure sensor reads 0–10 bar. The card gives raw counts (e.g. 0–27648 on Siemens). You linearly scale: <span class="mono hl">EU = (raw − raw_min) × (EU_max − EU_min) / (raw_max − raw_min) + EU_min</span>. Getting <span class="hl3">live-zero offset</span> right (4 mA ≠ 0 counts) is where beginners slip.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 7 — DETERMINISM & REDUNDANCY ============ -->
+  <div class="page" id="net">
+    <span class="page-tag">Page 7 · Reliability</span>
+    <h2 class="page-title">Determinism, Tasks & Redundancy</h2>
+    <p class="page-sub">From single-task scans to fault-tolerant, safety-rated systems.</p>
+
+    <div class="card">
+      <div class="label">Cyclic, periodic & event tasks</div>
+      <p class="body">Beyond the free-running main scan, modern CPUs run <span class="hl">periodic tasks</span> (e.g. a PID exactly every 10 ms for stable control), <span class="hl2">event/interrupt tasks</span> (fire on a hardware edge or high-speed counter), and <span class="hl3">priority scheduling</span> so critical loops pre-empt slow ones. The <strong>watchdog</strong> guards every task: overrun → CPU faults to a safe state.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><h4>Watchdog</h4><p>Set ≈ <b>2× max scan</b>. Overrun = STOP/fault, not silent lag.</p></div>
+      <div class="mini c-blue"><h4>Jitter</h4><p>Variation in cycle time. Low jitter = tight motion & control.</p></div>
+      <div class="mini c-amb"><h4>Hot standby</h4><p>Two CPUs in sync; backup takes over in <b>&lt;1 scan</b> on failure.</p></div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="label">Safety PLCs — a different breed</div>
+      <p class="body">A <strong>Safety PLC</strong> (F-CPU) is certified to <span class="hl">IEC 61508 / IEC 62061</span> and <span class="hl">ISO 13849 (PL d/e)</span>. It runs the user program on <span class="hl2">two diverse channels</span>, cross-checks results, tests its own I/O thousands of times per second, and forces outputs to a safe state on any discrepancy. This is how an E-stop or light curtain is trusted to stop a robot — tying directly into the safety systems of the automation cell.</p>
+    </div>
+    <div class="connect" style="margin-top:14px">
+      <span class="pill">↔ SEE ALSO</span>
+      <span>Periodic tasks run the <b>PID of lesson 10</b>. Networks here are lessons <b>02–06</b>. Safe stopping protects the <b>robots of lesson 15</b>.</span>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 8 — ENGINEERING PRACTICE ============ -->
+  <div class="page" id="tips">
+    <span class="page-tag">Page 8 · From the Field</span>
+    <h2 class="page-title">Engineering Practice</h2>
+    <p class="page-sub">Field-proven habits, the failures that actually happen, and senior-engineer notes.</p>
+
+    <div class="card">
+      <div class="label">Commissioning tips</div>
+      <ol class="tips">
+        <li><span class="num">1</span><div><b>Keep scan time stable.</b> Watch <span class="mono">max scan</span> in diagnostics; a creeping number warns of an inefficient loop before it faults.</div></li>
+        <li><span class="num">2</span><div><b>Never do edge detection on a slow input.</b> Use a rising-edge instruction (<span class="mono">R_TRIG</span>) — and for fast pulses use a high-speed counter, not the scan.</div></li>
+        <li><span class="num">3</span><div><b>Structure with FBs.</b> One reusable, tested "Motor" block beats 40 copied rungs. Less code = fewer bugs.</div></li>
+        <li><span class="num">4</span><div><b>Force tables are for testing only.</b> Forced I/O left in a running machine is a top cause of "ghost" faults — document and clear them.</div></li>
+        <li><span class="num">5</span><div><b>Comment in symbols, not addresses.</b> <span class="mono">Conveyor_Jam</span> survives a hardware change; <span class="mono">%I0.4</span> does not.</div></li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <div class="label">⚠ Common failures</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">⏱ Missed fast input</div><p>Pulse shorter than scan time is lost — the program never sees it. Fix: HSC / interrupt task.</p></div>
+        <div class="fail"><div class="ft">🔁 Watchdog trip</div><p>A runaway loop or huge FOR-loop overruns the scan → CPU faults to STOP. Fix: bound loops, raise limit cautiously.</p></div>
+        <div class="fail"><div class="ft">🔌 Sink/source mismatch</div><p>PNP sensor on an NPN card reads nothing. Fix: match sensor & card polarity.</p></div>
+        <div class="fail"><div class="ft">📉 INT overflow</div><p>A totaliser in an INT rolls over at 32 767 and jumps negative. Fix: DINT/REAL accumulator.</p></div>
+        <div class="fail"><div class="ft">⚡ EMI false trips</div><p>Unshielded analog beside VFD cable = noisy reading. Fix: shielded cable, single-point earth, separation.</p></div>
+        <div class="fail"><div class="ft">🪫 Lost retentive data</div><p>Dead backup battery wipes setpoints on power cycle. Fix: monitor battery; use flash retention.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">⭐ Pro engineer notes</div>
+      <div class="grid-2">
+        <div class="pro"><div class="pt">Read the diagnostics buffer first</div><p>90% of "the PLC is broken" calls are answered by the <em>CPU diagnostic buffer</em> — it timestamps the exact fault.</p></div>
+        <div class="pro"><div class="pt">Order matters in ladder</div><p>Because logic runs top-down using the live image, a coil set then reset later in the <em>same scan</em> ends OFF. Sequence deliberately.</p></div>
+        <div class="pro"><div class="pt">Version & back up offline</div><p>Always keep the <em>source project</em> archived — the running CPU may hold compiled code you can't fully reverse.</p></div>
+        <div class="pro"><div class="pt">Design for the safe state</div><p>Ask "what happens on wire-break / power-loss?" De-energise-to-stop and live-zero analog make failures <em>visible</em>.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ QUIZ ============ -->
+  <div class="page">
+    <div class="card quiz">
+      <div class="label">Quick Check · Active Recall</div>
+      <p class="quiz-q">Q1: A proximity sensor pulses HIGH for 5 ms. The PLC scan time is 12 ms. Will the program reliably detect it? Why?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>A:</b> No — not reliably. Inputs are only sampled once per scan, during the input-scan phase. A 5 ms pulse can begin and end <i>between</i> two samples and be missed entirely. To catch it, route it to a <b>high-speed counter or an event/interrupt task</b> that doesn't depend on the main scan.</span>
+      </div>
+      <p class="quiz-q" style="margin-top:20px">Q2: Why does a PLC copy inputs into a process image instead of reading pins live during execution?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>A:</b> For <b>determinism and consistency</b>. If an input changed mid-program, early and late rungs would see different values, producing race conditions. Freezing the image guarantees the whole scan sees one coherent snapshot — repeatable behaviour every cycle.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 9 — WORKED EXAMPLES ============ -->
+  <div class="page" id="wk">
+    <span class="page-tag">Page 9 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade numericals, solved step by step.</p>
+
+    <div class="card">
+      <div class="label">Worked Example 1 — Scan time &amp; worst-case response</div>
+      <p class="body"><b>Given:</b> input scan 1.5 ms, program execution 12 ms, output scan 1.5 ms, housekeeping 1 ms. Input cards have a 3 ms hardware filter. Find the scan time and the worst-case input-to-output response time.</p>
+      <div class="eqn">T_scan = 1.5 + 12 + 1.5 + 1 = <b>16 ms</b>
+
+worst case: the input changes just AFTER the input scan —
+it waits almost one full scan to be read, then one more scan
+to be solved and written:
+T_resp(max) ≈ filter + 2 × T_scan = 3 + 32 = <b>35 ms</b>
+T_resp(min) ≈ filter + 1 × T_scan = 3 + 16 = 19 ms</div>
+      <p class="body"><i>Discussion:</i> this is why "the PLC runs at 16 ms" understates latency — synchronous I/O always risks the two-scan worst case. Anything that must respond faster (registration marks, fast reject gates) belongs on a high-speed counter, an event/interrupt task, or the drive&#39;s own logic — not the main scan.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 2 — Analog scaling &amp; resolution (4–20 mA)</div>
+      <p class="body"><b>Given:</b> a 4–20 mA temperature transmitter spans 0–100 °C into a Siemens-style analog input that maps 4–20 mA to 0–27648 counts. The raw value reads 13824. Find the current, the temperature, and the theoretical resolution.</p>
+      <div class="eqn">fraction  = 13824 / 27648 = 0.50
+current   = 4 + 0.50 × 16          = <b>12 mA</b>
+temp      = 0 + 0.50 × 100         = <b>50 °C</b>
+
+scaling formula:  T = (raw / 27648) × (T_hi − T_lo) + T_lo
+resolution = 100 °C / 27648 ≈ <b>0.0036 °C per count</b></div>
+      <p class="body"><i>Discussion:</i> the 0.0036 °C figure is arithmetic, not accuracy — the transmitter (±0.25% ≈ ±0.25 °C) and card (±0.3% typ.) dominate. Also note the <b>live-zero</b> benefit: raw = 0 means 4 mA (true 0 °C), while a broken wire reads under-range (&lt;4 mA) and can be alarmed — a 0–20 mA loop cannot tell "zero" from "cut cable".</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 3 — When the scan cannot count: encoder maths</div>
+      <p class="body"><b>Given:</b> a 1024 ppr incremental encoder on a shaft at 1750 rpm, read in ×4 quadrature. Can a 16 ms scan count it? What hardware is required?</p>
+      <div class="eqn">f_pulse = 1024 × 1750 / 60 = <b>29 867 Hz  (≈ 29.9 kHz)</b>
+×4 quadrature edge rate = 4 × 29 867 ≈ <b>119.5 kHz</b>
+pulse period = 1/29 867 ≈ 33 µs   vs   scan = 16 000 µs
+
+scan-based counting limit ≈ 1/(2 × T_scan) = 31 Hz  →  hopeless</div>
+      <p class="body"><i>Discussion:</i> the scan can reliably count only signals slower than about half its rate (Nyquist logic applied to sampling the input image). At 30 kHz the program would miss ~99.9% of pulses. The fix is a <b>high-speed counter module</b> (typ. 100 kHz–1 MHz) that counts in hardware and hands the program a ready total — the program then reads position, not pulses.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 4 — Redundant CPU availability</div>
+      <p class="body"><b>Given:</b> a CPU has MTBF = 100 000 h and MTTR = 4 h. Compute availability for a single CPU and for a 1oo2 hot-standby pair (independent failures assumed).</p>
+      <div class="eqn">A_single = MTBF/(MTBF + MTTR) = 100000/100004 = <b>0.99996</b>
+downtime ≈ (1 − A) × 8760 h ≈ <b>21 min / year</b>
+
+A_pair = 1 − (1 − A)² = 1 − (4×10⁻⁵)² ≈ <b>0.9999999984</b>
+downtime ≈ 1.6×10⁻⁹ × 8760 h ≈ <b>0.05 s / year</b></div>
+      <p class="body"><i>Discussion:</i> the pair looks a million times better on paper, but the assumption of independence is the weak point: shared power, a common firmware bug, or a botched switchover (bumpless transfer failing) are <b>common-cause failures</b> that dominate real redundant systems. That is why standards cap the credit you may claim (β-factor, typically 2–10%) — engineered diversity matters more than duplication.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 10 — PROBLEM SET ============ -->
+  <div class="page" id="ps">
+    <span class="page-tag">Page 10 · MSc Practice</span>
+    <h2 class="page-title">Problem Set — 10 Questions</h2>
+    <p class="page-sub">Work each one before revealing. The scan cycle and the scaling formula do most of the lifting.</p>
+
+    <div class="card quiz">
+      <div class="label">Problem 1</div>
+      <p class="quiz-q">An 8 ms pulse arrives at a PLC whose scan time is 20 ms. Detection options?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>A:</b> The main scan samples inputs every 20 ms, so an 8 ms pulse can fall entirely between samples — unreliable. Use a <b>high-speed counter input, an interrupt/event task,</b> or a pulse-stretching input card. (A latching sensor also works if the process allows.)</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 2</div>
+      <p class="quiz-q">Raw value 20736 on a 0–27648 card, transmitter 4–20 mA = 0–16 bar. Current and pressure?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>A:</b> fraction = 20736/27648 = 0.75 → current = 4 + 0.75×16 = <b>16 mA</b>; pressure = 0.75 × 16 bar = <b>12 bar</b>.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 3</div>
+      <p class="quiz-q">Why does ladder logic executed top-down mean a coil written twice ends up controlled by the LAST rung only?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>A:</b> Outputs are written to the <b>process image</b>, not the terminals, during execution. Each assignment overwrites the image value; only the value present at the end of the scan is copied to the physical output. This is the classic "double coil" bug — the first rung&#39;s result is silently discarded.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 4</div>
+      <p class="quiz-q">A production totaliser must survive power loss; a "cycle running" flag must NOT. Where does each live?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>A:</b> Totaliser → <b>retentive memory</b> (battery/flash-backed), declared RETAIN, in a DINT/REAL. The state flag → <b>non-retentive</b>, so a power cycle restarts the sequence from a known safe state instead of resuming mid-cycle with the machine physically elsewhere.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 5</div>
+      <p class="quiz-q">State what TON, TOF and TP timers each do to a 2 s preset when their input pulses.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>A:</b> <b>TON</b> (on-delay): output goes TRUE 2 s after input rises, drops immediately with input. <b>TOF</b> (off-delay): output follows input TRUE immediately, stays TRUE 2 s after input falls. <b>TP</b> (pulse): any input rising edge fires a fixed 2 s pulse regardless of input duration.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 6</div>
+      <p class="quiz-q">Draw (mentally) a start/stop seal-in rung. Why is the stop contact wired NC in hardware?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>A:</b> (Start NO ∥ Motor contact) in series with Stop → Motor coil: the motor&#39;s own contact "seals in" the momentary start. Stop is a physical NC button read by a normally-closed circuit so that a <b>broken wire behaves like pressing stop</b> — fail-safe (de-energise-to-stop). A NO stop with a cut cable could never stop the machine.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 7</div>
+      <p class="quiz-q">2048 ppr encoder at 3000 rpm, ×4 quadrature. Edge rate? Suitable input?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>A:</b> f = 2048 × 50 = 102.4 kHz; ×4 = <b>409.6 kHz</b> edge rate. Needs a high-speed counter rated ≥ 500 kHz (or the drive/motion controller&#39;s encoder port) — no standard DI card or scan-based count survives this.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 8</div>
+      <p class="quiz-q">Give three distinct causes of a watchdog trip, and the first diagnostic you would check.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>A:</b> (1) unbounded/huge program loop (FOR over a big array each scan); (2) a blocking wait or heavy communication burst extending the scan; (3) an interrupt storm from a chattering event input. First stop: the <b>CPU diagnostic buffer</b> — it timestamps the overrun and usually names the offending OB/task.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 9</div>
+      <p class="quiz-q">A PNP (sourcing) sensor is wired to an input card that expects NPN (sinking) sensors. What do you observe, and what are the two fixes?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>A:</b> The input never turns ON (or floats erratically) — the sensor sources current to +24 V but the card also expects to be fed from +24 V, so no current flows through the input circuit. Fixes: use a card of matching polarity (or a configurable sink/source card), or replace the sensor. (A pull resistor workaround exists but is poor practice in industry.)</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 10</div>
+      <p class="quiz-q">MTBF 50 000 h, MTTR 2 h. Compute availability single and 1oo2, and name the assumption that flatters the second number.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">Tap to reveal ↓</span>
+        <span class="hidden"><b>A:</b> A = 50000/50002 = <b>0.99996</b> (≈ 21 min downtime/yr). Pair: 1 − (4×10⁻⁵)² ≈ <b>0.9999999984</b>. The flattering assumption is <b>failure independence</b> — shared power, common firmware and switchover logic create common-cause failures that set the real ceiling (handled by β-factor methods in IEC 61508).</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 11 — DERIVATIONS & TRAPS ============ -->
+  <div class="page" id="dv">
+    <span class="page-tag">Page 11 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">Where the formulas come from — and the traps that sink real programs.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 — worst-case response time</div>
+      <div class="eqn">event happens at the worst moment: just AFTER inputs were read
+  wait for next input scan:            up to 1 × T_scan
+  solve + write outputs (that scan):   included in the 2nd scan
+⇒ T_resp(max) = t_filter + 2·T_scan       T_resp(min) = t_filter + T_scan
+
+average ≈ t_filter + 1.5·T_scan</div>
+      <p class="body"><i>Why it matters:</i> the factor-of-two is structural, not implementation sloppiness — any read-solve-write architecture has it. Interrupt tasks beat it by bypassing the image; fieldbus-synchronised I/O (e.g. EtherCAT distributed clocks) beats it by aligning sampling with the cycle.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 — analog resolution &amp; scaling line</div>
+      <div class="eqn">an n-bit converter divides its span into 2ⁿ steps:
+  LSB = span / 2ⁿ        12-bit on 0–10 V → 10/4096 = 2.44 mV
+
+any linear scaling is one straight line through two points:
+  y = y_lo + (x − x_lo)·(y_hi − y_lo)/(x_hi − x_lo)
+with (x_lo,x_hi) = raw counts, (y_lo,y_hi) = engineering units</div>
+      <p class="body"><i>Why it matters:</i> every scaling block (SCL, SCP, NORM_X/SCALE_X) is this one line dressed up. Knowing it lets you scale <em>anything</em> — including reversed ranges (20–4 mA), offset live-zero ranges, and bipolar ±10 V — without memorising vendor blocks.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 — availability algebra</div>
+      <div class="eqn">A = uptime/(uptime+downtime) = MTBF/(MTBF + MTTR)
+series (both needed):    A_sys = A₁ × A₂          (availability multiplies DOWN)
+parallel (either works): A_sys = 1 − (1−A₁)(1−A₂)  (unavailability multiplies)</div>
+      <p class="body"><i>Why it matters:</i> the same two lines size everything from redundant CPUs to dual power supplies to parallel pumps. Series chains punish long systems (ten 99.9% elements ≈ 99.0%); parallel pairs reward even modest elements — until common-cause failure caps the gain.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol glossary</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Symbol / term</th><th>Meaning</th><th>Unit</th></tr>
+        <tr><td class="mono">T_scan</td><td>Full read-solve-write-housekeep cycle time</td><td>ms</td></tr>
+        <tr><td class="mono">t_filter</td><td>Input card hardware/debounce filter delay</td><td>ms</td></tr>
+        <tr><td class="mono">%I / %Q / %M</td><td>IEC addresses: input, output, internal memory</td><td>—</td></tr>
+        <tr><td class="mono">LSB</td><td>Smallest ADC step = span/2ⁿ</td><td>eng. units</td></tr>
+        <tr><td class="mono">ppr</td><td>Encoder pulses per revolution (×4 in quadrature)</td><td>—</td></tr>
+        <tr><td class="mono">TON / TOF / TP</td><td>On-delay, off-delay, fixed-pulse timers</td><td>—</td></tr>
+        <tr><td class="mono">RETAIN</td><td>Variable that survives power loss</td><td>—</td></tr>
+        <tr><td class="mono">MTBF / MTTR / A</td><td>Mean time between failures / to repair / availability</td><td>h · h · —</td></tr>
+        <tr><td class="mono">1oo2</td><td>"One out of two" — either channel can carry the function</td><td>—</td></tr>
+        <tr><td class="mono">OB / task</td><td>Organisation block / scheduled execution unit</td><td>—</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven exam &amp; field traps</div>
+      <ol class="tips">
+        <li><span class="num">1</span><div><b>Double coil.</b> The same output written on two rungs — only the last write survives the scan. Use one coil, many conditions.</div></li>
+        <li><span class="num">2</span><div><b>Scan-order dependency.</b> Logic that works only because rung A runs before rung B breaks the day someone reorders networks. Make state explicit.</div></li>
+        <li><span class="num">3</span><div><b>INT overflow at 32 767.</b> Totals and encoder counts belong in DINT/REAL; a rolled-over INT jumps to −32 768 mid-production.</div></li>
+        <li><span class="num">4</span><div><b>Floating-point equality.</b> <span class="mono">IF Real_A = Real_B</span> is a coin toss after arithmetic — compare with a tolerance band.</div></li>
+        <li><span class="num">5</span><div><b>Forces left on.</b> A forced output overrides all logic silently, surviving downloads on many platforms. Check the force table before any "impossible" behaviour hunt.</div></li>
+        <li><span class="num">6</span><div><b>BCD vs binary.</b> Legacy thumbwheels/displays speak BCD; treating 0x25 as 25 decimal (it is 37) corrupts every setpoint. Convert explicitly.</div></li>
+        <li><span class="num">7</span><div><b>Units in scaling.</b> Mixing raw counts, mA and engineering units in one formula is the top analog bug — write the two calibration points as a comment above every scaling block.</div></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 12 — STUDY & PRACTICE ============ -->
+  <div class="page" id="sp">
+    <span class="page-tag">Page 12 · MSc Practice</span>
+    <h2 class="page-title">Study &amp; Practice Path</h2>
+    <p class="page-sub">The canon, a hands-on ladder, and an honest self-check.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Resource</th><th>What it gives you</th><th>Level</th></tr>
+        <tr><td><b>W. Bolton</b> — <i>Programmable Logic Controllers</i></td><td>The standard teaching text: scan, languages, exercises with answers</td><td>Core</td></tr>
+        <tr><td><b>Petruzella</b> — <i>Programmable Logic Controllers</i></td><td>US-style ladder depth, wiring diagrams, motor control circuits</td><td>Core</td></tr>
+        <tr><td><b>IEC 61131-3</b></td><td>The languages standard itself: data types, POUs, execution model</td><td>Reference</td></tr>
+        <tr><td><b>John &amp; Tiegelkamp</b> — <i>IEC 61131-3: Programming Industrial Automation Systems</i></td><td>The deep companion to the standard (ST/SFC especially)</td><td>MSc</td></tr>
+        <tr><td><b>CODESYS</b> (free IDE) + soft PLC</td><td>Full IEC 61131-3 environment on your laptop — all five languages</td><td>Practice</td></tr>
+        <tr><td><b>OpenPLC project</b></td><td>Open-source runtime for Pi/ESP32 — wire real I/O cheaply (→ A36)</td><td>Practice</td></tr>
+        <tr><td><b>Siemens TIA / Allen-Bradley CCW</b> trial + simulator</td><td>Vendor fluency: PLCSIM / Micro800 simulator commissioning drills</td><td>Practice</td></tr>
+        <tr><td><b>PLC Academy / RealPars</b> resources</td><td>Worked ladder patterns: seal-in, interlocks, star-delta, sequencers</td><td>All levels</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder — eight exercises</div>
+      <ol class="tips">
+        <li><span class="num">1</span><div><b>Seal-in first.</b> In CODESYS, build start/stop with seal-in, then add an interlock and a run-hours totaliser (DINT, RETAIN).</div></li>
+        <li><span class="num">2</span><div><b>Timer trio.</b> Implement the same 3 s delay with TON, TOF and TP; watch all three on a trace and explain the differences in one sentence each.</div></li>
+        <li><span class="num">3</span><div><b>Break the scan.</b> Write a deliberate double-coil bug, observe it, fix it. Then create a scan-order dependency and refactor it away with explicit state.</div></li>
+        <li><span class="num">4</span><div><b>Scale analog by hand.</b> Code the two-point scaling line in ST for a 4–20 mA level sensor, including under-range (broken wire) alarming below 4 mA.</div></li>
+        <li><span class="num">5</span><div><b>State machine.</b> Build a 4-step sequence (fill→heat→hold→drain) in SFC, then rebuild it in ladder with an INT step register — feel why SFC exists.</div></li>
+        <li><span class="num">6</span><div><b>Measure your scan.</b> Read the CPU&#39;s min/avg/max scan diagnostics, then add a 10 000-iteration loop and watch the watchdog margin shrink.</div></li>
+        <li><span class="num">7</span><div><b>Simulate a fast pulse.</b> Feed a 5 ms pulse generator into a normal input vs an HSC/event task; log how many each catches in 1000 pulses.</div></li>
+        <li><span class="num">8</span><div><b>Write the FB.</b> Package "Motor" (start/stop/fault/hours) as a reusable function block with a declared interface, instantiate it three times, and version it.</div></li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment — can you…?</div>
+      <div class="grid-2">
+        <div class="mini"><h4>◔ Recall</h4><p>Draw the four scan phases from memory, write T_resp(max) = filter + 2·T_scan, and the two-point scaling line.</p></div>
+        <div class="mini c-blue"><h4>◑ Apply</h4><p>Scale any raw range to any engineering range, size an HSC from ppr × rpm, and choose retentive vs non-retentive per variable.</p></div>
+        <div class="mini c-purp"><h4>◕ Diagnose</h4><p>Walk into a faulted CPU, read the diagnostic buffer, and separate watchdog / I/O / program causes in under ten minutes.</p></div>
+        <div class="mini c-amb"><h4>● Design</h4><p>Structure a machine program in FBs with explicit state, fail-safe wiring assumptions, and a documented force policy.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MEMORY HOOK ============ -->
+  <div class="page">
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"Read · Solve · Write · Repeat — on a guaranteed clock."</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Advanced Deep Dive A07 — PLC · Companion to Micro Lesson 07<br>
+    Standards: IEC 61131 (PLC), IEC 61131-3 (languages), IEC 61508 / 62061 / ISO 13849 (safety)<br>
+    Industrial Engineering Micro-Learning Series · Advanced Track
+  </div>
+
+</div>
+
+<script>
+  // Scan-cycle animation
+  (function(){
+    const phases = [
+      {id:'ph1', name:'1 · INPUT SCAN', col:'#60a5fa'},
+      {id:'ph2', name:'2 · EXECUTE',    col:'#a3e635'},
+      {id:'ph3', name:'3 · OUTPUT',     col:'#fb923c'},
+      {id:'ph4', name:'4 · HOUSEKEEP',  col:'#c084fc'}
+    ];
+    const btn = document.getElementById('scanBtn');
+    const phName = document.getElementById('phName');
+    const scanN = document.getElementById('scanN');
+    let count = 0, running = false;
+
+    function highlight(i){
+      phases.forEach((p,j)=>{
+        const el = document.getElementById(p.id).querySelector('rect');
+        el.style.transition='all .2s';
+        if(j===i){ el.style.filter='drop-shadow(0 0 10px '+p.col+')'; el.setAttribute('stroke-width','3'); }
+        else { el.style.filter='none'; el.setAttribute('stroke-width','2'); }
+      });
+    }
+    function run(){
+      if(running) return; running=true;
+      btn.classList.add('run'); btn.textContent='⏳ scanning…';
+      let i=0;
+      const step=()=>{
+        if(i<phases.length){
+          highlight(i); phName.textContent=phases[i].name; i++;
+          setTimeout(step,520);
+        } else {
+          count++; scanN.textContent=count;
+          phases.forEach(p=>{const el=document.getElementById(p.id).querySelector('rect'); el.style.filter='none'; el.setAttribute('stroke-width','2');});
+          phName.textContent='loop complete'; running=false;
+          btn.classList.remove('run'); btn.textContent='▶ Animate one scan';
+        }
+      };
+      step();
+    }
+    btn.addEventListener('click', run);
+  })();
+</script>
+
+<!-- ===== AUTO-ANIM: universal reveal-on-scroll SVG animation (self-contained, reduced-motion aware) ===== -->
+<style>
+  @media (prefers-reduced-motion: no-preference){
+    svg.illus [data-anim]{ opacity:0; }
+    svg.illus.anim-in [data-anim]{ animation: aaFade .55s ease forwards; }
+    svg.illus.anim-in [data-anim-draw]{ animation: aaDraw .9s ease forwards; }
+    @keyframes aaFade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+    @keyframes aaDraw{ from{stroke-dashoffset:var(--aaLen);} to{stroke-dashoffset:0;} }
+  }
+</style>
+<script>
+(function(){
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  function prep(svg){
+    var step=0;
+    svg.querySelectorAll('line, path, polyline').forEach(function(el){
+      var sw = el.getAttribute('stroke') || (el.style && el.style.stroke);
+      if(!sw || sw==='none') return;
+      var len;
+      try { len = (el.getTotalLength && el.getTotalLength()) || 0; } catch(e){ len = 0; }
+      if(len>0 && len<5000){
+        el.style.strokeDasharray = len; el.style.strokeDashoffset = len;
+        el.style.setProperty('--aaLen', len);
+        el.setAttribute('data-anim-draw','');
+        el.style.animationDelay = (0.05 + step*0.05).toFixed(2)+'s';
+        step++;
+      }
+    });
+    svg.querySelectorAll('text, circle, rect, ellipse, polygon, use, image').forEach(function(el){
+      el.setAttribute('data-anim','');
+      el.style.animationDelay = (0.05 + (step++)*0.03).toFixed(2)+'s';
+    });
+  }
+  var svgs = document.querySelectorAll('svg.illus');
+  svgs.forEach(prep);
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){ en.target.classList.add('anim-in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.18 });
+  svgs.forEach(function(s){ io.observe(s); });
+})();
+</script>
+</body>
+</html>

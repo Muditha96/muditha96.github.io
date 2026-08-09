@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Profinet — Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --accent: #4ade80;
+    --accent-2: #60a5fa;
+    --accent-3: #fbbf24;
+    --accent-4: #a78bfa;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 32px 28px 80px;
+  }
+
+  /* HEADER */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 15px;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+    animation: fadeDown 0.7s ease;
+  }
+  .badge .dot {
+    width: 8px; height: 8px;
+    background: var(--accent-4);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--accent-4);
+    animation: pulse 2s infinite;
+  }
+
+  h1 {
+    font-size: clamp(40px, 6vw, 64px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin-bottom: 16px;
+    animation: fadeUp 0.7s ease 0.1s both;
+  }
+  h1 .emoji { font-size: 0.85em; margin-right: 8px; }
+
+  .subtitle {
+    font-size: clamp(18px, 2.2vw, 22px);
+    color: var(--text-dim);
+    margin-bottom: 40px;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 36px 32px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.7s ease both;
+  }
+  .card.delay-1 { animation-delay: 0.3s; }
+  .card.delay-2 { animation-delay: 0.45s; }
+  .card.delay-3 { animation-delay: 0.6s; }
+  .card.delay-4 { animation-delay: 0.75s; }
+  .card.delay-5 { animation-delay: 0.9s; }
+
+  .label {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-4);
+    margin-bottom: 14px;
+  }
+
+  .definition {
+    font-size: clamp(22px, 2.8vw, 28px);
+    font-weight: 500;
+    line-height: 1.45;
+  }
+
+  /* NETWORK DIAGRAM (Star/Switch topology) */
+  .network {
+    position: relative;
+    height: 380px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .switch-node {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px; height: 140px;
+    background: var(--card-2);
+    border: 3px solid var(--accent-4);
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    z-index: 5;
+    box-shadow: 0 0 40px rgba(167,139,250,0.3);
+  }
+  .switch-node .icon { font-size: 36px; margin-bottom: 4px; }
+
+  .device {
+    position: absolute;
+    width: 110px;
+    background: var(--card-2);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 5;
+  }
+  .device .icon { font-size: 24px; display: block; margin-bottom: 4px; }
+  .device.d1 { top: 10px; left: 50%; transform: translateX(-50%); border-color: var(--accent-2); }
+  .device.d2 { right: 20px; top: 50%; transform: translateY(-50%); border-color: var(--accent); }
+  .device.d3 { bottom: 10px; left: 50%; transform: translateX(-50%); border-color: var(--accent-3); }
+  .device.d4 { left: 20px; top: 50%; transform: translateY(-50%); border-color: var(--accent-4); }
+
+  /* Connecting lines via SVG-like CSS */
+  .line {
+    position: absolute;
+    left: 50%; top: 50%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-4), transparent);
+    transform-origin: 0 50%;
+    z-index: 1;
+    overflow: visible;
+  }
+  .line::after {
+    content: "";
+    position: absolute;
+    left: 0; top: 50%;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--accent);
+    transform: translateY(-50%);
+    animation: dataFlow 1.5s linear infinite;
+  }
+  .line.l1 { width: 110px; transform: rotate(-90deg); }
+  .line.l2 { width: 130px; transform: rotate(0deg); }
+  .line.l3 { width: 110px; transform: rotate(90deg); }
+  .line.l4 { width: 130px; transform: rotate(180deg); }
+
+  /* KEY FACTS */
+  .facts {
+    list-style: none;
+    display: grid;
+    gap: 16px;
+  }
+  .facts li {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--card-2);
+    padding: 18px 22px;
+    border-radius: 14px;
+    font-size: 19px;
+    border-left: 4px solid var(--accent-4);
+    transition: transform 0.3s ease;
+  }
+  .facts li:hover { transform: translateX(6px); }
+  .facts li .check {
+    width: 28px; height: 28px;
+    background: var(--accent-4);
+    color: var(--bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  /* EXAMPLE */
+  .example {
+    background: linear-gradient(135deg, rgba(167,139,250,0.1), rgba(96,165,250,0.05));
+    border-left: 4px solid var(--accent-2);
+  }
+  .example .icon-large { font-size: 48px; margin-bottom: 12px; }
+  .example p { font-size: 20px; line-height: 1.55; }
+
+  /* COMPARISON */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .compare > div {
+    background: var(--card-2);
+    padding: 20px;
+    border-radius: 14px;
+  }
+  .compare h4 {
+    font-size: 17px;
+    margin-bottom: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .compare ul { list-style: none; }
+  .compare li { padding: 6px 0; font-size: 17px; }
+  .compare .modbus { border-top: 3px solid var(--accent-3); }
+  .compare .profinet { border-top: 3px solid var(--accent-4); }
+
+  /* MEMORY HOOK */
+  .memory {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    color: #fff;
+    text-align: center;
+    padding: 40px 28px;
+    border: none;
+  }
+  .memory .label { color: rgba(255,255,255,0.75); }
+  .memory .quote {
+    font-size: clamp(26px, 3.5vw, 36px);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  /* QUICK CHECK */
+  .quiz { background: var(--card); border: 2px dashed var(--accent-4); }
+  .quiz .label { color: var(--accent-4); }
+  .quiz-q { font-size: 22px; font-weight: 500; margin-bottom: 20px; }
+  .quiz-answer {
+    background: var(--card-2);
+    padding: 18px;
+    border-radius: 12px;
+    font-size: 18px;
+    color: var(--text-dim);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+  }
+  .quiz-answer .hidden { opacity: 0; transition: opacity 0.4s ease; }
+  .quiz-answer.revealed .hidden { opacity: 1; }
+  .quiz-answer.revealed { background: rgba(167,139,250,0.1); color: var(--text); border: 1px solid var(--accent-4); }
+  .quiz-answer .tap {
+    display: block; text-align: center;
+    color: var(--accent-4); font-weight: 600;
+  }
+  .quiz-answer.revealed .tap { display: none; }
+
+  .footer {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-top: 40px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.4); opacity: 0.7; }
+  }
+  @keyframes dataFlow {
+    0%   { left: 0; opacity: 0; }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+  }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 48px 40px 100px; }
+    .card { padding: 44px 40px; }
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 24px 18px 60px; }
+    .card { padding: 28px 22px; border-radius: 20px; }
+    .network { height: 340px; }
+    .compare { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="badge">
+    <span class="dot"></span>
+    <span>Lesson 02 · Industrial Communication</span>
+  </div>
+
+  <h1><span class="emoji">🌐</span>Profinet</h1>
+  <p class="subtitle">Real-time Ethernet for modern factory automation.</p>
+
+  <!-- DEFINITION -->
+  <div class="card delay-1">
+    <div class="label">Quick Definition</div>
+    <p class="definition">
+      Profinet is an <strong>industrial Ethernet protocol</strong> that delivers high-speed, deterministic communication between PLCs, drives, and I/O over standard Ethernet cables.
+    </p>
+  </div>
+
+  <!-- NETWORK DIAGRAM -->
+  <div class="card delay-2">
+    <div class="label">Network Topology</div>
+    <div class="network">
+      <div class="device d1"><span class="icon">🖥️</span>PLC</div>
+      <div class="device d2"><span class="icon">⚙️</span>Servo Drive</div>
+      <div class="device d3"><span class="icon">🤖</span>Robot</div>
+      <div class="device d4"><span class="icon">📟</span>HMI</div>
+
+      <div class="line l1"></div>
+      <div class="line l2"></div>
+      <div class="line l3"></div>
+      <div class="line l4"></div>
+
+      <div class="switch-node">
+        <span class="icon">🔌</span>
+        Profinet<br>Switch
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY FACTS -->
+  <div class="card delay-3">
+    <div class="label">Key Facts</div>
+    <ul class="facts">
+      <li><span class="check">✓</span> Runs on standard Ethernet (100 Mbps / 1 Gbps)</li>
+      <li><span class="check">✓</span> Real-time cycle times down to 31.25 µs (IRT mode)</li>
+      <li><span class="check">✓</span> Star topology via industrial switches</li>
+      <li><span class="check">✓</span> Supports motion control & safety (PROFIsafe)</li>
+      <li><span class="check">✓</span> Backed by Siemens — dominant in Europe</li>
+    </ul>
+  </div>
+
+  <!-- COMPARISON -->
+  <div class="card delay-3">
+    <div class="label">Modbus vs Profinet</div>
+    <div class="compare">
+      <div class="modbus">
+        <h4>Modbus RTU</h4>
+        <ul>
+          <li>⏱️ ~50 ms cycle</li>
+          <li>🔌 RS-485 serial</li>
+          <li>🐢 Slow polling</li>
+          <li>💰 Cheap & simple</li>
+        </ul>
+      </div>
+      <div class="profinet">
+        <h4>Profinet</h4>
+        <ul>
+          <li>⚡ &lt;1 ms cycle</li>
+          <li>🌐 Ethernet (RJ45)</li>
+          <li>🚀 Real-time</li>
+          <li>🎯 Motion-grade</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXAMPLE -->
+  <div class="card example delay-4">
+    <div class="label">Real Industrial Example</div>
+    <div class="icon-large">🚗</div>
+    <p>
+      In an <strong>automotive body shop</strong>, Profinet synchronizes 40+ welding robots and conveyors with sub-millisecond precision — impossible with serial protocols like Modbus.
+    </p>
+  </div>
+
+  <!-- QUICK CHECK -->
+  <div class="card quiz delay-5">
+    <div class="label">Quick Check</div>
+    <p class="quiz-q">Q: Why can Profinet handle motion control but Modbus RTU cannot?</p>
+    <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+      <span class="tap">Tap to reveal answer ↓</span>
+      <span class="hidden">
+        <strong>A:</strong> Profinet uses real-time Ethernet with deterministic cycles under 1 ms, while Modbus RTU polls slaves one by one over slow serial lines — too slow and unpredictable for servo coordination.
+      </span>
+    </div>
+  </div>
+
+  <!-- MEMORY HOOK -->
+  <div class="card memory delay-5">
+    <div class="label">Memory Hook</div>
+    <p class="quote">"Profinet = Ethernet + Real-Time."</p>
+  </div>
+
+  <div class="footer">
+    Lesson 02 of the Industrial Engineering Micro-Learning Series
+  </div>
+
+</div>
+</body>
+</html>

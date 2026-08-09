@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Engineering capabilities of Muditha Priyasad: mechanical design, automation & controls, production engineering and digital tools — with capability levels.">
+  <meta name="description" content="Engineering skills and verified certifications of Muditha Priyasad, covering mechanical design, industrial automation, manufacturing improvement and digital fabrication.">
   <title>Skills & Certifications | Muditha Priyasad</title>
-  <link rel="stylesheet" href="styles.css?v=20260721-moving-gallery-all">
+  <link rel="stylesheet" href="styles.css?v=20260809-ux-polish-v2">
+  <link rel="stylesheet" href="learning.css?v=20260809-ux-polish-v2">
+  <link rel="stylesheet" href="design-system.css?v=20260809-ux-polish-v2">
   <meta name="author" content="Muditha Priyasad">
   <meta name="keywords" content="Muditha Priyasad, Mechanical Engineer, Automation Engineer, SolidWorks, PLC, SCADA, machine design, Sri Lanka, industrial automation, 3D printing, CNC">
   <link rel="canonical" href="https://muditha96.github.io/skills.html">
@@ -28,7 +30,7 @@
   "@context": "https://schema.org",
   "@type": "Person",
   "name": "Muditha Priyasad",
-  "jobTitle": "Mechanical Design, Automation & R&D Engineer",
+  "jobTitle": "Mechanical Design | Industrial Automation | R&D Engineer",
   "email": "mailto:muditha00@icloud.com",
   "address": { "@type": "PostalAddress", "addressCountry": "Sri Lanka" },
   "alumniOf": "University of Jaffna",
@@ -38,7 +40,7 @@
 }
 </script>
 </head>
-<body>
+<body class="skills-page">
   <!-- Do not upload confidential engineering files to this public website. -->
   <!-- Public-safe portfolio: do not upload confidential company files, PLC programs, drawings or private customer data. -->
   <a class="skip-link" href="#main">Skip to content</a>
@@ -46,48 +48,75 @@
     <nav class="nav" aria-label="Primary navigation">
       <a class="brand" href="index.html" aria-label="Muditha Priyasad home">
         <span class="brand-mark" aria-hidden="true">MP</span>
-        <span class="brand-copy"><strong>Muditha Priyasad</strong><small>Mechanical Design, Automation & R&D Engineer</small></span>
+        <span class="brand-copy"><strong>Muditha Priyasad</strong><small>Mechanical Design | Industrial Automation | R&D Engineer</small></span>
       </a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu" aria-label="Open navigation menu"><span></span><span></span><span></span></button>
+      <!-- Fixed portfolio navigation: keep labels and order consistent on every main page. -->
       <ul class="nav-menu" id="nav-menu">
-        <li><a  href="index.html">Home</a></li>
-        <li><a  href="projects.html">Projects</a></li>
-        <li><a  href="machines.html">Machines</a></li>
-        <li><a class="active" href="skills.html">Skills &amp; Certs</a></li>
-        <li><a  href="cv-contact.html">Contact</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="projects.html">Projects</a></li>
+        <li><a href="machines.html">Machines</a></li>
+        <li><a class="active" aria-current="page" href="skills.html">Skills &amp; Certs</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="cv-contact.html">CV &amp; Contact</a></li>
+        <li><a href="learning-lab.html">Learning Lab</a></li>
       </ul>
     </nav>
   </header>
     <main id="main" class="portfolio-shell">
 
     <section class="page-hero compact-hero">
-      <p class="eyebrow">Skills</p>
-      <h1>Skills & Certifications</h1>
-      <p>Grouped by what I can actually do on the factory floor, with an honest capability level for each area.</p>
+      <p class="eyebrow">Capability overview</p>
+      <h1>Skills &amp; Certs</h1>
+      <p>Practical engineering skills, the evidence behind them and verified credentials.</p>
     </section>
 
-    <section class="skill-grid" data-render="skills"></section>
-
-    <section class="section-head">
-      <p class="eyebrow">Core strengths</p>
-      <h2>How I work</h2>
-    </section>
-    <section class="legend-panel"><strong>Strengths</strong><div class="tag-row large-tags" data-render="strengths"></div></section>
-
-    <section class="section-head">
-      <p class="eyebrow">Education &amp; certifications</p>
-      <h2>Qualifications</h2>
-    </section>
-    <h2 id="certifications">Certifications</h2>
-    <section class="cert-grid" data-render="certifications"></section>
-
-    <section class="note-panel">
-      <p><strong>Experience:</strong> 2+ years experience across 15+ delivered projects, plus engineering internship, university and MTone project experience.</p>
+    <section class="skills-credentials" aria-labelledby="credential-title">
+      <div class="skills-section-heading">
+        <p class="eyebrow">Verified credentials</p>
+        <h2 id="credential-title">Qualifications</h2>
+      </div>
+      <ul class="skills-credential-list">
+        <li><strong>BSc (Hons) Mechanical Engineering</strong><span>University of Jaffna</span></li>
+        <li><strong>Associate Engineer Registration (2025)</strong><span>Engineering Council Sri Lanka · No. 218944 · certificate validity shown through Dec 2025</span></li>
+        <li><strong>CSWA and CSWA-AM</strong><span>Mechanical Design · Additive Manufacturing</span></li>
+        <li><strong>PLC Training</strong><span>University of Moratuwa · 2025</span></li>
+      </ul>
     </section>
 
-    <section class="cta-panel">
-      <div><p class="eyebrow">Next</p><h2>See the project case studies</h2></div>
-      <div class="hero-actions"><a class="button primary" href="projects.html">View Projects</a><a class="button secondary" href="cv-contact.html">CV / Contact</a></div>
+    <section class="skills-capabilities" aria-labelledby="capability-title">
+      <div class="skills-section-heading">
+        <p class="eyebrow">Engineering capability</p>
+        <h2 id="capability-title">Practical skills</h2>
+        <p>Tools, methods and related project evidence.</p>
+      </div>
+      <div class="skills-list" data-render="skills"></div>
+    </section>
+
+    <section class="skills-strengths" aria-labelledby="strengths-title">
+      <div class="skills-section-heading">
+        <p class="eyebrow">Core strengths</p>
+        <h2 id="strengths-title">Working approach</h2>
+      </div>
+      <ul class="skills-strength-list" data-render="strengths"></ul>
+    </section>
+
+    <section class="skills-certifications" aria-labelledby="certifications">
+      <div class="skills-section-heading">
+        <p class="eyebrow">Verified records</p>
+        <h2 id="certifications">Certificates &amp; training</h2>
+        <p>Select an image to inspect a certificate or open its PDF.</p>
+      </div>
+      <div class="cert-grid" data-render="certifications"></div>
+    </section>
+
+    <section class="skills-experience" aria-labelledby="experience-title">
+      <h2 id="experience-title">Experience summary</h2>
+      <ul>
+        <li>2+ years of professional industry experience</li>
+        <li>15+ delivered engineering projects</li>
+        <li>Additional internship, university and MTone project work</li>
+      </ul>
     </section>
 
   </main>
@@ -95,7 +124,8 @@
     <p>&copy; <span id="year">2026</span> Muditha Priyasad. Engineering Portfolio.</p>
     <small>Selected project details are simplified to protect confidential industrial information.</small>
   </footer>
-  <script src="data/portfolio-data.js?v=20260721-moving-gallery-all"></script>
-  <script src="script.js?v=20260721-moving-gallery-all"></script>
+  <script src="data/project-image-library.js?v=20260809-ux-polish-v2"></script>
+  <script src="data/portfolio-data.js?v=20260809-ux-polish-v2"></script>
+  <script src="script.js?v=20260809-ux-polish-v2"></script>
 </body>
 </html>

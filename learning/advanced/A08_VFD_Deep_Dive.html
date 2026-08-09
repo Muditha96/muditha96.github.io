@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>VFD — Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #60a5fa;       /* blue — matches micro card 08 VFD theme */
+    --accent-soft: #93c5fd;
+    --accent-2: #a3e635;     /* lime — used as the "linked to micro" colour */
+    --accent-3: #fbbf24;
+    --teal: #2dd4bf;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #34d399;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(96,165,250,0.12), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(163,230,53,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--bg); background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(96,165,250,0.35);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(96,165,250,0.12), rgba(163,230,53,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent-2);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-2); background: rgba(163,230,53,0.12); padding:4px 10px; border-radius:8px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--accent-2)!important; } .c-blue .big{color:var(--accent-2)}
+  .c-amb  { border-top-color: var(--accent-3)!important; } .c-amb .big{color:var(--accent-3)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .scan-controls { display:flex; gap:12px; justify-content:center; margin-top:16px; flex-wrap:wrap;}
+  .scan-controls button { background: var(--card); border:2px solid var(--accent); color:var(--accent); padding:11px 22px; border-radius:999px; font-size:15px; font-weight:700; cursor:pointer; transition: all .2s ease; }
+  .scan-controls button.run { background:var(--accent); color:var(--bg); box-shadow:0 0 16px var(--accent); }
+  .scan-status { text-align:center; margin-top:12px; font-family:ui-monospace,monospace; font-size:14px; color:var(--text-dim);}
+  .scan-status strong { color:var(--accent); }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .lang { background: var(--card-2); border-radius:14px; padding:18px; border-left:4px solid var(--accent); }
+  .lang .tag { font-family:ui-monospace,monospace; font-weight:800; font-size:13px; color:var(--accent); }
+  .lang h4 { font-size:16px; margin:4px 0 6px; }
+  .lang p { font-size:14px; color:var(--text-dim); }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; }
+  .eqn b { color: var(--accent); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .pro { background: linear-gradient(145deg, rgba(96,165,250,0.08), transparent); border:1px solid rgba(96,165,250,0.22); border-radius:14px; padding:16px; }
+  .pro .pt { font-weight:700; color:var(--accent); margin-bottom:6px; font-size:15px; }
+  .pro p { font-size:13.5px; color:var(--text-dim); }
+  .pro em { color:var(--accent-3); font-style:normal; font-weight:600; }
+
+  .memory { background: linear-gradient(135deg, var(--accent), #1e3a8a); color: #f8fafc; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(255,255,255,0.7); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(96,165,250,0.08); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  @keyframes fadeUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.4);opacity:0.7;} }
+
+  @media (max-width: 600px) {
+    .container { padding:24px 16px 60px; }
+    .card { padding:24px 18px; border-radius:18px; }
+    .grid-2,.grid-3,.fail-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ============ HERO ============ -->
+  <div class="page">
+    <a class="back" href="index.html">← Advanced Library</a>
+    <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · A08 · Industrial Automation</span></div>
+    <h1 class="hero"><span class="emoji">🌀</span>The VFD, In Depth</h1>
+    <p class="hero-sub">The rectifier–DC-bus–inverter chain, V/f vs vector vs DTC, PWM, harmonics, braking and motor protection — MSc-level, every concept explained.</p>
+
+    <div class="connect">
+      <span class="pill">↔ LINKED</span>
+      <span>This is the advanced companion to <b>Micro Lesson 08 — VFD</b>. Read the 90-second card ("Change the Frequency, Change the Speed") first, then go deep here.</span>
+    </div>
+
+    <div class="toc">
+      <a href="#what">1 · What a VFD Really Does</a>
+      <a href="#chain">2 · The Power Chain</a>
+      <a href="#pwm">3 · PWM & the Inverter</a>
+      <a href="#vf">4 · V/f Control</a>
+      <a href="#vector">5 · Vector & DTC</a>
+      <a href="#demo">6 · Interactive: Pick a Mode</a>
+      <a href="#energy">7 · Affinity Laws & Energy</a>
+      <a href="#brake">8 · Braking & Regeneration</a>
+      <a href="#harm">9 · Harmonics & Cable Effects</a>
+      <a href="#tips">10 · Engineering Practice</a>
+      <a href="#wk">11 · Worked Examples</a>
+      <a href="#ps">12 · Problem Set</a>
+      <a href="#dv">13 · Derivations &amp; Traps</a>
+      <a href="#sp">14 · Study &amp; Practice</a>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 1 — WHAT IT IS ============ -->
+  <div class="page" id="what">
+    <span class="page-tag">Page 1 · Foundations</span>
+    <h2 class="page-title">What a VFD Really Does</h2>
+    <p class="page-sub">It does not "slow the motor down with a resistor." It <em>synthesises a brand-new AC supply</em> at whatever frequency and voltage the motor needs.</p>
+
+    <div class="card">
+      <div class="label">Precise Definition</div>
+      <p class="lead">A <strong>Variable Frequency Drive</strong> is a power-electronic converter that takes fixed-frequency, fixed-voltage mains and produces an <span class="hl">adjustable-frequency, adjustable-voltage</span> three-phase output, so an AC induction or PM motor can run at any speed and torque on demand.</p>
+      <p class="body">An induction motor's synchronous speed is locked to supply frequency: <span class="mono">n<sub>s</sub> = 120·f / p</span>. A 4-pole motor on 50 Hz turns at 1500 rpm — and <strong>nothing</strong> you do to the voltage alone changes that. To change speed you must change <span class="hl">f</span>. The VFD's entire reason to exist is to manufacture that variable <span class="hl">f</span> cleanly, while keeping magnetic flux correct so the motor still makes torque.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini">
+        <h4>Speed = frequency</h4>
+        <p>Output Hz sets rotor speed. 0–high Hz → standstill to over-speed.</p>
+      </div>
+      <div class="mini c-blue">
+        <h4>Torque = flux × current</h4>
+        <p>Keep flux constant by ramping V with f. That's the core trick.</p>
+      </div>
+      <div class="mini c-amb">
+        <h4>Soft everything</h4>
+        <p>Controlled accel/decel removes inrush, water-hammer, belt shock.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="label">Why not a throttle valve or a gearbox?</div>
+      <p class="body">Mechanically throttling a pump or fan to reduce flow <strong>wastes the energy as heat and turbulence</strong> — the motor still runs full speed. A VFD instead drops the motor's <em>speed</em>, and because pump/fan power follows the <span class="hl2">cube of speed</span> (affinity laws, page 7), a 20% speed cut can save ~50% of the energy. That single fact is why VFDs dominate HVAC, water and process industries.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 2 — POWER CHAIN ============ -->
+  <div class="page" id="chain">
+    <span class="page-tag">Page 2 · Hardware</span>
+    <h2 class="page-title">The Power Chain: Rectifier → DC Bus → Inverter</h2>
+    <p class="page-sub">Every standard VFD is three stages in series. Understand these three and you understand the whole drive.</p>
+
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="VFD power chain block diagram">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#fb923c"/><stop offset="1" stop-color="#fbbf24"/>
+          </linearGradient>
+          <linearGradient id="g2" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#2dd4bf"/>
+          </linearGradient>
+          <linearGradient id="g3" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#a3e635"/>
+          </linearGradient>
+        </defs>
+        <!-- mains -->
+        <text x="40" y="40" fill="#94a3b8" font-size="14" font-family="monospace">3-phase mains</text>
+        <text x="40" y="58" fill="#fbbf24" font-size="13" font-family="monospace">50/60 Hz fixed</text>
+        <g stroke="#fbbf24" stroke-width="2" fill="none">
+          <path d="M30 80 q15 -14 30 0 t30 0"/><path d="M30 100 q15 -14 30 0 t30 0"/><path d="M30 120 q15 -14 30 0 t30 0"/>
+        </g>
+        <line x1="95" y1="100" x2="150" y2="100" stroke="#475569" stroke-width="3"/>
+        <!-- rectifier -->
+        <rect x="150" y="60" width="150" height="170" rx="14" fill="url(#g1)" opacity="0.16" stroke="#fb923c" stroke-width="2"/>
+        <text x="225" y="50" fill="#fb923c" font-size="15" font-weight="bold" text-anchor="middle">RECTIFIER</text>
+        <text x="225" y="120" fill="#fed7aa" font-size="13" text-anchor="middle">6-pulse diode</text>
+        <text x="225" y="140" fill="#fed7aa" font-size="13" text-anchor="middle">bridge</text>
+        <text x="225" y="172" fill="#94a3b8" font-size="12" text-anchor="middle">AC → DC</text>
+        <line x1="300" y1="145" x2="360" y2="145" stroke="#475569" stroke-width="3"/>
+        <!-- dc bus -->
+        <rect x="360" y="60" width="150" height="170" rx="14" fill="url(#g2)" opacity="0.16" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="435" y="50" fill="#2dd4bf" font-size="15" font-weight="bold" text-anchor="middle">DC BUS</text>
+        <!-- cap symbol -->
+        <line x1="420" y1="110" x2="450" y2="110" stroke="#2dd4bf" stroke-width="3"/>
+        <line x1="420" y1="150" x2="450" y2="150" stroke="#2dd4bf" stroke-width="3"/>
+        <line x1="435" y1="95" x2="435" y2="110" stroke="#2dd4bf" stroke-width="2"/>
+        <line x1="435" y1="150" x2="435" y2="165" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="435" y="190" fill="#99f6e4" font-size="12" text-anchor="middle">smoothing cap</text>
+        <text x="435" y="208" fill="#94a3b8" font-size="12" text-anchor="middle">~1.35× V_LL</text>
+        <line x1="510" y1="145" x2="570" y2="145" stroke="#475569" stroke-width="3"/>
+        <!-- inverter -->
+        <rect x="570" y="60" width="150" height="170" rx="14" fill="url(#g3)" opacity="0.16" stroke="#60a5fa" stroke-width="2"/>
+        <text x="645" y="50" fill="#60a5fa" font-size="15" font-weight="bold" text-anchor="middle">INVERTER</text>
+        <text x="645" y="120" fill="#bfdbfe" font-size="13" text-anchor="middle">6× IGBT</text>
+        <text x="645" y="140" fill="#bfdbfe" font-size="13" text-anchor="middle">+ PWM</text>
+        <text x="645" y="172" fill="#94a3b8" font-size="12" text-anchor="middle">DC → variable AC</text>
+        <line x1="720" y1="145" x2="770" y2="145" stroke="#475569" stroke-width="3"/>
+        <!-- motor -->
+        <circle cx="805" cy="145" r="34" fill="#1a2230" stroke="#a3e635" stroke-width="2.5"/>
+        <text x="805" y="151" fill="#a3e635" font-size="20" font-weight="bold" text-anchor="middle">M</text>
+        <text x="805" y="205" fill="#a3e635" font-size="12" text-anchor="middle">motor</text>
+        <!-- control underlay -->
+        <rect x="150" y="248" width="570" height="40" rx="10" fill="#c084fc" opacity="0.12" stroke="#c084fc" stroke-width="1.5"/>
+        <text x="435" y="273" fill="#c084fc" font-size="13" text-anchor="middle" font-weight="bold">CONTROL: gate-driver + DSP running the V/f or vector algorithm</text>
+      </svg>
+      <p class="cap">The universal VFD topology — a voltage-source inverter (VSI). Power flows left to right; the brain sits underneath.</p>
+    </div>
+
+    <div class="grid-3" style="margin-top:16px">
+      <div class="mini c-org">
+        <h4>① Rectifier</h4>
+        <p>A diode bridge turns incoming AC into rough DC. Cheap, robust, but draws non-sinusoidal current → harmonics (page 9).</p>
+      </div>
+      <div class="mini c-teal">
+        <h4>② DC Bus</h4>
+        <p>Big electrolytic capacitors smooth the DC and store energy. Bus voltage ≈ 1.35× line-to-line RMS (≈ 565 V DC on 415 V mains).</p>
+      </div>
+      <div class="mini c-blue">
+        <h4>③ Inverter</h4>
+        <p>Six IGBTs switched by PWM chop the DC bus into a synthetic 3-phase AC of any frequency and voltage.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="label">The pre-charge detail engineers forget</div>
+      <p class="body">Those bus capacitors look like a <strong>short circuit</strong> at power-up. Without protection, the inrush would weld the rectifier diodes. So every drive has a <span class="hl">pre-charge resistor</span> (or thyristor soft-charge) that limits initial current, then a relay/contactor bypasses it once the bus is charged. A failed pre-charge relay is a classic "drive trips on power-up" fault.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 3 — PWM ============ -->
+  <div class="page" id="pwm">
+    <span class="page-tag">Page 3 · The Synthesis</span>
+    <h2 class="page-title">PWM: How DC Becomes a Sine Wave</h2>
+    <p class="page-sub">The inverter output is not a sine wave at all — it is a train of fixed-height DC pulses whose <em>average</em> traces a sine.</p>
+
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 860 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PWM pulse train tracing a sine wave">
+        <line x1="40" y1="140" x2="820" y2="140" stroke="#334155" stroke-width="1.5"/>
+        <!-- target sine -->
+        <path d="M40 140 Q 140 30 240 140 T 440 140 T 640 140 T 840 140" fill="none" stroke="#a3e635" stroke-width="3" opacity="0.9"/>
+        <!-- pwm pulses approximating top half -->
+        <g fill="#60a5fa" opacity="0.55">
+          <rect x="60" y="120" width="14" height="20"/>
+          <rect x="84" y="95" width="14" height="45"/>
+          <rect x="108" y="70" width="14" height="70"/>
+          <rect x="132" y="52" width="14" height="88"/>
+          <rect x="156" y="52" width="14" height="88"/>
+          <rect x="180" y="70" width="14" height="70"/>
+          <rect x="204" y="95" width="14" height="45"/>
+          <rect x="228" y="120" width="14" height="20"/>
+        </g>
+        <!-- lower half -->
+        <g fill="#f472b6" opacity="0.5">
+          <rect x="260" y="140" width="14" height="20"/>
+          <rect x="284" y="140" width="14" height="45"/>
+          <rect x="308" y="140" width="14" height="70"/>
+          <rect x="332" y="140" width="14" height="88"/>
+          <rect x="356" y="140" width="14" height="88"/>
+          <rect x="380" y="140" width="14" height="70"/>
+          <rect x="404" y="140" width="14" height="45"/>
+          <rect x="428" y="140" width="14" height="20"/>
+        </g>
+        <text x="150" y="40" fill="#a3e635" font-size="14" font-family="monospace" text-anchor="middle">target sine (fundamental)</text>
+        <text x="250" y="250" fill="#94a3b8" font-size="13" font-family="monospace">pulse WIDTH varies → average follows the sine</text>
+        <!-- carrier note -->
+        <text x="600" y="60" fill="#60a5fa" font-size="13" font-family="monospace">carrier (switching) freq</text>
+        <text x="600" y="80" fill="#60a5fa" font-size="13" font-family="monospace">f_sw = 2–16 kHz</text>
+        <text x="600" y="110" fill="#fbbf24" font-size="13" font-family="monospace">output freq</text>
+        <text x="600" y="130" fill="#fbbf24" font-size="13" font-family="monospace">f_out = 0–~120 Hz</text>
+      </svg>
+      <p class="cap">Sine-triangle PWM. A high-frequency triangle "carrier" compared against a sine "reference" decides each pulse width. The motor's inductance integrates the pulses back into near-sinusoidal current.</p>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="label">The carrier-frequency trade-off</div>
+      <p class="body">The <span class="hl">switching (carrier) frequency</span> is one of the most consequential settings on a drive:</p>
+      <div class="tbl-wrap" style="margin-top:12px">
+        <table>
+          <tr><th>Higher f<sub>sw</sub> (e.g. 8–16 kHz)</th><th>Lower f<sub>sw</sub> (e.g. 2–4 kHz)</th></tr>
+          <tr><td>✓ Quieter motor (above audible whine)</td><td>✓ Lower switching losses → cooler drive</td></tr>
+          <tr><td>✓ Smoother current, less heating</td><td>✓ Higher continuous output current</td></tr>
+          <tr><td>✗ More heat in IGBTs (derate output)</td><td>✗ Audible acoustic whine from motor</td></tr>
+          <tr><td>✗ Worse reflected-wave / cable effects</td><td>✗ More current ripple & torque ripple</td></tr>
+        </table>
+      </div>
+      <p class="body" style="margin-top:12px">Rule of thumb: keep it as <strong>low as the acoustic requirement allows</strong>, then add an output filter if cable length forces a higher value.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 4 — V/f ============ -->
+  <div class="page" id="vf">
+    <span class="page-tag">Page 4 · Control Strategy I</span>
+    <h2 class="page-title">V/f (Scalar) Control — Keep the Flux Constant</h2>
+    <p class="page-sub">The original, open-loop strategy. Simple, cheap, good enough for fans and pumps.</p>
+
+    <div class="card">
+      <div class="label">The governing idea</div>
+      <p class="body">Motor flux is set by <strong>voltage ÷ frequency</strong>. If you lower frequency to slow the motor but keep voltage high, flux soars, the iron saturates and the motor overheats. So V/f control <span class="hl">ramps voltage in proportion to frequency</span> to hold flux — and therefore available torque — roughly constant.</p>
+      <div class="eqn">
+        Φ ∝ <b>V</b> / <b>f</b>   →   hold <b>V/f = constant</b><br>
+        e.g. <span class="v2">400 V / 50 Hz = 8.0</span>  →  at 25 Hz, apply <span class="v2">200 V</span><br>
+        Above base speed: V is capped → <span class="v3">flux falls</span> → "field weakening" (constant power, less torque)
+      </div>
+    </div>
+
+    <div class="stage">
+      <svg class="illus" viewBox="0 0 860 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="V/f curve with boost and field weakening regions">
+        <line x1="70" y1="230" x2="820" y2="230" stroke="#334155" stroke-width="2"/>
+        <line x1="70" y1="230" x2="70" y2="30" stroke="#334155" stroke-width="2"/>
+        <text x="430" y="268" fill="#94a3b8" font-size="14" text-anchor="middle">Frequency (Hz) →</text>
+        <text x="30" y="130" fill="#94a3b8" font-size="14" transform="rotate(-90 30 130)" text-anchor="middle">Voltage →</text>
+        <!-- boost offset -->
+        <line x1="70" y1="218" x2="120" y2="200" stroke="#fb923c" stroke-width="3"/>
+        <!-- linear region -->
+        <line x1="120" y1="200" x2="520" y2="60" stroke="#60a5fa" stroke-width="4"/>
+        <!-- field weakening flat -->
+        <line x1="520" y1="60" x2="800" y2="60" stroke="#fbbf24" stroke-width="4"/>
+        <!-- base point -->
+        <circle cx="520" cy="60" r="6" fill="#a3e635"/>
+        <line x1="520" y1="60" x2="520" y2="230" stroke="#a3e635" stroke-width="1" stroke-dasharray="5 5"/>
+        <text x="520" y="248" fill="#a3e635" font-size="13" text-anchor="middle">base (50 Hz)</text>
+        <text x="95" y="185" fill="#fb923c" font-size="12">boost</text>
+        <text x="300" y="120" fill="#60a5fa" font-size="13" font-weight="bold">constant V/f (constant torque)</text>
+        <text x="640" y="50" fill="#fbbf24" font-size="13" font-weight="bold">field weakening (constant power)</text>
+      </svg>
+      <p class="cap">The V/f profile. Note the small "voltage boost" near 0 Hz that compensates for stator resistance so the motor can break away under load.</p>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px">
+      <div class="pro">
+        <div class="pt">Where V/f shines</div>
+        <p>Variable-torque loads (centrifugal pumps, fans, blowers) where torque demand falls with speed and precise low-speed control isn't critical. Also for running <em>multiple motors</em> from one drive.</p>
+      </div>
+      <div class="fail">
+        <div class="ft">⚠ Where V/f struggles</div>
+        <p>Poor torque below ~5 Hz, no torque control, sluggish dynamic response, and it can't hold a stalled load. For cranes, winders and positioning you need vector control.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 5 — VECTOR & DTC ============ -->
+  <div class="page" id="vector">
+    <span class="page-tag">Page 5 · Control Strategy II</span>
+    <h2 class="page-title">Vector Control & DTC — Controlling Torque Directly</h2>
+    <p class="page-sub">Instead of guessing flux from a V/f ratio, these methods model the motor in real time and command flux and torque <em>independently</em>.</p>
+
+    <div class="card">
+      <div class="label">Field-Oriented Control (FOC / vector)</div>
+      <p class="body">Vector control mathematically rotates the three stator currents into a reference frame that spins with the rotor flux (the <span class="hl">d–q transform</span>, via Clarke + Park). In that frame the motor looks like a DC motor: the <span class="hl2">d-axis current</span> controls magnetising flux and the <span class="hl3">q-axis current</span> controls torque — and they no longer interfere. The drive can then command exact torque, even at <strong>zero speed</strong>.</p>
+      <div class="eqn">
+        T ∝ <b>i_q</b> · Φ_d &nbsp;&nbsp;(torque from q-axis current)<br>
+        Φ_d set by <span class="v2">i_d</span> &nbsp;&nbsp;(flux from d-axis current)<br>
+        → decoupled control = fast, precise, full torque at 0 rpm
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="mini c-blue">
+        <h4>Sensorless vector</h4>
+        <p>Estimates rotor position from a motor model (back-EMF, current). No encoder. ~0.5% speed accuracy, torque down to ~1 Hz.</p>
+      </div>
+      <div class="mini c-teal">
+        <h4>Closed-loop vector</h4>
+        <p>Adds an encoder for true rotor feedback. Full torque at 0 rpm, &lt;0.01% speed accuracy. For cranes, lifts, winders.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="label">Direct Torque Control (DTC)</div>
+      <p class="body">ABB's alternative: skip the PWM modulator entirely. DTC estimates flux and torque every ~25 µs and uses a <span class="hl">hysteresis switching table</span> to pick the next inverter state directly — driving torque and flux to stay inside tight bands. The result is the <strong>fastest torque response</strong> available (microseconds) with no tacho needed, at the cost of variable switching frequency and more torque ripple.</p>
+    </div>
+
+    <div class="tbl-wrap" style="margin-top:14px">
+      <table>
+        <tr><th>Attribute</th><th>V/f Scalar</th><th>Sensorless Vector</th><th>Closed-Loop Vector</th><th>DTC</th></tr>
+        <tr><td><b>Speed accuracy</b></td><td>1–3%</td><td>~0.5%</td><td>&lt;0.01%</td><td>~0.5%</td></tr>
+        <tr><td><b>Torque at 0 rpm</b></td><td>No</td><td>Limited</td><td>Full</td><td>Full*</td></tr>
+        <tr><td><b>Torque response</b></td><td>Slow</td><td>Fast</td><td>Very fast</td><td>Fastest (µs)</td></tr>
+        <tr><td><b>Encoder?</b></td><td>No</td><td>No</td><td>Yes</td><td>Optional</td></tr>
+        <tr><td><b>Typical use</b></td><td>Pumps, fans</td><td>Conveyors, mixers</td><td>Cranes, lifts</td><td>Mills, presses</td></tr>
+      </table>
+    </div>
+    <p class="cap" style="text-align:left;margin-left:4px">*DTC holds full torque at standstill only with an encoder option on most platforms.</p>
+  </div>
+
+  <!-- ============ PAGE 6 — INTERACTIVE ============ -->
+  <div class="page" id="demo">
+    <span class="page-tag">Page 6 · Active Recall</span>
+    <h2 class="page-title">Interactive — Pick the Right Mode</h2>
+    <p class="page-sub">Choose a control mode and watch the predicted behaviour. Builds the link between application and strategy.</p>
+
+    <div class="card">
+      <div class="scan-controls">
+        <button data-mode="vf" class="run">V/f Scalar</button>
+        <button data-mode="svc">Sensorless Vector</button>
+        <button data-mode="clv">Closed-Loop Vector</button>
+        <button data-mode="dtc">DTC</button>
+      </div>
+
+      <div class="stage" style="margin-top:18px">
+        <svg class="illus" viewBox="0 0 860 220" xmlns="http://www.w3.org/2000/svg">
+          <line x1="70" y1="180" x2="820" y2="180" stroke="#334155" stroke-width="2"/>
+          <line x1="70" y1="180" x2="70" y2="25" stroke="#334155" stroke-width="2"/>
+          <text x="430" y="208" fill="#94a3b8" font-size="13" text-anchor="middle">Speed (rpm) →</text>
+          <text x="34" y="105" fill="#94a3b8" font-size="13" transform="rotate(-90 34 105)" text-anchor="middle">Available torque →</text>
+          <path id="torqueCurve" d="M70 120 L800 120" fill="none" stroke="#60a5fa" stroke-width="4"/>
+          <circle id="zeroDot" cx="70" cy="120" r="7" fill="#a3e635"/>
+          <text x="80" y="40" fill="#a3e635" font-size="13" id="zeroLabel">torque @ 0 rpm</text>
+        </svg>
+      </div>
+
+      <div class="scan-status" id="modeStatus"><strong>V/f Scalar</strong> — flux held by V/f ratio. Cheap and robust; torque sags near zero speed.</div>
+
+      <div class="grid-3" style="margin-top:16px">
+        <div class="mini"><h4>Best for</h4><p id="mBest">Pumps & fans</p></div>
+        <div class="mini c-amb"><h4>Encoder</h4><p id="mEnc">Not needed</p></div>
+        <div class="mini c-pink"><h4>Speed accuracy</h4><p id="mAcc">1–3%</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 7 — AFFINITY / ENERGY ============ -->
+  <div class="page" id="energy">
+    <span class="page-tag">Page 7 · Why It Pays</span>
+    <h2 class="page-title">The Affinity Laws — Where the Energy Goes</h2>
+    <p class="page-sub">The single most important economic fact about VFDs on centrifugal loads.</p>
+
+    <div class="card">
+      <div class="label">The cube law</div>
+      <div class="eqn">
+        Flow &nbsp;Q ∝ <b>N</b> &nbsp;&nbsp;(speed)<br>
+        Pressure&nbsp;H ∝ <b>N²</b><br>
+        Power&nbsp;&nbsp;&nbsp;P ∝ <b>N³</b> &nbsp;← the money line
+      </div>
+      <p class="body">Run a pump at <span class="hl">80%</span> speed and it delivers 80% flow — but draws only <span class="hl2">0.8³ ≈ 51%</span> of the power. Run at 50% speed → just <strong>12.5%</strong> power. A throttle valve at the same flow would still draw ~90%+. This non-linearity is why a VFD retrofit on an oversized pump often pays back in under two years.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">100%</div><p>Speed → 100% power (baseline)</p></div>
+      <div class="mini c-blue"><div class="big">51%</div><p>80% speed → ~51% power</p></div>
+      <div class="mini c-teal"><div class="big">12.5%</div><p>50% speed → ~12.5% power</p></div>
+    </div>
+
+    <div class="pro" style="margin-top:14px">
+      <div class="pt">Caveat engineers miss</div>
+      <p>The cube law only holds for <em>variable-torque</em> centrifugal loads against a friction-dominated system curve. With high <em>static head</em> (lifting water uphill) the savings shrink — and below a minimum speed the pump may not overcome the static head at all. Always check the system curve, not just the pump curve.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 8 — BRAKING ============ -->
+  <div class="page" id="brake">
+    <span class="page-tag">Page 8 · Stopping</span>
+    <h2 class="page-title">Braking & Regeneration</h2>
+    <p class="page-sub">When a load drives the motor (overhauling), the motor becomes a generator and pumps energy <em>back</em> into the DC bus. That energy must go somewhere.</p>
+
+    <div class="grid-2">
+      <div class="lang">
+        <span class="tag">METHOD 1</span>
+        <h4>Dynamic (resistor) braking</h4>
+        <p>A brake chopper IGBT dumps the excess bus energy into a <strong>braking resistor</strong> as heat when bus voltage rises. Simple, cheap, common on cranes and centrifuges. Wastes the energy.</p>
+      </div>
+      <div class="lang" style="border-left-color:var(--green)">
+        <span class="tag" style="color:var(--green)">METHOD 2</span>
+        <h4>Regenerative (active front-end)</h4>
+        <p>An active rectifier (IGBTs instead of diodes) feeds braking energy <strong>back to the grid</strong>. Costs more but recovers energy and gives clean, low-harmonic input. Used on lifts, test rigs, downhill conveyors.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="label">DC injection braking</div>
+      <p class="body">For a quick stop without a resistor, the drive can inject <span class="hl">DC current</span> into the stator. This creates a stationary magnetic field that drags the rotor to a halt. Good for fans and saws — but it heats the rotor and gives no holding torque once stopped, so it's not a substitute for a mechanical brake on a hoist.</p>
+    </div>
+
+    <div class="fail" style="margin-top:14px">
+      <div class="ft">⚠ The "overvoltage on decel" trip</div>
+      <p>The #1 nuisance trip: you set too fast a decel ramp on a high-inertia load with no brake resistor → regenerated energy spikes the DC bus → the drive trips on <b>DC bus overvoltage (OV)</b> to protect the capacitors. Fix: extend the decel time, enable the resistor/chopper, or fit a regen front-end.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 9 — HARMONICS ============ -->
+  <div class="page" id="harm">
+    <span class="page-tag">Page 9 · Side Effects</span>
+    <h2 class="page-title">Harmonics, dV/dt & Cable Effects</h2>
+    <p class="page-sub">A VFD is a non-linear load and a fast switch. Two distinct problems: dirty input current, and a violent output edge.</p>
+
+    <div class="card">
+      <div class="label">Input-side: harmonics</div>
+      <p class="body">The diode rectifier draws current in sharp pulses, not a clean sine — injecting <span class="hl3">5th, 7th, 11th, 13th</span> harmonics back onto the supply. High <strong>THDi</strong> overheats transformers/neutrals, distorts voltage and can trip other equipment. <span class="hl">IEEE 519</span> sets the limits.</p>
+      <p class="body" style="margin-top:8px">Mitigations, in rough order of effectiveness/cost: <b>line reactor / DC choke</b> → <b>passive harmonic filter</b> → <b>12/18-pulse rectifier</b> → <b>active front-end</b> (lowest THDi, also enables regen).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Output-side: reflected-wave & dV/dt</div>
+      <p class="body">IGBT edges are brutally fast (rise times ~50–100 ns). On a long motor cable, the PWM pulse reflects off the impedance mismatch at the motor and can <span class="hl">double the voltage</span> at the motor terminals — stressing winding insulation and causing premature failure. The same fast edges drive <span class="hl2">common-mode shaft currents</span> that pit bearings via EDM (electric discharge machining).</p>
+    </div>
+
+    <div class="grid-3" style="margin-top:4px">
+      <div class="mini c-org"><h4>Long cables</h4><p>Add an output <b>dV/dt or sine filter</b>; keep cable within drive's spec length.</p></div>
+      <div class="mini c-purp"><h4>Bearing currents</h4><p>Use an <b>insulated NDE bearing</b>, a shaft grounding ring, and shielded symmetrical cable.</p></div>
+      <div class="mini c-teal"><h4>EMC</h4><p>Bond shields 360°, separate power/signal runs, fit the internal <b>EMC filter</b>.</p></div>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 10 — PRACTICE ============ -->
+  <div class="page" id="tips">
+    <span class="page-tag">Page 10 · Engineering Practice</span>
+    <h2 class="page-title">Commissioning & Selection Checklist</h2>
+    <p class="page-sub">What separates a drive that runs from a drive that lasts.</p>
+
+    <ol class="tips">
+      <li><span class="num">1</span><div><b>Size for current, not just kW.</b> The motor's full-load amps (FLA) and the load's torque profile (constant vs variable torque) decide the frame — a constant-torque load needs more overload headroom (150% for 60 s).</div></li>
+      <li><span class="num">2</span><div><b>Run autotune.</b> Vector and DTC modes measure stator resistance, inductance and rotor time-constant. Skipping autotune cripples low-speed torque and accuracy.</div></li>
+      <li><span class="num">3</span><div><b>Set accel/decel to the inertia.</b> Match ramps to load inertia; add a brake resistor for high-inertia decel to avoid OV trips.</div></li>
+      <li><span class="num">4</span><div><b>Protect the motor.</b> Set electronic thermal overload (I²t) to motor FLA; on long runs add a motor thermistor (PTC) input — VFD cooling differs from across-the-line.</div></li>
+      <li><span class="num">5</span><div><b>Mind cable length.</b> Beyond the drive's rated metres, fit an output reactor/filter and use shielded symmetrical cable to control reflected-wave and bearing currents.</div></li>
+      <li><span class="num">6</span><div><b>Use Safe Torque Off (STO).</b> The built-in SIL-rated STO input removes torque safely without dropping the line contactor — the modern way to integrate the drive into the machine safety system.</div></li>
+    </ol>
+
+    <div class="card" style="margin-top:18px">
+      <div class="label">Real Industrial Example — full circle to Micro 08</div>
+      <p class="body">On an <strong>automated bottling line</strong>, a single 22 kW VFD runs the main conveyor in <span class="hl">sensorless vector</span> mode for smooth product handling, while booster-pump VFDs on the rinse station run <span class="hl">V/f</span> and ride the affinity-law savings. The micro card's "<i>Change the Frequency, Change the Speed</i>" is exactly this — and now you know <em>which</em> control mode does it, and why each station picked the one it did.</p>
+    </div>
+  </div>
+
+  <!-- ============ QUIZ ============ -->
+  <div class="page">
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A high-inertia centrifuge trips on <b>DC bus overvoltage</b> every time it decelerates. The drive has no brake resistor fitted. Give two valid fixes and say which one also <em>recovers</em> energy.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">tap to reveal answer ▾</span>
+        <div class="hidden">
+          During decel the load drives the motor as a generator, pumping energy into the DC bus and raising its voltage until the OV trip fires. Fixes: <b>(1)</b> lengthen the decel ramp so the regenerated power is small enough for the drive to bleed off; <b>(2)</b> fit a <b>brake chopper + resistor</b> to dump the energy as heat; or <b>(3)</b> use a <b>regenerative (active front-end) drive</b>. Only option 3 <em>recovers</em> the energy back to the grid — the resistor merely wastes it as heat.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 11 — WORKED EXAMPLES ============ -->
+  <div class="page" id="wk">
+    <span class="page-tag">Page 11 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade problems, solved in full.</p>
+
+    <div class="card">
+      <div class="label">WE 1 · The affinity-law payback</div>
+      <p class="body"><strong>A 45 kW supply fan runs 6 000 h/yr at 75% flow. Today a damper throttles it (motor still draws ≈ 90% power). Compute the annual energy saved by a VFD at 75% speed, and the CO₂-adjacent number your manager actually reads: money at 30 LKR/kWh.</strong></p>
+      <div class="eqn">VFD at 75% speed:  P ∝ n³ → 0.75³ = 0.42 → P ≈ 0.42 × 45 = 19.0 kW
+Damper at 75% flow: P ≈ 0.90 × 45 = 40.5 kW
+Saving = (40.5 − 19.0) × 6 000 h = <b>129 000 kWh/yr</b>
+At 30 LKR/kWh → <b>≈ 3.9 million LKR/yr</b> — the drive pays for itself in months.</div>
+      <p class="body"><em>Discussion:</em> the cube law is the whole business case (A47's fan laws). Honesty check: the law assumes pure friction systems — high static head flattens the curve (see Trap 2), and drive losses (~3%) plus motor efficiency off-BEP shave the ideal number. Even so, the order of magnitude survives every correction.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 2 · V/f arithmetic at 35 Hz</div>
+      <p class="body"><strong>A 4-pole, 400 V/50 Hz motor (rated slip 3%) runs from a V/f drive at 35 Hz. Find the applied voltage, synchronous and shaft speeds, and the torque available.</strong></p>
+      <div class="eqn">V/f ratio = 400/50 = 8 V per Hz → V(35) = 8 × 35 = <b>280 V</b>
+n<span class="v3">s</span> = 120·f/P = 120×35/4 = <b>1 050 rpm</b>
+slip ≈ 3% (slip in rpm scales with flux &amp; load, roughly constant torque)
+n ≈ 1 050 × 0.97 ≈ <b>1 019 rpm</b>
+Torque: flux Φ ∝ V/f = constant → <b>full rated torque available</b> (minus cooling caveat)</div>
+      <p class="body"><em>Discussion:</em> below base speed the drive is a constant-torque machine — flux is held, current limits torque. Two footnotes carry the marks: at low Hz the stator IR drop eats a bigger voltage fraction, so drives add <b>voltage boost / IR compensation</b>; and a self-cooled motor at 1 000 rpm has lost ~⅓ of its fan cooling — continuous full torque may need a blower or a bigger frame.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 3 · Sizing a brake resistor</div>
+      <p class="body"><strong>A centrifuge (J = 12 kg·m² at the motor shaft) must decelerate from 1 450 rpm to rest in 10 s. The 400 V drive's chopper turns on at V<sub>dc</sub> = 750 V. Find the braking energy, mean and peak power, and a resistor value.</strong></p>
+      <div class="eqn">ω = 2π×1450/60 = 151.8 rad/s
+E = ½Jω² = ½ × 12 × 151.8² = <b>138 kJ</b>
+Mean power = 138 kJ / 10 s = 13.8 kW
+Peak (start of linear ramp, full speed &amp; full braking torque) ≈ 2×mean = <b>27.6 kW</b>
+Resistor: R ≤ V<span class="v3">dc</span>²/P<span class="v3">pk</span> = 750²/27 600 ≈ <b>20 Ω</b> (round down to standard, check chopper I<span class="v3">max</span>)
+Continuous rating: one stop per 5 min → duty = 10/300 = 3.3% → P<span class="v3">cont</span> ≈ 0.033×13.8 kW ≈ 0.5 kW (size 1–2 kW with margin)</div>
+      <p class="body"><em>Discussion:</em> the ½Jω² line is the same energy ledger as Page 8: ramp longer and the chopper may vanish entirely; stop often and the resistor's <em>continuous</em> rating — not the peak — drives its size and its ventilation (A46's thermal budget). A regenerative front end turns this heater into a credit note.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 4 · Long motor cables &amp; the 2× spike</div>
+      <p class="body"><strong>A drive feeds a motor through 60 m of cable. IGBT rise time t<sub>r</sub> = 100 ns; pulse velocity in cable v ≈ 1.5×10⁸ m/s. Show why the motor sees ~2× the DC bus voltage, and what fixes exist.</strong></p>
+      <div class="eqn">Critical length: l<span class="v3">c</span> ≈ v·t<span class="v3">r</span>/2 = 1.5×10⁸ × 100×10⁻⁹ / 2 = <b>7.5 m</b>
+60 m ≫ 7.5 m → each PWM edge arrives as a travelling wave; the motor's high
+surge impedance reflects it → terminal voltage → up to 2×V<span class="v3">dc</span> ≈ 2×565 = <b>~1 130 V</b>
+spikes at the carrier frequency, thousands of times per second.</div>
+      <p class="body"><em>Discussion:</em> this is transmission-line physics arriving uninvited in a motor circuit. Fixes in ascending cost: <b>inverter-duty motor</b> (reinforced first-turn insulation, IEC 60034-25), <b>dV/dt filter</b> at the drive, <b>sine filter</b> (kills the problem, adds loss and cost), shorter/symmetric screened cable (A46's 360° EMC discipline). First-turn insulation failure from edge reflections is a classic "mystery" winding death — now not a mystery.</p>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 12 — PROBLEM SET ============ -->
+  <div class="page" id="ps">
+    <span class="page-tag">Page 12 · MSc Practice</span>
+    <h2 class="page-title">Problem Set</h2>
+    <p class="page-sub">Ten problems. Work each before revealing — the reveal is the marking scheme.</p>
+
+    <div class="card quiz">
+      <div class="label">Problem 1</div>
+      <p class="quiz-q">A pump runs at 60% speed. What fraction of rated flow, head and power do the affinity laws predict?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">tap to reveal answer ▾</span>
+        <div class="hidden">Q ∝ n → <b>60%</b> flow; H ∝ n² → <b>36%</b> head; P ∝ n³ → <b>21.6%</b> power. Caveat before applying: if the system has significant static head, the operating point doesn't slide down the ideal curve — check the real system curve (A47) before promising the 21.6%.</div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 2</div>
+      <p class="quiz-q">Compute the ideal DC bus voltage of a 400 V AC drive, and the voltage a 690 V drive would have.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">tap to reveal answer ▾</span>
+        <div class="hidden">V<sub>dc</sub> ≈ √2 × V<sub>LL</sub>: 400 V → <b>565 V</b>; 690 V → <b>976 V</b>. (Six-pulse rectified line-to-line peak; real buses ride slightly lower under load, and the brake chopper threshold sits above — e.g. ~750 V on a 400 V drive.)</div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 3</div>
+      <p class="quiz-q">Why does available torque fall above base speed — and why does it fall as 1/f first, then ~1/f² at the top end?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">tap to reveal answer ▾</span>
+        <div class="hidden">Above base speed the voltage ceiling is reached, so flux Φ ∝ V/f falls as <b>1/f</b> (field weakening) → torque at constant current falls as 1/f (constant-power region). Push further and the pull-out torque — ∝ Φ², i.e. <b>1/f²</b> — closes in on the load torque; you hit the breakdown limit region. Practical ceiling ≈ 1.5–2× base speed for standard motors (mechanical limits permitting).</div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 4</div>
+      <p class="quiz-q">Rank for a frequently-stopping high-inertia load: longer ramp, brake resistor, active front end — by capex and by energy outcome.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">tap to reveal answer ▾</span>
+        <div class="hidden">Capex: ramp (free) &lt; resistor+chopper &lt; AFE. Energy: ramp <b>avoids</b> fast braking (production cost instead); resistor <b>wastes</b> ½Jω² as heat every stop; AFE <b>recovers</b> it to the grid. Frequent stops × high J is exactly where the AFE's premium pays back — compute WE 3's energy × stops/day before deciding.</div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 5</div>
+      <p class="quiz-q">A fan system has a structural resonance at ~32 Hz drive output. The drive runs 20–50 Hz. What feature handles this and how does it work?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">tap to reveal answer ▾</span>
+        <div class="hidden"><b>Skip / jump frequencies:</b> program a band (e.g. 30–34 Hz) the output may pass through but never dwell in — the ramp crosses it quickly, steady-state operation is excluded. Find the band with a vibration survey (A42's resonance detection); a drive that dwells on a structural resonance is a fatigue machine (A42/A19).</div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 6</div>
+      <p class="quiz-q">Six months after a VFD retrofit, the motor's DE bearing shows fluting (washboard raceways — A19). Mechanism and three fixes?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">tap to reveal answer ▾</span>
+        <div class="hidden">PWM common-mode voltage capacitively couples to the shaft; when it exceeds the oil-film breakdown of the bearing, micro-EDM discharges pit the raceway — thousands per second (ISO 15243 electrical erosion, A19's VFD-fluting entry). Fixes: <b>shaft grounding ring</b>, <b>insulated NDE bearing</b> (breaks the circulating path — use both for large frames), <b>common-mode filter/chokes</b> at the drive, plus proper 360° screen termination so the current has a designed return path (A46).</div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 7</div>
+      <p class="quiz-q">A 22 kW drive lists "22 kW heavy duty (150% 60 s) / 30 kW normal duty (110% 60 s)". Which rating applies to a crusher, and why do drives have two?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">tap to reveal answer ▾</span>
+        <div class="hidden">The crusher needs <b>heavy duty (constant-torque)</b>: it demands overload torque headroom (150%) for lumps and starts. Fans/pumps (variable torque, P∝n³) never see overload at reduced speed, so the same silicon can carry a bigger motor at 110% margin — the "normal duty" rating. Two ratings = one inverter, two thermal duty assumptions. Size by load type AND motor FLC, not nameplate kW alone.</div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 8</div>
+      <p class="quiz-q">Carrier frequency: 2 kHz vs 12 kHz — list the trade-offs an engineer weighs.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">tap to reveal answer ▾</span>
+        <div class="hidden">Higher carrier (12 kHz): quieter motor (whine above human annoyance band), smoother current, better low-speed control — but <b>higher switching losses</b> (derate the drive), more dV/dt edges per second stressing insulation and bearings, more EMC energy. Lower carrier (2 kHz): efficient and robust but audible whine and rougher current. Default mid (4–8 kHz); derate per the manual above that; never raise it to "fix" a noise complaint without checking the derating table.</div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 9</div>
+      <p class="quiz-q">The drive runs in a 45 °C plant room at 1 800 m altitude. What happens to its rating?</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">tap to reveal answer ▾</span>
+        <div class="hidden">Double derating: typically full rating to 40 °C then ~1–1.5%/°C above (45 °C → ~93–95%), and full rating to 1 000 m then ~1%/100 m for the thinner cooling air (1 800 m → ~92%). Combined ≈ <b>0.94 × 0.92 ≈ 86%</b> of nameplate — a "22 kW" drive is now a 19 kW drive. Panel thermal design (A46's ΔT = P/kA) must use the drive's real dissipation too.</div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 10</div>
+      <p class="quiz-q">Commissioning basics: name six parameters you must set (or verify) before first start on any drive, any brand.</p>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <span class="tap">tap to reveal answer ▾</span>
+        <div class="hidden">Any six of: <b>motor nameplate set</b> (V, Hz, FLC, rpm, cosφ — feeds the model and the electronic OL), <b>control mode</b> (V/f vs vector; run motor-ID/autotune for vector), <b>accel/decel ramps</b>, <b>current/torque limits</b>, <b>min/max frequency</b> (+ skip bands), <b>stop mode</b> (ramp/coast/DC brake), start source &amp; reference source (terminals/fieldbus — A45's dialects), and the fault relay wiring into the starter logic (A51). The motor-data page is the one that protects the motor — never skip it.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 13 — DERIVATIONS & TRAPS ============ -->
+  <div class="page" id="dv">
+    <span class="page-tag">Page 13 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">Three derivations worth owning, and the seven classic traps.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 · Why flux = V/f (the constant that rules the drive)</div>
+      <div class="eqn">Stator EMF (Faraday, sinusoidal steady state):  E = 4.44 · f · N · Φ<span class="v3">m</span>   (A32's transformer eqn — same physics)
+Neglect stator drop: V ≈ E  →  <b>Φ<span class="v3">m</span> ≈ V / (4.44·N·f)  ∝  V/f</b>
+Hold V/f constant → flux constant → rated torque per amp at any speed  ∎
+Low-f correction: V = E + I·R<span class="v3">s</span> — at 2 Hz, I·R<span class="v3">s</span> is a large share of the tiny V,
+so drives add boost; above base speed V hits its ceiling → Φ ∝ 1/f (field weakening).</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 · The affinity cube from first principles</div>
+      <div class="eqn">Impeller velocity triangles scale with speed n:
+  flow      Q ∝ (blade velocity)·(area)        → <b>Q ∝ n</b>
+  head      H ∝ u²/g (Euler, A47)              → <b>H ∝ n²</b>
+  power     P = ρ·g·Q·H/η ∝ n · n²             → <b>P ∝ n³</b>  ∎
+Fine print: valid along similar operating points (same efficiency),
+i.e. friction-dominated systems. Static head breaks similarity —
+re-intersect pump and system curves instead (A47's honest method).</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 · Braking energy &amp; the DC-bus ledger</div>
+      <div class="eqn">Decelerating inertia J from ω₁ to ω₂ releases  E = ½J(ω₁² − ω₂²)
+Power flow: load → motor (as generator) → inverter (reverse) → DC bus
+Bus capacitor stores only  E<span class="v3">cap</span> = ½C(V<span class="v3">max</span>² − V<span class="v3">nom</span>²)  — typically a few hundred J,
+vs WE 3's 138 kJ → 1000× too small → voltage rises in ms → OV trip.
+Hence the three exits: time (long ramp), heat (chopper+resistor), grid (AFE).  ∎</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven exam &amp; field traps</div>
+      <ul class="tips">
+        <li><b>Boost or stall:</b> pure V/f at 1–3 Hz under-fluxes the motor (IR drop) — no breakaway torque. Enable boost/IR comp, or use vector mode for high starting torque.</li>
+        <li><b>Static head breaks the cube:</b> quoting P∝n³ savings for a boiler-feed or high-lift pump is an audit finding — check the system curve (A47).</li>
+        <li><b>2×V<sub>dc</sub> at the motor:</b> any cable beyond ~10 m puts reflected spikes on the winding — inverter-duty insulation or filters (WE 4).</li>
+        <li><b>Drive FLC ≠ motor kW:</b> size by current and duty class (heavy vs normal, Problem 7); a "22 kW" drive can be wrong for a 22 kW motor.</li>
+        <li><b>THD<sub>i</sub> vs THD<sub>v</sub>:</b> the drive draws distorted current; whether the bus <em>voltage</em> distorts depends on source impedance — quote IEEE 519 at the PCC, not at the drive terminals.</li>
+        <li><b>Field-weakening cliff:</b> above base speed torque ∝ 1/f and pull-out ∝ 1/f² — a "just run it at 70 Hz" request needs a torque check, not a parameter change.</li>
+        <li><b>The unread derating table:</b> ambient, altitude and carrier frequency each shave the rating (Problems 8–9); stacked, they can hide 20%+.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 14 — STUDY & PRACTICE ============ -->
+  <div class="page" id="sp">
+    <span class="page-tag">Page 14 · MSc Practice</span>
+    <h2 class="page-title">Study Path &amp; Practice Ladder</h2>
+    <p class="page-sub">The canon, the bench, and an honest self-check.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Resource</th><th>What it gives you</th></tr>
+          <tr><td><b>Hughes &amp; Drury, <i>Electric Motors and Drives</i></b></td><td>The canonical readable text — motors, V/f, vector, drives, all with physical intuition</td></tr>
+          <tr><td><b>ABB Technical Guides 1–10</b> (free PDFs)</td><td>Working-engineer gold: dimensioning, harmonics, EMC, bearing currents, direct torque control</td></tr>
+          <tr><td><b>Danfoss <i>VLT Design Guide</i> / <i>Facts Worth Knowing about AC Drives</i></b></td><td>Application sizing, derating tables, filter selection</td></tr>
+          <tr><td><b>Bose, <i>Modern Power Electronics and AC Drives</i></b></td><td>The graduate depth: PWM math, vector control theory</td></tr>
+          <tr><td><b>IEC 61800 series / IEC 60034-25</b></td><td>Drive systems standard; inverter-fed motor insulation requirements</td></tr>
+          <tr><td><b>IEEE 519</b></td><td>Harmonic limits at the point of common coupling</td></tr>
+          <tr><td><b>A29 MOSFETs · A30 Three-Phase · A47 Pumps · A51 Starters</b></td><td>The neighbours: the switches, the supply, the load, the alternative</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder — eight exercises</div>
+      <ul class="tips">
+        <li>Rectify–smooth–invert from memory: draw the power chain with voltages (400 V AC → 565 V DC → PWM) and name every component's failure mode.</li>
+        <li>On any drive (or its simulator/manual), do the six-parameter commissioning of Problem 10; run a motor-ID tune and note what changed.</li>
+        <li>Measure or compute V/f pairs at 10/25/35/50 Hz for a motor you know; verify the constant, then find the boost parameter and see its effect at 2 Hz.</li>
+        <li>Log input current THD (clamp meter with THD, or the drive's own meters) with and without the DC choke option — see Page 9 become numbers.</li>
+        <li>Compute WE 3 for a machine at your plant (J from coupling + load datasheets); decide ramp vs resistor vs AFE on real stop frequency.</li>
+        <li>Walk one drive installation against the EMC checklist: screened cable, 360° glands both ends, separation from signal runs, filter fitted (A46).</li>
+        <li>Trend motor bearing condition on a VFD-fed machine (A42's envelope bands); if fluting signatures appear, trace the common-mode path and fix it (Problem 6).</li>
+        <li>Build the affinity-savings spreadsheet: speed profile → power → kWh → LKR; present WE 1 for a real fan or pump to whoever owns the energy bill.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment — can you…</div>
+      <div class="grid-2">
+        <div class="mini"><h4>Explain</h4><p>…why Φ ∝ V/f, what boost fixes at low Hz, and what field weakening costs above base speed?</p></div>
+        <div class="mini c-teal"><h4>Size</h4><p>…a drive by duty class, derating stack, and motor FLC — and a brake resistor from ½Jω² with a duty cycle?</p></div>
+        <div class="mini c-purp"><h4>Predict</h4><p>…harmonics, cable reflections and bearing currents before they happen, and name the mitigation for each?</p></div>
+        <div class="mini c-amb"><h4>Justify</h4><p>…a VFD (or a soft starter instead — A51's table) with an honest affinity-law calculation that respects static head?</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MEMORY HOOK ============ -->
+  <div class="page">
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"Rectify · Smooth · Invert — and the motor never knows it isn't the mains."</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Advanced Deep Dive · A08 · VFD &nbsp;|&nbsp; companion to Micro Lesson 08<br>
+    Optimized for iPad Pro 11″ M4 · keratoconus-friendly · self-contained HTML<br>
+    <a href="index.html" style="color:var(--accent)">← Back to Advanced Library</a>
+  </div>
+
+</div>
+
+<script>
+  // ----- interactive control-mode demo -----
+  const modes = {
+    vf:  { name:"V/f Scalar", curve:"M70 120 C 200 150, 300 95, 800 95", zero:155, zlbl:"low torque @ 0 rpm",
+           status:"flux held by V/f ratio. Cheap and robust; torque sags near zero speed.",
+           best:"Pumps & fans", enc:"Not needed", acc:"1–3%", col:"#60a5fa" },
+    svc: { name:"Sensorless Vector", curve:"M70 100 C 200 105, 400 95, 800 95", zero:110, zlbl:"limited torque @ 0 rpm",
+           status:"models the motor to control torque without an encoder. Good torque down to ~1 Hz.",
+           best:"Conveyors, mixers", enc:"Not needed", acc:"~0.5%", col:"#2dd4bf" },
+    clv: { name:"Closed-Loop Vector", curve:"M70 90 L800 90", zero:90, zlbl:"FULL torque @ 0 rpm",
+           status:"encoder feedback gives full torque at standstill and razor-sharp speed holding.",
+           best:"Cranes, lifts, winders", enc:"Required", acc:"<0.01%", col:"#a3e635" },
+    dtc: { name:"DTC", curve:"M70 92 L800 92", zero:92, zlbl:"FULL torque, fastest response",
+           status:"picks inverter states directly every ~25 µs — the fastest torque response made.",
+           best:"Mills, presses", enc:"Optional", acc:"~0.5%", col:"#fbbf24" }
+  };
+  const curveEl = document.getElementById('torqueCurve');
+  const dotEl   = document.getElementById('zeroDot');
+  const zlblEl  = document.getElementById('zeroLabel');
+  const statusEl= document.getElementById('modeStatus');
+  const btns = document.querySelectorAll('.scan-controls button');
+
+  function setMode(key){
+    const m = modes[key];
+    curveEl.setAttribute('d', m.curve);
+    curveEl.setAttribute('stroke', m.col);
+    dotEl.setAttribute('cy', m.zero);
+    dotEl.setAttribute('fill', m.col);
+    zlblEl.setAttribute('y', m.zero<70?60:Math.max(40,m.zero-12));
+    zlblEl.textContent = m.zlbl;
+    statusEl.innerHTML = "<strong>"+m.name+"</strong> — "+m.status;
+    document.getElementById('mBest').textContent = m.best;
+    document.getElementById('mEnc').textContent = m.enc;
+    document.getElementById('mAcc').textContent = m.acc;
+    btns.forEach(b=>b.classList.toggle('run', b.dataset.mode===key));
+  }
+  btns.forEach(b=>b.addEventListener('click', ()=>setMode(b.dataset.mode)));
+  setMode('vf');
+</script>
+
+<!-- ===== AUTO-ANIM: universal reveal-on-scroll SVG animation (self-contained, reduced-motion aware) ===== -->
+<style>
+  @media (prefers-reduced-motion: no-preference){
+    svg.illus [data-anim]{ opacity:0; }
+    svg.illus.anim-in [data-anim]{ animation: aaFade .55s ease forwards; }
+    svg.illus.anim-in [data-anim-draw]{ animation: aaDraw .9s ease forwards; }
+    @keyframes aaFade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+    @keyframes aaDraw{ from{stroke-dashoffset:var(--aaLen);} to{stroke-dashoffset:0;} }
+  }
+</style>
+<script>
+(function(){
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  function prep(svg){
+    var step=0;
+    svg.querySelectorAll('line, path, polyline').forEach(function(el){
+      var sw = el.getAttribute('stroke') || (el.style && el.style.stroke);
+      if(!sw || sw==='none') return;
+      var len;
+      try { len = (el.getTotalLength && el.getTotalLength()) || 0; } catch(e){ len = 0; }
+      if(len>0 && len<5000){
+        el.style.strokeDasharray = len; el.style.strokeDashoffset = len;
+        el.style.setProperty('--aaLen', len);
+        el.setAttribute('data-anim-draw','');
+        el.style.animationDelay = (0.05 + step*0.05).toFixed(2)+'s';
+        step++;
+      }
+    });
+    svg.querySelectorAll('text, circle, rect, ellipse, polygon, use, image').forEach(function(el){
+      el.setAttribute('data-anim','');
+      el.style.animationDelay = (0.05 + (step++)*0.03).toFixed(2)+'s';
+    });
+  }
+  var svgs = document.querySelectorAll('svg.illus');
+  svgs.forEach(prep);
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){ en.target.classList.add('anim-in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.18 });
+  svgs.forEach(function(s){ io.observe(s); });
+})();
+</script>
+</body>
+</html>

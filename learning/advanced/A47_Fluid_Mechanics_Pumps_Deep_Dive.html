@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Fluid Mechanics &amp; Pumps · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #0ea5e9;       /* ocean blue */
+    --accent-soft: #7dd3fc;
+    --accent-2: #34d399;      /* flow green */
+    --accent-3: #f472b6;      /* cavitation pink */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(14,165,233,0.13), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(52,211,153,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(14,165,233,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(14,165,233,0.14), rgba(52,211,153,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(14,165,233,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-flow { border-top-color: var(--accent-2)!important; } .c-flow .big{color:var(--accent-2)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #0ea5e9, #075985); color: #02222e; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(2,34,46,0.75); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(14,165,233,0.10); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:90px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Thermal &amp; Fluid Engineering · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🌊</span>Fluid Mechanics &amp; Pumps</h1>
+  <p class="hero-sub">From the physics of a moving fluid to the machine that moves it: fluid properties and statics, continuity and Bernoulli, viscous losses and the Moody chart, dimensional analysis, centrifugal pump theory and velocity triangles, system curves and the operating point, NPSH and cavitation, the affinity laws, and how to select and troubleshoot a real pump.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>A full advanced module. Related:</span>
+    <a href="A12_Pneumatic_Systems_Deep_Dive.html">A12 Pneumatics →</a>
+    <a href="A13_Hydraulic_Systems_Deep_Dive.html">A13 Hydraulics →</a>
+    <a href="A08_VFD_Deep_Dive.html">A08 VFD →</a>
+    <a href="A42_Vibration_Analysis_Deep_Dive.html">A42 Vibration →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · What Is a Fluid</a>
+    <a href="#p2">2 · Fluid Statics</a>
+    <a href="#p3">3 · Continuity</a>
+    <a href="#p4">4 · Bernoulli &amp; Energy</a>
+    <a href="#p5">5 · Viscous Flow &amp; Losses</a>
+    <a href="#p6">6 · Similitude</a>
+    <a href="#p7">7 · Centrifugal Pump Theory</a>
+    <a href="#p8">8 · Pump &amp; System Curves</a>
+    <a href="#p9">9 · NPSH &amp; Cavitation</a>
+    <a href="#p10">10 · Affinity &amp; Control</a>
+    <a href="#p11">11 · Pump Types &amp; Selection</a>
+    <a href="#p12">12 · Recap &amp; Quiz</a>
+    <a href="#p13">13 · Worked Examples</a>
+    <a href="#p14">14 · Problem Set</a>
+    <a href="#p15">15 · Derivations &amp; Traps</a>
+    <a href="#p16">16 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ============ PAGE 1 ============ -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 16 · Foundations</span>
+    <h2 class="page-title">What Is a Fluid?</h2>
+    <p class="page-sub">A substance that cannot resist shear — and the handful of properties that decide how it behaves.</p>
+
+    <div class="card">
+      <div class="label">Definition</div>
+      <p class="lead">A fluid is any substance that <span class="hl">deforms continuously under shear stress</span>, however small. A solid strains a fixed amount and stops; a fluid keeps flowing as long as the stress acts. That single property is the root of everything downstream.</p>
+      <p class="body">We treat fluids as a <strong>continuum</strong> — ignoring individual molecules and assigning smooth fields of density, pressure and velocity at every point. Valid whenever the smallest scale of interest is far larger than the molecular mean free path (essentially always in engineering flow, failing only in rarefied gas / MEMS regimes — see <a href="A34_Nanotech_MEMS_Deep_Dive.html" style="color:var(--accent-soft)">A34</a>).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The properties that matter</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Property</th><th>Symbol / unit</th><th>What it governs</th></tr>
+          <tr><td><b>Density</b></td><td class="mono">ρ (kg/m³)</td><td>Inertia, static pressure, buoyancy. Water ≈ 998, air ≈ 1.2</td></tr>
+          <tr><td><b>Dynamic viscosity</b></td><td class="mono">μ (Pa·s)</td><td>Internal friction — resistance to shear. Water ≈ 1.0×10⁻³</td></tr>
+          <tr><td><b>Kinematic viscosity</b></td><td class="mono">ν = μ/ρ (m²/s)</td><td>Viscosity per unit inertia — the number in Reynolds. Water ≈ 1.0×10⁻⁶</td></tr>
+          <tr><td><b>Bulk modulus</b></td><td class="mono">K (Pa)</td><td>Resistance to compression; sets sound speed &amp; water-hammer. Water ≈ 2.2 GPa</td></tr>
+          <tr><td><b>Vapour pressure</b></td><td class="mono">p<sub>v</sub> (Pa)</td><td>Where liquid boils at ambient temperature — the seed of cavitation (Page 9)</td></tr>
+          <tr><td><b>Surface tension</b></td><td class="mono">σ (N/m)</td><td>Droplets, capillarity, menisci. Water ≈ 0.072</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Newton's law of viscosity</div>
+      <p class="body">The defining constitutive relation: shear stress is proportional to the velocity gradient (strain rate).</p>
+      <div class="eqn"><b>τ = μ · (du/dy)</b>       τ = shear stress [Pa], du/dy = velocity gradient [1/s]
+Newtonian fluid: μ constant (water, air, light oils)
+Non-Newtonian: μ varies with strain rate — shear-thinning (paint, blood), shear-thickening (cornflour), Bingham (toothpaste, slurries)</div>
+      <p class="body">Most industrial pumping is Newtonian. Slurries, greases and polymer melts are not — and a pump curve measured on water lies to you about them (Page 11).</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><h4>Water @ 20 °C</h4><p class="big">998</p><p>kg/m³ · μ ≈ 1.0 cP · the reference fluid for everything.</p></div>
+      <div class="mini c-flow"><h4>Air @ 20 °C</h4><p class="big">1.2</p><p>kg/m³ · ~800× less dense, ~55× lower ν — behaves very differently.</p></div>
+      <div class="mini c-amb"><h4>Hydraulic oil</h4><p class="big">870</p><p>kg/m³ · ν ≈ 32–46 cSt · viscosity is the whole game (A13).</p></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 1</div>
+      <p class="quiz-q">Why does the Reynolds number use kinematic viscosity ν rather than dynamic viscosity μ?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Reynolds is the ratio of <strong>inertial to viscous forces</strong>: Re = ρVL/μ = VL/ν. The density in the inertial term and the density hidden in μ combine — dividing by ρ folds both into ν = μ/ρ. So ν is literally &quot;viscosity per unit inertia,&quot; the natural parameter for a force ratio. It also has clean units (m²/s) and is what&#39;s tabulated for the Moody chart.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 ============ -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 16 · Statics</span>
+    <h2 class="page-title">Fluid Statics</h2>
+    <p class="page-sub">No motion, no viscosity — just pressure, depth, and the forces they create.</p>
+
+    <div class="card">
+      <div class="label">The hydrostatic law</div>
+      <p class="lead">In a fluid at rest, pressure increases <span class="hl">linearly with depth</span> and acts <span class="hl2">equally in all directions</span> at a point (Pascal). Only gravity and pressure balance.</p>
+      <div class="eqn"><b>dp/dz = −ρg</b>   →   <b>p = p₀ + ρg·h</b>      (h = depth below the free surface)
+Pressure head:  <b>h = p / (ρg)</b>   [m of fluid]   — the language pumps speak
+Water: 1 bar ≈ 10.2 m head · 1 m head ≈ 0.098 bar ≈ 9.81 kPa</div>
+      <p class="body">Converting pressure to <strong>head</strong> (metres of the fluid) is the single most useful habit in pump work — it makes the fluid&#39;s density drop out of the pump curve and lets you add suction, static lift and friction as simple metres.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Manometry &amp; buoyancy</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" text-anchor="middle">
+            <!-- U-tube manometer -->
+            <path d="M60 40 L60 150 Q60 175 85 175 L135 175 Q160 175 160 150 L160 70" fill="none" stroke="#475569" stroke-width="10"/>
+            <path d="M60 90 L60 150 Q60 165 85 165 L135 165 Q160 165 160 150 L160 110" fill="none" stroke="#0ea5e9" stroke-width="8"/>
+            <text x="60" y="30" fill="#7dd3fc">p₁</text>
+            <text x="160" y="60" fill="#7dd3fc">p₂</text>
+            <line x1="180" y1="90" x2="180" y2="110" stroke="#f472b6" stroke-width="1.5"/>
+            <text x="205" y="104" fill="#f9a8d4" font-size="11">Δh</text>
+            <text x="110" y="205" fill="#64748b" font-size="11">p₁−p₂ = ρg·Δh</text>
+            <!-- buoyancy -->
+            <rect x="300" y="35" width="150" height="150" rx="6" fill="#0b2530" stroke="#0ea5e9"/>
+            <rect x="345" y="70" width="60" height="60" rx="4" fill="#334155" stroke="#94a3b8"/>
+            <line x1="375" y1="70" x2="375" y2="40" stroke="#f87171" stroke-width="2" marker-end="url(#up)"/>
+            <line x1="375" y1="130" x2="375" y2="160" stroke="#34d399" stroke-width="2"/>
+            <defs><marker id="up" markerWidth="8" markerHeight="8" refX="4" refY="6" orient="auto"><path d="M0,6 L4,0 L8,6 z" fill="#f87171"/></marker></defs>
+            <text x="470" y="60" fill="#fca5a5" font-size="11" text-anchor="start">W (weight ↓)</text>
+            <text x="470" y="150" fill="#6ee7b7" font-size="11" text-anchor="start">F_B = ρg·V (up)</text>
+            <text x="470" y="110" fill="#94a3b8" font-size="10.5" text-anchor="start">float if F_B &gt; W</text>
+            <text x="375" y="205" fill="#64748b" font-size="11">Archimedes: buoyancy = weight of displaced fluid</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">A manometer turns an unknown pressure difference into a readable height. Buoyancy is just the net of hydrostatic pressure over a submerged body — higher pressure underneath than on top.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Force on a submerged surface</div>
+      <div class="eqn"><b>F = ρg·h̄·A</b>       h̄ = depth of the surface centroid, A = area
+Acts at the centre of pressure, below the centroid:  y_cp = ȳ + I_x̄ /(ȳ·A)</div>
+      <p class="body">This sizes dam gates, tank walls, sluice valves and inspection covers. The force cares only about centroid depth and area; the <em>line of action</em> sits lower because pressure grows with depth — which is why a tank door hinges near the bottom.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 2</div>
+      <p class="quiz-q">A pump datasheet lists head in metres, not pressure in bar. You&#39;re pumping brine (ρ = 1200 kg/m³). Does the pump deliver the same <em>pressure</em> as on water?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">No — it delivers the same <strong>head</strong> (metres), but <strong>more pressure and more power</strong>. A centrifugal pump is a head machine: it throws the fluid to a height set by geometry and speed, independent of density. But p = ρg·h, so at 1200 kg/m³ the same 30 m head is 1200×9.81×30 = 353 kPa vs 294 kPa on water — and shaft power (∝ ρ) rises 20 %. Check the motor doesn&#39;t overload on the denser fluid.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 ============ -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 16 · Kinematics</span>
+    <h2 class="page-title">Flow &amp; Continuity</h2>
+    <p class="page-sub">Mass is conserved. Everything a pipe does to a flow starts there.</p>
+
+    <div class="card">
+      <div class="label">The control volume &amp; continuity</div>
+      <p class="lead">Draw an imaginary boundary — a <span class="hl">control volume</span> — and mass in must equal mass out plus what accumulates inside. For steady, incompressible flow: <span class="hl2">what goes in, comes out.</span></p>
+      <div class="eqn"><b>Continuity:</b>  ρ₁A₁V₁ = ρ₂A₂V₂     (general)
+Incompressible:  <b>A₁V₁ = A₂V₂ = Q</b>   (constant volume flow rate)
+→ smaller pipe = faster flow:  V₂ = V₁·(A₁/A₂) = V₁·(D₁/D₂)²</div>
+      <p class="body">A halved diameter <strong>quadruples</strong> the velocity — and (Page 4) the velocity head goes as V², so it rises sixteenfold. This is why reducers, sudden contractions and half-closed valves cost so much: they force the fluid to sprint, and sprinting stores energy the flow can&#39;t fully recover.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Flow rate, velocity &amp; the "how fast is too fast" rule</div>
+      <div class="eqn"><b>Q = A·V = (π/4)·D²·V</b>      Q [m³/s], A [m²], V [m/s]
+Useful field units:  Q [m³/h] = 3600·Q [m³/s] · Q [L/s] = 1000·Q [m³/s]</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Service</th><th>Sensible velocity</th><th>Why</th></tr>
+          <tr><td>Pump suction line</td><td><b>0.6–1.5 m/s</b></td><td>Low velocity → low friction → protects NPSH (Page 9)</td></tr>
+          <tr><td>Pump discharge / general</td><td><b>1.5–3 m/s</b></td><td>Balance of pipe cost vs pumping-energy cost</td></tr>
+          <tr><td>Long transmission</td><td><b>1–2 m/s</b></td><td>Friction ∝ V² — energy dominates over decades</td></tr>
+          <tr><td>Slurry lines</td><td><b>&gt; settling velocity</b></td><td>Too slow → particles drop out &amp; block</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">🎛 Interactive — pipe velocity &amp; flow</div>
+      <div class="demo">
+        <div class="demo-row"><span>Flow rate Q</span><b><span id="qv">30</span> m³/h</b></div>
+        <input type="range" id="qR" min="1" max="300" step="1" value="30">
+        <div class="demo-row"><span>Internal diameter D</span><b><span id="dv">80</span> mm</b></div>
+        <input type="range" id="dR" min="15" max="300" step="1" value="80">
+        <div class="demo-out" id="qOut"></div>
+      </div>
+      <p class="cap">V = Q/A. Watch the velocity-head V²/2g grow with the square of velocity — the currency Bernoulli trades in.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 3</div>
+      <p class="quiz-q">A branch reduces from DN100 to DN50 carrying the same flow. By what factor does the velocity head (V²/2g) change?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Velocity rises with (D₁/D₂)² = (100/50)² = <strong>4×</strong>. Velocity head goes as V², so it changes by 4² = <strong>16×</strong>. That energy is real: at the reducer the pressure drops (Bernoulli), and any turbulent re-expansion downstream dissipates a good chunk as an irrecoverable minor loss. Contractions are cheap to draw and expensive to run.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 ============ -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 16 · Energy</span>
+    <h2 class="page-title">Bernoulli &amp; the Energy Equation</h2>
+    <p class="page-sub">The book-keeping of a flow: pressure, velocity and elevation trading places along a streamline.</p>
+
+    <div class="card">
+      <div class="label">Bernoulli — the ideal ledger</div>
+      <p class="lead">Along a streamline in <span class="hl">steady, incompressible, frictionless</span> flow, the sum of three energy-per-weight terms — <span class="hl2">pressure head, velocity head and elevation head</span> — is constant.</p>
+      <div class="eqn"><b>p/(ρg) + V²/(2g) + z = constant = H</b>     [metres]
+ pressure head  velocity head  elevation head   total head</div>
+      <p class="body">Each term is energy per unit weight, so all three share the unit of length — metres of fluid. Speed up (V↑) and pressure must fall; climb (z↑) and something else must give. It is conservation of energy wearing hydraulic clothes.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The real energy equation — with losses &amp; a pump</div>
+      <p class="body">Real flow has friction, and we usually add a machine. Extend Bernoulli between points 1 and 2:</p>
+      <div class="eqn">p₁/ρg + V₁²/2g + z₁ + <b>H<sub>pump</sub></b> = p₂/ρg + V₂²/2g + z₂ + <b>h<sub>L</sub></b>
+H<sub>pump</sub> = head the pump ADDS · h<sub>L</sub> = head friction+fittings REMOVE (Page 5)</div>
+      <p class="body">Rearranged, the pump must supply the static lift, the pressure/velocity change, <em>and</em> every metre of friction loss. That rearrangement <strong>is the system curve</strong> (Page 8) — the demand the pump has to meet.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">HGL &amp; EGL — seeing the energy</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12">
+            <!-- reservoir -->
+            <rect x="20" y="40" width="70" height="70" fill="#0b2530" stroke="#0ea5e9"/>
+            <line x1="20" y1="40" x2="90" y2="40" stroke="#7dd3fc" stroke-width="2"/>
+            <!-- pipe with contraction -->
+            <path d="M90 90 L300 90 L300 105 L420 105 L420 90 L640 90 L640 140" fill="none" stroke="#475569" stroke-width="10"/>
+            <!-- EGL -->
+            <line x1="20" y1="40" x2="90" y2="45" stroke="#f87171" stroke-width="2.5" stroke-dasharray="6 3"/>
+            <line x1="90" y1="45" x2="300" y2="70" stroke="#f87171" stroke-width="2.5" stroke-dasharray="6 3"/>
+            <line x1="300" y1="70" x2="420" y2="95" stroke="#f87171" stroke-width="2.5" stroke-dasharray="6 3"/>
+            <line x1="420" y1="95" x2="640" y2="120" stroke="#f87171" stroke-width="2.5" stroke-dasharray="6 3"/>
+            <text x="150" y="35" fill="#fca5a5" font-size="11">EGL — total head, always sloping down (friction)</text>
+            <!-- HGL -->
+            <line x1="90" y1="62" x2="300" y2="82" stroke="#34d399" stroke-width="2.5"/>
+            <line x1="300" y1="98" x2="420" y2="110" stroke="#34d399" stroke-width="2.5"/>
+            <line x1="420" y1="110" x2="640" y2="130" stroke="#34d399" stroke-width="2.5"/>
+            <text x="150" y="205" fill="#6ee7b7" font-size="11">HGL — pressure head; dips at the contraction where V spikes</text>
+            <line x1="305" y1="72" x2="305" y2="98" stroke="#7dd3fc" stroke-width="1.5"/>
+            <text x="330" y="88" fill="#7dd3fc" font-size="10.5">V²/2g</text>
+            <text x="500" y="60" fill="#94a3b8" font-size="10.5">gap EGL−HGL = velocity head</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">The Energy Grade Line (total head) only ever falls in the flow direction — friction is one-way. The Hydraulic Grade Line (pressure head) sits a velocity-head below it and dips wherever the fluid speeds up. If the HGL drops below the pipe, you have sub-atmospheric pressure — and a cavitation / air-ingress risk.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 4</div>
+      <p class="quiz-q">On a long siphon the HGL dips below the pipe crown at the high point. What&#39;s the danger, and what limits how high a siphon can go?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Below-atmospheric pressure at the crown means dissolved air comes out of solution and, if pressure reaches the fluid&#39;s vapour pressure, the water <strong>boils cold</strong> — the siphon breaks (vapour lock). The theoretical ceiling is one atmosphere of head (≈10.3 m of water at sea level), less friction, less the vapour-pressure margin, less altitude derating. Real siphons top out well under 10 m. Same physics as pump-suction NPSH (Page 9).</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 ============ -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 16 · Losses</span>
+    <h2 class="page-title">Viscous Flow &amp; Head Loss</h2>
+    <p class="page-sub">Where the energy actually goes — Reynolds, the Moody chart, and the two kinds of loss.</p>
+
+    <div class="card">
+      <div class="label">Laminar vs turbulent — the Reynolds number</div>
+      <p class="lead">Re compares inertia to viscosity and decides the flow&#39;s personality: orderly layers (<span class="hl">laminar</span>) or chaotic mixing (<span class="hl3">turbulent</span>).</p>
+      <div class="eqn"><b>Re = ρVD/μ = VD/ν</b>
+Re &lt; 2300  → laminar (friction ∝ V, viscosity rules)
+2300–4000  → transitional (unpredictable — avoid designing here)
+Re &gt; 4000  → turbulent (friction ∝ V², roughness matters)</div>
+      <p class="body">Most water and process flow is deeply turbulent (Re 10⁴–10⁶). Viscous oils and micro-channels can be laminar — a completely different loss law, which is why hydraulic-line sizing (A13) and water-pipe sizing feel different.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Major loss — Darcy–Weisbach &amp; the Moody chart</div>
+      <div class="eqn"><b>h<sub>f</sub> = f · (L/D) · V²/(2g)</b>       friction head loss along a pipe
+f = Darcy friction factor, from the Moody chart = fn(Re, ε/D)
+Laminar:  f = 64/Re   (roughness irrelevant)
+Turbulent (Colebrook):  1/√f = −2·log₁₀( ε/(3.7D) + 2.51/(Re·√f) )</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="11">
+            <line x1="70" y1="30" x2="70" y2="190" stroke="#475569"/><line x1="70" y1="190" x2="660" y2="190" stroke="#475569"/>
+            <text x="40" y="110" fill="#94a3b8" transform="rotate(-90 40 110)">friction f</text>
+            <text x="360" y="218" fill="#94a3b8">Reynolds number (log)</text>
+            <!-- laminar line -->
+            <line x1="90" y1="55" x2="200" y2="150" stroke="#7dd3fc" stroke-width="2.5"/>
+            <text x="110" y="60" fill="#7dd3fc">laminar 64/Re</text>
+            <!-- transition -->
+            <rect x="200" y="40" width="40" height="150" fill="rgba(251,191,36,0.10)"/>
+            <text x="220" y="35" fill="#fbbf24" text-anchor="middle">trans.</text>
+            <!-- turbulent curves flattening to roughness plateaus -->
+            <path d="M240 150 Q400 120 660 118" fill="none" stroke="#f87171" stroke-width="2.5"/>
+            <path d="M240 138 Q400 100 660 96" fill="none" stroke="#fb923c" stroke-width="2.5"/>
+            <path d="M240 120 Q400 78 660 74" fill="none" stroke="#f472b6" stroke-width="2.5"/>
+            <text x="670" y="118" fill="#fca5a5" text-anchor="end" font-size="10">smooth</text>
+            <text x="600" y="70" fill="#f9a8d4" font-size="10">rough ε/D↑</text>
+            <text x="470" y="150" fill="#94a3b8" font-size="10">curves flatten → f depends only on ε/D (fully rough)</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">At high Re the friction factor stops caring about Re and depends only on relative roughness ε/D — the &quot;fully rough&quot; regime where most large water mains live.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Minor losses — fittings &amp; valves</div>
+      <div class="eqn"><b>h<sub>m</sub> = K · V²/(2g)</b>       K = loss coefficient per fitting
+Σh<sub>L</sub> = h<sub>f</sub> + Σh<sub>m</sub> = ( f·L/D + ΣK )·V²/(2g)</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Fitting</th><th>K (typical)</th><th>Fitting</th><th>K (typical)</th></tr>
+          <tr><td>Sharp entrance</td><td>0.5</td><td>90° elbow (std)</td><td>0.9</td></tr>
+          <tr><td>Exit to tank</td><td>1.0</td><td>Gate valve (open)</td><td>0.15</td></tr>
+          <tr><td>45° elbow</td><td>0.4</td><td>Globe valve (open)</td><td>~10</td></tr>
+          <tr><td>Tee (run)</td><td>0.6</td><td>Check valve (swing)</td><td>2–2.5</td></tr>
+        </table>
+      </div>
+      <p class="body">&quot;Minor&quot; is a misnomer on short, fitting-heavy skids — ten elbows and a globe valve can dwarf the straight-pipe loss. The globe valve&#39;s K≈10 is why it throttles well and wastes energy doing it.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 5</div>
+      <p class="quiz-q">Doubling the flow through a fixed turbulent pipe system multiplies the friction head loss by roughly what?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">≈ <strong>4×</strong>. In turbulent flow h<sub>L</sub> ∝ V² ∝ Q² (f changes only slightly with Re). This quadratic is the shape of the <strong>system curve</strong> (Page 8) and the reason pumping energy explodes at high flow — and why trimming flow 20 % with a VFD cuts friction-dominated head ~36 % and power far more (Page 10).</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 ============ -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 16 · Similitude</span>
+    <h2 class="page-title">Dimensional Analysis &amp; Similitude</h2>
+    <p class="page-sub">Why a model tugboat and a real one obey the same numbers — and how pump laws are born.</p>
+
+    <div class="card">
+      <div class="label">Buckingham Π theorem</div>
+      <p class="lead">Any physical relation among <span class="hl">n</span> variables built from <span class="hl">k</span> independent dimensions can be rewritten as a relation among just <span class="hl2">n − k dimensionless groups</span> (Π terms). Fewer knobs, universal curves.</p>
+      <div class="eqn">Pipe example: h<sub>f</sub> = fn(ρ, V, D, L, μ, ε)  → 7 vars, 3 dims (M,L,T)
+→ 4 Π groups:  f = fn( Re , ε/D , L/D )   ← exactly the Moody structure
+The friction factor IS a dimensionless group; that&#39;s why one chart fits all pipes.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">The dimensionless numbers that run fluids</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Number</th><th>Ratio</th><th>Rules when…</th></tr>
+          <tr><td><b>Reynolds</b> Re = ρVL/μ</td><td>inertia / viscous</td><td>pipe flow, drag, pumps — almost everything</td></tr>
+          <tr><td><b>Froude</b> Fr = V/√(gL)</td><td>inertia / gravity</td><td>free surfaces: channels, ship hulls, spillways</td></tr>
+          <tr><td><b>Mach</b> Ma = V/c</td><td>inertia / compressibility</td><td>gas &gt; 0.3 Ma — compressible flow</td></tr>
+          <tr><td><b>Weber</b> We = ρV²L/σ</td><td>inertia / surface tension</td><td>droplets, atomisation, sprays</td></tr>
+          <tr><td><b>Euler / Cavitation</b> σ<sub>c</sub></td><td>pressure / inertia</td><td>cavitation onset (Page 9)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Similitude — testing small, trusting big</div>
+      <p class="body">A scale model predicts the prototype only if the <strong>governing dimensionless groups match</strong>. Match Re for a submerged pump impeller; match Froude for a ship&#39;s wave drag. You usually can&#39;t match all groups at once (the classic ship-model dilemma: matching Fr forces a Re mismatch), so engineers match the dominant one and correct the rest — the origin of pump &quot;model laws&quot; and the affinity relations (Page 10).</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 6</div>
+      <p class="quiz-q">Why can the entire family of pipe-friction data collapse onto a single Moody chart instead of needing a separate curve for every pipe size and fluid?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Because dimensional analysis reduces seven dimensional variables to <strong>three dimensionless groups</strong> — f, Re and ε/D. Two completely different pipes (a 20 mm oil line and a 2 m water main) that share the same Re and ε/D have the <em>same</em> friction factor. The chart plots the universal relationship f = fn(Re, ε/D); dimensional variables like diameter, velocity and viscosity only enter through those groups.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 7 ============ -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 16 · Pump Theory</span>
+    <h2 class="page-title">Centrifugal Pump Theory</h2>
+    <p class="page-sub">How a spinning impeller turns shaft power into head — Euler, velocity triangles, and the pump curve.</p>
+
+    <div class="card">
+      <div class="label">The idea</div>
+      <p class="lead">A centrifugal pump adds energy by <span class="hl">flinging fluid outward</span>: the impeller accelerates it to high velocity at the tip, then the volute <span class="hl2">decelerates that velocity into pressure</span> (a diffuser — Bernoulli in reverse). Kinetic energy in the eye becomes pressure head at the flange.</p>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="12" text-anchor="middle">
+            <!-- volute -->
+            <path d="M350 125 m -95 0 a 95 90 0 1 0 190 0 a 95 90 0 1 0 -190 0" fill="#12202b" stroke="#0ea5e9" stroke-width="2"/>
+            <!-- impeller vanes (curved back) -->
+            <circle cx="350" cy="125" r="24" fill="#334155" stroke="#94a3b8"/>
+            <g stroke="#7dd3fc" stroke-width="3" fill="none">
+              <path d="M350 101 Q378 108 388 132"/>
+              <path d="M374 111 Q392 130 384 158"/>
+              <path d="M369 145 Q356 168 330 168"/>
+              <path d="M326 149 Q308 132 316 108"/>
+              <path d="M331 105 Q344 100 350 101"/>
+            </g>
+            <!-- suction eye -->
+            <line x1="250" y1="125" x2="326" y2="125" stroke="#34d399" stroke-width="8"/>
+            <text x="230" y="112" fill="#6ee7b7" font-size="11">suction</text>
+            <text x="245" y="145" fill="#94a3b8" font-size="10">low p, high V eye</text>
+            <!-- discharge -->
+            <line x1="445" y1="60" x2="520" y2="60" stroke="#0ea5e9" stroke-width="8"/>
+            <text x="520" y="50" fill="#7dd3fc" font-size="11" text-anchor="start">discharge</text>
+            <text x="520" y="72" fill="#94a3b8" font-size="10" text-anchor="start">high p</text>
+            <!-- rotation arrow -->
+            <path d="M350 80 A45 45 0 0 1 395 125" fill="none" stroke="#fbbf24" stroke-width="2" marker-end="url(#rot)"/>
+            <defs><marker id="rot" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#fbbf24"/></marker></defs>
+            <text x="350" y="235" fill="#94a3b8" font-size="11">impeller accelerates → volute diffuses velocity into pressure</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Euler's pump equation &amp; velocity triangles</div>
+      <p class="body">Applying angular-momentum conservation to the impeller gives the ideal head added — Euler&#39;s turbomachine equation:</p>
+      <div class="eqn"><b>gH<sub>Euler</sub> = U₂·V<sub>u2</sub> − U₁·V<sub>u1</sub></b>       U = blade speed, V<sub>u</sub> = tangential fluid velocity
+Usually designed with no inlet swirl (V<sub>u1</sub>=0):  <b>gH = U₂·V<sub>u2</sub></b>
+U₂ = π·D₂·N/60   → head rises with impeller diameter² and speed² (the seed of affinity laws)</div>
+      <p class="body">The <strong>velocity triangle</strong> at the blade tip resolves the fluid&#39;s absolute velocity into blade motion (U) plus flow relative to the blade (W). <strong>Backward-curved vanes</strong> (the industry standard) give a falling head–flow characteristic that is stable and efficient — as flow rises, V<sub>u2</sub> drops, so head droops gracefully.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">From ideal to real — the H–Q curve</div>
+      <p class="body">Euler predicts a straight falling line; reality bends it down via three deductions: <strong>slip</strong> (fluid doesn&#39;t perfectly follow the vanes), <strong>friction</strong> (∝ Q²), and <strong>shock/incidence losses</strong> (minimum at the design point, rising either side). The result is the familiar drooping <strong>pump curve</strong>, with a Best Efficiency Point (BEP) where the losses are least.</p>
+      <div class="grid-3">
+        <div class="mini"><h4>Head</h4><p class="big">H–Q</p><p>Drooping curve; shut-off head at Q=0 is the highest.</p></div>
+        <div class="mini c-flow"><h4>Efficiency</h4><p class="big">BEP</p><p>Peak η at the design flow; run here for life &amp; economy.</p></div>
+        <div class="mini c-amb"><h4>Power</h4><p class="big">P–Q</p><p>Rises with flow; overload risk when running far right.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Pump power &amp; efficiency</div>
+      <div class="eqn"><b>Hydraulic (water) power:</b>  P<sub>h</sub> = ρ·g·Q·H     [W]
+<b>Shaft power:</b>  P<sub>shaft</sub> = P<sub>h</sub> / η<sub>pump</sub>
+<b>Wire-to-water:</b>  η<sub>total</sub> = η<sub>pump</sub> · η<sub>motor</sub> · η<sub>VFD</sub>
+Field shortcut:  P<sub>shaft</sub> [kW] ≈ ρ·Q[m³/h]·H[m] / (367·η)   (water)</div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 7</div>
+      <p class="quiz-q">Why do almost all process centrifugal pumps use backward-curved vanes rather than forward-curved ones that would give more head?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Backward-curved vanes give a <strong>steadily falling, stable H–Q curve</strong> and the highest efficiency. Forward-curved vanes produce a rising/humped characteristic that can be <strong>unstable</strong> (two flows for one head → surging) and drives a steeply rising power curve that <strong>overloads the motor</strong> at high flow. Backward-curved trades peak head for a well-behaved curve and a non-overloading (or gently rising) power draw — the right engineering compromise.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 8 ============ -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 16 · Matching</span>
+    <h2 class="page-title">Pump Curve Meets System Curve</h2>
+    <p class="page-sub">The operating point is where supply meets demand — find it, and you know everything.</p>
+
+    <div class="card">
+      <div class="label">The system curve</div>
+      <p class="lead">The system demands a head that is <span class="hl">static lift (fixed)</span> plus <span class="hl2">friction (∝ Q²)</span>. Plot that against flow and you get a rising parabola sitting on a static-head pedestal.</p>
+      <div class="eqn"><b>H<sub>sys</sub>(Q) = H<sub>static</sub> + k·Q²</b>
+H<sub>static</sub> = elevation lift + (discharge − suction pressure) head  → does NOT change with flow
+k·Q² = all friction + fittings (Page 5)  → grows with the square of flow</div>
+      <p class="body">Static-dominated systems (lifting water up a tower) have a flat-ish demand; friction-dominated systems (long pipelines, filters) have a steep parabola. Which one you have decides whether throttling or speed control saves money (Page 10).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The operating point</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="11">
+            <line x1="70" y1="30" x2="70" y2="205" stroke="#475569"/><line x1="70" y1="205" x2="660" y2="205" stroke="#475569"/>
+            <text x="40" y="120" fill="#94a3b8" transform="rotate(-90 40 120)">Head H</text>
+            <text x="360" y="232" fill="#94a3b8">Flow Q</text>
+            <!-- pump curve drooping -->
+            <path d="M90 60 Q300 75 640 190" fill="none" stroke="#0ea5e9" stroke-width="3"/>
+            <text x="110" y="55" fill="#7dd3fc">pump H–Q</text>
+            <!-- system curve parabola -->
+            <path d="M90 165 Q400 150 640 70" fill="none" stroke="#34d399" stroke-width="3"/>
+            <text x="560" y="60" fill="#6ee7b7" text-anchor="end">system H<sub>static</sub>+kQ²</text>
+            <line x1="90" y1="165" x2="130" y2="163" stroke="#34d399" stroke-width="3" stroke-dasharray="4 3"/>
+            <text x="95" y="185" fill="#6ee7b7" font-size="10">H_static</text>
+            <!-- operating point -->
+            <circle cx="392" cy="118" r="7" fill="#fbbf24" stroke="#0b0f14"/>
+            <line x1="392" y1="118" x2="392" y2="205" stroke="#fbbf24" stroke-dasharray="4 3"/>
+            <line x1="392" y1="118" x2="70" y2="118" stroke="#fbbf24" stroke-dasharray="4 3"/>
+            <text x="405" y="112" fill="#fde68a" font-size="11">operating point</text>
+            <text x="392" y="220" fill="#fbbf24" font-size="10" text-anchor="middle">Q_op</text>
+            <!-- BEP marker -->
+            <circle cx="330" cy="88" r="4" fill="#f472b6"/>
+            <text x="300" y="80" fill="#f9a8d4" font-size="10" text-anchor="end">BEP</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">The pump can only run where its curve crosses the system curve — one flow, one head. Good selection puts that crossing near the BEP; a pump forced far left or right of BEP runs hot, vibrates and wears (Page 12).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Series &amp; parallel</div>
+      <div class="grid-2">
+        <div class="mini c-blue"><h4>Series (heads add)</h4><p>Same Q, H₁+H₂. For high head against a steep system curve. Multistage pumps are series impellers on one shaft.</p></div>
+        <div class="mini c-flow"><h4>Parallel (flows add)</h4><p>Same H, Q₁+Q₂. For high flow against a flat system curve. Beware: two pumps rarely give double flow — the steeper system curve robs it.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 8</div>
+      <p class="quiz-q">You add a second identical pump in parallel expecting double the flow but get only ~30 % more. Why?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">The <strong>system curve is steep</strong> (friction-dominated). Parallel pumps add flow at equal head, shifting the combined pump curve right — but more flow means the system demands much more head (∝ Q²), so the new operating point climbs the curve and the flow gain is throttled by friction. Parallel pumping only delivers near-double flow on a <strong>flat, static-dominated</strong> system. On steep systems, series (or a bigger single pump) is the right move.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 9 ============ -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 16 · Cavitation</span>
+    <h2 class="page-title">NPSH &amp; Cavitation</h2>
+    <p class="page-sub">The pump&#39;s most misunderstood failure — boiling cold water, and the margin that prevents it.</p>
+
+    <div class="card">
+      <div class="label">What cavitation is</div>
+      <p class="lead">If the local pressure at the impeller eye falls to the fluid&#39;s <span class="hl3">vapour pressure</span>, the liquid <span class="hl3">boils</span> — forming vapour bubbles that collapse violently as pressure recovers downstream, hammering the metal at thousands of bar.</p>
+      <p class="body">The symptoms: a sound like <strong>pumping gravel</strong>, dropping head and flow, vibration, and pitted, spongy impeller damage. Left running, it destroys impellers in weeks and wrecks seals and bearings (cross-check with vibration signatures, <a href="A42_Vibration_Analysis_Deep_Dive.html" style="color:var(--accent-soft)">A42</a>).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">NPSH — the two numbers that must not cross</div>
+      <div class="eqn"><b>NPSH<sub>available</sub></b> = (p<sub>atm</sub> ± p<sub>tank</sub>)/ρg − H<sub>static,suction</sub> − h<sub>f,suction</sub> − p<sub>v</sub>/ρg
+   = what the SYSTEM offers at the pump eye, above boiling  [m]
+<b>NPSH<sub>required</sub></b> = what the PUMP needs (from its curve, rises with Q²)  [m]
+<b>RULE:</b>  NPSH<sub>a</sub> ≥ NPSH<sub>r</sub> + margin (≥ 0.5–1 m, or ×1.1–1.3)</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="11">
+            <line x1="70" y1="20" x2="70" y2="180" stroke="#475569"/><line x1="70" y1="180" x2="660" y2="180" stroke="#475569"/>
+            <text x="40" y="100" fill="#94a3b8" transform="rotate(-90 40 100)">NPSH (m)</text>
+            <text x="360" y="205" fill="#94a3b8">Flow Q</text>
+            <!-- NPSHa falling -->
+            <path d="M90 60 Q350 78 640 150" fill="none" stroke="#34d399" stroke-width="3"/>
+            <text x="110" y="52" fill="#6ee7b7">NPSHa (system offers)</text>
+            <!-- NPSHr rising -->
+            <path d="M90 165 Q400 150 640 55" fill="none" stroke="#f472b6" stroke-width="3"/>
+            <text x="560" y="50" fill="#f9a8d4" text-anchor="end">NPSHr (pump needs)</text>
+            <!-- crossover -->
+            <circle cx="470" cy="118" r="7" fill="#f87171"/>
+            <line x1="470" y1="118" x2="470" y2="180" stroke="#f87171" stroke-dasharray="4 3"/>
+            <text x="470" y="105" fill="#fca5a5" text-anchor="middle" font-size="10.5">cavitation limit</text>
+            <text x="270" y="150" fill="#6ee7b7" font-size="10">safe: NPSHa &gt; NPSHr</text>
+            <text x="560" y="150" fill="#fca5a5" font-size="10">cavitating →</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">NPSHa falls with flow (more suction friction); NPSHr rises with flow. Where they cross, the pump cavitates. Every design decision on the suction side is about keeping NPSHa comfortably above NPSHr across the whole operating range.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Fixing / preventing cavitation — all on the suction side</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Raise NPSHa:</strong> flood the suction (raise the source, lower the pump), shorten &amp; fatten the suction pipe, remove suction restrictions, pressurise the tank.</div></li>
+        <li><span class="num">2</span><div><strong>Cut suction friction:</strong> bigger suction line (0.6–1.5 m/s), fewer fittings, full-bore valves, clean strainers — a blocked suction strainer is the classic field cause.</div></li>
+        <li><span class="num">3</span><div><strong>Lower NPSHr:</strong> run slower (NPSHr ∝ ~N²), pick a pump with a low-NPSHr impeller or an inducer, use a larger suction eye, run nearer BEP.</div></li>
+        <li><span class="num">4</span><div><strong>Mind the fluid:</strong> hot liquids have high p<sub>v</sub> (boiling water needs huge NPSHa); volatile liquids too. Temperature is a hidden cavitation driver.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">🎛 Interactive — NPSH available</div>
+      <div class="demo">
+        <div class="demo-row"><span>Suction lift (−) / flooded head (+)</span><b><span id="hsv">-2.0</span> m</b></div>
+        <input type="range" id="hsR" min="-8" max="6" step="0.5" value="-2">
+        <div class="demo-row"><span>Suction friction loss</span><b><span id="hfv">0.8</span> m</b></div>
+        <input type="range" id="hfR" min="0" max="5" step="0.1" value="0.8">
+        <div class="demo-row"><span>Water temperature</span><b><span id="tv">25</span> °C</b></div>
+        <input type="range" id="tR" min="10" max="90" step="5" value="25">
+        <div class="demo-row"><span>Pump NPSHr at duty</span><b><span id="nrv">3.0</span> m</b></div>
+        <input type="range" id="nrR" min="1" max="8" step="0.5" value="3">
+        <div class="demo-out" id="npOut"></div>
+      </div>
+      <p class="cap">Atmospheric ≈ 10.33 m water at sea level. Vapour-pressure head climbs steeply with temperature — watch a hot-water duty eat the whole margin.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 9</div>
+      <p class="quiz-q">A pump runs fine on cold water but cavitates when the same water is heated to 80 °C. Nothing else changed. Why?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Vapour pressure rose. At 25 °C p<sub>v</sub> ≈ 0.32 m head; at 80 °C it&#39;s ≈ 4.8 m head. NPSHa = atmospheric − lift − friction − <strong>p<sub>v</sub></strong>, so heating the water subtracts ~4.5 m of margin — enough to drop NPSHa below NPSHr. Hot-liquid pumps are almost always <strong>flooded-suction</strong> designs for exactly this reason (boiler feed, condensate).</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 10 ============ -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 16 · Control</span>
+    <h2 class="page-title">Affinity Laws &amp; Flow Control</h2>
+    <p class="page-sub">How head, flow and power scale with speed — and why the VFD beats the valve.</p>
+
+    <div class="card">
+      <div class="label">The affinity (fan/pump) laws</div>
+      <p class="lead">Change a centrifugal pump&#39;s speed (or trim its impeller) and its curve scales by simple power laws — the single most useful set of relations in rotating-machine energy work.</p>
+      <div class="eqn"><b>Q ∝ N</b>          flow scales with speed          Q₂/Q₁ = N₂/N₁
+<b>H ∝ N²</b>         head scales with speed²         H₂/H₁ = (N₂/N₁)²
+<b>P ∝ N³</b>         power scales with speed³        P₂/P₁ = (N₂/N₁)³
+(same laws with impeller diameter D for a trim, within limits)</div>
+      <p class="body">The <strong>cube law on power</strong> is the money: slowing a pump to 80 % speed cuts flow to 80 % but power to 0.8³ = <strong>51 %</strong>. That is why variable-speed pumping dominates modern energy-efficient design — and why oversized pumps throttled by a valve waste so much.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Throttle vs speed — where the energy goes</div>
+      <div class="stage">
+        <svg class="illus" viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+          <g font-size="11">
+            <line x1="70" y1="25" x2="70" y2="200" stroke="#475569"/><line x1="70" y1="200" x2="660" y2="200" stroke="#475569"/>
+            <text x="360" y="228" fill="#94a3b8">Flow Q</text>
+            <text x="40" y="115" fill="#94a3b8" transform="rotate(-90 40 115)">Head H</text>
+            <!-- full speed pump -->
+            <path d="M90 55 Q300 75 640 185" fill="none" stroke="#0ea5e9" stroke-width="3"/>
+            <text x="100" y="48" fill="#7dd3fc">full speed</text>
+            <!-- reduced speed pump -->
+            <path d="M90 105 Q280 122 560 205" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6 3"/>
+            <text x="150" y="118" fill="#7dd3fc" font-size="10">reduced speed (VFD)</text>
+            <!-- system curve -->
+            <path d="M90 175 Q400 150 640 60" fill="none" stroke="#34d399" stroke-width="3"/>
+            <text x="600" y="55" fill="#6ee7b7" text-anchor="end">system</text>
+            <!-- throttled system curve steeper -->
+            <path d="M90 175 Q330 150 500 60" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-dasharray="5 3"/>
+            <text x="470" y="55" fill="#fdba74" text-anchor="end" font-size="10">throttled system</text>
+            <!-- points -->
+            <circle cx="360" cy="120" r="6" fill="#fbbf24"/><text x="372" y="115" fill="#fde68a" font-size="10">A full</text>
+            <circle cx="300" cy="135" r="6" fill="#fb923c"/><text x="250" y="130" fill="#fdba74" font-size="10">B throttle</text>
+            <circle cx="300" cy="150" r="6" fill="#38bdf8"/><text x="312" y="163" fill="#7dd3fc" font-size="10">B VFD (lower H)</text>
+            <text x="360" y="30" fill="#94a3b8" font-size="10">throttling wastes head as ΔP across the valve; VFD lowers the curve instead</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">To cut flow: a valve <em>steepens the system curve</em>, burning the excess head as heat across the valve. A VFD <em>lowers the pump curve</em>, so the pump never makes the excess head in the first place — the difference is the cube law made visible.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Control methods compared</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Method</th><th>How</th><th>Energy</th><th>Best for</th></tr>
+          <tr><td><b>Throttle valve</b></td><td>Add system resistance</td><td>Poor (waste as ΔP)</td><td>Cheap, small trim, occasional</td></tr>
+          <tr><td><b>VFD (speed)</b></td><td>Lower pump curve</td><td>Excellent (P∝N³)</td><td>Friction-dominated, varying duty</td></tr>
+          <tr><td><b>Impeller trim</b></td><td>Permanently shrink D</td><td>Good, one-time</td><td>Fixed over-capacity; no retrofit cost</td></tr>
+          <tr><td><b>Bypass / recirc</b></td><td>Return flow to source</td><td>Worst</td><td>Min-flow protection only</td></tr>
+          <tr><td><b>On/off + tank</b></td><td>Batch the duty</td><td>Good</td><td>Static-dominated lift, storage available</td></tr>
+        </table>
+      </div>
+      <p class="body"><strong>Caveat — static head breaks the cube law:</strong> the affinity cube on <em>power</em> assumes the operating point tracks a curve through the origin. On a static-dominated system, slowing the pump quickly hits the static head and stalls the flow — VFD savings shrink and there is a minimum speed below which the pump delivers nothing. Know your system-curve shape (Page 8) before promising energy savings.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 10</div>
+      <p class="quiz-q">A friction-dominated cooling loop runs a pump throttled to 70 % flow. Estimate the power saving from switching to a VFD at 70 % speed instead.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">On a purely friction system, 70 % flow ≈ 70 % speed. Power scales as N³: 0.70³ = <strong>0.343</strong> → the VFD draws ~34 % of full-speed power. The throttled pump still runs near full-speed power (it makes full head, wasting the excess across the valve — say ~85–90 %). Saving ≈ <strong>50–60 % of pump energy</strong>. On payback that&#39;s often &lt; 2 years — the headline case for variable-speed pumping (ties to A08 VFD).</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 11 ============ -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 / 16 · Selection</span>
+    <h2 class="page-title">Pump Types &amp; Selection</h2>
+    <p class="page-sub">Centrifugal vs positive displacement, specific speed, and choosing the right machine.</p>
+
+    <div class="card">
+      <div class="label">The great divide</div>
+      <div class="grid-2">
+        <div class="mini c-blue"><h4>Rotodynamic (centrifugal)</h4><p>Adds velocity then diffuses it. Flow <em>varies</em> with head. High flow, moderate head, cheap, smooth. Cannot self-prime (usually). The default for water.</p></div>
+        <div class="mini c-flow"><h4>Positive displacement</h4><p>Traps a fixed volume &amp; pushes it. Flow ~<em>constant</em> regardless of head — makes whatever pressure the pipe resists. High pressure, viscous fluids, metering, self-priming. Needs a relief valve.</p></div>
+      </div>
+      <div class="eqn"><b>Golden rule:</b>  a PD pump MUST have a pressure-relief path — dead-head it against a closed valve and it will burst the pipe or stall the motor (it doesn&#39;t &quot;give up&quot; like a centrifugal at shut-off head).</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Specific speed — one number that picks the impeller shape</div>
+      <div class="eqn"><b>N<sub>s</sub> = N·√Q / H^(3/4)</b>   (dimensional forms vary — keep units consistent)
+low N<sub>s</sub>  → radial impeller: high head, low flow
+mid N<sub>s</sub>  → mixed-flow: balanced
+high N<sub>s</sub> → axial (propeller): low head, huge flow</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Family</th><th>Head</th><th>Flow</th><th>Typical use</th></tr>
+          <tr><td><b>Radial centrifugal</b></td><td>High</td><td>Low–mid</td><td>Boiler feed, high-rise, RO</td></tr>
+          <tr><td><b>Mixed-flow</b></td><td>Mid</td><td>High</td><td>Irrigation, flood, cooling</td></tr>
+          <tr><td><b>Axial (propeller)</b></td><td>Low (&lt;5 m)</td><td>Very high</td><td>Drainage, circulation</td></tr>
+          <tr><td><b>Multistage centrifugal</b></td><td>Very high</td><td>Low–mid</td><td>Borehole, HP washdown, RO</td></tr>
+          <tr><td><b>Gear / screw (PD)</b></td><td>High</td><td>Low</td><td>Oils, viscous, lube, fuel</td></tr>
+          <tr><td><b>Diaphragm / peristaltic (PD)</b></td><td>Mid</td><td>Low, metered</td><td>Dosing, slurries, hygienic</td></tr>
+          <tr><td><b>Progressive cavity (PD)</b></td><td>Mid–high</td><td>Low–mid</td><td>Sludge, thick/abrasive media</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Selection workflow</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Define the duty:</strong> flow Q and total head H (static + friction at design flow) — the operating point you actually need.</div></li>
+        <li><span class="num">2</span><div><strong>Characterise the fluid:</strong> density, viscosity, temperature, solids, abrasiveness, corrosivity, vapour pressure — this eliminates whole families.</div></li>
+        <li><span class="num">3</span><div><strong>Pick the type:</strong> centrifugal for water-like high flow; PD for viscous, high-pressure, metered or self-priming duties.</div></li>
+        <li><span class="num">4</span><div><strong>Select for BEP:</strong> choose a curve whose duty point sits near BEP (ideally 80–110 %), not far right or left.</div></li>
+        <li><span class="num">5</span><div><strong>Check NPSH:</strong> NPSHa (system) ≥ NPSHr (pump) + margin across the whole range (Page 9).</div></li>
+        <li><span class="num">6</span><div><strong>Check power &amp; motor:</strong> at the worst-case point on the curve (end of curve, densest fluid) — non-overloading motor sizing.</div></li>
+        <li><span class="num">7</span><div><strong>Materials &amp; seals:</strong> wetted parts vs fluid; mechanical seal vs packing; ATEX/hygienic/API as the sector demands.</div></li>
+      </ul>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 11</div>
+      <p class="quiz-q">You must meter 20 L/h of a viscous polymer dose accurately against a variable back-pressure. Centrifugal or PD — and why?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Positive displacement</strong> (diaphragm/metering or peristaltic). A centrifugal&#39;s flow <em>changes with head</em>, so variable back-pressure would swing the dose — useless for metering — and its efficiency collapses on viscous fluid. A PD pump delivers a <strong>near-constant volume per stroke regardless of back-pressure</strong>, handles viscosity well, and is inherently a metering device. Fit a relief valve on the discharge.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 ============ -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 / 16 · Consolidate</span>
+    <h2 class="page-title">Recap, Failure Modes &amp; Quiz</h2>
+    <p class="page-sub">Ten ideas, six ways pumps fail, and the memory hook.</p>
+
+    <div class="card">
+      <div class="label">The ten ideas</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div>A fluid can&#39;t resist shear: τ = μ·du/dy. Density, viscosity and vapour pressure decide behaviour.</div></li>
+        <li><span class="num">2</span><div>Statics: p = ρgh. Think in <strong>head (metres)</strong> and the fluid&#39;s density drops out of pump curves.</div></li>
+        <li><span class="num">3</span><div>Continuity: A₁V₁ = A₂V₂. Narrow = fast; velocity head ∝ V².</div></li>
+        <li><span class="num">4</span><div>Bernoulli + losses + pump = the energy equation. Rearranged, it&#39;s the system curve.</div></li>
+        <li><span class="num">5</span><div>Losses: h<sub>L</sub> = (fL/D + ΣK)·V²/2g. Turbulent loss ∝ Q² — the system parabola.</div></li>
+        <li><span class="num">6</span><div>Dimensional analysis collapses complexity into Re, Fr, Ma… one Moody chart fits all pipes.</div></li>
+        <li><span class="num">7</span><div>A centrifugal pump adds head via Euler: gH = U₂V<sub>u2</sub>. Backward-curved vanes = stable curve.</div></li>
+        <li><span class="num">8</span><div>Operating point = pump curve ∩ system curve. Aim it at BEP.</div></li>
+        <li><span class="num">9</span><div>NPSHa ≥ NPSHr + margin, or the pump boils cold and cavitates. Fix it on the suction side.</div></li>
+        <li><span class="num">10</span><div>Affinity: Q∝N, H∝N², P∝N³. The cube law is why VFDs beat valves — unless static head dominates.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Six classic pump failures</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">🌫 Cavitation</div><p>NPSHa &lt; NPSHr → vapour bubbles collapse, sounds like gravel, pits the impeller. Blocked suction strainer or hot liquid is the usual cause. Fix the suction, not the pump.</p></div>
+        <div class="fail"><div class="ft">↔ Running off-BEP</div><p>Oversized pump throttled far left, or a worn system running far right → radial thrust, shaft deflection, seal &amp; bearing wear, recirculation damage. Right-size or trim/VFD.</p></div>
+        <div class="fail"><div class="ft">🔥 Dead-heading</div><p>Centrifugal against a closed valve → all power becomes heat, fluid flashes to steam, seals cook. PD pump dead-headed → bursts. Fit min-flow / relief protection.</p></div>
+        <div class="fail"><div class="ft">💨 Air / loss of prime</div><p>Air in the suction → the impeller spins in vapour, head collapses, seal runs dry. Vent, flood the suction, fix leaking suction joints (they leak air, not water).</p></div>
+        <div class="fail"><div class="ft">〰 Vibration / misalignment</div><p>Coupling misalignment, unbalance, bent shaft, or vane-pass resonance → bearing failure. Diagnose with vibration spectra (A42); laser-align.</p></div>
+        <div class="fail"><div class="ft">🧲 Dry-run seal failure</div><p>Mechanical seal run without liquid film → faces overheat &amp; crack in seconds. Low-level / no-flow interlocks and proper priming prevent it.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Final Quiz</div>
+      <p class="quiz-q">Q1 — A pump&#39;s measured head is well below its curve and it draws less power than expected, with a rattling noise. Most likely cause?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Cavitation</strong> (or air ingress). Vapour in the impeller reduces the effective fluid density and flow, so head and power both drop, accompanied by the characteristic gravel rattle. Check suction: strainer, valve, NPSHa, liquid temperature. A worn wear-ring also drops head but without the noise and with normal/high power.</span>
+      </div>
+      <p class="quiz-q">Q2 — Convert: a pump makes 45 m head on water. What is that in bar, and in bar on brine (ρ=1200)?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">Water: p = ρgh = 998×9.81×45 = 441 kPa ≈ <strong>4.4 bar</strong>. Brine: 1200×9.81×45 = 530 kPa ≈ <strong>5.3 bar</strong> — same head, more pressure (and 20 % more shaft power). The head is the density-independent quantity; pressure and power are not.</span>
+      </div>
+      <p class="quiz-q">Q3 — A friction-dominated system runs at 100 m³/h. To drop to 75 m³/h, estimate the VFD speed and the power fraction.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">Q∝N → 75 % speed. P∝N³ → 0.75³ = <strong>0.42</strong> → about 42 % of full-speed power. (Throttling to 75 m³/h would leave power near ~90 %.) The VFD roughly halves the energy — the cube law at work.</span>
+      </div>
+      <p class="quiz-q">Q4 — Why can two identical pumps in series NOT solve a high-flow problem on a flat, static-dominated system?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">Series adds <strong>head</strong>, not flow. On a flat (static-dominated) system the demand curve is nearly horizontal — the extra head just pushes the operating point far right at almost the same head, giving little useful flow gain and risking the far-right end of the curve (overload, low NPSHa). High flow on a flat system wants pumps in <strong>parallel</strong> (flows add). Match the pairing to the system-curve shape.</span>
+      </div>
+      <p class="quiz-q">Q5 — Suction line velocity is 3 m/s and the pump is cavitating. Name two suction-side changes and one operational change.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">Suction-side: (1) <strong>upsize the suction pipe</strong> to bring velocity to 0.6–1.5 m/s (slashes friction, raises NPSHa); (2) <strong>shorten/simplify the suction</strong> — remove elbows, clean the strainer, flood the pump. Operational: (3) <strong>reduce speed</strong> (VFD) — lowers NPSHr (∝N²) and moves the duty left. Also: cool the liquid if p<sub>v</sub> is the driver.</span>
+      </div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">&quot;Head not pressure, curve meets curve, guard the suction, cube the speed.&quot;</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 ============ -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 / 16 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade numericals, fully worked.</p>
+
+    <div class="card">
+      <div class="label">WE 1 — Total head &amp; pump power</div>
+      <p class="body"><strong>Given:</strong> lift water Q = 40 m³/h up a static height of 18 m through 120 m of DN80 steel pipe (f = 0.022), fittings ΣK = 9. Pump efficiency 72 %, motor 92 %. Find total head, and electrical input power.</p>
+      <div class="eqn">V = Q/A = (40/3600)/((π/4)·0.08²) = 0.0111/0.00503 = <b>2.21 m/s</b>
+h<sub>L</sub> = (f·L/D + ΣK)·V²/2g = (0.022×120/0.08 + 9)×2.21²/19.62
+   = (33.0 + 9)×0.249 = 42.0×0.249 = <b>10.5 m</b>
+H<sub>total</sub> = 18 + 10.5 = <b>28.5 m</b>
+P<sub>hyd</sub> = ρgQH = 998×9.81×(40/3600)×28.5 = <b>3.10 kW</b>
+P<sub>elec</sub> = 3.10/(0.72×0.92) = <b>4.68 kW</b> → pick a 5.5 kW motor</div>
+      <p class="body"><strong>Discussion:</strong> friction (10.5 m) is a large share of a modest 18 m lift — worth checking whether DN100 (V = 1.4 m/s) would cut friction to ~3 m and shrink the motor. The pipe-vs-energy trade over the pump&#39;s life usually favours the bigger pipe.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 2 — NPSH available</div>
+      <p class="body"><strong>Given:</strong> pump draws 30 °C water (p<sub>v</sub> ≈ 0.43 m, ρ ≈ 996) from an open tank 2.5 m <em>below</em> the pump centreline; suction friction 1.1 m; atmospheric = 10.33 m. Pump NPSHr = 3.5 m. Safe?</p>
+      <div class="eqn">NPSHa = p<sub>atm</sub>/ρg − H<sub>lift</sub> − h<sub>f,suc</sub> − p<sub>v</sub>/ρg
+     = 10.33 − 2.5 − 1.1 − 0.43 = <b>6.30 m</b>
+Margin = NPSHa − NPSHr = 6.30 − 3.5 = <b>+2.8 m</b>  →  SAFE ✓</div>
+      <p class="body"><strong>Discussion:</strong> comfortable now — but re-run it hot. At 70 °C, p<sub>v</sub> ≈ 3.2 m, so NPSHa falls to 4.6 m (margin 1.1 m — marginal), and at 85 °C it would cavitate. The suction lift is the other lever: flooding the pump 2.5 m instead of lifting adds 5 m of NPSHa outright.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 3 — Affinity-law re-rate</div>
+      <p class="body"><strong>Given:</strong> a pump at 1450 rpm delivers 60 m³/h at 32 m, drawing 7.0 kW. The duty drops to 48 m³/h on a friction-dominated loop. Find the VFD speed, new head and new power.</p>
+      <div class="eqn">Q∝N:  N₂ = 1450×(48/60) = <b>1160 rpm</b>
+H∝N²: H₂ = 32×(48/60)² = 32×0.64 = <b>20.5 m</b>
+P∝N³: P₂ = 7.0×(48/60)³ = 7.0×0.512 = <b>3.58 kW</b>
+Energy saved vs throttling (~6.5 kW): ≈ <b>2.9 kW ≈ 45 %</b></div>
+      <p class="body"><strong>Discussion:</strong> the affinity cube assumes the operating point follows a curve through the origin — valid here because the loop is friction-dominated (H<sub>static</sub>≈0). Add 15 m of static lift and H₂ can&#39;t fall below 15 m, the flow stalls sooner, and the savings shrink — always sanity-check against the system-curve shape.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE 4 — Reynolds &amp; friction regime</div>
+      <p class="body"><strong>Given:</strong> (a) water at 20 °C (ν = 1.0×10⁻⁶) in DN50 at 2 m/s; (b) oil ν = 40×10⁻⁶ in the same pipe at the same speed. Classify each and give the laminar friction factor where applicable.</p>
+      <div class="eqn">(a) Re = VD/ν = 2×0.05/1.0e-6 = <b>100 000</b> → turbulent → use Moody (f ≈ 0.018–0.021, ε/D dependent)
+(b) Re = 2×0.05/40e-6 = <b>2500</b> → transitional/low-turbulent — design out of this band;
+    if kept laminar (Re&lt;2300, slightly slower): f = 64/Re ≈ 64/2300 = <b>0.028</b></div>
+      <p class="body"><strong>Discussion:</strong> same pipe, same speed, two universes — the water main is deeply turbulent and roughness-sensitive; the oil line hovers in the treacherous transition zone where friction is unpredictable and pulsation-prone. Viscous services are sized to sit firmly laminar or firmly turbulent, never in between.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 ============ -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 / 16 · MSc Practice</span>
+    <h2 class="page-title">Problem Set</h2>
+    <p class="page-sub">Ten problems. Work each before revealing.</p>
+
+    <div class="card quiz">
+      <div class="label">Problems 1–10</div>
+
+      <p class="quiz-q">P1 — Water flows at 25 m³/h in DN65 (D=65 mm). Find velocity and velocity head.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">V = (25/3600)/((π/4)·0.065²) = 0.00694/0.00332 = <strong>2.09 m/s</strong>. Velocity head = V²/2g = 4.37/19.62 = <strong>0.22 m</strong>.</span>
+      </div>
+
+      <p class="quiz-q">P2 — A tank is pressurised to 1.5 bar gauge above water 4 m deep. Gauge pressure at the bottom?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">p = p<sub>tank</sub> + ρgh = 150 000 + 998×9.81×4 = 150 000 + 39 160 = <strong>189 kPa ≈ 1.89 bar g</strong> (≈ 19.3 m of water head).</span>
+      </div>
+
+      <p class="quiz-q">P3 — DN100 pipe (V=1.5 m/s) reduces to DN50. Velocity and velocity head in the DN50?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">V₂ = V₁(D₁/D₂)² = 1.5×(100/50)² = 1.5×4 = <strong>6 m/s</strong>. Velocity head = 6²/19.62 = <strong>1.83 m</strong> (16× the DN100 value of 0.115 m).</span>
+      </div>
+
+      <p class="quiz-q">P4 — 200 m of DN100 steel (f=0.02) at 3 m/s. Friction head loss?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">h<sub>f</sub> = f(L/D)(V²/2g) = 0.02×(200/0.1)×(9/19.62) = 0.02×2000×0.459 = <strong>18.4 m</strong>. (Halving V to 1.5 m/s → ¼ the loss = 4.6 m — the V² lever.)</span>
+      </div>
+
+      <p class="quiz-q">P5 — Pump: 30 m³/h at 25 m head, η=70 %. Shaft power?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">P<sub>hyd</sub> = 998×9.81×(30/3600)×25 = 2.04 kW. Shaft = 2.04/0.70 = <strong>2.91 kW</strong>. (Field shortcut: ρQH/(367η) = 998×30×25/(367×0.70)/1000 ≈ 2.9 kW ✓.)</span>
+      </div>
+
+      <p class="quiz-q">P6 — NPSHa: atmospheric 10.1 m, flooded suction +3 m, suction friction 0.6 m, 45 °C water (p<sub>v</sub>≈1.0 m). Value, and OK against NPSHr=4 m?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">NPSHa = 10.1 + 3 − 0.6 − 1.0 = <strong>11.5 m</strong>. Margin over 4 m NPSHr = 7.5 m → very safe. Flooding the suction (+3 rather than a lift) is what makes it comfortable even warm.</span>
+      </div>
+
+      <p class="quiz-q">P7 — Pump at 2900 rpm gives 50 m³/h, 40 m, 9 kW. Trim to 2600 rpm (VFD). New Q, H, P?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">ratio = 2600/2900 = 0.897. Q = 50×0.897 = <strong>44.8 m³/h</strong>; H = 40×0.897² = <strong>32.2 m</strong>; P = 9×0.897³ = <strong>6.5 kW</strong>. A 10 % speed cut → ~28 % power cut.</span>
+      </div>
+
+      <p class="quiz-q">P8 — Reynolds for glycol (ν=15×10⁻⁶ m²/s) in DN40 at 1.2 m/s. Regime?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">Re = VD/ν = 1.2×0.04/15e-6 = 0.048/15e-6 = <strong>3200</strong> → transitional (2300–4000). Undesirable — nudge velocity down for stable laminar (f=64/Re) or up for firm turbulent; don&#39;t design a pulsating dose line to sit at 3200.</span>
+      </div>
+
+      <p class="quiz-q">P9 — System: H<sub>static</sub>=12 m, and at 60 m³/h friction is 8 m. Write H<sub>sys</sub>(Q) and find head at 90 m³/h.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">k = 8/60² = 0.00222 m/(m³/h)². H<sub>sys</sub> = 12 + 0.00222·Q². At 90: 12 + 0.00222×8100 = 12 + 18.0 = <strong>30 m</strong>. Friction more than doubled (8→18 m) for a 50 % flow rise — the Q² law.</span>
+      </div>
+
+      <p class="quiz-q">P10 — A centrifugal pump is dead-headed (discharge valve shut) for 10 minutes. What happens and why is it dangerous?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal</span>
+        <span class="hidden">At shut-off the pump makes maximum head but zero flow, so <strong>all shaft power becomes heat</strong> in the trapped liquid. Temperature climbs fast; the water can flash to steam, the mechanical seal cooks and fails, and the casing can be damaged. Protect with a <strong>minimum-flow bypass</strong>, a thermal/no-flow trip, or auto-recirculation valves. (A PD pump dead-headed simply bursts the weakest component — always relieve it.)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 15 ============ -->
+  <section class="page" id="p15">
+    <span class="page-tag">Page 15 / 16 · MSc Practice</span>
+    <h2 class="page-title">Key Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">Three derivations, a symbol glossary, and seven traps.</p>
+
+    <div class="card">
+      <div class="label">Derivation 1 — Bernoulli from the energy equation</div>
+      <div class="eqn">Start: steady flow work-energy on a streamline, unit weight of fluid.
+Pressure work + kinetic + potential are conserved without friction/machine:
+∫dp/ρ + V²/2 + gz = const   →  (incompressible, ÷g)
+<b>p/ρg + V²/2g + z = H</b>
+Each term = energy per unit WEIGHT → units of metres (head).
+Add machine &amp; loss for the real equation:  H₁ + H<sub>p</sub> = H₂ + h<sub>L</sub></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 2 — the affinity laws from geometry</div>
+      <div class="eqn">Blade tip speed U₂ = πD₂N/60  → U₂ ∝ N
+Flow through the impeller ∝ throughflow velocity ∝ U₂ ∝ N  → <b>Q ∝ N</b>
+Euler head gH = U₂·V<sub>u2</sub>, and V<sub>u2</sub> ∝ U₂ ∝ N  → H ∝ U₂² ∝ N²  → <b>H ∝ N²</b>
+Power P = ρgQH ∝ N·N² = N³  → <b>P ∝ N³</b>
+(same reasoning with D at fixed N gives the diameter-trim laws)</div>
+      <p class="body">The cube law is not empirical — it falls straight out of &quot;flow scales with speed, head scales with speed², power is their product.&quot;</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Derivation 3 — NPSH available</div>
+      <div class="eqn">Apply the energy equation from the free surface (point 0) to the pump eye (point e):
+p₀/ρg + z₀ = p<sub>e</sub>/ρg + V<sub>e</sub>²/2g + z<sub>e</sub> + h<sub>f,suc</sub>
+Define NPSHa = (p<sub>e</sub>/ρg + V<sub>e</sub>²/2g) − p<sub>v</sub>/ρg   (total head at eye above vapour)
+Substitute:  <b>NPSHa = p<sub>atm</sub>/ρg − (z<sub>e</sub>−z₀) − h<sub>f,suc</sub> − p<sub>v</sub>/ρg</b>
+(z<sub>e</sub>−z₀) is +ve for a lift, −ve for a flooded suction.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol glossary</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Symbol</th><th>Meaning</th><th>Unit</th></tr>
+          <tr><td class="mono">ρ, μ, ν</td><td>Density, dynamic &amp; kinematic viscosity</td><td>kg/m³, Pa·s, m²/s</td></tr>
+          <tr><td class="mono">H, h<sub>L</sub></td><td>Head; head loss</td><td>m</td></tr>
+          <tr><td class="mono">Q, V, A</td><td>Volume flow, velocity, area</td><td>m³/s, m/s, m²</td></tr>
+          <tr><td class="mono">f, K</td><td>Darcy friction factor; minor-loss coeff.</td><td>—</td></tr>
+          <tr><td class="mono">Re</td><td>Reynolds number = VD/ν</td><td>—</td></tr>
+          <tr><td class="mono">p<sub>v</sub></td><td>Vapour pressure (of the fluid at T)</td><td>Pa or m head</td></tr>
+          <tr><td class="mono">NPSHa/r</td><td>Net positive suction head available / required</td><td>m</td></tr>
+          <tr><td class="mono">N<sub>s</sub></td><td>Specific speed (impeller-shape index)</td><td>—</td></tr>
+          <tr><td class="mono">BEP</td><td>Best efficiency point</td><td>—</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven exam &amp; field traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Head vs pressure:</strong> a centrifugal makes constant <em>head</em>, not pressure — density changes the pressure and power, not the head.</div></li>
+        <li><span class="num">2</span><div><strong>NPSH is a suction problem:</strong> you never cure cavitation on the discharge side. Fix the suction, the fluid temperature, or the speed.</div></li>
+        <li><span class="num">3</span><div><strong>Affinity cube needs H<sub>static</sub>≈0:</strong> on static-dominated systems the N³ saving is optimistic and there&#39;s a minimum useful speed.</div></li>
+        <li><span class="num">4</span><div><strong>Series adds head, parallel adds flow</strong> — and the system-curve slope decides whether either actually helps.</div></li>
+        <li><span class="num">5</span><div><strong>&quot;Minor&quot; losses aren&#39;t:</strong> on short fitting-heavy skids ΣK·V²/2g can dwarf fL/D. A globe valve (K≈10) alone can dominate.</div></li>
+        <li><span class="num">6</span><div><strong>Never dead-head a PD pump:</strong> it has no shut-off head — it makes whatever pressure it takes to fail something. Always relieve.</div></li>
+        <li><span class="num">7</span><div><strong>Water-curve ≠ viscous-curve:</strong> a pump&#39;s catalogue curve is on water; on viscous fluid head and efficiency drop and power rises — apply viscosity correction (HI charts).</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 16 ============ -->
+  <section class="page" id="p16">
+    <span class="page-tag">Page 16 / 16 · MSc Practice</span>
+    <h2 class="page-title">Study &amp; Practice Path</h2>
+    <p class="page-sub">The shelf, the ladder, and an honest self-check.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Resource</th><th>What it gives you</th></tr>
+          <tr><td><b>White — Fluid Mechanics</b></td><td>The standard rigorous text: statics, Bernoulli, viscous flow, dimensional analysis, turbomachinery</td></tr>
+          <tr><td><b>Cengel &amp; Cimbala — Fluid Mechanics</b></td><td>Very readable, worked-example heavy — ideal first pass</td></tr>
+          <tr><td><b>Munson — Fundamentals of Fluid Mechanics</b></td><td>Clear on control volumes and similitude</td></tr>
+          <tr><td><b>KSB Centrifugal Pump Lexicon / Selecting Centrifugal Pumps</b></td><td>Free, superb industry reference on curves, NPSH, selection</td></tr>
+          <tr><td><b>Grundfos "Pump Handbook" &amp; Motor/Pump modules</b></td><td>Free, practical: system curves, VFD control, energy</td></tr>
+          <tr><td><b>Hydraulic Institute (HI) standards &amp; viscosity charts</b></td><td>Definitive on NPSH margins, testing, viscous correction</td></tr>
+          <tr><td><b>Moody chart + Colebrook / Swamee–Jain</b></td><td>Keep one to hand; Swamee–Jain gives f explicitly without iteration</td></tr>
+          <tr><td><b>Karassik — Pump Handbook</b></td><td>The encyclopedic professional reference</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div>Take a real pump nameplate + curve. Mark its BEP, shut-off head, and NPSHr line. Where does it actually run?</div></li>
+        <li><span class="num">2</span><div>Measure a real system: suction and discharge gauges → compute total head. Compare with the curve at the measured flow.</div></li>
+        <li><span class="num">3</span><div>Build the system curve for one loop: H<sub>static</sub> + k·Q² from pipe/fittings. Overlay the pump curve; predict the operating point.</div></li>
+        <li><span class="num">4</span><div>Compute NPSHa for that install and compare with NPSHr. Find the margin; identify the biggest suction-side lever.</div></li>
+        <li><span class="num">5</span><div>Apply the affinity laws: pick a lower duty, predict Q/H/P at reduced speed, and estimate the VFD energy saving vs throttling.</div></li>
+        <li><span class="num">6</span><div>Read a Moody chart for two of your pipes; compute h<sub>f</sub> by Darcy and by Swamee–Jain — check they agree.</div></li>
+        <li><span class="num">7</span><div>Listen to a cavitating pump (video/plant) and correlate the &quot;gravel&quot; sound with a dropped head reading and vibration spectrum (A42).</div></li>
+        <li><span class="num">8</span><div>Do a full selection: given a duty and fluid, choose type, size to BEP, verify NPSH, size the motor, list wetted materials.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment</div>
+      <div class="grid-2">
+        <div class="mini"><h4>Concepts</h4><p>Explain head vs pressure, laminar vs turbulent, BEP, NPSH, and the affinity laws without notes.</p></div>
+        <div class="mini c-amb"><h4>Calculation</h4><p>Total head, Darcy loss, pump power, NPSHa, affinity re-rate — five closed-book routines.</p></div>
+        <div class="mini c-flow"><h4>Judgement</h4><p>Series vs parallel, VFD vs throttle, centrifugal vs PD — pick right for the system-curve shape.</p></div>
+        <div class="mini c-grn"><h4>Diagnosis</h4><p>Read symptoms (noise, low head, hot seal) and localise the cause to suction, BEP, or dead-head.</p></div>
+      </div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Final Thought</div>
+      <p class="quote">Master the two curves and the suction, and the pump has no secrets left.</p>
+    </div>
+
+    <p class="footer">
+      Advanced Deep Dive A47 · Fluid Mechanics &amp; Pumps · Thermal &amp; Fluid Engineering<br>
+      Related: <a href="A12_Pneumatic_Systems_Deep_Dive.html" style="color:var(--accent-soft)">A12 Pneumatics</a> ·
+      <a href="A13_Hydraulic_Systems_Deep_Dive.html" style="color:var(--accent-soft)">A13 Hydraulics</a> ·
+      <a href="A08_VFD_Deep_Dive.html" style="color:var(--accent-soft)">A08 VFD</a> ·
+      <a href="A42_Vibration_Analysis_Deep_Dive.html" style="color:var(--accent-soft)">A42 Vibration</a><br>
+      Micro Learning · Advanced Library · optimised for iPad Pro 11&quot; · keratoconus-friendly high-contrast dark theme
+    </p>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  var g=9.81;
+  // Pipe velocity demo
+  var qR=document.getElementById('qR'), dR=document.getElementById('dR');
+  function pv(){
+    var Q=+qR.value/3600, D=+dR.value/1000;
+    document.getElementById('qv').textContent=qR.value;
+    document.getElementById('dv').textContent=dR.value;
+    var A=Math.PI/4*D*D, V=Q/A, vh=V*V/(2*g);
+    var flag = V<0.6?'<span style="color:#fbbf24"> (low — settling risk on solids)</span>':(V>3.5?'<span style="color:#f87171"> (high — friction &amp; erosion)</span>':'<span style="color:#4ade80"> (sensible)</span>');
+    document.getElementById('qOut').innerHTML=
+      'A = (π/4)·D² = <b>'+(A*1e4).toFixed(2)+' cm²</b><br>'+
+      'V = Q/A = <b>'+V.toFixed(2)+' m/s</b>'+flag+'<br>'+
+      'velocity head V²/2g = <b>'+vh.toFixed(3)+' m</b>';
+  }
+  qR.addEventListener('input',pv); dR.addEventListener('input',pv); pv();
+
+  // NPSH demo — vapour pressure head vs temperature (approx, m of water)
+  var pvTable={10:0.13,15:0.17,20:0.24,25:0.32,30:0.44,35:0.58,40:0.76,45:1.0,50:1.28,55:1.64,60:2.08,65:2.62,70:3.28,75:4.08,80:5.05,85:6.20,90:7.58};
+  var hsR=document.getElementById('hsR'), hfR=document.getElementById('hfR'), tR=document.getElementById('tR'), nrR=document.getElementById('nrR');
+  function np(){
+    var hs=+hsR.value, hf=+hfR.value, T=+tR.value, nr=+nrR.value;
+    document.getElementById('hsv').textContent=hs.toFixed(1);
+    document.getElementById('hfv').textContent=hf.toFixed(1);
+    document.getElementById('tv').textContent=T;
+    document.getElementById('nrv').textContent=nr.toFixed(1);
+    var pvh=pvTable[T]||0.24;
+    // hs is +flooded / -lift; NPSHa = atm + hs - hf - pv
+    var npsha=10.33 + hs - hf - pvh;
+    var margin=npsha-nr;
+    var verdict = margin>=1 ? '<b style="color:#4ade80">SAFE ✓</b> ('+margin.toFixed(1)+' m margin)'
+                : margin>=0 ? '<b style="color:#fbbf24">MARGINAL</b> (only '+margin.toFixed(1)+' m — add margin)'
+                : '<b style="color:#f87171">CAVITATION ✗</b> ('+margin.toFixed(1)+' m — short of NPSHr)';
+    document.getElementById('npOut').innerHTML=
+      'p<sub>v</sub> head at '+T+' °C ≈ <b>'+pvh.toFixed(2)+' m</b><br>'+
+      'NPSHa = 10.33 '+(hs>=0?'+':'−')+' '+Math.abs(hs).toFixed(1)+' − '+hf.toFixed(1)+' − '+pvh.toFixed(2)+' = <b>'+npsha.toFixed(2)+' m</b><br>'+
+      'vs NPSHr '+nr.toFixed(1)+' m → '+verdict;
+  }
+  [hsR,hfR,tR,nrR].forEach(function(r){r.addEventListener('input',np);}); np();
+})();
+</script>
+</body>
+</html>

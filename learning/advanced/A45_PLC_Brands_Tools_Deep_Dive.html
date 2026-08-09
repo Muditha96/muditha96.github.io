@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PLC Brands &amp; Programming Tools · Sri Lanka Field Guide · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #a3e635;       /* ladder lime — pairs with A07 */
+    --accent-soft: #d9f99d;
+    --accent-2: #38bdf8;     /* software sky */
+    --accent-3: #fb923c;     /* brand orange */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(163,230,53,0.11), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(56,189,248,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(163,230,53,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(163,230,53,0.13), rgba(56,189,248,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(163,230,53,0.16); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-2)!important; } .c-sky .big{color:var(--accent-2)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #a3e635, #4d7c0f); color: #1a2604; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(26,38,4,0.75); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(163,230,53,0.09); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:100px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Industrial Automation · MSc Level · Sri Lanka Field Guide</span></div>
+  <h1 class="hero"><span class="emoji">🧰</span>PLC Brands &amp; Programming Tools</h1>
+  <p class="hero-sub">One PLC concept, a dozen dialects. This lecture maps the brands you will actually meet on Sri Lankan factory floors — Mitsubishi, Omron, Siemens, Delta and friends — their programming software, their addressing languages, how the same logic looks in each, and the smartest order to learn them for a career at home or abroad.</p>
+
+  <div class="connect">
+    <span class="pill">◆ COMPANION</span>
+    <span>Builds directly on:</span>
+    <a href="A07_PLC_Deep_Dive.html">A07 PLC In Depth →</a>
+    <a href="A36_Embedded_RaspberryPi_Deep_Dive.html">A36 Embedded &amp; OpenPLC →</a>
+    <a href="A14_SCADA_HMI_Deep_Dive.html">A14 SCADA &amp; HMI →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · One Concept, Many Dialects</a>
+    <a href="#p2">2 · The Sri Lanka Brand Map</a>
+    <a href="#p3">3 · Siemens &amp; TIA Portal</a>
+    <a href="#p4">4 · Mitsubishi &amp; GX Works</a>
+    <a href="#p5">5 · Omron &amp; Sysmac</a>
+    <a href="#p6">6 · Delta &amp; Budget Brands</a>
+    <a href="#p7">7 · AB · Schneider · CODESYS</a>
+    <a href="#p8">8 · One Program, Five Dialects</a>
+    <a href="#p9">9 · Simulators &amp; Home Lab</a>
+    <a href="#p10">10 · Career Path &amp; Quiz</a>
+    <a href="#p11">11 · Worked Examples</a>
+    <a href="#p12">12 · Problem Set</a>
+    <a href="#p13">13 · Deep Structure &amp; Traps</a>
+    <a href="#p14">14 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ============ PAGE 1 ============ -->
+  <section class="page" id="p1">
+    <span class="page-tag">Page 1 / 14 · The Landscape</span>
+    <h2 class="page-title">One PLC Concept, Many Dialects</h2>
+    <p class="page-sub">Every brand runs the same scan cycle you learned in A07 — what differs is the language around it.</p>
+
+    <div class="card">
+      <div class="label">The core truth</div>
+      <p class="lead">A PLC engineer&#39;s skill is <span class="hl">90% transferable</span>: scan cycle, I/O, timers, state machines and interlocks are identical everywhere. The remaining 10% — <span class="hl2">addressing notation, software workflow, and download quirks</span> — is what a "brand" really is.</p>
+      <p class="body">The bridge between brands is <strong>IEC 61131-3</strong>: the international standard defining five programming languages (LD, FBD, ST, SFC, IL) and a common software model (programs, function blocks, data types). Every modern vendor claims compliance; every vendor also adds proprietary flavour — which is why this lecture teaches the standard first and the dialects against it.</p>
+      <div class="eqn">what changes between brands        what never changes
+──────────────────────────         ─────────────────────────
+addressing (%I0.0 vs X0)           the scan: read → solve → write
+IDE &amp; project structure            ladder logic &amp; boolean algebra
+download/online workflow           timers, counters, edges
+hardware config style              state-machine design
+comms setup dialogs                interlock &amp; fail-safe thinking</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Why "which brand?" matters anyway</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Machines arrive with their PLC chosen.</strong> A Japanese knitting machine brings Mitsubishi; a German packing line brings Siemens; a Chinese bag-making machine brings Delta or Xinje. Maintenance engineers don&#39;t choose — they meet.</div></li>
+        <li><span class="num">2</span><div><strong>Software is the real lock-in.</strong> The CPU is a grey box; the IDE, cables, licences and the program archive are where brands capture you. Losing the only laptop with the licensed software (and the project file) is a plant-stopping event.</div></li>
+        <li><span class="num">3</span><div><strong>Job ads are written in brand names.</strong> "GX Works2 essential", "TIA Portal experience", "Studio 5000 preferred" — your CV is scanned for these exact strings, in Colombo and in Dubai alike.</div></li>
+      </ul>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">5</div><h4>IEC languages</h4><p>LD ladder · FBD blocks · ST text · SFC steps · IL (deprecated) — page 8 shows one program in all of them.</p></div>
+      <div class="mini c-sky"><div class="big">90%</div><h4>Transferable skill</h4><p>Learn the concepts once (A07); each new brand is then a weekend of notation, not a new career.</p></div>
+      <div class="mini c-org"><div class="big">10%</div><h4>The dialect tax</h4><p>Addressing, IDE workflow, cables and quirks — exactly what this lecture catalogues per brand.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 ============ -->
+  <section class="page" id="p2">
+    <span class="page-tag">Page 2 / 14 · Local Market</span>
+    <h2 class="page-title">The Sri Lanka Brand Map</h2>
+    <p class="page-sub">Who you&#39;ll meet where: the installed base follows the machinery import routes.</p>
+
+    <div class="card">
+      <div class="label">Brands by industry sector</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Sector (SL)</th><th>Dominant brands</th><th>Why</th></tr>
+        <tr><td><b>Apparel &amp; textile</b> (largest industrial employer)</td><td>Mitsubishi, Omron, Delta; Siemens on newer lines</td><td>Machinery from Japan/China/Taiwan; Juki, Brother ecosystems; retrofits favour cheap Delta</td></tr>
+        <tr><td><b>Tea, rubber &amp; food processing</b></td><td>Mitsubishi FX, Omron CP, Delta, Xinje</td><td>Small machine automation, local panel builders, cost-driven</td></tr>
+        <tr><td><b>Cement, steel, glass</b></td><td>Siemens S7, ABB, some AB</td><td>European process lines, big I/O counts, engineering contractors</td></tr>
+        <tr><td><b>Water &amp; power (NWSDB, CEB, IPPs)</b></td><td>Siemens, Schneider, ABB</td><td>Tender-driven infrastructure projects, European consultants</td></tr>
+        <tr><td><b>Printing &amp; packaging</b></td><td>Mitsubishi, Omron, Siemens, Delta servo packages</td><td>Mixed Japanese/Chinese machine imports (→ A09 servo)</td></tr>
+        <tr><td><b>Multinationals &amp; BOI zone plants</b></td><td>Allen-Bradley, Siemens per corporate standard</td><td>Head-office standards override local availability</td></tr>
+        <tr><td><b>SME machine building / retrofits</b></td><td>Delta, Fatek, Xinje, Wecon, INVT</td><td>Price, local agent stock, free software</td></tr>
+      </table></div>
+      <p class="body"><strong>The pattern:</strong> Sri Lanka&#39;s installed base is <span class="hl">Japan-heavy at the machine level</span> (Mitsubishi, Omron), <span class="hl2">Europe-heavy at the plant/infrastructure level</span> (Siemens, Schneider, ABB), and <span class="hl3">Taiwan/China-heavy at the budget end</span> (Delta, Fatek, Xinje). Allen-Bradley appears where an American or corporate specification demands it. Plan your learning order accordingly — page 10.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The local ecosystem around the boxes</div>
+      <p class="body"><strong>Agents &amp; stock:</strong> the practical question is never "which PLC is best" but "which one can I buy on Kollupitiya/Panchikawatte lead time, with a local agent who answers the phone" — Delta, Mitsubishi and Omron win this daily. <strong>Panel builders:</strong> a healthy Colombo/Gampaha panel-building trade wires CUs, VFDs (→ A08) and PLC panels to IEC 61439 — many engineers start here. <strong>Second-hand market:</strong> used FX1N/FX2N/FX3U units circulate cheaply from decommissioned machines — the classic Sri Lankan home-lab starter. <strong>Support reality:</strong> for budget Chinese brands the "support" is a PDF and a WeChat group; for Mitsubishi/Siemens there are trained local engineers — price that into any purchasing decision you influence.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-red"><div class="big">🇯🇵</div><h4>Machine level</h4><p>Mitsubishi &amp; Omron ride in on Japanese machinery — the most common faceplates in SL factories.</p></div>
+      <div class="mini c-teal"><div class="big">🇩🇪</div><h4>Plant level</h4><p>Siemens dominates process industry &amp; infrastructure tenders; Schneider/ABB share the space.</p></div>
+      <div class="mini c-amb"><div class="big">🇹🇼</div><h4>Budget level</h4><p>Delta is the SME default; Fatek/Xinje/Wecon fill the lowest tier with free software.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 ============ -->
+  <section class="page" id="p3">
+    <span class="page-tag">Page 3 / 14 · Ecosystem 1</span>
+    <h2 class="page-title">Siemens — S7 &amp; TIA Portal</h2>
+    <p class="page-sub">The engineering-heavyweight ecosystem: strictest structure, deepest toolchain, global job currency.</p>
+
+    <div class="card">
+      <div class="label">Hardware family</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Tier</th><th>Model</th><th>Role in SL</th></tr>
+        <tr><td><b>Smart relay</b></td><td>LOGO! 8</td><td>Small machine / building logic; gateway drug to TIA thinking</td></tr>
+        <tr><td><b>Compact</b></td><td>S7-1200</td><td>The modern workhorse: machine control, OEM panels, water pump stations</td></tr>
+        <tr><td><b>Advanced</b></td><td>S7-1500</td><td>Process lines, cement/steel, fail-safe (F) variants, PROFINET backbone (→ A02)</td></tr>
+        <tr><td><b>Legacy you WILL meet</b></td><td>S7-200 / S7-300 / S7-400</td><td>Still running SL plants; programmed in STEP 7 Classic / MicroWIN, not TIA</td></tr>
+      </table></div>
+      <div class="eqn">software: <b>TIA Portal</b> (S7-1200/1500, WinCC HMI, Startdrive VFDs — one project)
+legacy:   STEP 7 v5.x (S7-300/400) · STEP 7-MicroWIN (S7-200 — common in SL!)
+sim:      <b>PLCSIM</b> built in · languages: LAD, FBD, <b>SCL</b> (=ST), GRAPH (=SFC)</div>
+      <p class="body"><strong>The Siemens mental model:</strong> everything is a <span class="hl">block</span> — OBs (entry points: OB1 cyclic, OB35 timed, OB82 diagnostics), FCs/FBs (logic, FBs with instance DBs holding their memory), DBs (data). Addressing is <span class="hl2">%I0.0 / %Q0.0 / %M0.0</span> but modern practice is fully symbolic with optimized blocks — you name tags and forget addresses. TIA enforces structure that feels bureaucratic on day one and priceless on a 2000-I/O project.</p>
+      <p class="body"><strong>Quirks that cost beginners days:</strong> hardware configuration must match reality and be downloaded separately from code; optimized vs standard block access breaks raw addressing assumptions; and project files are version-locked (a V17 project won&#39;t open in V16 — archive the installer with the project).</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-teal"><div class="big">OB1</div><h4>Block architecture</h4><p>OB/FB/FC/DB structure scales to huge programs — the reason big plants specify Siemens.</p></div>
+      <div class="mini"><div class="big">SCL</div><h4>Real ST language</h4><p>Structured Control Language — full IEC ST; the door from PLC world into software engineering.</p></div>
+      <div class="mini c-sky"><div class="big">SCE</div><h4>Free learning</h4><p>Siemens SCE trainer packages + TIA Portal trial + PLCSIM = a zero-hardware classroom (page 9).</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 ============ -->
+  <section class="page" id="p4">
+    <span class="page-tag">Page 4 / 14 · Ecosystem 2</span>
+    <h2 class="page-title">Mitsubishi — FX/iQ &amp; GX Works</h2>
+    <p class="page-sub">The most common nameplate on Sri Lankan machines — pragmatic, compact, everywhere.</p>
+
+    <div class="card">
+      <div class="label">Hardware family</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Tier</th><th>Model</th><th>Role in SL</th></tr>
+        <tr><td><b>Legacy compact (everywhere)</b></td><td>FX1N / FX2N / FX3U / FX3G</td><td>The installed base: sewing automation, packing, tea machinery — and the used market</td></tr>
+        <tr><td><b>Current compact</b></td><td>FX5U (iQ-F)</td><td>Ethernet built-in, 4-axis pulse output — the modern retrofit default</td></tr>
+        <tr><td><b>Modular / rack</b></td><td>Q series → iQ-R</td><td>Larger machines &amp; lines, motion controllers (→ A09), CC-Link networks</td></tr>
+        <tr><td><b>HMI &amp; drives kin</b></td><td>GOT HMIs, FR inverters, MR servos</td><td>The full Japanese package that arrives with machinery</td></tr>
+      </table></div>
+      <div class="eqn">software: <b>GX Works3</b> (FX5U/iQ-R) · <b>GX Works2</b> (FX3U/Q — still daily-driver in SL)
+ancient:  GX Developer / FXGP-WIN (you will meet them on old laptops)
+sim:      GX Simulator built in · languages: ladder-centric + ST, FBD, SFC (Works3)</div>
+      <p class="body"><strong>The Mitsubishi mental model:</strong> a flat <span class="hl">device map</span> with letter prefixes — <span class="hl2">X</span> inputs, <span class="hl2">Y</span> outputs (octal-numbered on FX: X0–X7, X10…), <span class="hl2">M</span> internal relays, <span class="hl2">D</span> data registers, <span class="hl2">T/C</span> timers/counters. No mandatory structure — which makes small programs fast and large undisciplined programs unreadable. Ladder is the culture; ST exists but the installed base is 95% rungs.</p>
+      <p class="body"><strong>Quirks:</strong> octal I/O numbering (there is no X8!); comments live in the project file, not the CPU — losing the laptop loses the documentation; FX3U programs don&#39;t upload into GX Works3 without conversion; and the classic RS-422 round-DIN programming cable (SC-09) is its own little economy in Panchikawatte.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-red"><div class="big">X/Y</div><h4>Octal devices</h4><p>X0–X7 then X10 — the numbering trap every new Mitsubishi engineer falls into once.</p></div>
+      <div class="mini"><div class="big">FX</div><h4>SL&#39;s workhorse</h4><p>Decades of FX units run the island&#39;s machines; used FX3U = the standard home-lab buy.</p></div>
+      <div class="mini c-org"><div class="big">GOT</div><h4>Package deal</h4><p>PLC + GOT HMI + FR VFD + MR servo — learn one wiring diagram, service a thousand machines.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 ============ -->
+  <section class="page" id="p5">
+    <span class="page-tag">Page 5 / 14 · Ecosystem 3</span>
+    <h2 class="page-title">Omron — CP/CJ &amp; CX-One / Sysmac</h2>
+    <p class="page-sub">Japan&#39;s other giant: sensor-to-controller coherence, and the smoothest ladder editor in the business.</p>
+
+    <div class="card">
+      <div class="label">Hardware family</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Tier</th><th>Model</th><th>Role in SL</th></tr>
+        <tr><td><b>Micro</b></td><td>CP1E / CP2E</td><td>Small machines, packaging, the Omron answer to FX — common in SL</td></tr>
+        <tr><td><b>Compact/modular legacy</b></td><td>CP1H, CJ2M, CJ1</td><td>Machine + small line control across the installed base</td></tr>
+        <tr><td><b>Machine automation (current)</b></td><td>NX1P / NJ series</td><td>Sysmac platform: PLC + motion + EtherCAT (→ A03) in one controller</td></tr>
+        <tr><td><b>Everything around</b></td><td>E2E/E3 sensors, MY relays, NB/NA HMIs, temperature controllers</td><td>Omron&#39;s sensor catalogue is half of every SL panel anyway (→ A11)</td></tr>
+      </table></div>
+      <div class="eqn">software: <b>CX-Programmer</b> (inside CX-One suite) — CP/CJ ladder world
+          <b>Sysmac Studio</b> — NX/NJ: IEC 61131-3 proper, ST + motion + vision
+sim:      CX-Simulator · Sysmac simulator · languages: LD dominant, ST rising</div>
+      <p class="body"><strong>The Omron mental model:</strong> memory <span class="hl">areas</span> — <span class="hl2">CIO</span> (I/O + work bits, e.g. 0.00–0.15 per word), <span class="hl2">W</span> work, <span class="hl2">H</span> holding (retentive), <span class="hl2">D</span> data memory, <span class="hl2">A</span> auxiliary (system flags). Address = word.bit: input <span class="mono">0.05</span>, output <span class="mono">100.03</span>. The word/bit structure makes channel-wise data handling natural, and the differentiate-up/down instructions (DIFU/DIFD) are the local dialect for edges.</p>
+      <p class="body"><strong>Quirks:</strong> the CIO word split between real I/O and work bits invites accidental overlap on small CPUs; CX-Programmer&#39;s function-key-driven editing (F-keys for contacts/coils) is beloved by veterans and baffling for a day; and the CX-One licence covers a whole suite (HMI, networks, servo) — the SL-relevant point being that one legal copy equips a workshop.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-sky"><div class="big">0.05</div><h4>Word.bit addressing</h4><p>CIO area, word 0 bit 05 — think in 16-bit channels, not loose contacts.</p></div>
+      <div class="mini"><div class="big">F-keys</div><h4>Fastest ladder entry</h4><p>CX-Programmer&#39;s keyboard editing makes veterans absurdly quick — worth learning properly.</p></div>
+      <div class="mini c-teal"><div class="big">NX/NJ</div><h4>The Sysmac future</h4><p>EtherCAT motion + PLC + safety in one IEC-native IDE — Omron&#39;s answer to TIA.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 ============ -->
+  <section class="page" id="p6">
+    <span class="page-tag">Page 6 / 14 · Ecosystem 4</span>
+    <h2 class="page-title">Delta &amp; the Budget Tier — Fatek, Xinje, Wecon</h2>
+    <p class="page-sub">Where most Sri Lankan SME automation actually happens: capable hardware, free software, thin manuals.</p>
+
+    <div class="card">
+      <div class="label">Delta — the SME default</div>
+      <div class="eqn">hardware: DVP-ES2/SS2/SA2 (FX-workalike) → <b>AS series</b> (current, Ethernet)
+software: WPLSoft (legacy, free) → <b>ISPSoft</b> → <b>DIADesigner</b> (current)
+devices:  X/Y (octal!) · M · D · T/C — deliberately Mitsubishi-shaped
+kin:      VFD-M/MS300 drives (SL&#39;s most common VFD → A08), ASDA servos, DOP HMIs</div>
+      <p class="body">Delta&#39;s strategy was to be <strong>the affordable Mitsubishi</strong>: same device letters, similar instructions, half the price, free software. It worked — Delta is everywhere in Sri Lankan SME machinery, retrofits and local machine building. Engineering quality is real (Taiwanese, ISO-certified, decent documentation); the gap versus the Japanese tier is in long-term firmware support, advanced diagnostics and application-engineering depth.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The rest of the budget shelf</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Brand</th><th>Software</th><th>Field notes (SL)</th></tr>
+        <tr><td><b>Fatek (TW)</b></td><td>WinProladder (free)</td><td>Solid FX-style micro; loyal following among panel builders; good uptime record</td></tr>
+        <tr><td><b>Xinje (CN)</b></td><td>XDPPro (free)</td><td>Very cheap, Mitsubishi-flavoured; fine for simple machines; verify analog specs yourself</td></tr>
+        <tr><td><b>Wecon (CN)</b></td><td>LX studio tools</td><td>PLC+HMI combos at rock-bottom price; HMI software better than the PLC side</td></tr>
+        <tr><td><b>INVT / Kinco (CN)</b></td><td>Auto Studio etc.</td><td>Ride in with their VFD/HMI lines; same caveats</td></tr>
+        <tr><td><b>Panasonic (JP)</b></td><td>FPWIN GR/Pro</td><td>FP-X/FP0R niche but respected — appears on Japanese auxiliary equipment</td></tr>
+      </table></div>
+      <p class="body"><strong>Honest engineering guidance for the budget tier:</strong> perfectly acceptable for a rice-mill conveyor or a simple packing machine; think twice where downtime is expensive, where the machine will outlive its supplier relationship, or where safety functions are involved (no proper safety-rated variants — → A35). The hidden cost is <em>your time</em>: thinner manuals, translated menus, and forum-based support. Budget PLC + branded sensors + branded VFD is a common, sensible SL compromise.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-amb"><div class="big">$</div><h4>Free software</h4><p>The budget tier&#39;s real weapon: no licence barrier for students — ISPSoft/WinProladder cost nothing to learn tonight.</p></div>
+      <div class="mini"><div class="big">X/Y</div><h4>Mitsubishi-shaped</h4><p>Delta/Xinje copied the FX device model — GX Works skills transfer almost line-for-line.</p></div>
+      <div class="mini c-red"><div class="big">⚖️</div><h4>Risk pricing</h4><p>Cheap iron, thin support: match the brand tier to the downtime cost, not to the purchase order.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 7 ============ -->
+  <section class="page" id="p7">
+    <span class="page-tag">Page 7 / 14 · Ecosystem 5</span>
+    <h2 class="page-title">Allen-Bradley, Schneider &amp; the CODESYS World</h2>
+    <p class="page-sub">The corporate spec, the tender spec, and the universal runtime hiding inside a dozen logos.</p>
+
+    <div class="card">
+      <div class="label">Allen-Bradley / Rockwell — the corporate standard</div>
+      <div class="eqn">hardware: Micro800 (CCW, free) · CompactLogix · ControlLogix
+software: <b>Studio 5000</b> (Logix) · Connected Components Workbench (Micro800)
+model:    <b>TAG-based</b> — no addresses at all: Motor.Start, Conveyor[3].Speed
+network:  EtherNet/IP native (CIP) — the US counterpart to PROFINET (→ A02)</div>
+      <p class="body">AB&#39;s Logix platform abandoned memory addresses entirely: everything is a named tag with a data type, programs are organised in tasks/programs/routines, and UDTs (user-defined types) let you build a "Motor" structure once and reuse it plant-wide. In Sri Lanka you meet AB inside multinationals (FMCG, tobacco, beverages) and on imported US-spec lines; in the Gulf job market it is a first-class citizen — worth a simulator-level acquaintance even if no local plant runs it.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Schneider Electric &amp; the CODESYS universe</div>
+      <div class="eqn">Schneider: Zelio (smart relay) · M221/M241/M262 (Machine Expert / -Basic)
+          legacy Modicon Quantum/Premium (Unity Pro → EcoStruxure Control Expert)
+          heritage: Modicon INVENTED the PLC (1968) and Modbus (→ A01)
+
+CODESYS:  one IEC 61131-3 IDE licensed by 400+ brands —
+          ABB AC500 · WAGO · Festo · Eaton · Bosch Rexroth · Delta AS (flavour)
+          free runtime for <b>Raspberry Pi</b> (→ A36) = the cheapest real-PLC lab</div>
+      <p class="body"><strong>Why CODESYS matters strategically:</strong> learn it once and you&#39;ve pre-learned the IDE of dozens of brands — same editor, same ST, same online-change workflow under different paint. Its free soft-PLC on a Raspberry Pi is the single cheapest way in Sri Lanka to practise professional IEC 61131-3 structured programming on real hardware, and OpenPLC (fully open-source) covers the same ground for zero cost. Schneider itself appears in SL through Zelio relays in small panels and Modicon in water/power infrastructure.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini c-purp"><div class="big">tags</div><h4>AB&#39;s model</h4><p>No %I0.0 anywhere — named, typed tags and UDTs; the most software-engineer-friendly PLC world.</p></div>
+      <div class="mini c-teal"><div class="big">1968</div><h4>Modicon legacy</h4><p>Schneider carries the original PLC lineage and Modbus — still the lingua franca of SL device comms.</p></div>
+      <div class="mini"><div class="big">400+</div><h4>CODESYS reach</h4><p>One IDE, hundreds of logos, free Pi runtime — the best learning leverage per hour spent.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 8 ============ -->
+  <section class="page" id="p8">
+    <span class="page-tag">Page 8 / 14 · Rosetta Stone</span>
+    <h2 class="page-title">One Program, Five Dialects</h2>
+    <p class="page-sub">The same start/stop seal-in, written in every accent — the fastest brand-fluency exercise there is.</p>
+
+    <div class="card">
+      <div class="label">Addressing Rosetta stone</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Concept</th><th>Siemens</th><th>Mitsubishi</th><th>Omron</th><th>Delta</th><th>Allen-Bradley</th></tr>
+        <tr><td><b>Input 1</b></td><td class="mono">%I0.0 / tag</td><td class="mono">X0 (octal)</td><td class="mono">0.00</td><td class="mono">X0 (octal)</td><td class="mono">Local:1:I.Data.0 / tag</td></tr>
+        <tr><td><b>Output 1</b></td><td class="mono">%Q0.0</td><td class="mono">Y0</td><td class="mono">100.00</td><td class="mono">Y0</td><td class="mono">tag e.g. MotorRun</td></tr>
+        <tr><td><b>Internal bit</b></td><td class="mono">%M0.0</td><td class="mono">M0</td><td class="mono">W0.00</td><td class="mono">M0</td><td class="mono">BOOL tag</td></tr>
+        <tr><td><b>16-bit word</b></td><td class="mono">%MW10 / DB</td><td class="mono">D10</td><td class="mono">D10</td><td class="mono">D10</td><td class="mono">INT tag</td></tr>
+        <tr><td><b>Timer</b></td><td class="mono">IEC TON (DB)</td><td class="mono">T0 K50</td><td class="mono">TIM 000 #50</td><td class="mono">T0 K50</td><td class="mono">TON instruction, tag</td></tr>
+        <tr><td><b>Retentive bit</b></td><td class="mono">M w/ retain set</td><td class="mono">latched M / S</td><td class="mono">H area</td><td class="mono">latched M</td><td class="mono">tag (all retentive)</td></tr>
+        <tr><td><b>Edge up</b></td><td class="mono">P box / R_TRIG</td><td class="mono">PLS / LDP</td><td class="mono">DIFU / @</td><td class="mono">PLS / LDP</td><td class="mono">ONS / OSR</td></tr>
+      </table></div>
+      <p class="body">Pin this table above your desk: it converts <strong>any</strong> brand&#39;s program you can read into every brand&#39;s program you can write. Note the two octal families (Mitsubishi, Delta), the word.bit family (Omron), the byte.bit family (Siemens), and the no-address family (AB).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Start/stop seal-in — Structured Text, three accents</div>
+      <div class="eqn"><span class="v2">// Siemens SCL</span>
+"Motor" := ("Start" OR "Motor") AND NOT "Stop" AND NOT "OverloadTrip";
+
+<span class="v2">// Mitsubishi ST (GX Works3)</span>
+Y0 := (X0 OR Y0) AND NOT X1 AND NOT M10;
+
+<span class="v2">// CODESYS / Omron Sysmac / AB ST — pure IEC</span>
+Motor := (Start OR Motor) AND NOT Stop AND NOT Overload;</div>
+      <p class="body">Identical logic, cosmetic differences: Siemens quotes symbolic names, Mitsubishi happily mixes raw devices into ST, the IEC-native platforms look like clean Pascal. In ladder the same rung is: <span class="mono">--[Start]--+--[/Stop]--[/OL]--(Motor)--</span> with a <span class="mono">[Motor]</span> branch in parallel with Start — in every brand, forever. The seal-in rung is your passport photo: same face, different passports.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">🧪 Interactive — dialect switcher</div>
+      <div class="demo">
+        <div class="seg" id="brandSeg">
+          <button class="on" data-b="0">Siemens</button>
+          <button data-b="1">Mitsubishi</button>
+          <button data-b="2">Omron</button>
+          <button data-b="3">Delta</button>
+          <button data-b="4">Allen-Bradley</button>
+        </div>
+        <div class="demo-out" id="dialectOut"></div>
+      </div>
+      <p class="body">Tap through the brands and watch the same three facts re-spell themselves: input notation, the 2-second on-delay timer, and where the program&#39;s memory lives. This is the whole "dialect tax" on one screen.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 9 ============ -->
+  <section class="page" id="p9">
+    <span class="page-tag">Page 9 / 14 · Zero-Budget Lab</span>
+    <h2 class="page-title">Simulators, Free Tools &amp; the Sri Lankan Home Lab</h2>
+    <p class="page-sub">Every ecosystem can be practised tonight without buying a single PLC — and a real lab costs less than you think.</p>
+
+    <div class="card">
+      <div class="label">Free &amp; trial software per ecosystem</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Ecosystem</th><th>Free route</th><th>Simulator</th></tr>
+        <tr><td><b>Siemens</b></td><td>TIA Portal trial (renewable) + SCE curriculum</td><td><b>PLCSIM</b> — full virtual S7-1200/1500</td></tr>
+        <tr><td><b>Mitsubishi</b></td><td>GX Works2/3 trial; e-learning portal free</td><td><b>GX Simulator</b> built into Works</td></tr>
+        <tr><td><b>Omron</b></td><td>CX-One trial / Sysmac Studio trial</td><td>CX-Simulator / Sysmac sim</td></tr>
+        <tr><td><b>Delta</b></td><td><b>ISPSoft / WPLSoft fully free</b></td><td>Built-in simulator — zero-cost complete stack</td></tr>
+        <tr><td><b>Allen-Bradley</b></td><td><b>CCW free</b> (Micro800); Studio 5000 trial</td><td>Micro800 simulator in CCW; Echo (paid)</td></tr>
+        <tr><td><b>CODESYS</b></td><td><b>Fully free IDE</b> + free Pi runtime</td><td>Built-in soft PLC — professional IEC, no hardware</td></tr>
+        <tr><td><b>OpenPLC</b></td><td>Fully open source (editor + runtime)</td><td>Runs on Pi/ESP32/PC (→ A36)</td></tr>
+        <tr><td><b>Practice worlds</b></td><td>PLC Fiddle (browser ladder), LogixPro (cheap AB trainer)</td><td><b>Factory I/O</b> — 3-D plant that talks to PLCSIM/Modbus</td></tr>
+      </table></div>
+      <p class="body"><strong>The highest-leverage combo for a Sri Lankan student:</strong> Delta ISPSoft (free, Mitsubishi-shaped — trains the FX world too) + TIA Portal trial with PLCSIM (trains the Siemens world) + CODESYS on a Raspberry Pi (trains the IEC/ST world). Three ecosystems, LKR 0 in software.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Building the physical lab — Colombo pricing logic</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Tier 0 — LKR 0:</strong> simulators above + Factory I/O trial. You can reach genuine intermediate skill before touching hardware.</div></li>
+        <li><span class="num">2</span><div><strong>Tier 1 — a used FX1N/FX2N or CP1E</strong> from the second-hand machinery trade + SC-09-style cable + a row of switches and LEDs on a board: the classic SL starter, often under the price of a textbook.</div></li>
+        <li><span class="num">3</span><div><strong>Tier 2 — new Delta DVP/AS or Fatek</strong> with genuine free software, a 4-line HMI, and one MS300 VFD: a complete mini production cell that mirrors real SME panels (→ A08).</div></li>
+        <li><span class="num">4</span><div><strong>Tier 3 — Raspberry Pi + CODESYS/OpenPLC + opto-isolated I/O board</strong> (→ A36 for the wiring rules): professional structured programming, Modbus practice against a real VFD, and a bridge to SCADA (→ A14).</div></li>
+        <li><span class="num">5</span><div><strong>Wire it like a panel, not a toy:</strong> DIN rail, terminal blocks, ferrules, E-stop and 24 V PSU — the lab should teach panel discipline (→ the coming IEC 60204 module) as a side effect.</div></li>
+      </ul>
+    </div>
+
+    <div class="grid-3">
+      <div class="mini"><div class="big">0 LKR</div><h4>Software cost</h4><p>Delta + CODESYS + trials: the licence barrier to PLC skill in Sri Lanka is now zero.</p></div>
+      <div class="mini c-sky"><div class="big">3-D</div><h4>Factory I/O</h4><p>A virtual conveyor plant driven by your simulated PLC — sorting, palletising, alarms: interview-ready projects.</p></div>
+      <div class="mini c-org"><div class="big">2nd-hand</div><h4>FX economy</h4><p>Decommissioned FX units are SL&#39;s cheapest real-hardware classroom — test I/O before paying.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 10 ============ -->
+  <section class="page" id="p10">
+    <span class="page-tag">Page 10 / 14 · Consolidate</span>
+    <h2 class="page-title">Career Path, Pitfalls &amp; Quiz</h2>
+    <p class="page-sub">Which brand first, which second, and the tool-side mistakes that stop real production lines.</p>
+
+    <div class="card">
+      <div class="label">The Sri Lanka learning order — a defensible sequence</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Concepts first (A07):</strong> scan, I/O, timers, state machines — brand-free. Everything after is dialect.</div></li>
+        <li><span class="num">2</span><div><strong>Mitsubishi GX Works2/3 second:</strong> the largest installed base on SL factory floors; a maintenance job magnet. Delta comes almost free with it (same device model).</div></li>
+        <li><span class="num">3</span><div><strong>Siemens TIA third:</strong> the plant/process tier at home AND the strongest single keyword for Middle East / EU / Australia job markets. Learn SCL properly here.</div></li>
+        <li><span class="num">4</span><div><strong>Omron fourth:</strong> rounds out the Japanese machine world; CX-Programmer fluency reads as "can service anything from Japan".</div></li>
+        <li><span class="num">5</span><div><strong>CODESYS/ST always:</strong> in parallel from day one — it future-proofs you across 400 brands and pulls your style toward structured, testable code. AB via CCW/simulator if the Gulf or FMCG multinationals are the target.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Six tool-side failures that stop plants</div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">⚠️ The only project file</div><p>Program lives on one retired engineer&#39;s laptop; CPU upload has no comments/symbols. Fix: archive project + IDE installer + licence per machine, versioned, off-site copy.</p></div>
+        <div class="fail"><div class="ft">⚠️ Version mismatch</div><p>TIA V17 file vs V16 office; GX Works3 vs an FX3U. Downgrade is rarely possible. Record IDE version ON the panel door.</p></div>
+        <div class="fail"><div class="ft">⚠️ Wrong cable/driver day</div><p>SC-09 vs USB clones, RS-232 vs USB-serial latency, wrong COM port — hours lost before the first rung. Keep a tested cable kit per brand.</p></div>
+        <div class="fail"><div class="ft">⚠️ Hardware config not downloaded</div><p>Siemens/Omron: code downloaded but I/O config stale → modules dark, no error you expect. Download BOTH, verify online-vs-offline equal.</p></div>
+        <div class="fail"><div class="ft">⚠️ Forces left active</div><p>Same sin, every brand, different menu. Check the force table first on any "impossible" behaviour (→ A07 traps).</p></div>
+        <div class="fail"><div class="ft">⚠️ Online edit without discipline</div><p>Live changes never written back to the master file → the archive lies. One rule: every online change is exported same day.</p></div>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 1</div>
+      <p class="quiz-q">A Sri Lankan apparel factory&#39;s new bag-closing machine arrives from Taiwan. Statistically, which PLC and software will the panel most likely contain?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Delta DVP/AS programmed in ISPSoft/WPLSoft</strong> (or another Taiwanese/Chinese budget brand like Fatek/Xinje). Taiwanese machine builders default to Delta; the free software means the factory can legally open the program — IF the builder shipped the project file. Ask for it at handover, always.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 2</div>
+      <p class="quiz-q">In a Mitsubishi FX program you see X7 followed by X10. Is X8 missing hardware?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">No — FX I/O numbering is <strong>octal</strong>: X0–X7, then X10–X17. X8 and X9 do not exist by definition. Delta copies this. Miscounting octal I/O during commissioning is the classic first-week Mitsubishi error.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 3</div>
+      <p class="quiz-q">Translate: Omron output 100.03 — what kind of address is this, and what&#39;s the Siemens byte.bit equivalent notation style?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Omron CIO <strong>word 100, bit 03</strong> (word.bit in 16-bit channels). Siemens would express an output as <strong>%Q12.3</strong> — byte 12, bit 3 (byte.bit in 8-bit groups). Same physical idea, different word sizes in the notation — the page-8 table converts.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 4</div>
+      <p class="quiz-q">Why does Allen-Bradley&#39;s Logix platform have no equivalent of %I0.0 at all?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Logix is fully <strong>tag-based</strong>: memory is allocated by named, typed tags (BOOL, INT, UDTs), and physical I/O maps to structured tags like Local:1:I.Data.0 — usually aliased to a name. Benefits: self-documenting programs, reusable UDT/AOI structures, no address bookkeeping. Cost: you must design a naming convention — the discipline IS the address map.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 5</div>
+      <p class="quiz-q">You must service: a cement plant DCS-adjacent PLC, a Japanese loom, and a local SME&#39;s conveyor retrofit. Name the three software packages you&#39;ll most likely open.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>TIA Portal (or STEP 7 classic)</strong> for the cement plant&#39;s S7; <strong>GX Works2/3</strong> for the loom&#39;s Mitsubishi FX/Q; <strong>ISPSoft/WPLSoft</strong> for the SME&#39;s Delta. That trio covers the majority of Sri Lankan service calls — which is exactly the page-10 learning order.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">🧠 Quick Check 6</div>
+      <p class="quiz-q">A factory asks you to standardise future purchases on one budget brand to save money. What three questions decide if that&#39;s wise?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">(1) <strong>What does one hour of downtime cost</strong> vs the PLC price difference? (2) <strong>Is there a competent local agent</strong> with stock and firmware support for the next 10 years? (3) <strong>Are safety functions involved</strong> (budget brands lack SIL/PL-rated options — → A35)? Cheap iron is rational for low-consequence machines with local support; elsewhere the "saving" is borrowed downtime.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 11 ============ -->
+  <section class="page" id="p11">
+    <span class="page-tag">Page 11 / 14 · MSc Practice</span>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four field-grade exercises: translation, selection, migration and archive rescue.</p>
+
+    <div class="card">
+      <div class="label">Worked Example 1 — Same machine, four dialects</div>
+      <p class="body"><b>Task:</b> a conveyor with Start (NO), Stop (NC wired, read as true-when-healthy), overload relay, and a 3 s start-delay siren. Write the core logic per brand.</p>
+      <div class="eqn"><span class="v2">// Siemens SCL (siren TON as IEC block)</span>
+#SirenTmr(IN := ("Start" OR "Run") AND "StopHealthy" AND "OLHealthy",
+          PT := T#3s);
+"Siren" := #SirenTmr.IN AND NOT #SirenTmr.Q;   // sounds during delay
+"Run"   := #SirenTmr.Q;
+
+<span class="v2">// Mitsubishi ladder (GX Works2, devices)</span>
+LD X0        (Start)          OR Y1 (Run seal)
+AND X1       (Stop healthy)   AND X2 (OL healthy)  → OUT M0
+LD M0 → OUT T0 K30            (3.0 s, 100 ms base)
+LD M0 ANI T0 → OUT Y0         (Siren)
+LD T0 → OUT Y1                (Run)
+
+<span class="v2">// Omron (CX-Programmer)</span>
+LD 0.00  OR 100.01  AND 0.01  AND 0.02  → OUT W0.00
+W0.00 → TIM 000 #30 · LD W0.00 ANDNOT T000 → OUT 100.00 (siren)
+LD T000 → OUT 100.01 (run)
+
+<span class="v2">// Delta: byte-for-byte the Mitsubishi solution with DVP devices</span></div>
+      <p class="body"><em>Discussion:</em> notice what stayed identical — the seal-in shape, the NC-stop philosophy (healthy = TRUE, so a broken wire stops the machine, → A44&#39;s fail-safe logic), and the timer gating. What changed: timer syntax (IEC block with PT vs K-constant in 100 ms units vs #BCD), and address spelling. Do this exercise once per new brand and the dialect tax is paid in an afternoon.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 2 — Selecting a PLC for a 20-I/O SL machine</div>
+      <p class="body"><b>Given:</b> a local tea-packing machine: 12 DI, 8 DO, one 4-20 mA load cell input, Modbus link to one VFD, budget-sensitive, one-shift operation. Score the candidates.</p>
+      <div class="eqn">criteria (weight):  price(3) · local agent/stock(3) · analog+comms fit(2) ·
+                    free software(2) · downtime cost tolerance(2)
+
+Delta DVP-SA2/AS  : 3+3+2+2+2 = <b>12/12 — selected</b>
+Mitsubishi FX5U   : 1+3+2+0(licence)+2 = 8 — better iron, over budget
+Siemens S7-1200   : 1+2+2+0+2 = 7 — overkill tier for one-shift packing
+Xinje XD          : 3+2+1(verify analog)+2+1 = 9 — viable, thinner support</div>
+      <p class="body"><em>Discussion:</em> the decision is dominated by <strong>agent + price</strong>, not CPU features — every candidate executes 20 I/O of ladder identically. The load-cell channel and Modbus port are the only technical differentiators worth checking datasheet-deep (resolution, isolated RS-485). Had this been a three-shift export line, the downtime-cost row would flip the answer to FX5U or S7-1200: same matrix, different weights — that is the method to show an interviewer.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 3 — Migration: FX2N fleet to FX5U</div>
+      <p class="body"><b>Given:</b> a factory with nine FX2N machines, spares drying up. Plan the migration.</p>
+      <div class="eqn">1 · UPLOAD &amp; ARCHIVE every FX2N program (GX Works2) + verify vs running CPU
+2 · CONVERT: GX Works2 project → GX Works3 conversion path (FX3U step if needed)
+3 · REMAP: octal I/O carries over; check SPECIALS — D8000-series system regs,
+    high-speed counter instructions, comms (RS instruction → predefined protocol)
+4 · REWIRE: FX5U terminal layout differs; 24V sink/source check per card
+5 · PILOT one machine · run a scan-time + function test script · then fleet</div>
+      <p class="body"><em>Discussion:</em> the dangerous 20% is never the ladder — it is <strong>system devices, comms instructions and analog scaling</strong> that changed generation-to-generation. The professional habit: build a migration test checklist from the OLD machine&#39;s behaviour (what does each mode do, what are the alarm paths), not from the code — the code may contain dead logic nobody remembers. Same skeleton applies to S7-300→S7-1500 (rewrite in TIA, absolute→symbolic) or CP1→NX (CX→Sysmac).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Worked Example 4 — The archive-rescue audit</div>
+      <p class="body"><b>Given:</b> you inherit maintenance of 30 machines, mixed brands, no documentation culture. Design the software-asset rescue.</p>
+      <div class="eqn">per machine, one row:  brand/CPU · IDE + VERSION · cable type · licence status ·
+project file? · comments in file or CPU? · upload possible? · backup date
+
+triage:  RED    no file + upload loses comments (Mitsubishi/Delta/Omron typical)
+         AMBER  file exists, wrong IDE version, licence unclear
+         GREEN  archived project + installer + cable, verified this year</div>
+      <p class="body"><em>Discussion:</em> reds get scheduled downtime for a verified upload NOW, while the machine still runs and the old technician still answers calls — comments are re-created by interview, which is expensive but cheapest today. The deliverable is a fireproof (and cloud) archive: project + IDE installer + licence record + cable photo per machine. This audit, done unasked in your first month, is the highest-visibility move a young SL maintenance engineer can make.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 ============ -->
+  <section class="page" id="p12">
+    <span class="page-tag">Page 12 / 14 · MSc Practice</span>
+    <h2 class="page-title">Problem Set — 10 Questions</h2>
+    <p class="page-sub">Translation drills, selection calls, and rescue scenarios — the daily diet of a multi-brand engineer.</p>
+
+    <div class="card quiz">
+      <div class="label">Problem 1</div>
+      <p class="quiz-q">Translate to Siemens notation: Mitsubishi X12 (input) and Y7 (output).</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">X12 octal = decimal input #10 → <strong>%I1.2</strong> (byte 1, bit 2). Y7 = output #7 → <strong>%Q0.7</strong>. The octal→byte.bit conversion (8 per group in both, conveniently) is: octal digit pair maps to byte.bit directly for the first two bytes.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 2</div>
+      <p class="quiz-q">A Mitsubishi T0 K50 with default 100 ms base equals what IEC timer preset?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">50 × 100 ms = <strong>T#5s</strong>. The K-constant-times-base convention (with 10 ms and 1 ms timer ranges too) vs IEC&#39;s explicit PT := T#5s is a classic translation slip — a K50 copied as "50 s" makes a machine six times slower to react.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 3</div>
+      <p class="quiz-q">Why do Delta skills transfer to Mitsubishi almost line-for-line, but not to Omron?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Delta deliberately cloned the <strong>Mitsubishi device model</strong> — X/Y octal, M/D/T/C, similar instruction mnemonics — so programs map almost symbol-for-symbol. Omron uses a different architecture: CIO <strong>word.bit</strong> areas, TIM/CNT syntax, DIFU edges — same concepts, different grammar family.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 4</div>
+      <p class="quiz-q">A plant&#39;s S7-300 program exists only inside the CPU. What can you recover by upload, and what is lost?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">Upload recovers the executable <strong>logic</strong> (blocks, instructions, addresses). Lost forever unless archived: <strong>symbolic names, comments, and network titles</strong> — on classic S7 they live in the offline project. A 5000-rung program without symbols is technically present and practically unreadable; budget weeks of re-documentation.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 5</div>
+      <p class="quiz-q">Which two ecosystems give a Sri Lankan student a complete legal toolchain for LKR 0, and what does each teach best?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Delta (ISPSoft/WPLSoft + simulator)</strong> — teaches the Mitsubishi-family device world that dominates SL machines. <strong>CODESYS (free IDE + Pi runtime)</strong> — teaches professional IEC 61131-3 structure and ST. (OpenPLC and AB&#39;s CCW are honourable free mentions.)</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 6</div>
+      <p class="quiz-q">An Omron CP1E program uses W0.00–W0.15 and also CIO 0.00 inputs. A colleague adds an output card mapped to CIO 0. What happens?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Address collision risk:</strong> on small CPUs CIO words are shared between physical I/O mapping and work bits; remapping hardware onto a word the program already uses as work bits corrupts logic silently. Fix: keep work bits in the W area (that&#39;s what it&#39;s for), audit the I/O table after any hardware change.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 7</div>
+      <p class="quiz-q">Same seal-in rung; write it in AB Structured Text with tags, including an alarm-horn ONS (one-shot).</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><span class="mono">Motor := (Start OR Motor) AND NOT Stop AND NOT Overload;</span> plus one-shot: <span class="mono">HornPulse := Motor AND NOT MotorPrev; MotorPrev := Motor;</span> — the manual edge pattern (or use OSR/ONS in ladder). Note: zero addresses anywhere; tag names carry the meaning.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 8</div>
+      <p class="quiz-q">Your factory&#39;s German line PLC shows TIA V16; your laptop has V18. Options?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden">TIA opens older projects by <strong>upgrading</strong> them — but then the file no longer matches the plant&#39;s V16 baseline, and downgrading is not supported. Correct practice: install V16 alongside V18 (TIA versions coexist), work in the machine&#39;s native version, and only upgrade as a planned, tested, documented event for the whole machine — never casually on a service call.</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 9</div>
+      <p class="quiz-q">Rank for a Gulf-region automation job application: GX Works, TIA Portal, Studio 5000 — and justify in one line each.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>TIA Portal first</strong> — Siemens dominates Middle East infrastructure/process tenders. <strong>Studio 5000 second</strong> — US-spec oil &amp; gas and FMCG sites. <strong>GX Works third</strong> — valued in packaging/machinery but a narrower keyword there. (For a SL-domestic career the order roughly reverses — market decides, not preference.)</span>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Problem 10</div>
+      <p class="quiz-q">A budget-brand PLC controls a machine with a light curtain. The vendor proposes wiring the curtain into a normal input "handled in software". Verdict?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')">
+        <span class="tap">Tap to reveal</span>
+        <span class="hidden"><strong>Reject.</strong> Safety functions require rated hardware: a safety relay or safety PLC/PLr-assessed circuit (→ A35), not standard I/O on any brand — and budget brands offer no safety-rated options at all. Standard PLC scan + non-redundant input ≠ PL c/d/e. The curtain wires through a safety relay that removes power; the PLC merely gets told about it.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 ============ -->
+  <section class="page" id="p13">
+    <span class="page-tag">Page 13 / 14 · MSc Practice</span>
+    <h2 class="page-title">Deep Structure, Glossary &amp; Traps</h2>
+    <p class="page-sub">The three structural ideas under every IDE — and the traps that cross brands with you.</p>
+
+    <div class="card">
+      <div class="label">Structure 1 — three memory philosophies</div>
+      <div class="eqn">FLAT DEVICE MAP   (Mitsubishi, Delta, Omron-ish)
+  fixed letter areas: X/Y/M/D — simple, fast, discipline is on YOU
+BLOCK-STRUCTURED  (Siemens)
+  OB/FB/FC/DB — data belongs to blocks; instance DBs give FBs private memory
+TAG-BASED         (Allen-Bradley, CODESYS/Sysmac direction)
+  named typed tags + UDTs/structs — the compiler owns the map</div>
+      <p class="body"><em>Why it matters:</em> the philosophy predicts how programs rot. Flat maps rot by address collisions and mystery M-bits; block systems rot by copy-pasted FCs with absolute addressing; tag systems rot by naming anarchy. Reading a brand&#39;s memory philosophy tells you what discipline to import on day one.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Structure 2 — where the truth lives (project vs CPU)</div>
+      <div class="eqn">CPU always holds:            compiled logic (uploadable)
+project file may hold ALONE: symbols · comments · UDT definitions ·
+                             HMI tags · network config documentation
+brand reality:  Siemens classic &amp; Mitsubishi &amp; Delta → comments in FILE
+                TIA (optimized) &amp; AB Logix → much more stored IN the CPU</div>
+      <p class="body"><em>Why it matters:</em> this single fact drives the archive discipline of pages 10–11. Knowing per-brand what an upload can and cannot recover is the difference between a 2-hour and a 2-month recovery — ask it as your first question at any new plant.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Structure 3 — the online/offline contract</div>
+      <div class="eqn">every IDE maintains TWO programs: offline (file) and online (CPU)
+operations: download (file→CPU) · upload (CPU→file) · compare · online edit
+the invariant to enforce:  <b>compare = EQUAL at the end of every visit</b></div>
+      <p class="body"><em>Why it matters:</em> nearly every "the machine doesn&#39;t match the drawing" disaster is a violated online/offline contract. Brands differ in edit granularity (AB online edits per rung; Siemens per block; Mitsubishi write-during-RUN with caveats) but the professional invariant is brand-free: leave with a verified-equal archive or you left a trap for the next engineer.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Glossary</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Term</th><th>Meaning</th><th>Note</th></tr>
+        <tr><td class="mono">IEC 61131-3</td><td>Standard for PLC languages &amp; software model</td><td>LD·FBD·ST·SFC·(IL)</td></tr>
+        <tr><td class="mono">IDE</td><td>The programming software (TIA, GX Works, …)</td><td>the real lock-in</td></tr>
+        <tr><td class="mono">OB/FB/FC/DB</td><td>Siemens block types (entry/logic+memory/logic/data)</td><td>instance DB = FB&#39;s memory</td></tr>
+        <tr><td class="mono">X·Y·M·D·T·C</td><td>Mitsubishi/Delta device letters</td><td>X/Y octal!</td></tr>
+        <tr><td class="mono">CIO·W·H·D·A</td><td>Omron memory areas, word.bit addressing</td><td>H = retentive</td></tr>
+        <tr><td class="mono">Tag / UDT / AOI</td><td>AB named data · user type · add-on instruction</td><td>no addresses</td></tr>
+        <tr><td class="mono">SCL / ST</td><td>Siemens name for / the IEC structured-text language</td><td>learn it early</td></tr>
+        <tr><td class="mono">GX·CX·ISP</td><td>Works (Mitsubishi) · -One/-Programmer (Omron) · -Soft (Delta)</td><td>CV keywords</td></tr>
+        <tr><td class="mono">CODESYS</td><td>IEC IDE licensed by 400+ brands; free Pi runtime</td><td>skill multiplier</td></tr>
+        <tr><td class="mono">Online edit</td><td>Changing a RUNNING PLC&#39;s logic</td><td>export same day</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Seven cross-brand traps</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Octal I/O</strong> (Mitsubishi/Delta): X8/Y8 don&#39;t exist; wiring lists written in decimal shift every terminal after the eighth.</div></li>
+        <li><span class="num">2</span><div><strong>Timer bases:</strong> K50 means 5 s or 0.5 s depending on the timer&#39;s base — check the range, not the constant. IEC&#39;s T#5s exists precisely to kill this trap.</div></li>
+        <li><span class="num">3</span><div><strong>Retentivity defaults differ:</strong> AB tags retain by default; Siemens M-bits don&#39;t unless configured; Mitsubishi has latched ranges. After a power cycle, "same program" behaves differently per brand.</div></li>
+        <li><span class="num">4</span><div><strong>NC stop philosophy survives translation — verify it did.</strong> Copying logic between brands while flipping input polarity (healthy=1 vs pressed=1) silently deletes fail-safety (→ A44).</div></li>
+        <li><span class="num">5</span><div><strong>Uploads lie by omission:</strong> logic yes, meaning maybe. Know per brand whether comments/symbols live in the CPU before promising a recovery.</div></li>
+        <li><span class="num">6</span><div><strong>Trial-licence cliffs:</strong> TIA/GX trials expire mid-commissioning if you let them. Track licence dates like calibration dates.</div></li>
+        <li><span class="num">7</span><div><strong>USB-serial adapter roulette:</strong> cloned cables and wrong drivers cause "cannot connect" that looks like a dead CPU. Keep one KNOWN-GOOD cable kit per brand, labelled, hoarded.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 ============ -->
+  <section class="page" id="p14">
+    <span class="page-tag">Page 14 / 14 · MSc Practice</span>
+    <h2 class="page-title">Study &amp; Practice Path</h2>
+    <p class="page-sub">Free official training, Sri Lankan institutions, and an eight-step ladder to multi-brand fluency.</p>
+
+    <div class="card">
+      <div class="label">Reference shelf &amp; free training</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Resource</th><th>What it gives you</th><th>Level</th></tr>
+        <tr><td><b>Siemens SCE learning documents + TIA trial + PLCSIM</b></td><td>Free, structured, university-grade Siemens curriculum</td><td>Core</td></tr>
+        <tr><td><b>Mitsubishi Electric e-Learning portal</b></td><td>Free FX/GX Works courses from the maker of SL&#39;s installed base</td><td>Core</td></tr>
+        <tr><td><b>Omron tutorials + CX-One/Sysmac trials</b></td><td>Official CP1/NX paths; sensor-to-PLC coherence</td><td>Core</td></tr>
+        <tr><td><b>Delta ISPSoft/DIADesigner manuals</b></td><td>Free complete ecosystem — the SL SME reality</td><td>Core</td></tr>
+        <tr><td><b>CODESYS free IDE + online courses</b></td><td>Professional IEC 61131-3 &amp; ST — the 400-brand multiplier</td><td>MSc</td></tr>
+        <tr><td><b>RealPars / PLC Academy / YouTube (Tim Wilborne etc.)</b></td><td>Visual walkthroughs across brands; commissioning realism</td><td>All levels</td></tr>
+        <tr><td><b>John &amp; Tiegelkamp</b> — <i>IEC 61131-3</i>; <b>Bolton</b> — <i>PLCs</i></td><td>The standard&#39;s depth + the concepts text (pairs with A07)</td><td>MSc / Core</td></tr>
+        <tr><td><b>SL institutions:</b> NAITA &amp; CGTTI automation courses · Moratuwa/SLIIT short courses · IESL CPD · local agents&#39; brand trainings</td><td>Hands-on panels, certificates local employers recognise</td><td>Local</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-on ladder — eight exercises</div>
+      <ul class="tips">
+        <li><span class="num">1</span><div><strong>Rosetta drill.</strong> Hand-write the page-8 addressing table from memory; re-do weekly until automatic.</div></li>
+        <li><span class="num">2</span><div><strong>One program, three IDEs.</strong> Build the Example-1 conveyor in ISPSoft, TIA+PLCSIM and CODESYS in the same week; diff your own dialects.</div></li>
+        <li><span class="num">3</span><div><strong>Simulate a real machine.</strong> Factory I/O sorting station driven by PLCSIM — sensors, actuators, alarm handling; record a demo video for your CV.</div></li>
+        <li><span class="num">4</span><div><strong>Second-hand resurrection.</strong> Buy one used FX/CP1E, get cable + comms working, upload whatever is inside, and re-document it — the full archive-rescue workflow in miniature.</div></li>
+        <li><span class="num">5</span><div><strong>ST conversion.</strong> Take any 30-rung ladder you&#39;ve written and re-express it in ST on CODESYS; note which rungs resisted — those are your state machines.</div></li>
+        <li><span class="num">6</span><div><strong>Modbus bridge.</strong> PLC (or Pi/OpenPLC) ↔ one Delta MS300 VFD over RS-485: write speed, read status word (→ A01, A08) — SL&#39;s most common integration task.</div></li>
+        <li><span class="num">7</span><div><strong>Plant survey.</strong> In any factory you can access, fill the Example-4 audit table for five machines — brands, versions, cables, archive status. Instant credibility.</div></li>
+        <li><span class="num">8</span><div><strong>Teach one dialect.</strong> Run a one-hour session for juniors converting Mitsubishi↔Siemens notation; teaching the table is the final proof you own it.</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-assessment — can you…?</div>
+      <div class="grid-2">
+        <div class="mini"><div class="big">◔</div><h4>Recall</h4><p>Reproduce the addressing Rosetta table and name each ecosystem&#39;s IDE, simulator and free route from memory.</p></div>
+        <div class="mini c-sky"><div class="big">◑</div><h4>Apply</h4><p>Write the seal-in + timer program in ladder AND ST for any of the five ecosystems without references.</p></div>
+        <div class="mini c-purp"><div class="big">◕</div><h4>Decide</h4><p>Run the weighted selection matrix for a real machine and defend the brand-tier choice against downtime cost.</p></div>
+        <div class="mini c-grn"><div class="big">●</div><h4>Rescue</h4><p>Audit a mixed-brand plant&#39;s software assets, triage RED/AMBER/GREEN, and execute a verified archive.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="card memory">
+    <div class="label">Memory Hook</div>
+    <p class="quote">"Concepts are one; brands are accents. Mitsubishi runs the machines, Siemens runs the plants, Delta runs the budget — and the archive runs your career."</p>
+  </div>
+
+  <div class="footer">
+    <p><strong>A45 · PLC Brands &amp; Programming Tools — Sri Lanka Field Guide — Advanced Deep Dive</strong></p>
+    <p>Companion modules: <a href="A07_PLC_Deep_Dive.html" style="color:var(--accent-soft)">A07 PLC In Depth</a> · <a href="A36_Embedded_RaspberryPi_Deep_Dive.html" style="color:var(--accent-soft)">A36 Embedded &amp; OpenPLC</a> · <a href="A14_SCADA_HMI_Deep_Dive.html" style="color:var(--accent-soft)">A14 SCADA</a> · <a href="A08_VFD_Deep_Dive.html" style="color:var(--accent-soft)">A08 VFD</a> · <a href="A01_Modbus_RTU_Deep_Dive.html" style="color:var(--accent-soft)">A01 Modbus</a></p>
+    <p>Micro Learning · Advanced Library · optimised for iPad Pro 11&Prime; · dark, high-contrast, keratoconus-friendly</p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var data=[
+    {n:'Siemens · TIA Portal',i:'input: <b>%I0.0</b> (byte.bit) · output: <b>%Q0.0</b> · flag: %M0.0 or symbolic tag',
+     t:'timer: IEC TON block in an instance DB —  #Tmr(IN := Start, PT := <b>T#2s</b>)',
+     m:'memory model: <b>blocks</b> — OB1 calls FCs/FBs; FB data lives in instance DBs; comments stored in project (TIA also in CPU if configured)'},
+    {n:'Mitsubishi · GX Works',i:'input: <b>X0</b> (octal! X0–X7, X10…) · output: <b>Y0</b> · flag: M0',
+     t:'timer: <b>OUT T0 K20</b> (100 ms base → 2.0 s) · contact T0 closes when done',
+     m:'memory model: <b>flat device map</b> X/Y/M/D/T/C — comments live in the PROJECT FILE, not the CPU: archive or lose them'},
+    {n:'Omron · CX-Programmer',i:'input: <b>0.00</b> (CIO word.bit) · output: <b>100.00</b> · work bit: W0.00',
+     t:'timer: <b>TIM 000 #20</b> (BCD, 100 ms base → 2.0 s) · contact T000',
+     m:'memory model: <b>areas</b> CIO/W/H/D/A — H is retentive; keep work bits in W to avoid I/O-word collisions'},
+    {n:'Delta · ISPSoft',i:'input: <b>X0</b> (octal, Mitsubishi-style) · output: <b>Y0</b> · flag: M0',
+     t:'timer: <b>OUT T0 K20</b> (100 ms base → 2.0 s) — FX-compatible thinking',
+     m:'memory model: flat X/Y/M/D clone of the FX world — GX skills transfer nearly line-for-line; software is fully free'},
+    {n:'Allen-Bradley · Studio 5000',i:'input: tag alias of <b>Local:1:I.Data.0</b> — e.g. StartPB · output: tag MotorRun',
+     t:'timer: <b>TON(SirenTmr)</b> with SirenTmr.PRE := 2000 (ms) · done bit SirenTmr.DN',
+     m:'memory model: <b>tags + UDTs</b>, no addresses; tags retentive by default; program docs largely stored in the controller'}
+  ];
+  var seg=document.getElementById('brandSeg'), out=document.getElementById('dialectOut');
+  function show(k){
+    var d=data[k];
+    out.innerHTML='<b>'+d.n+'</b><br>'+d.i+'<br>'+d.t+'<br>'+d.m;
+  }
+  seg.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    seg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); show(+b.dataset.b);
+  });
+  show(0);
+})();
+</script>
+</body>
+</html>

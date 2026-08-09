@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>OT Cybersecurity &amp; IEC 62443 · Advanced Deep Dive | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #22c55e;       /* terminal green */
+    --accent-soft: #86efac;
+    --accent-2: #f87171;      /* alert red */
+    --accent-3: #38bdf8;      /* network sky */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(244,63,94,0.13), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(56,189,248,0.06), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(244,63,94,0.45);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(244,63,94,0.14), rgba(56,189,248,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(244,63,94,0.18); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-3)!important; } .c-sky .big{color:var(--accent-3)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #f87171, #881337); color: #fff1f2; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(255,241,242,0.8); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(34,197,94,0.10); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:70px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+</style></head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Advanced Deep Dive · Energy &amp; Emerging Tech · MSc Level</span></div>
+  <h1 class="hero"><span class="emoji">🔐</span>OT Cybersecurity &amp; IEC 62443</h1>
+  <p class="hero-sub">Why the plant floor is not an office network — and how the ISA/IEC 62443 family rebuilds security as an engineered property of the control system. Zones &amp; conduits, the Purdue reference model and why IIoT is shattering it, security levels and the risk assessment that sets them, foundational requirements, secure development, patching what you cannot reboot, network segmentation, monitoring OT traffic, and responding to an incident when "shut it down" can be more dangerous than the attack.</p>
+
+  <div class="connect">
+    <span class="pill">◆ STANDALONE</span>
+    <span>A full advanced module. Related:</span>
+    <a href="A33_Industry_4_5_Deep_Dive.html">A33 Industry 4.0/5.0 →</a>
+    <a href="A52_Functional_Safety_SIL_Deep_Dive.html">A52 Functional Safety →</a>
+    <a href="A14_SCADA_HMI_Deep_Dive.html">A14 SCADA &amp; HMI →</a>
+    <a href="A06_OPC_UA_Deep_Dive.html">A06 OPC UA →</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 · Why OT ≠ IT</a>
+    <a href="#p2">2 · The 62443 Family</a>
+    <a href="#p3">3 · Purdue &amp; the IIoT Break</a>
+    <a href="#p4">4 · Zones &amp; Conduits</a>
+    <a href="#p5">5 · Security Levels (SL)</a>
+    <a href="#p6">6 · Risk Assessment</a>
+    <a href="#p7">7 · Foundational Requirements</a>
+    <a href="#p8">8 · Secure Development (SDL)</a>
+    <a href="#p9">9 · Patching &amp; Hardening</a>
+    <a href="#p10">10 · Monitoring &amp; IR</a>
+    <a href="#p11">11 · Programme in Practice</a>
+    <a href="#p12">12 · Recap &amp; Quiz</a>
+    <a href="#p13">13 · Worked Examples</a>
+    <a href="#p14">14 · Problem Set</a>
+    <a href="#p15">15 · Derivations &amp; Traps</a>
+    <a href="#p16">16 · Study &amp; Practice</a>
+  </div>
+
+  <!-- ============ PAGE 1 ============ -->
+  <section class="page" id="p1">
+    <div class="page-tag">Page 1 / 16</div>
+    <h2 class="page-title">Why OT Is Not IT</h2>
+    <p class="page-sub">The single idea that makes industrial security a different discipline: the consequence of failure is physical, and the system must never stop.</p>
+
+    <p class="lead">Operational Technology (OT) is the hardware and software that <b>monitors and controls physical processes</b> — PLCs, DCS, SCADA, drives, safety systems, instruments. Information Technology (IT) moves and stores <b>data</b>. Both need security, but their priorities are inverted, and copying an IT playbook onto a plant is how good intentions cause outages.</p>
+
+    <div class="card">
+      <div class="label">The Inverted Priority Triad</div>
+      <p>IT security ranks the classic <span class="hl">C-I-A</span> triad as <b>Confidentiality → Integrity → Availability</b>. Protect the data first. OT flips it to <span class="hl2">A-I-C</span>: <b>Availability → Integrity → Confidentiality</b>. A stopped reactor, a tripped furnace, or a spurious valve command can injure people and destroy equipment. A leaked setpoint rarely can.</p>
+      <div class="grid-2" style="margin-top:12px">
+        <div class="mini c-blue"><h4>IT world</h4><p>Reboot to patch. 3–5 year hardware life. Confidentiality is king. Downtime = inconvenience. Encrypt everything.</p></div>
+        <div class="mini c-grn"><h4>OT world</h4><p>Cannot reboot a running unit. 15–25 year asset life. Availability is king. Downtime = lost production, safety risk. Determinism &gt; encryption.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Why the IT Playbook Breaks on the Plant</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>IT reflex</th><th>What it does in OT</th></tr>
+        <tr><td>Auto-push OS patches</td><td>Reboots a controller mid-batch; unvalidated patch may break real-time drivers</td></tr>
+        <tr><td>Aggressive vulnerability scan</td><td>Legacy PLCs crash from malformed packets — the scan itself is a denial of service</td></tr>
+        <tr><td>Force MFA + password rotation</td><td>Operator locked out of an HMI during an upset — safety hazard</td></tr>
+        <tr><td>Antivirus with real-time scan</td><td>CPU spikes blow the scan-cycle deadline on an engineering workstation</td></tr>
+        <tr><td>"Just re-image the box"</td><td>The box runs a discontinued Windows build with a costly unsupported driver stack</td></tr>
+      </table></div>
+      <p style="margin-top:10px" class="page-sub">OT security is not "IT security, applied harder." It is a co-discipline with automation engineering — which is exactly why <b>ISA</b> (the automation professional body) authored the standard, and IEC adopted it.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">A Short History of Why We Care</div>
+      <ul class="tips">
+        <li><b>Stuxnet (2010)</b> — the wake-up. Malware crossed an air gap on USB, targeted specific Siemens S7 PLCs driving uranium centrifuges, and sabotaged them while feeding normal readings to operators. It proved a cyber attack can produce a <i>physical</i>, targeted, deniable effect.</li>
+        <li><b>Ukraine grid (2015 &amp; 2016)</b> — remote attackers opened breakers and blacked out ~230,000 people; the 2016 CRASHOVERRIDE/Industroyer malware spoke grid protocols natively.</li>
+        <li><b>TRITON/TRISIS (2017)</b> — malware targeted a <b>Safety Instrumented System</b> (Triconex), the last line of defence (see <a href="A52_Functional_Safety_SIL_Deep_Dive.html">A52</a>). Attacking the SIS means attacking the thing that prevents a disaster.</li>
+        <li><b>Colonial Pipeline (2021)</b> — ransomware hit the <i>IT</i> billing side, but the operator shut the <i>OT</i> pipeline pre-emptively because IT and OT were not cleanly separated. Fuel shortages across the US east coast.</li>
+      </ul>
+      <p class="page-sub">Lesson thread: the impact is physical, the safety layer is a target, and poor IT/OT separation turns an office breach into a plant shutdown.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">An IT team proposes deploying their standard endpoint agent, which quarantines any process it doesn't recognise, onto the DCS operator stations. Why is this dangerous, and what is the OT-correct alternative?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> An aggressive agent may quarantine or block a legitimate control process, freezing the operator's window into a live process — an availability and safety hazard. The proprietary control binaries are also unknown to a generic reputation engine, so false positives are likely. OT-correct alternatives: <b>application allow-listing</b> (only known-good executables run, no cloud reputation calls), tuned to the vendor's validated software set, in <i>monitor</i> mode first; endpoint protection that the automation vendor has tested and blesses; and any agent running with tested CPU limits so it can't starve the scan cycle. Security controls in OT must be validated against the control application before deployment.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 ============ -->
+  <section class="page" id="p2">
+    <div class="page-tag">Page 2 / 16</div>
+    <h2 class="page-title">The ISA/IEC 62443 Family</h2>
+    <p class="page-sub">One numbering scheme, four groups, three roles. Learn the map and every document falls into place.</p>
+
+    <p class="lead">ISA/IEC 62443 is a <b>series</b>, not a single document. Its power is that it assigns responsibility to three distinct <b>roles</b> and gives each the parts that apply to them. The parts are grouped <b>General → Policies &amp; Procedures → System → Component</b>.</p>
+
+    <div class="card">
+      <div class="label">The Three Roles</div>
+      <div class="grid-3">
+        <div class="mini c-blue"><h4>Asset Owner</h4><p>Operates the plant. Owns the risk, the security programme, and the operating environment. (The 2-x parts.)</p></div>
+        <div class="mini c-amb"><h4>Integrator / Service Provider</h4><p>Designs &amp; commissions the automation solution and maintains it. (The 2-4 &amp; 3-x parts.)</p></div>
+        <div class="mini c-grn"><h4>Product Supplier</h4><p>Builds the PLC, drive, HMI or software product. (The 4-x parts.)</p></div>
+      </div>
+      <p style="margin-top:10px">Security is a <b>shared responsibility</b>: a supplier can build a capable product (SL-C), an integrator must configure it to actually meet a target (SL-T), and the owner must operate it to keep it there (SL-A). No single party can deliver a secure plant alone.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The Map of the Series</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Group</th><th>Part</th><th>What it covers</th><th>Primary role</th></tr>
+        <tr><td rowspan="2"><b>1 General</b></td><td>1-1</td><td>Terminology, concepts &amp; models (zones, conduits, SL)</td><td>All</td></tr>
+        <tr><td>1-6 <span class="hl3">(2025)</span></td><td>Security for <b>IIoT</b> devices — the newest part</td><td>Supplier / Integrator</td></tr>
+        <tr><td rowspan="3"><b>2 Policies &amp; Procedures</b></td><td>2-1</td><td>Asset owner's <b>security programme</b> (the CSMS)</td><td>Asset Owner</td></tr>
+        <tr><td>2-2 <span class="hl3">(TR 2025)</span></td><td>IACS <b>security protection scheme</b> — rating a programme</td><td>Asset Owner</td></tr>
+        <tr><td>2-4</td><td>Requirements for <b>service providers</b> (integrators)</td><td>Integrator</td></tr>
+        <tr><td rowspan="3"><b>3 System</b></td><td>3-1</td><td>Security technologies for IACS (survey of controls)</td><td>Integrator</td></tr>
+        <tr><td><b>3-2</b></td><td><b>Risk assessment</b> — zones/conduits &amp; setting SL-T</td><td>Integrator / Owner</td></tr>
+        <tr><td><b>3-3</b></td><td><b>System security requirements</b> &amp; SLs (the 7 FRs at system level)</td><td>Integrator</td></tr>
+        <tr><td rowspan="2"><b>4 Component</b></td><td>4-1</td><td>Secure <b>product development lifecycle</b> (SDL)</td><td>Supplier</td></tr>
+        <tr><td><b>4-2</b></td><td>Technical security requirements for <b>components</b></td><td>Supplier</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">The Two You Will Live In</div>
+      <div class="grid-2">
+        <div class="mini c-grn"><h4>62443-3-2 — Risk Assessment</h4><p>How you divide the system into zones and conduits and derive a <b>target Security Level</b> for each. This is the engineering method (Page 6).</p></div>
+        <div class="mini c-sky"><h4>62443-3-3 — System Requirements</h4><p>The catalogue of <b>System Requirements (SRs)</b> grouped under 7 Foundational Requirements, each with SL 1–4 enhancement levels (Page 7).</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Certification &amp; the Regulatory Pull <span class="hl3">(2025–2026)</span></div>
+      <p>62443 is increasingly the <i>de facto</i> answer to new law. The <b>EU Cyber Resilience Act (CRA)</b> imposes security requirements on products with digital elements, and the <b>EU Machinery Regulation 2023/1230</b> (see <a href="A35_Cobot_Safety_Deep_Dive.html">A35</a>) folds cybersecurity into machine safety. In the US the <b>NIST</b> framework and sector rules (e.g. TSA pipeline directives after Colonial) point the same way. Certification schemes — ISASecure (CSA, SDLA, SSA) and IECEE — let a supplier or integrator demonstrate conformance. The direction of travel: 62443 conformance is moving from "good practice" toward "market-access requirement."</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A vendor's brochure says their PLC is "62443 certified to SL 3." A colleague concludes the plant is therefore SL 3. Where is the error?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> The PLC being certified means its component <b>capability</b> (SL-C, per 62443-4-2) can reach SL 3 <i>if configured and integrated correctly</i>. The plant's <b>achieved</b> level (SL-A) depends on how the integrator wired the zones and conduits (62443-3-3) and how the owner operates the programme (62443-2-1). A SL-3-capable component in a flat network with default passwords achieves nothing like SL 3. Capability ≠ target ≠ achieved.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 ============ -->
+  <section class="page" id="p3">
+    <div class="page-tag">Page 3 / 16</div>
+    <h2 class="page-title">The Purdue Model &amp; the IIoT Break</h2>
+    <p class="page-sub">The reference architecture that structured OT security for 30 years — and why Industry 4.0 is quietly dismantling it.</p>
+
+    <p class="lead">The <b>Purdue Enterprise Reference Architecture (PERA)</b> layers a plant into levels by function and timescale. It gives everyone a shared mental model of "where a device sits" and, crucially, <b>where the boundaries that need protecting are</b>.</p>
+
+    <div class="card">
+      <div class="label">The Purdue Levels</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Level</th><th>Name</th><th>What lives here</th><th>Timescale</th></tr>
+        <tr><td><b>L4/5</b></td><td>Enterprise / Business</td><td>ERP, email, internet, corporate IT</td><td>Days–months</td></tr>
+        <tr><td class="hl3"><b>L3.5</b></td><td><b>DMZ</b></td><td>Historian replica, patch server, remote-access jump host, data diode</td><td>—</td></tr>
+        <tr><td><b>L3</b></td><td>Site Operations</td><td>SCADA servers, historians, MES, engineering workstations</td><td>Seconds–minutes</td></tr>
+        <tr><td><b>L2</b></td><td>Area Supervisory</td><td>HMIs, local control room, batch servers</td><td>Sub-second</td></tr>
+        <tr><td><b>L1</b></td><td>Basic Control</td><td>PLCs, DCS controllers, RTUs</td><td>ms</td></tr>
+        <tr><td><b>L0</b></td><td>Process</td><td>Sensors, actuators, valves, motors, the physics</td><td>μs–ms</td></tr>
+      </table></div>
+      <p style="margin-top:10px">The key control point is the <b>L3.5 DMZ</b>: no traffic should flow directly between enterprise IT (L4/5) and the control network (≤L3). Everything brokers through the DMZ, so a compromised office PC cannot talk straight to a PLC.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The Golden Rules (Traditional Purdue)</div>
+      <ul class="tips">
+        <li>Traffic flows <b>vertically through boundaries</b>, never around them. No L4→L1 shortcuts.</li>
+        <li>A <b>Safety Instrumented System</b> (SIS) sits alongside L1 but on its own segregated network — an attacker in the BPCS must not reach the SIS (the TRITON lesson).</li>
+        <li>Real-time control lives low (L0–L2); anything that can tolerate latency lives high.</li>
+        <li>Lower is more trusted and less patchable; higher is less trusted and more exposed. Security effort concentrates at the <b>seams</b>.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Why IIoT Shatters It <span class="hl3">(the 2025 problem)</span></div>
+      <p>Industry 4.0 (see <a href="A33_Industry_4_5_Deep_Dive.html">A33</a>) puts computation and cloud connectivity at the <i>bottom</i> of the pyramid. A modern "smart" sensor at L0 may have an onboard CPU, a TCP/IP stack, and a <b>direct MQTT link to AWS or Azure</b> — bypassing L1, L2, L3 and the DMZ in one hop. The neat vertical layering assumed low-level devices were dumb. They no longer are.</p>
+      <div class="grid-2" style="margin-top:10px">
+        <div class="mini c-red"><h4>The break</h4><p>An L0/L1 IIoT device with a north-bound cloud connection is simultaneously in the most-trusted zone and talking to the internet. Purdue's boundary model has no box for it.</p></div>
+        <div class="mini c-grn"><h4>The response</h4><p><b>62443-1-6 (2025)</b> addresses IIoT devices explicitly. Architecturally the answer is <b>zone-based / zero-trust thinking</b>: stop trusting a device because of <i>where</i> it sits; trust it because of <i>what it proves</i> (identity, authentication, least privilege) on every connection — including its cloud link, which becomes its own conduit with its own controls.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Purdue Isn't Dead — It's a Logical Model Now</div>
+      <p>The pragmatic 2026 view: Purdue remains an excellent <b>logical</b> reference for reasoning about trust and data flow, even where the <b>physical</b> network is flatter and IIoT devices break the strict hierarchy. You keep the DMZ and the safety segregation, and you supplement "trust by layer" with <b>explicit per-conduit authentication</b> so a flattened or cloud-connected topology is still governed. Zones &amp; conduits (Page 4) are the tool that survives the flattening.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A vibration sensor (see <a href="A42_Vibration_Analysis_Deep_Dive.html">A42</a>) is installed on a critical pump with a built-in 4G modem that streams data to the vendor's cloud dashboard for predictive maintenance. In Purdue terms, what is the problem and how do you govern it?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> The device sits physically at L0/L1 (most trusted) but its 4G link is an <b>uncontrolled conduit straight to the internet</b>, bypassing every Purdue boundary and the DMZ. Governance: treat the cloud link as its own conduit with explicit controls — put the device in its own <b>monitoring/IIoT zone</b> that is <i>read-only</i> toward the process and cannot inject commands; ensure the modem cannot route into the control LAN (physical/logical isolation); require mutual authentication and encryption on the cloud link; and confirm the vendor's product meets 62443-4-2 / 1-6. If it can only <i>observe</i> and is isolated from the control path, the exposure is bounded to data confidentiality, not process integrity.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 ============ -->
+  <section class="page" id="p4">
+    <div class="page-tag">Page 4 / 16</div>
+    <h2 class="page-title">Zones &amp; Conduits</h2>
+    <p class="page-sub">The central engineering abstraction of 62443. Get this right and the rest is bookkeeping.</p>
+
+    <p class="lead">A <b>zone</b> is a grouping of assets that share the same security requirements — the same trust level and consequence. A <b>conduit</b> is a special zone that carries the <b>communication</b> between zones and controls what may cross. You segment the plant into zones, connect them only through defined conduits, and apply controls at each conduit boundary. This is "defence in depth" made concrete and auditable.</p>
+
+    <div class="card">
+      <div class="label">Definitions That Matter</div>
+      <div class="grid-2">
+        <div class="mini c-grn"><h4>Zone</h4><p>Assets grouped by shared security needs. Can be physical (a room), logical (a VLAN), or both. Has a boundary, a target SL, and a defined list of what's inside.</p></div>
+        <div class="mini c-sky"><h4>Conduit</h4><p>The controlled channel between zones. It has endpoints, the protocols it carries, and the security controls (firewall rules, authentication, encryption) applied to it. Nothing crosses a zone boundary except through a conduit.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">How You Draw Them</div>
+      <ul class="tips">
+        <li><b>Group by consequence, not convenience.</b> The safety system, the basic control system, and the enterprise all have different consequences of compromise → different zones. Two PLCs doing the same critical job with the same exposure can share a zone.</li>
+        <li><b>Separate the SIS.</b> The Safety Instrumented System is always its own zone with the tightest conduit — ideally one-way or read-only from the BPCS. This is the TRITON-proofing principle.</li>
+        <li><b>The DMZ is a zone of conduits.</b> L3.5 exists precisely so that IT↔OT data exchange happens in a controlled buffer, never as a direct conduit from enterprise to control.</li>
+        <li><b>Wireless, remote access and cloud links are conduits</b> — each needs its own controls, not a hole in the firewall.</li>
+        <li><b>Smaller zones = better containment</b> but more conduits to manage. Balance blast-radius against operational overhead.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">A Reference Zone/Conduit Diagram</div>
+      <svg viewBox="0 0 760 430" style="width:100%;height:auto;background:var(--bg-2);border-radius:12px">
+        <defs>
+          <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#38bdf8"/></marker>
+        </defs>
+        <!-- Enterprise zone -->
+        <rect x="30" y="24" width="700" height="70" rx="10" fill="#1e293b" stroke="#60a5fa" stroke-width="2"/>
+        <text x="46" y="48" fill="#93c5fd" font-size="14" font-weight="700">Enterprise Zone — L4/5 (SL-T 1)</text>
+        <rect x="60" y="56" width="120" height="28" rx="5" fill="#0b0f14" stroke="#334155"/><text x="120" y="74" fill="#cbd5e1" font-size="11" text-anchor="middle">ERP / Email</text>
+        <rect x="200" y="56" width="120" height="28" rx="5" fill="#0b0f14" stroke="#334155"/><text x="260" y="74" fill="#cbd5e1" font-size="11" text-anchor="middle">Internet</text>
+        <!-- DMZ -->
+        <rect x="30" y="118" width="700" height="60" rx="10" fill="#3b2f14" stroke="#fbbf24" stroke-width="2.5"/>
+        <text x="46" y="141" fill="#fde68a" font-size="14" font-weight="700">DMZ — L3.5 (broker only: historian mirror · patch server · jump host · data diode)</text>
+        <rect x="300" y="150" width="160" height="22" rx="5" fill="#0b0f14" stroke="#fbbf24"/><text x="380" y="165" fill="#fde68a" font-size="10.5" text-anchor="middle">No direct IT↔OT flow</text>
+        <!-- Control zone -->
+        <rect x="30" y="202" width="430" height="110" rx="10" fill="#14321f" stroke="#22c55e" stroke-width="2"/>
+        <text x="46" y="226" fill="#86efac" font-size="14" font-weight="700">Control Zone — L1/2/3 (SL-T 2)</text>
+        <rect x="55" y="238" width="110" height="30" rx="5" fill="#0b0f14" stroke="#334155"/><text x="110" y="257" fill="#cbd5e1" font-size="11" text-anchor="middle">SCADA / HMI</text>
+        <rect x="180" y="238" width="110" height="30" rx="5" fill="#0b0f14" stroke="#334155"/><text x="235" y="257" fill="#cbd5e1" font-size="11" text-anchor="middle">PLC / DCS</text>
+        <rect x="305" y="238" width="130" height="30" rx="5" fill="#0b0f14" stroke="#334155"/><text x="370" y="257" fill="#cbd5e1" font-size="11" text-anchor="middle">Eng. Workstation</text>
+        <rect x="120" y="278" width="220" height="26" rx="5" fill="#0b0f14" stroke="#334155"/><text x="230" y="296" fill="#cbd5e1" font-size="11" text-anchor="middle">L0 field: sensors · actuators</text>
+        <!-- SIS zone -->
+        <rect x="490" y="202" width="240" height="110" rx="10" fill="#3a1420" stroke="#f87171" stroke-width="2.5"/>
+        <text x="506" y="226" fill="#fca5a5" font-size="14" font-weight="700">Safety Zone — SIS</text>
+        <rect x="520" y="238" width="180" height="30" rx="5" fill="#0b0f14" stroke="#f87171"/><text x="610" y="257" fill="#fca5a5" font-size="11" text-anchor="middle">SIL-rated logic solver</text>
+        <text x="610" y="292" fill="#fca5a5" font-size="10.5" text-anchor="middle">Own network · tightest conduit</text>
+        <!-- Conduits -->
+        <line x1="380" y1="94" x2="380" y2="118" stroke="#38bdf8" stroke-width="3" marker-end="url(#ah)"/>
+        <line x1="380" y1="178" x2="380" y2="202" stroke="#38bdf8" stroke-width="3" marker-end="url(#ah)"/>
+        <text x="392" y="112" fill="#38bdf8" font-size="10">conduit A</text>
+        <text x="392" y="196" fill="#38bdf8" font-size="10">conduit B</text>
+        <line x1="460" y1="257" x2="490" y2="257" stroke="#f87171" stroke-width="3" marker-end="url(#ah)"/>
+        <text x="452" y="248" fill="#f87171" font-size="10">read-only</text>
+        <!-- IIoT rogue path -->
+        <rect x="120" y="352" width="220" height="30" rx="5" fill="#0b0f14" stroke="#a855f7" stroke-dasharray="4 3"/><text x="230" y="371" fill="#c4b5fd" font-size="11" text-anchor="middle">IIoT sensor + cloud modem</text>
+        <path d="M340,367 C520,367 660,300 660,110" stroke="#a855f7" stroke-width="2.5" stroke-dasharray="6 4" fill="none"/>
+        <text x="545" y="360" fill="#c4b5fd" font-size="10.5">rogue conduit → internet</text>
+        <text x="690" y="150" fill="#c4b5fd" font-size="10.5" text-anchor="end">bypasses DMZ!</text>
+      </svg>
+      <p style="margin-top:8px" class="page-sub">Every arrow is a conduit with its own firewall rules, protocol allow-list and authentication. The dashed purple path is the IIoT problem from Page 3 — an unmanaged conduit that skips the DMZ. Finding and governing those is half the real job.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Controls You Put on a Conduit</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Control</th><th>Purpose</th></tr>
+        <tr><td>Firewall / ACL by protocol &amp; direction</td><td>Only the exact protocols needed cross (e.g. OPC UA out, nothing in)</td></tr>
+        <tr><td>Deep-packet inspection / industrial firewall</td><td>Validate Modbus/OPC UA/EtherNet-IP payloads, not just ports</td></tr>
+        <tr><td>Data diode (one-way)</td><td>Physically enforce read-only for historian/monitoring exports</td></tr>
+        <tr><td>Authenticated &amp; encrypted transport</td><td>Mutual auth on the conduit (e.g. OPC UA security, TLS, IPsec)</td></tr>
+        <tr><td>Jump host / secure remote access broker</td><td>No direct inbound; brokered, logged, MFA'd, session-recorded</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">You need to export process data to a cloud analytics platform for predictive maintenance, but the security team forbids any inbound path to the control zone. What conduit design satisfies both?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> A <b>one-way conduit</b>. Put a historian mirror in the DMZ (L3.5); replicate data <i>up</i> to it from the control zone through a strictly outbound-only rule — ideally a hardware <b>data diode</b> that makes an inbound path physically impossible. The cloud platform then pulls from the DMZ historian, never from the control zone. Data flows out for analytics; no command can ever flow back in. This is exactly why the DMZ zone exists.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 ============ -->
+  <section class="page" id="p5">
+    <div class="page-tag">Page 5 / 16</div>
+    <h2 class="page-title">Security Levels (SL 1–4)</h2>
+    <p class="page-sub">A vector, not a score. The insight that stops teams over- or under-spending on security.</p>
+
+    <p class="lead">A <b>Security Level</b> expresses <i>how capable an attacker</i> the zone must resist. It is defined by the <b>means, resources, skills and motivation</b> of the threat you're defending against — deliberately parallel to how SIL in <a href="A52_Functional_Safety_SIL_Deep_Dive.html">A52</a> expresses risk-reduction capability.</p>
+
+    <div class="card">
+      <div class="label">The Four Levels</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>SL</th><th>Protect against…</th><th>Attacker profile</th></tr>
+        <tr><td><b>SL 1</b></td><td>Casual / coincidental violation</td><td>No specific intent — accidental misuse, careless staff, commodity malware that wandered in</td></tr>
+        <tr><td><b>SL 2</b></td><td>Intentional, <b>low</b> resources, generic skills, low motivation</td><td>A hacker with common tools; a disgruntled insider without specialist knowledge</td></tr>
+        <tr><td><b>SL 3</b></td><td>Intentional, <b>moderate</b> resources, <b>IACS-specific</b> skills, moderate motivation</td><td>A skilled attacker who understands control systems — hacktivist group, sophisticated criminal</td></tr>
+        <tr><td><b>SL 4</b></td><td>Intentional, <b>extended</b> resources, IACS-specific skills, <b>high</b> motivation</td><td>Nation-state; the Stuxnet/TRITON class of adversary</td></tr>
+      </table></div>
+      <p style="margin-top:10px">Most industrial zones target <b>SL 2</b>; genuinely critical infrastructure and safety zones aim for <b>SL 3</b>. <b>SL 4</b> is rare, expensive and reserved for the highest-consequence national assets — you do not put SL 4 everywhere any more than you put SIL 4 on every loop.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The Three Flavours of SL — Don't Confuse Them</div>
+      <div class="grid-3">
+        <div class="mini c-amb"><h4>SL-T (Target)</h4><p>What a zone <b>needs</b>, derived from risk assessment (62443-3-2). The requirement.</p></div>
+        <div class="mini c-grn"><h4>SL-C (Capability)</h4><p>What a component or system <b>can</b> deliver if configured right (62443-4-2 / 3-3). The vendor claim.</p></div>
+        <div class="mini c-sky"><h4>SL-A (Achieved)</h4><p>What the installed, operating system <b>actually</b> delivers. The audited reality.</p></div>
+      </div>
+      <p style="margin-top:10px" class="eqn">Goal for every zone: &nbsp; SL-A &nbsp;≥&nbsp; SL-T &nbsp;&nbsp;(and this requires SL-C ≥ SL-T <i>and</i> correct integration &amp; operation)</p>
+    </div>
+
+    <div class="card">
+      <div class="label">SL Is a Vector Across the 7 Foundational Requirements</div>
+      <p>A zone's SL is not one number — it's a <b>7-element vector</b>, one SL per Foundational Requirement (Page 7). You might need SL 3 for <i>Use Control</i> (who can issue commands) but only SL 1 for <i>Data Confidentiality</i> (the setpoints aren't secret). Writing it as a vector stops you paying for confidentiality you don't need while under-protecting the access control you do.</p>
+      <p class="eqn" style="margin-top:8px">SL-T(zone) = { IAC 3, UC 3, SI 2, DC 1, RDF 2, TRE 2, RA 2 }</p>
+      <p class="page-sub">(IAC = Identification &amp; Authentication Control, UC = Use Control, SI = System Integrity, DC = Data Confidentiality, RDF = Restricted Data Flow, TRE = Timely Response to Events, RA = Resource Availability.)</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A team sets every zone in the plant — including the office historian mirror — to SL 3 "to be safe." Why is this poor engineering?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> SL is <b>risk-driven</b>, like SIL. Setting everything to SL 3 wastes money and effort on low-consequence zones (the office historian mirror can't hurt the process) while diluting attention from the zones that genuinely need SL 3 (safety, critical control). It also imposes operational friction — heavy authentication, tighter controls — where it buys little. Correct practice: run the 62443-3-2 risk assessment per zone, target SL to the actual consequence and threat, and express it as a per-FR vector so you protect what matters at the level it matters.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 ============ -->
+  <section class="page" id="p6">
+    <div class="page-tag">Page 6 / 16</div>
+    <h2 class="page-title">Risk Assessment (62443-3-2)</h2>
+    <p class="page-sub">The method that turns "we should be more secure" into a defensible per-zone target. The engineering heart of the standard.</p>
+
+    <p class="lead">62443-3-2 gives a <b>workflow</b> from a system under consideration (SUC) to a set of zones, conduits and target SLs, with documented residual risk. It mirrors the HAZOP→LOPA logic of process safety (<a href="A52_Functional_Safety_SIL_Deep_Dive.html">A52</a>) but for cyber threats.</p>
+
+    <div class="card">
+      <div class="label">The Workflow (ZCR steps)</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Step</th><th>Activity</th><th>Output</th></tr>
+        <tr><td>ZCR 1</td><td>Identify the <b>System Under Consideration</b> (boundary of the assessment)</td><td>Asset inventory &amp; scope</td></tr>
+        <tr><td>ZCR 2</td><td>Perform an <b>initial (high-level) risk assessment</b></td><td>Worst-case unmitigated risk — is detailed work justified?</td></tr>
+        <tr><td>ZCR 3</td><td>Partition the SUC into <b>zones &amp; conduits</b></td><td>Zone/conduit diagram</td></tr>
+        <tr><td>ZCR 4</td><td>Decide if initial risk exceeds <b>tolerable risk</b></td><td>Go/stop gate for detailed assessment</td></tr>
+        <tr><td>ZCR 5</td><td><b>Detailed risk assessment</b> per zone/conduit</td><td>Likelihood × consequence, existing controls, gaps</td></tr>
+        <tr><td>ZCR 6</td><td>Document results &amp; assign <b>SL-T</b> per zone/conduit</td><td>The risk assessment report + residual risk sign-off</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">The Risk Equation</div>
+      <p class="eqn">Risk = Threat × Vulnerability × Consequence</p>
+      <p>You reduce risk by attacking any factor: lower <b>threat exposure</b> (segmentation, no internet path), reduce <b>vulnerability</b> (patching, hardening, removing services), or limit <b>consequence</b> (safety systems, physical relief, fail-safe design). Because you can rarely change an adversary's motivation, most cyber effort targets <i>vulnerability</i> and <i>exposure</i> — which is exactly what zones/conduits and hardening do.</p>
+      <p class="page-sub" style="margin-top:8px">62443-3-2 also introduces the idea of <b>cyber-security PHA</b>: consequence is frequently taken from the existing process-safety hazard study, so a cyber event's worst physical outcome is already quantified. The cyber assessment then asks "how likely is a threat to reach that consequence, given our controls?"</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Setting SL-T From Consequence &amp; Threat</div>
+      <p>A practical matrix crosses the <b>consequence severity</b> (from the PHA — minor, serious, major, catastrophic) with the <b>threat likelihood / attacker capability</b> to land on a target SL. High consequence + capable adversary → SL 3. Low consequence + casual threat → SL 1. This is the cyber twin of the SIL-selection matrix, and it keeps spending proportionate.</p>
+    </div>
+
+    <div class="card demo">
+      <div class="label">🧪 Interactive — Target SL Selector</div>
+      <p class="lead" style="margin-bottom:10px">Cross the worst-case consequence of a zone being compromised with the threat you must resist. Watch the recommended target SL and the residual-risk note update.</p>
+      <div class="demo-row"><span>Consequence if compromised</span></div>
+      <div class="seg" id="d1conseq">
+        <button data-v="1" class="on">Minor</button>
+        <button data-v="2">Serious</button>
+        <button data-v="3">Major</button>
+        <button data-v="4">Catastrophic</button>
+      </div>
+      <div class="demo-row"><span>Threat / attacker capability to resist</span></div>
+      <div class="seg" id="d1threat">
+        <button data-v="1" class="on">Casual</button>
+        <button data-v="2">Low-skill</button>
+        <button data-v="3">IACS-skilled</button>
+        <button data-v="4">Nation-state</button>
+      </div>
+      <div class="demo-out" id="d1out"></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">Your initial (ZCR 2) assessment shows a zone whose worst-case compromise is a nuisance data error, well below tolerable risk. What does 62443-3-2 let you do, and what must you still record?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> If the initial high-level risk is already below the tolerable threshold (ZCR 4 gate), you may <b>skip the detailed per-zone assessment</b> for that zone — the method is risk-proportionate and doesn't force exhaustive analysis where consequence is trivially low. But you must still <b>document</b> the decision: the zone definition, the initial risk finding, the tolerable-risk criterion used, and the rationale for stopping. Undocumented "we judged it low" is the audit finding; a recorded, criteria-based screen-out is defensible engineering.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 7 ============ -->
+  <section class="page" id="p7">
+    <div class="page-tag">Page 7 / 16</div>
+    <h2 class="page-title">The 7 Foundational Requirements</h2>
+    <p class="page-sub">The backbone of 62443-3-3 and 4-2. Every technical control in the standard hangs off one of these seven.</p>
+
+    <p class="lead">The <b>Foundational Requirements (FRs)</b> are the seven categories that all System Requirements (SRs) and Component Requirements (CRs) organise under. Learn the seven and you have the shape of the entire technical standard.</p>
+
+    <div class="card">
+      <div class="label">FR 1–7</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>#</th><th>Foundational Requirement</th><th>Plain meaning</th><th>Example control</th></tr>
+        <tr><td>FR1</td><td><b>Identification &amp; Authentication Control (IAC)</b></td><td>Prove who (or what) you are</td><td>Unique user IDs, MFA on remote access, device certificates</td></tr>
+        <tr><td>FR2</td><td><b>Use Control (UC)</b></td><td>Enforce what an authenticated identity may do</td><td>Role-based access, least privilege, session lock, authorised command lists</td></tr>
+        <tr><td>FR3</td><td><b>System Integrity (SI)</b></td><td>Data &amp; software are not tampered with</td><td>Signed firmware, malware protection, communication integrity checks</td></tr>
+        <tr><td>FR4</td><td><b>Data Confidentiality (DC)</b></td><td>Keep sensitive data secret</td><td>Encryption at rest/in transit for recipes, credentials, config</td></tr>
+        <tr><td>FR5</td><td><b>Restricted Data Flow (RDF)</b></td><td>Segment the network; control what crosses</td><td>Zones &amp; conduits, firewalls, DMZ, data diodes</td></tr>
+        <tr><td>FR6</td><td><b>Timely Response to Events (TRE)</b></td><td>Detect, log, and react to security events</td><td>Audit logging, SIEM, alerting, forensic evidence, IR plan</td></tr>
+        <tr><td>FR7</td><td><b>Resource Availability (RA)</b></td><td>Keep the control system running under stress</td><td>DoS resistance, backups, redundancy, resource limits</td></tr>
+      </table></div>
+      <p style="margin-top:10px">Mnemonic: <b>"I Use Some Data — Restrict, Track, Availability."</b> FR7 (Availability) being last on the list but <i>first</i> in OT priority is the recurring irony — the OT world reads C-I-A backwards, and FR7 is where the plant-floor stakes live.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">SL Enhances Each FR</div>
+      <p>Under each FR sit specific SRs, and each SR has <b>Requirement Enhancements (RE)</b> that ratchet the strength up SL 1→4. Example for FR1 authentication:</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>SL</th><th>FR1 authentication strength (illustrative)</th></tr>
+        <tr><td>SL 1</td><td>Identify &amp; authenticate human users (basic passwords)</td></tr>
+        <tr><td>SL 2</td><td>+ unique per-user IDs, authenticate <b>all</b> users &amp; devices, harden against guessing</td></tr>
+        <tr><td>SL 3</td><td>+ multi-factor for untrusted networks, public-key / certificate auth, protect authenticators</td></tr>
+        <tr><td>SL 4</td><td>+ MFA for <b>all</b> access, strongest cryptographic device identity</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">System vs Component View</div>
+      <div class="grid-2">
+        <div class="mini c-sky"><h4>62443-3-3 (System SRs)</h4><p>"The <b>zone</b> shall enforce MFA on remote access." A property of how the system is assembled and configured.</p></div>
+        <div class="mini c-grn"><h4>62443-4-2 (Component CRs)</h4><p>"The <b>PLC</b> shall support certificate-based authentication." A capability the product must ship with so the system can meet its SR.</p></div>
+      </div>
+      <p style="margin-top:10px" class="page-sub">The integrator's job is to compose SL-C-rated components (4-2) into a system that meets the SL-T-rated SRs (3-3) for each zone. Both use the same seven FRs, which is why the framework composes cleanly.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A plant encrypts every OT link end-to-end (strong FR4) but shares one generic admin login across all engineers with no logging (weak FR1, FR2, FR6). Under 62443, is this zone "secure"?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> No. Security under 62443 is the <b>vector across all seven FRs</b>, not one strong dimension. This zone has excellent Data Confidentiality (FR4) but near-zero Identification &amp; Authentication (FR1), Use Control (FR2) and event Response (FR6) — a shared unlogged admin account means no accountability, no least privilege, and no forensic trail. An attacker (or careless insider) with that one credential owns the zone, and you'd never know who. The SL vector is only as strong as its weakest FR relative to its target; over-investing in FR4 doesn't compensate for a hole in FR1.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 8 ============ -->
+  <section class="page" id="p8">
+    <div class="page-tag">Page 8 / 16</div>
+    <h2 class="page-title">Secure Development &amp; the Supply Chain</h2>
+    <p class="page-sub">62443-4-1: security has to be built into the product, not bolted onto the plant. And you can't secure what your suppliers left broken.</p>
+
+    <p class="lead">62443-4-1 defines a <b>Secure Development Lifecycle (SDL)</b> for product suppliers — the process that produces PLCs, drives and software that <i>can</i> be secured. It's the cyber analogue of the safety lifecycle: security is a property of how the thing was <b>made</b>, verified across eight practices.</p>
+
+    <div class="card">
+      <div class="label">The 8 SDL Practices (62443-4-1)</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>#</th><th>Practice</th><th>What it demands</th></tr>
+        <tr><td>SM</td><td>Security Management</td><td>A defined, resourced process owner &amp; governance</td></tr>
+        <tr><td>SR</td><td>Specification of Security Requirements</td><td>Threat model &amp; security requirements per product</td></tr>
+        <tr><td>SD</td><td>Secure by Design</td><td>Defence-in-depth, least privilege, secure defaults in the architecture</td></tr>
+        <tr><td>SI</td><td>Secure Implementation</td><td>Secure coding, avoid known-bad patterns</td></tr>
+        <tr><td>SVV</td><td>Security Verification &amp; Validation Testing</td><td>Pen-test, fuzzing, vulnerability scanning before release</td></tr>
+        <tr><td>DM</td><td>Defect Management</td><td>Track &amp; triage security defects through their life</td></tr>
+        <tr><td>SUM</td><td>Security Update Management</td><td>Deliver patches &amp; advisories to customers</td></tr>
+        <tr><td>SG</td><td>Security Guidelines</td><td>Ship hardening &amp; secure-deployment docs to the integrator</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">The Supply Chain: SBOM &amp; Vulnerability Disclosure <span class="hl3">(2025–2026 focus)</span></div>
+      <p>Modern controllers embed open-source libraries, RTOS components and third-party stacks. A vulnerability in one library (think of the industrial "Ripple20", "URGENT/11" or "OT:ICEFALL" families of TCP/IP-stack bugs) can silently affect thousands of devices from dozens of vendors.</p>
+      <ul class="tips">
+        <li><b>SBOM (Software Bill of Materials)</b> — an ingredient list of every component in the firmware. Increasingly mandated (US Executive Order, EU CRA) so an owner can answer "am I affected by CVE-X?" in minutes, not months.</li>
+        <li><b>Coordinated Vulnerability Disclosure (CVD)</b> — suppliers publish security advisories (via ICS-CERT / CISA and their own PSIRT) with CVE IDs, CVSS scores and mitigations. Reading these is a core asset-owner duty.</li>
+        <li><b>Provenance &amp; signing</b> — firmware and updates must be cryptographically signed so a device rejects tampered images (this is what Stuxnet exploited the absence of).</li>
+        <li><b>Third-party / integrator risk</b> — the 62443-2-4 requirements exist because integrators and service providers are a major attack path (remote-access tools, shared laptops, weak credentials brought on-site).</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">CVSS in an OT Context — Read It Twice</div>
+      <p>A CVE's <b>CVSS base score</b> is IT-centric: it assumes availability is least important. In OT you must <b>re-score</b> for your context — a "medium" CVSS bug that causes a controller to crash may be <b>critical</b> to you because availability is king, while a "critical" data-leak bug on an isolated PLC may be low-risk in practice. Use CVSS as an input, temper it with your zone/consequence analysis, and prioritise by <i>reachability</i> (can a threat actually get to it, given your conduits?).</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A CISA advisory reports a CVSS 9.8 remote-code-execution flaw in a protocol stack used by one of your PLC models. Your first action is to patch immediately. Why might that be the wrong first move in OT?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> In OT, the first move is <b>assess reachability and consequence, then plan</b> — not reflexively patch a running controller. Ask: is that PLC actually reachable by the threat, given your zones/conduits? (If it's in a segmented zone with no path to an attacker, the effective risk is far below 9.8.) Is the vendor patch validated for your firmware/application, and can you afford the reboot? Often the correct <i>immediate</i> action is a <b>compensating control</b> — tighten the conduit firewall to block the vulnerable protocol/port, add monitoring — which buys time to schedule and test the real patch during a planned outage. Rushing an unvalidated patch onto a live safety-critical controller can cause the very outage the attacker wanted.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 9 ============ -->
+  <section class="page" id="p9">
+    <div class="page-tag">Page 9 / 16</div>
+    <h2 class="page-title">Patching, Hardening &amp; Backups</h2>
+    <p class="page-sub">The day-to-day defensive hygiene — done the OT way, where you cannot simply reboot to fix.</p>
+
+    <p class="lead">Most real-world compromise doesn't need a nation-state exploit; it walks in through default passwords, unpatched decade-old CVEs, flat networks and USB sticks. The unglamorous controls stop the majority of attacks — the trick is doing them without breaking availability.</p>
+
+    <div class="card">
+      <div class="label">Hardening — Reduce the Attack Surface First</div>
+      <ul class="tips">
+        <li><b>Disable unused services &amp; ports</b> — the web server, FTP, Telnet and discovery protocols shipped "on" by default are free attacker footholds. Turn off what the application doesn't need.</li>
+        <li><b>Change every default credential</b> — the single highest-value, lowest-cost control. Default passwords are published in manuals.</li>
+        <li><b>Least functionality &amp; least privilege</b> — engineering workstations shouldn't browse the web or read email; operators shouldn't have programming rights.</li>
+        <li><b>Physical security</b> — lock panels, disable/epoxy unused USB ports, control the key switch. Stuxnet and many insider events are physical-access stories.</li>
+        <li><b>Application allow-listing</b> on Windows-based HMIs/workstations — far more OT-appropriate than signature antivirus because the software set is fixed and known.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Patching Without Rebooting the Plant</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Reality</th><th>OT patching practice</th></tr>
+        <tr><td>Can't reboot a running unit</td><td>Patch during planned outages / turnarounds; maintain a patch backlog with risk-ranking</td></tr>
+        <tr><td>Unvalidated patch may break control</td><td>Test on an offline replica / test bench <b>before</b> production; wait for vendor validation</td></tr>
+        <tr><td>Some devices are unpatchable (EoL)</td><td><b>Compensating controls</b>: isolate in a tighter zone, virtual-patch at an industrial firewall, monitor closely</td></tr>
+        <tr><td>Patch delivery is slow in OT</td><td>Risk-based schedule: patch internet-reachable &amp; high-consequence first; deep-zone legacy last</td></tr>
+      </table></div>
+      <p style="margin-top:10px" class="page-sub"><b>Virtual patching</b> — blocking exploitation of a known vulnerability at a network device (IPS / industrial firewall rule) without touching the vulnerable asset — is the OT world's escape hatch for the unpatchable. It doesn't fix the flaw; it makes it unreachable.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Backups &amp; Recovery — the Ransomware Antidote</div>
+      <p>The most likely serious incident a typical plant faces in 2026 is not Stuxnet — it's <b>ransomware</b> reaching OT (usually via the IT side or a shared engineering laptop). The defence that actually works is <b>tested recovery</b>:</p>
+      <ul class="tips">
+        <li><b>3-2-1 rule</b>: 3 copies, 2 media, 1 off-site/offline. An <b>offline (air-gapped) backup</b> ransomware can't encrypt is the point.</li>
+        <li>Back up <b>controller programs, HMI projects, network configs and full system images</b> — not just data. You need to rebuild a controller from bare metal.</li>
+        <li><b>Test the restore.</b> An untested backup is a hope, not a control. Rehearse rebuilding a station within your recovery-time objective (RTO).</li>
+        <li>Keep <b>golden images</b> and documented configurations so a compromised device can be re-flashed to a known-good state quickly.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Secure Remote Access — the Perennial Hole</div>
+      <p>Vendor remote support and work-from-anywhere engineering are operational necessities and the <b>#1 real-world entry path</b>. Do it right: no direct inbound to OT; a brokered <b>jump host</b> in the DMZ; MFA; session recording &amp; logging; time-boxed, approved access that is <i>off by default</i>; and no shared/persistent VPN tunnels that live forever. "The vendor left a permanent VPN with a shared password" is a recurring root cause.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A critical PLC runs firmware with a known RCE flaw, but the vendor has ended support and no patch exists. It must stay in service for three more years. What is the 62443-aligned response?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> <b>Compensating controls, documented as accepted residual risk.</b> Since you can't patch, you make the flaw unreachable and detectable: put the PLC in its own tight <b>zone</b> with a restrictive conduit (only the exact protocol/port the process needs, from only the exact source it needs); <b>virtual-patch</b> the specific exploit at an industrial firewall/IPS; add <b>monitoring</b> to detect anomalous access; enforce strict physical &amp; remote-access control; and keep tested <b>backups/golden image</b> for fast recovery. Record the decision, the controls, and the residual risk with management sign-off, and put the device on the replacement roadmap. This is FR5 (restricted data flow) + FR6 (response) compensating for an unfixable FR3 gap.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 10 ============ -->
+  <section class="page" id="p10">
+    <div class="page-tag">Page 10 / 16</div>
+    <h2 class="page-title">Monitoring &amp; Incident Response</h2>
+    <p class="page-sub">You will not keep every attacker out. FR6 is about seeing them and responding without making things worse.</p>
+
+    <p class="lead">Prevention (segmentation, hardening) is necessary but not sufficient. <b>Detection</b> and a rehearsed <b>response</b> are what separate a contained event from a headline. In OT, both must respect the golden rule: <b>the safe state of the process comes first</b>.</p>
+
+    <div class="card">
+      <div class="label">OT Monitoring — Why It's Different</div>
+      <ul class="tips">
+        <li><b>Passive first.</b> Prefer <b>passive network monitoring</b> (a SPAN/mirror port feeding an OT-aware IDS) over active scanning that can crash fragile devices. You watch the traffic; you don't poke the PLCs.</li>
+        <li><b>Baseline the normal.</b> OT traffic is <i>remarkably regular</i> — the same devices talk the same protocols at the same rates. That predictability is a gift: anomaly detection works far better here than in chaotic IT. A PLC suddenly receiving a firmware-write, or a new device appearing, stands out.</li>
+        <li><b>Protocol awareness.</b> An OT IDS understands Modbus, DNP3, EtherNet/IP, OPC UA, S7 — so it can flag "a write to a safety register from an unexpected source", not just "TCP packet".</li>
+        <li><b>Asset inventory is prerequisite.</b> You can't detect a rogue device if you never knew what "all devices" was. Continuous, passive asset discovery underpins everything (and is the first thing most programmes lack).</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">SIEM, Logging &amp; the SOC</div>
+      <p>Audit logs from HMIs, workstations, firewalls and the OT IDS feed a <b>SIEM</b> for correlation and alerting. Best practice in 2026 is a <b>converged or dedicated OT SOC</b> where analysts understand control systems — an IT SOC that treats "engineer downloaded a PLC program" as routine will miss the one time it's an attacker. Keep logs on a system the attacker can't easily erase (write-once / off-zone).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">The Incident Response Cycle (OT-flavoured)</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Phase</th><th>OT-specific considerations</th></tr>
+        <tr><td><b>Prepare</b></td><td>OT IR plan, roles, contacts, offline backups, vendor support lines, rehearsed playbooks &amp; tabletop exercises</td></tr>
+        <tr><td><b>Detect &amp; Analyse</b></td><td>Correlate IDS/SIEM; confirm it's an incident, not a process upset; scope which zones are affected</td></tr>
+        <tr><td><b>Contain</b></td><td><b>Here's the hard part</b> — isolating a zone may lose visibility/control of a live process. Containment must be weighed against safe operation; sometimes you keep a compromised-but-monitored system running to a controlled shutdown</td></tr>
+        <tr><td><b>Eradicate &amp; Recover</b></td><td>Re-flash from golden images, restore validated backups, rebuild in a safe sequence, verify integrity before reconnecting</td></tr>
+        <tr><td><b>Post-Incident</b></td><td>Blameless review (see <a href="A25_Root_Cause_Analysis_Deep_Dive.html">A25</a> RCA), feed lessons back into the programme, report to regulators where required</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">"Shut It Down" Is a Safety Decision, Not an IT One</div>
+      <p>The instinct from IT — "pull the plug, contain the breach" — can be the <b>most dangerous</b> action on a plant. Killing power to a running furnace, reactor or pipeline mid-process can create the very hazard the SIS exists to prevent. In OT, the containment decision is made <b>jointly with operations and safety</b>, and often the right move is a <b>controlled, orderly shutdown to a safe state</b> rather than an abrupt kill. The IR plan must pre-authorise who makes that call and how.</p>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">Your OT IDS flags an engineering workstation issuing program downloads to three PLCs at 03:00 — outside any maintenance window. Walk through the first response steps in OT-correct order.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> (1) <b>Analyse before acting</b> — confirm it's genuinely anomalous (no approved change, no ticket) and not a legitimate remote session; check what was written. (2) <b>Preserve evidence</b> — capture logs/traffic before anything is changed. (3) <b>Assess process state</b> — are the PLCs currently controlling a live process safely? Loop in operations. (4) <b>Contain proportionately</b> — cut the <i>workstation's</i> network access (kill its conduit / disable the remote-access session) to stop further writes, rather than dropping the PLCs that are running the process. (5) <b>Verify PLC integrity</b> — compare running programs against golden images; if tampered, plan a controlled recovery with operations, not an abrupt trip. (6) Escalate per the IR plan. The theme: stop the attacker's access, keep the process safe, recover deliberately.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 11 ============ -->
+  <section class="page" id="p11">
+    <div class="page-tag">Page 11 / 16</div>
+    <h2 class="page-title">Building the Programme in Practice</h2>
+    <p class="page-sub">From a flat, default-password plant to a maturing 62443 programme — the realistic first-year roadmap for a Sri Lankan process/manufacturing site.</p>
+
+    <p class="lead">Standards describe the destination; a programme is how you get there without boiling the ocean. 62443-2-1 calls this the <b>CSMS (Cyber Security Management System)</b> — the OT analogue of an ISO 27001 ISMS, but tuned to control systems.</p>
+
+    <div class="card">
+      <div class="label">The "Crawl → Walk → Run" Order That Actually Works</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Stage</th><th>Do this</th><th>Why first</th></tr>
+        <tr><td><b>1. Know</b></td><td>Build an <b>asset inventory</b> (passive discovery). Map data flows &amp; existing connections.</td><td>You cannot protect, patch or detect what you don't know exists. Almost every programme discovers unknown internet paths here.</td></tr>
+        <tr><td><b>2. Separate</b></td><td>Establish the <b>IT/OT boundary &amp; DMZ</b>; kill direct enterprise→control paths; find &amp; govern rogue conduits (4G modems, vendor VPNs).</td><td>The highest-leverage single control — turns an office breach from "plant down" into "contained".</td></tr>
+        <tr><td><b>3. Harden</b></td><td>Change default credentials; disable unused services; lock USB; secure remote access via a jump host + MFA.</td><td>Cheap, blocks the majority of real-world intrusions.</td></tr>
+        <tr><td><b>4. Assess</b></td><td>Run the <b>62443-3-2 risk assessment</b>; define zones/conduits &amp; target SLs formally.</td><td>Now you can prioritise spend by risk instead of guessing.</td></tr>
+        <tr><td><b>5. Detect</b></td><td>Deploy <b>passive OT monitoring</b>; centralise logs; write &amp; rehearse an OT IR plan; tested offline backups.</td><td>Assume prevention fails; buy the ability to see &amp; recover.</td></tr>
+        <tr><td><b>6. Sustain</b></td><td>Patch cycle, change management, training, periodic reassessment, metrics, MoC (see <a href="A52_Functional_Safety_SIL_Deep_Dive.html">A52</a>).</td><td>Security is a lifecycle, not a project. Threats &amp; the plant both change.</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">People &amp; Governance — the Half Everyone Skips</div>
+      <ul class="tips">
+        <li><b>Ownership.</b> Name an OT security owner who bridges automation and IT security. "Everyone's job" = no one's job.</li>
+        <li><b>Training &amp; culture.</b> The operator who plugs in a found USB, the engineer who reuses a password, the manager who approves a permanent vendor tunnel — awareness is a control (62443-2-1 requires it).</li>
+        <li><b>Management of Change.</b> Every network/config change goes through MoC — the same discipline as process safety. The "temporary" firewall rule that became permanent is a classic root cause.</li>
+        <li><b>Third-party governance.</b> Integrators &amp; vendors get 62443-2-4-style requirements written into contracts: their laptops, their remote access, their credentials are <i>your</i> attack surface.</li>
+      </ul>
+    </div>
+
+    <div class="card demo">
+      <div class="label">🧪 Interactive — Programme Maturity Self-Check</div>
+      <p class="lead" style="margin-bottom:10px">Tick the controls your (imagined) site has in place. The score maps to a rough maturity band and names your weakest link — the thing to do next.</p>
+      <div class="seg" id="d2asset"><button data-k="asset" data-v="0" class="on">No asset inventory</button><button data-k="asset" data-v="1">Asset inventory</button></div>
+      <div class="seg" id="d2seg"><button data-k="seg" data-v="0" class="on">Flat / direct IT-OT</button><button data-k="seg" data-v="1">DMZ &amp; segmentation</button></div>
+      <div class="seg" id="d2hard"><button data-k="hard" data-v="0" class="on">Defaults &amp; open USB</button><button data-k="hard" data-v="1">Hardened + MFA remote</button></div>
+      <div class="seg" id="d2mon"><button data-k="mon" data-v="0" class="on">No monitoring</button><button data-k="mon" data-v="1">Passive OT IDS + logs</button></div>
+      <div class="seg" id="d2bak"><button data-k="bak" data-v="0" class="on">No tested backups</button><button data-k="bak" data-v="1">Tested offline backups + IR plan</button></div>
+      <div class="demo-out" id="d2out"></div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Quick Check</div>
+      <p class="quiz-q">A site has a modest budget and can do exactly one thing this year. Which single control gives the greatest real-world risk reduction, and why?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> <b>Segment the network — establish the IT/OT boundary and DMZ, and cut/govern any direct or rogue paths (vendor VPNs, cellular modems) into the control zone.</b> Most damaging real incidents (ransomware crossing from IT, remote-access abuse) depend on a reachable path to OT. Removing that path converts an office/IT compromise from a plant-down event into a contained one, and it protects <i>every</i> device behind it — including the legacy ones you can't patch. It's the highest leverage-per-rupee control. (A close second, and nearly free, is changing default credentials and locking down remote access — often done in the same push.)</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 ============ -->
+  <section class="page" id="p12">
+    <div class="page-tag">Page 12 / 16</div>
+    <h2 class="page-title">Recap, Failure Modes &amp; Quiz</h2>
+    <p class="page-sub">The whole module in one screen, the six ways OT security programmes fail, and five exam-grade checks.</p>
+
+    <div class="card">
+      <div class="label">The 8 Ideas That Matter</div>
+      <ul class="tips">
+        <li><b>OT flips the triad</b> to Availability → Integrity → Confidentiality; the consequence of failure is physical and the system can't stop.</li>
+        <li><b>62443 is a family with three roles</b> (owner / integrator / supplier) — security is a shared responsibility, and capability (SL-C) ≠ target (SL-T) ≠ achieved (SL-A).</li>
+        <li><b>Purdue</b> gives the layered reference &amp; the DMZ; <b>IIoT breaks it</b>, and zones/conduits + zero-trust thinking survive the flattening.</li>
+        <li><b>Zones &amp; conduits</b> are the engineering core: group by consequence, connect only through controlled conduits, segregate the SIS.</li>
+        <li><b>Security Levels 1–4</b> express attacker capability as a per-FR vector; target them by risk, not everywhere at max.</li>
+        <li><b>62443-3-2 risk assessment</b> turns consequence × threat into a defensible SL-T; <b>the 7 FRs</b> organise every technical control.</li>
+        <li><b>Prevention + detection + recovery</b>: harden &amp; segment, monitor passively, keep tested offline backups — ransomware makes recovery the decisive control.</li>
+        <li><b>"Shut it down" is a safety decision</b>; containment is weighed against safe operation, made jointly with operations.</li>
+      </ul>
+    </div>
+
+    <div class="fail-grid">
+      <div class="fail">
+        <h4>① Flat network</h4>
+        <p>No IT/OT boundary or DMZ. One office phishing email reaches a PLC. <b>Fix:</b> segment first — it's the highest-leverage control.</p>
+      </div>
+      <div class="fail">
+        <h4>② Rogue conduits</h4>
+        <p>Forgotten vendor VPN, a 4G modem on a "smart" sensor, an engineer's hotspot. Invisible internet paths into OT. <b>Fix:</b> asset &amp; connection discovery; govern every conduit.</p>
+      </div>
+      <div class="fail">
+        <h4>③ Default credentials</h4>
+        <p>Published passwords, shared admin logins, no MFA. The cheapest attack there is. <b>Fix:</b> change defaults, unique IDs, MFA on remote access.</p>
+      </div>
+      <div class="fail">
+        <h4>④ Patch paralysis</h4>
+        <p>Either reckless auto-patching that breaks control, or years-old CVEs never touched. <b>Fix:</b> risk-based schedule + compensating/virtual patching for the unpatchable.</p>
+      </div>
+      <div class="fail">
+        <h4>⑤ Untested backups</h4>
+        <p>Backups exist but no one ever restored one; or they're online and ransomware encrypts them too. <b>Fix:</b> 3-2-1 with an offline copy, rehearse the restore to your RTO.</p>
+      </div>
+      <div class="fail">
+        <h4>⑥ IT-style incident response</h4>
+        <p>"Pull the plug" on a live process; no OT IR plan; IT SOC blind to control-system context. <b>Fix:</b> OT IR plan, joint safety/ops containment, controlled shutdown to safe state.</p>
+      </div>
+    </div>
+
+    <div class="card quiz">
+      <div class="label">Final Quiz</div>
+      <p class="quiz-q">Q1. Explain why "SL-C 3 component" does not make a "SL 3 plant".</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> SL-C is the component's <i>capability</i> if configured correctly (62443-4-2). Achieved level (SL-A) also needs the integrator to build the zones/conduits to meet the system SRs (3-3) <i>and</i> the owner to operate the programme (2-1). A capable component in a flat network with default passwords achieves nothing near SL 3. Capability ≠ target ≠ achieved.</span></div>
+
+      <p class="quiz-q">Q2. Why is the Purdue model said to be "breaking", and what replaces the assumption it relied on?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Purdue assumed low-level devices were dumb and traffic flowed strictly through layer boundaries. IIoT devices at L0/L1 now have onboard compute and direct cloud links, bypassing the DMZ — the layering assumption fails. It's replaced by <b>zero-trust / per-conduit authentication</b>: trust a device for what it proves (identity, least privilege) on each connection, not for where it sits. Purdue survives as a <i>logical</i> reference; zones &amp; conduits are the tool that adapts.</span></div>
+
+      <p class="quiz-q">Q3. A zone's SL-T is written {IAC 3, UC 3, SI 2, DC 1, RDF 2, TRE 2, RA 2}. What does the DC 1 tell a designer, and why isn't it a weakness?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> SL is a <b>per-FR vector</b>. DC 1 (Data Confidentiality) says the data in this zone isn't secret enough to justify strong confidentiality controls — so don't spend on encrypting non-sensitive setpoints. It's not a weakness because confidentiality isn't the risk here; access control and command authority are, hence IAC 3 and UC 3. Targeting each FR to its actual risk is the whole point — it prevents wasting effort on DC while properly funding the FRs that matter.</span></div>
+
+      <p class="quiz-q">Q4. Why can a CVSS 9.8 be lower-priority in OT than a CVSS 5.0, in the right circumstances?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> CVSS base scores are IT-centric and ignore <b>reachability</b> and OT's availability-first priorities. A 9.8 RCE on a PLC that sits in a segmented zone with no path an attacker can reach is effectively low-risk <i>in your context</i>; a 5.0 flaw that crashes a controller reachable from a poorly-segmented zone may be critical because availability is king and it's exploitable. Re-score CVEs against your zones/conduits (can a threat get there?) and consequence, using CVSS as one input, not the verdict.</span></div>
+
+      <p class="quiz-q">Q5. During a suspected intrusion on a live reactor, IT wants to immediately power off the control network. Give the OT-correct position.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Abruptly powering off a live reactor's control network can create a physical hazard worse than the intrusion — losing control/visibility of an exothermic process is exactly what the safety system is meant to prevent. The OT-correct position: containment is a <b>joint safety/operations decision</b>. Contain the <i>attacker's access</i> (isolate the compromised workstation, cut the malicious conduit, disable remote sessions) while keeping the process under control, then perform a <b>deliberate, controlled shutdown to a safe state</b> if needed. Preserve evidence, and recover from golden images/backups. The process's safe state ranks above rapid IT-style containment.</span></div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"Availability first, group by consequence, guard every conduit — you can't stop every attacker, so segment to contain, monitor to see, and back up to recover."</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 — WORKED EXAMPLES ============ -->
+  <section class="page" id="p13">
+    <div class="page-tag">Page 13 / 16 · MSc Practice</div>
+    <h2 class="page-title">Worked Examples</h2>
+    <p class="page-sub">Four exam-grade problems worked end-to-end — the reasoning an assessor wants to see, not just the answer.</p>
+
+    <div class="card">
+      <div class="label">WE-1 · Deriving a Target SL From Consequence &amp; Threat</div>
+      <p>A batch chemical reactor's basic control zone: worst-case cyber compromise (from the PHA) is a runaway leading to a vessel rupture — <b>catastrophic</b>. The credible threat is a financially-motivated criminal group with control-system tooling — <b>IACS-skilled</b>. Existing controls: segmented zone, MFA remote access, but shared engineering login and no monitoring.</p>
+      <p class="eqn">Consequence = Catastrophic (4) &nbsp;→&nbsp; drives SL up<br>
+      Threat capability = IACS-skilled (3) &nbsp;→&nbsp; SL-T floor = 3<br>
+      Matrix(Catastrophic, IACS-skilled) ⇒ <b>SL-T = 3</b> (SL 4 reserved for nation-state / national-critical)</p>
+      <p>Now the <b>per-FR</b> refinement. Command authority to the reactor is the dominant risk → <b>UC 3, IAC 3</b>. Program/firmware integrity matters (TRITON-class) → <b>SI 3</b>. Setpoints aren't secret → <b>DC 1</b>. Segmentation is central → <b>RDF 3</b>. Detection is currently absent but needed at this consequence → <b>TRE 3</b>. Availability of control is safety-relevant → <b>RA 2–3</b>.</p>
+      <p class="eqn">SL-T = { IAC 3, UC 3, SI 3, DC 1, RDF 3, TRE 3, RA 3 }</p>
+      <p><b>Gap analysis vs current SL-A:</b> shared login fails IAC 3 &amp; UC 3 (need unique IDs + least privilege); no monitoring fails TRE 3 (need passive OT IDS + logging). These two gaps are the funded work; segmentation &amp; MFA already meet RDF/part of IAC.</p>
+      <p class="page-sub"><b>Insight:</b> a single scalar "SL 3" hides the actual work. The vector plus a gap analysis converts a risk assessment directly into a prioritised, costed remediation list — and shows an auditor exactly why each control exists.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-2 · Conduit Design for a Cloud Analytics Feed</div>
+      <p>Management wants pump vibration &amp; process data (see <a href="A42_Vibration_Analysis_Deep_Dive.html">A42</a>) in a cloud PdM platform. Constraint: security policy forbids <b>any</b> inbound path to the control zone (SL-T RDF 3). Design the data path.</p>
+      <p><b>Solution architecture:</b></p>
+      <p class="eqn">Control zone (L1/2) → [outbound-only replication] → Historian mirror in DMZ (L3.5) → [cloud pulls from DMZ] → Cloud PdM</p>
+      <ul class="tips">
+        <li>Control→DMZ conduit: <b>strictly outbound</b>, single protocol (e.g. historian replication or OPC UA read), firewall rule source=historian dest=DMZ-mirror only. For SL 3 assurance, enforce with a <b>hardware data diode</b> so an inbound path is physically impossible, not just rule-based.</li>
+        <li>DMZ→Cloud conduit: TLS, mutual authentication, the cloud initiates the pull <i>from</i> the DMZ; the DMZ never holds a credential into the control zone.</li>
+        <li>No credential, route or trust relationship exists from cloud → DMZ → control. A full cloud compromise reaches, at worst, a read-only DMZ copy.</li>
+      </ul>
+      <p class="eqn">Residual risk = data confidentiality of the mirrored dataset only. Process integrity risk ≈ 0 (no command path exists).</p>
+      <p class="page-sub"><b>Insight:</b> "get data out without letting anything in" is the archetypal OT conduit problem, and the data diode is the archetypal answer — it moves the guarantee from <i>configuration</i> (a rule someone can fat-finger) to <i>physics</i> (light only goes one way down the fibre).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-3 · Prioritising CVEs by Reachability</div>
+      <p>Three advisories land in one week. Rank them for a plant whose control zone is well-segmented behind a DMZ, with one legacy HMI exposed to the corporate network through a mis-configured rule.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>CVE</th><th>CVSS</th><th>Affected asset</th><th>Reachability</th></tr>
+        <tr><td>A</td><td>9.8 RCE</td><td>PLC deep in segmented zone</td><td>No path from any threat source</td></tr>
+        <tr><td>B</td><td>7.5 DoS</td><td>Legacy HMI reachable from corporate net (mis-config)</td><td>Directly reachable from IT</td></tr>
+        <tr><td>C</td><td>5.3 info-leak</td><td>Historian mirror in DMZ</td><td>Reachable but read-only, non-sensitive data</td></tr>
+      </table></div>
+      <p class="eqn">Effective risk ≈ CVSS × reachability × consequence<br>
+      B: 7.5 × reachable × (HMI DoS loses operator view = high consequence) → <b>rank #1, act now</b><br>
+      A: 9.8 × unreachable × catastrophic → base score scary but effective risk low → <b>rank #2, schedule patch</b><br>
+      C: 5.3 × reachable × low consequence (read-only, non-secret) → <b>rank #3, routine</b></p>
+      <p><b>Immediate actions:</b> for B, fix the firewall mis-config <i>today</i> (removes reachability — a free "virtual patch") <i>and</i> schedule the HMI patch; for A, verify segmentation still holds, then patch at the next window; for C, log &amp; batch it.</p>
+      <p class="page-sub"><b>Insight:</b> the highest CVSS is not the top priority. Reachability — a direct product of your zone/conduit design — reorders the list, and the cheapest fix (correcting one firewall rule) beats the scariest number.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">WE-4 · Attack-Path Likelihood &amp; the Value of Segmentation</div>
+      <p>Model an office→OT ransomware path as a chain of steps that each must succeed. Rough per-step success probabilities <i>before</i> segmentation: phish an office user 0.5, pivot office→server 0.6, reach flat OT LAN 0.8, encrypt reachable OT hosts 0.7.</p>
+      <p class="eqn">P(reach &amp; damage OT)_before = 0.5 × 0.6 × 0.8 × 0.7 ≈ <b>0.168</b> (≈ 1 in 6 per serious campaign)</p>
+      <p>Now insert a DMZ + segmentation that cuts the "reach OT LAN" step from 0.8 to 0.05 (must defeat the boundary) and reduces "encrypt reachable OT" to 0.3 (fewer hosts reachable, some unpatchable ones now isolated):</p>
+      <p class="eqn">P(...)_after = 0.5 × 0.6 × 0.05 × 0.3 ≈ <b>0.0045</b> &nbsp;→&nbsp; a ~37× reduction from one architectural control</p>
+      <p class="page-sub"><b>Insight:</b> because the path is a <b>product</b> of independent steps, hammering the one step you control best — the IT/OT boundary — collapses the whole chain. This is the quantitative case behind "segment first": it's the term in the product you can push closest to zero, and it protects everything behind it at once. (This is the cyber cousin of the SIF/LOPA decade-arithmetic in <a href="A52_Functional_Safety_SIL_Deep_Dive.html">A52</a>.)</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 — PROBLEM SET ============ -->
+  <section class="page" id="p14">
+    <div class="page-tag">Page 14 / 16 · MSc Practice</div>
+    <h2 class="page-title">Problem Set</h2>
+    <p class="page-sub">Ten problems from recall to design judgement. Work each fully before revealing.</p>
+
+    <div class="card quiz">
+      <p class="quiz-q">P1. State the OT priority triad and give one concrete reason each ordering differs from IT.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> OT = <b>Availability → Integrity → Confidentiality</b>. Availability first: a stopped process can injure people/destroy equipment (vs IT downtime = inconvenience). Integrity second: a corrupted setpoint/command has physical consequence. Confidentiality last: leaked setpoints rarely cause physical harm. IT is C-I-A because its asset is data.</span></div>
+
+      <p class="quiz-q">P2. Match each 62443 part to its role: 2-1, 2-4, 3-3, 4-2.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> 2-1 → <b>Asset Owner</b> (security programme / CSMS). 2-4 → <b>Service Provider / Integrator</b> (requirements for service providers). 3-3 → <b>Integrator</b> (system security requirements &amp; SLs). 4-2 → <b>Product Supplier</b> (component technical requirements).</span></div>
+
+      <p class="quiz-q">P3. A device is claimed "SL-C 3". List the two additional conditions needed before its zone can be SL-A 3.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> (1) The <b>integrator</b> must configure zones/conduits and system controls so the zone's SRs meet SL-T 3 across all seven FRs (62443-3-3) — e.g. actually enable the device's MFA/cert auth, restrict the conduits. (2) The <b>asset owner</b> must operate the programme (62443-2-1) so it stays there — patching, access management, monitoring, MoC. Capability + correct integration + sustained operation = achieved.</span></div>
+
+      <p class="quiz-q">P4. Why must the SIS be its own zone, and what conduit type ideally connects it to the BPCS?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> The SIS is the last line of defence against a physical catastrophe (see A52); an attacker who reaches it can disable protection while attacking the process (the TRITON scenario). Isolating it in its own zone with the <b>tightest possible conduit — ideally one-way / read-only</b> from BPCS to SIS (the SIS may publish status out, but the BPCS cannot write to the SIS) — means compromising the control system does not compromise safety. Physical separation and independent credentials reinforce it.</span></div>
+
+      <p class="quiz-q">P5. Give the 3-2-1 backup rule and explain which element specifically defeats ransomware.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> <b>3</b> copies, on <b>2</b> different media, with <b>1</b> off-site. The element that defeats ransomware is the <b>offline / air-gapped copy</b> — ransomware can only encrypt what it can reach on the network, so a physically disconnected backup survives. Equally important: the backups must include controller programs, HMI projects, configs and full images, and the <b>restore must be tested</b> against your RTO — an unrestorable backup is not a control.</span></div>
+
+      <p class="quiz-q">P6. An engineer proposes a permanent VPN with a shared password so the drive vendor can support the plant anytime. List four things wrong and the correct design.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Wrong: (1) <b>permanent</b> (should be off-by-default, time-boxed); (2) <b>shared password</b> (no unique identity/accountability, fails FR1); (3) <b>direct into OT</b> (no DMZ broker, fails FR5); (4) <b>no MFA / no logging / no session recording</b> (fails FR1/FR6). Correct: brokered <b>jump host in the DMZ</b>, unique per-person accounts + MFA, access requested &amp; approved per session, time-boxed, fully logged and session-recorded, with no standing inbound path.</span></div>
+
+      <p class="quiz-q">P7. Explain "virtual patching" and when it is the right choice.</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Virtual patching blocks <i>exploitation</i> of a known vulnerability at a network device (industrial firewall / IPS rule that drops the malicious protocol pattern or restricts the reachable source/port) <b>without modifying the vulnerable asset</b>. Right choice when: the asset is end-of-life/unpatchable, a validated patch doesn't exist yet, or a reboot/outage isn't available. It doesn't fix the flaw — it makes it unreachable — so pair it with monitoring and a replacement plan, and record it as a compensating control.</span></div>
+
+      <p class="quiz-q">P8. In the attack-path model of WE-4, likelihoods were multiplied. Why, and what design principle follows?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> A successful compromise requires <b>every</b> step in the chain to succeed, so (assuming rough independence) the overall probability is the <b>product</b> of the per-step probabilities. Principle: <b>defence in depth</b> — driving any single step toward zero collapses the whole product. Concentrate on the step you can most reduce (the IT/OT boundary), because a 16× cut there (0.8→0.05) dominates the result and protects everything behind it.</span></div>
+
+      <p class="quiz-q">P9. Why is passive network monitoring preferred over active scanning in OT, and what makes anomaly detection unusually effective here?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Active scanning sends probes that can crash fragile legacy devices (the scan becomes a DoS) and can consume real-time resources. <b>Passive</b> monitoring reads a mirror/SPAN of traffic and touches nothing. Anomaly detection works unusually well because OT traffic is <b>highly regular</b> — the same devices, protocols and rates repeat predictably — so deviations (a new device, an unexpected program-write, an out-of-window session) stand out sharply against a stable baseline, unlike chaotic IT traffic.</span></div>
+
+      <p class="quiz-q">P10. During an active intrusion on a running furnace, the IR plan must specify who authorises isolation. Why is this an OT-specific requirement, and who decides?</p>
+      <div class="quiz-answer" onclick="this.classList.add('revealed')"><span class="tap">Tap to reveal ↓</span><span class="hidden"><b>A:</b> Because isolating/powering a live furnace can create a physical hazard (loss of control/visibility of a hot process) potentially worse than the cyber event — so containment is a <b>safety decision, not purely a security one</b>. The IR plan must pre-authorise a <b>joint decision</b> between security, <b>operations and process safety</b>, with operations/safety holding veto on actions that affect the process's safe state. The usual answer is to contain the attacker's <i>access</i> while the process is brought to a <b>controlled safe shutdown</b>, rather than an abrupt kill.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 15 — DERIVATIONS & TRAPS ============ -->
+  <section class="page" id="p15">
+    <div class="page-tag">Page 15 / 16 · MSc Practice</div>
+    <h2 class="page-title">Key Frameworks, Derivations &amp; Exam Traps</h2>
+    <p class="page-sub">The reasoning behind the numbers, a symbol/term glossary, and the seven mistakes that cost marks and cause breaches.</p>
+
+    <div class="card">
+      <div class="label">D-1 · Why Defence-in-Depth Multiplies (the attack-path product)</div>
+      <p>Model a compromise as a chain of <i>n</i> independent barriers, each defeated with probability <i>pᵢ</i>. The attacker succeeds only if all barriers fail:</p>
+      <p class="eqn">P(success) = ∏ᵢ pᵢ = p₁·p₂·…·pₙ</p>
+      <p>Adding an independent barrier with defeat-probability <i>p_new</i> multiplies the result by <i>p_new</i> &lt; 1 — it can never increase risk, and a strong barrier (small p) slashes it. The <b>marginal value of a barrier is largest where the current product is dominated by a single large term</b>: cutting the flat-network step from 0.8 to 0.05 (×0.0625) beats improving an already-small term. Corollary — <b>independence matters</b>: if two "barriers" share a common cause (same credential, same flat VLAN), their failures correlate and the product overstates protection (the cyber twin of common-cause β in A52).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">D-2 · Effective Risk vs CVSS — Reachability as a Multiplier</div>
+      <p>A CVSS base score B is a context-free severity. Your <b>effective risk</b> weights it by whether a threat can reach the asset and how bad the outcome is:</p>
+      <p class="eqn">R_eff ≈ B × ρ × C<br>
+      ρ = reachability ∈ [0,1] (product of the conduits an attacker must cross)<br>
+      C = consequence factor (OT: availability-weighted, from the PHA)</p>
+      <p>Because ρ is a function of your zone/conduit design, <b>you control a multiplier on every CVE</b>. Good segmentation drives ρ→0 for deep assets, which is why an unreachable 9.8 can rank below a reachable 5.0. This is also the formal reason "patch by CVSS order" is wrong in OT: it ignores ρ, the term you engineered.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">D-3 · The SL Vector &amp; the "Weakest-FR" Rule</div>
+      <p>A zone's achieved security is the vector <b>SL-A</b> = (a₁…a₇) across the seven FRs; its requirement is <b>SL-T</b> = (t₁…t₇). Conformance is <i>per component</i>:</p>
+      <p class="eqn">Zone conforms ⇔ aᵢ ≥ tᵢ for <b>all</b> i (not on average)</p>
+      <p>An overall "security posture" that averages FRs is misleading: strong FR4 (a₄=4) cannot compensate for weak FR1 (a₁=1) if t₁=3, because an attacker exploits the <b>minimum</b>, not the mean. The governing quantity is <i>minᵢ(aᵢ − tᵢ)</i>: if it's negative, the zone fails at that FR regardless of how strong the others are. This is why "we encrypt everything" is not an answer to "who can log in".</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Symbol &amp; Term Glossary</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Term</th><th>Meaning</th></tr>
+        <tr><td>IACS</td><td>Industrial Automation &amp; Control System — the assets 62443 protects</td></tr>
+        <tr><td>SUC</td><td>System Under Consideration — the boundary of a risk assessment</td></tr>
+        <tr><td>Zone / Conduit</td><td>Group of assets with shared security needs / the controlled channel between zones</td></tr>
+        <tr><td>SL-T / SL-C / SL-A</td><td>Security Level: Target (needed) / Capability (possible) / Achieved (actual)</td></tr>
+        <tr><td>FR1–7</td><td>Foundational Requirements: IAC, UC, SI, DC, RDF, TRE, RA</td></tr>
+        <tr><td>SR / CR / RE</td><td>System Requirement / Component Requirement / Requirement Enhancement</td></tr>
+        <tr><td>CSMS</td><td>Cyber Security Management System (62443-2-1) — the owner's programme</td></tr>
+        <tr><td>DMZ (L3.5)</td><td>Demilitarised zone brokering all IT↔OT traffic</td></tr>
+        <tr><td>SBOM</td><td>Software Bill of Materials — the firmware ingredient list</td></tr>
+        <tr><td>SDL</td><td>Secure Development Lifecycle (62443-4-1)</td></tr>
+        <tr><td>CVSS / CVE</td><td>Vulnerability severity score / catalogued vulnerability ID</td></tr>
+        <tr><td>ρ (reachability)</td><td>Probability an attacker can reach an asset given the conduits — a design-controlled multiplier</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">⚠ Seven Exam Traps</div>
+      <ul class="tips">
+        <li><b>Reversing the triad.</b> Writing C-I-A for OT. It's <b>A-I-C</b>; availability leads because failure is physical.</li>
+        <li><b>Confusing SL-C/T/A.</b> "SL-3 certified component" ≠ "SL-3 plant". Capability, target and achieved are three different things.</li>
+        <li><b>Averaging the FR vector.</b> Security is <b>per-FR</b>; the weakest FR relative to its target governs. Don't offset a weak FR1 with a strong FR4.</li>
+        <li><b>Patching by CVSS.</b> Ignoring reachability. Re-score with ρ and OT consequence; an unreachable 9.8 &lt; a reachable exploitable 5.0.</li>
+        <li><b>IT-style containment.</b> "Pull the plug" on a live process can be more dangerous than the attack — containment is a joint safety decision, aim for controlled safe shutdown.</li>
+        <li><b>Air-gap complacency.</b> "It's air-gapped" is usually false (vendor VPNs, USB, IIoT modems) and, even if true, Stuxnet crossed one. Air gap is not a substitute for the FR controls.</li>
+        <li><b>Treating security as a project.</b> It's a <b>lifecycle</b> (CSMS): threats and the plant both change, so risk assessment, patching and monitoring recur. A one-off audit decays.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 16 — STUDY & PRACTICE ============ -->
+  <section class="page" id="p16">
+    <div class="page-tag">Page 16 / 16 · MSc Practice</div>
+    <h2 class="page-title">Study &amp; Practice Path</h2>
+    <p class="page-sub">The canonical standards &amp; texts, a hands-on ladder you can run on modest kit, and a self-assessment grid.</p>
+
+    <div class="card">
+      <div class="label">Reference Shelf</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Source</th><th>Why it matters</th></tr>
+        <tr><td><b>ISA/IEC 62443 series</b> (esp. 1-1, 2-1, 3-2, 3-3, 4-2)</td><td>The primary standard — read 3-2 (risk) and 3-3 (SRs) in full; skim the rest by role</td></tr>
+        <tr><td><b>IEC 62443-1-6 (2025) &amp; TR 62443-2-2 (2025)</b></td><td>Newest parts: IIoT device security and rating a protection scheme — the current frontier</td></tr>
+        <tr><td><b>NIST SP 800-82</b> "Guide to OT Security" (Rev 3)</td><td>The best free, comprehensive OT-security handbook; complements 62443</td></tr>
+        <tr><td><b>NIST Cybersecurity Framework (CSF 2.0)</b></td><td>Govern-Identify-Protect-Detect-Respond-Recover — the programme-level scaffold</td></tr>
+        <tr><td>Knapp &amp; Langill, <i>Industrial Network Security</i> (2nd ed.)</td><td>The standard practitioner textbook — segmentation, protocols, monitoring</td></tr>
+        <tr><td>Macaulay &amp; Singer, <i>Cybersecurity for Industrial Control Systems</i></td><td>Readable bridge from IT security to ICS</td></tr>
+        <tr><td>SANS ICS410 / GICSP; ISA IC32/IC33 (62443 cert)</td><td>The two mainstream OT-security training/certification tracks</td></tr>
+        <tr><td>CISA ICS Advisories &amp; MITRE ATT&amp;CK for ICS</td><td>Free, current: vulnerability advisories and a catalogue of real ICS attacker techniques</td></tr>
+        <tr><td>Dragos / Nozomi / Claroty threat reports (annual)</td><td>Current OT threat landscape &amp; incident case studies from monitoring vendors</td></tr>
+      </table></div>
+      <p class="page-sub" style="margin-top:8px">Note: none of the OT-cybersecurity standards sit in your PDF material folder — this module is grounded in the 62443/NIST canon plus the 2025–2026 standard updates confirmed by current sources. The <i>Marwedel — Embedded System Design</i> PDF you have supports the device/CPS side (links <a href="A36_Embedded_RaspberryPi_Deep_Dive.html">A36</a>).</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Hands-On Ladder (modest kit, Sri-Lanka-friendly)</div>
+      <ul class="tips">
+        <li><b>1 · Draw your plant.</b> Take any system you know and sketch its Purdue levels, zones and conduits. Mark every internet path — including the ones nobody admits to.</li>
+        <li><b>2 · Asset discovery.</b> On a lab switch, run a <b>passive</b> tool (e.g. open-source Malcolm / Zeek / GRASSMARLIN) against mirrored traffic; build an inventory without scanning.</li>
+        <li><b>3 · Segment a lab.</b> With two cheap managed switches / pfSense, build an IT zone, a DMZ and an OT zone; prove a rule blocks IT→OT while a one-way historian export works.</li>
+        <li><b>4 · Run an OT protocol.</b> Use a soft-PLC (OpenPLC, see <a href="A45_PLC_Brands_Tools_Deep_Dive.html">A45</a>) + Modbus; watch the traffic in Wireshark; craft a rogue write and see it in the capture.</li>
+        <li><b>5 · Anomaly baseline.</b> Record 10 minutes of "normal", then introduce a new device / unexpected write and confirm it stands out — feel why OT anomaly detection works.</li>
+        <li><b>6 · Do a mini 62443-3-2.</b> For one zone, write the SUC, consequence, threat, SL-T vector and gap list — one page, defensible.</li>
+        <li><b>7 · Tabletop an incident.</b> Walk the "03:00 rogue PLC download" scenario with colleagues; decide containment vs safe-state as a group.</li>
+        <li><b>8 · Backup &amp; restore drill.</b> Image a controller/HMI, wipe it, and rebuild from the golden image within a target RTO — time it.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">Self-Assessment — Can You…?</div>
+      <div class="grid-2">
+        <div class="mini c-grn"><h4>Foundations</h4><p>State the A-I-C flip &amp; why; map the four 62443 groups to the three roles; define zone vs conduit.</p></div>
+        <div class="mini c-sky"><h4>Method</h4><p>Run a 62443-3-2 risk assessment to a per-FR SL-T vector; explain SL-C vs SL-T vs SL-A; name the 7 FRs.</p></div>
+        <div class="mini c-amb"><h4>Practice</h4><p>Design a one-way cloud conduit; prioritise CVEs by reachability; write an OT-correct patch &amp; backup strategy.</p></div>
+        <div class="mini c-purp"><h4>Judgement</h4><p>Argue "segment first"; run an OT incident to a safe state without an IT-style plug-pull; govern IIoT &amp; remote access.</p></div>
+      </div>
+    </div>
+
+    <div class="card memory">
+      <div class="label">Memory Hook</div>
+      <p class="quote">"Availability first, group by consequence, guard every conduit — you can't stop every attacker, so segment to contain, monitor to see, and back up to recover."</p>
+    </div>
+
+    <div class="footer">
+      Advanced Deep Dive · Lesson A54 · OT Cybersecurity &amp; IEC 62443<br>
+      Standalone module · Industrial Engineering Micro-Learning Series<br>
+      Related: A33 Industry 4.0/5.0 · A52 Functional Safety · A14 SCADA &amp; HMI · A06 OPC UA · A36 Embedded/Raspberry Pi · A42 Vibration<br>
+      Optimised for iPad Pro 11″ M4 · keratoconus-friendly · self-contained HTML
+    </div>
+
+  </section>
+
+  </div>
+
+<script>
+(function(){
+  function $(id){ return document.getElementById(id); }
+
+  // ---- D1: Target SL selector (Page 6) ----
+  var d1c = 1, d1t = 1;
+  function segPick(containerId, cb){
+    var c = $(containerId);
+    if(!c) return;
+    c.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){
+        c.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+        b.classList.add('on');
+        cb(parseInt(b.getAttribute('data-v'),10));
+      });
+    });
+  }
+  function d1render(){
+    var out = $('d1out'); if(!out) return;
+    // Matrix: SL rises with max of consequence/threat, tempered so SL4 needs top threat.
+    var base = Math.max(d1c, d1t);
+    var sl = base;
+    if(d1c>=3 && d1t>=3) sl = 3;
+    if(d1c===4 && d1t===4) sl = 4;
+    if(d1c<=1 && d1t<=1) sl = 1;
+    if(sl>4) sl=4; if(sl<1) sl=1;
+    var cName = ['','Minor','Serious','Major','Catastrophic'][d1c];
+    var tName = ['','Casual','Low-skill','IACS-skilled','Nation-state'][d1t];
+    var note;
+    if(sl>=4) note = 'SL 4 — reserve for national-critical assets; extended resources &amp; nation-state adversary. Expect heavy cost &amp; strict controls across all 7 FRs.';
+    else if(sl===3) note = 'SL 3 — critical / safety-adjacent zones. IACS-skilled adversary: MFA on untrusted networks, certificate identity, strong monitoring (FR6).';
+    else if(sl===2) note = 'SL 2 — the typical industrial default. Unique IDs, hardened access, segmentation. Blocks low-skill intentional attackers.';
+    else note = 'SL 1 — casual/accidental threat only, low consequence. Basic authentication &amp; hygiene suffice; don\'t over-spend here.';
+    out.innerHTML = 'Consequence: <b>'+cName+'</b> &nbsp;·&nbsp; Threat to resist: <b>'+tName+'</b><br>'+
+      'Recommended target: <b>SL-T = '+sl+'</b><br><span style="font-size:13px">'+note+'</span>';
+  }
+  segPick('d1conseq', function(v){ d1c=v; d1render(); });
+  segPick('d1threat', function(v){ d1t=v; d1render(); });
+  d1render();
+
+  // ---- D2: Programme maturity self-check (Page 11) ----
+  var d2 = { asset:0, seg:0, hard:0, mon:0, bak:0 };
+  function d2seg(containerId, key){
+    var c = $(containerId); if(!c) return;
+    c.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){
+        c.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+        b.classList.add('on');
+        d2[key] = parseInt(b.getAttribute('data-v'),10);
+        d2render();
+      });
+    });
+  }
+  function d2render(){
+    var out = $('d2out'); if(!out) return;
+    var score = d2.asset + d2.seg + d2.hard + d2.mon + d2.bak;
+    var band, col;
+    if(score<=1){ band='Initial / Exposed'; }
+    else if(score<=3){ band='Developing'; }
+    else if(score===4){ band='Managed'; }
+    else { band='Maturing (keep sustaining)'; }
+    // weakest link, in priority order
+    var weakest = 'None — sustain &amp; reassess periodically.';
+    if(!d2.asset) weakest = 'Build an ASSET INVENTORY first — you can\'t protect, patch or detect what you can\'t see.';
+    else if(!d2.seg) weakest = 'SEGMENT next — establish the IT/OT boundary &amp; DMZ, kill rogue conduits. Highest single-control risk reduction.';
+    else if(!d2.hard) weakest = 'HARDEN — change default credentials, disable unused services, lock USB, MFA remote access. Cheap, blocks most intrusions.';
+    else if(!d2.mon) weakest = 'DETECT — deploy passive OT monitoring &amp; centralise logs. Assume prevention fails.';
+    else if(!d2.bak) weakest = 'RECOVER — tested offline backups + an OT incident-response plan. Your ransomware antidote.';
+    out.innerHTML = 'Controls in place: <b>'+score+' / 5</b> &nbsp;·&nbsp; Maturity: <b>'+band+'</b><br>'+
+      '<span style="font-size:13px">Do next → '+weakest+'</span>';
+  }
+  d2seg('d2asset','asset'); d2seg('d2seg','seg'); d2seg('d2hard','hard');
+  d2seg('d2mon','mon'); d2seg('d2bak','bak');
+  d2render();
+})();
+</script>
+</body>
+</html>
