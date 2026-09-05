@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Start Here &mdash; The Learning Path | Advanced Micro Learning</title>
+<style>
+  :root{
+    --bg:#0f1419; --bg2:#0b0f14; --card:#1a2230; --card-2:#232d3f; --card-3:#2b3650;
+    --accent:#8b5cf6; --accent-soft:#c4b5fd;
+    --lime:#a3e635; --blue:#60a5fa; --amber:#fbbf24; --teal:#2dd4bf; --pink:#f472b6;
+    --purple:#c084fc; --orange:#fb923c; --green:#34d399; --danger:#f87171; --sky:#38bdf8;
+    --text:#f1f5f9; --dim:#94a3b8; --border:#334155;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    background:
+      radial-gradient(1200px 600px at 82% -10%, rgba(139,92,246,0.15), transparent 60%),
+      radial-gradient(900px 500px at -10% 18%, rgba(56,189,248,0.08), transparent 55%),
+      var(--bg);
+    color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+    line-height:1.65; letter-spacing:0.01em; min-height:100vh; overflow-x:hidden; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1020px;margin:0 auto;padding:34px 24px 100px;}
+  a{color:var(--accent-soft);}
+  .back{display:inline-block;color:var(--dim);text-decoration:none;font-size:15px;margin-bottom:18px;}
+  .back:hover{color:var(--accent-soft);}
+  .badge{display:inline-flex;align-items:center;gap:10px;background:var(--card);padding:10px 18px;
+    border-radius:999px;font-size:14px;color:var(--dim);border:1px solid var(--border);margin-bottom:20px;}
+  .badge .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  h1{font-size:clamp(34px,5.6vw,58px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;margin-bottom:14px;}
+  h1 .e{margin-right:14px;}
+  .sub{font-size:clamp(16px,2.1vw,20px);color:var(--dim);max-width:840px;margin-bottom:28px;}
+  .sub b{color:var(--text);}
+  .stats{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:30px;}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 20px;min-width:130px;}
+  .stat b{display:block;font-size:26px;font-weight:800;color:var(--accent-soft);line-height:1.1;}
+  .stat span{font-size:12.5px;color:var(--dim);text-transform:uppercase;letter-spacing:0.09em;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px 22px;margin-bottom:20px;}
+  .card.hi{border-left:5px solid var(--accent);}
+  .card.warn{border-left:5px solid var(--amber);}
+  .label{font-family:ui-monospace,monospace;font-size:12px;font-weight:700;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--accent-soft);margin-bottom:12px;}
+  h2.sec{font-size:clamp(24px,3.4vw,34px);font-weight:800;letter-spacing:-0.02em;margin:44px 0 6px;}
+  .secsub{color:var(--dim);font-size:16px;margin-bottom:20px;max-width:840px;}
+  p.body{font-size:16.5px;color:#cbd5e1;margin-bottom:14px;}
+  p.body b{color:var(--text);}
+  ol.steps{list-style:none;counter-reset:s;}
+  ol.steps li{counter-increment:s;position:relative;padding-left:46px;margin-bottom:14px;font-size:16.5px;color:#cbd5e1;}
+  ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:30px;height:30px;border-radius:9px;
+    background:var(--card-3);color:var(--accent-soft);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;}
+  ol.steps li b{color:var(--text);}
+  .tbl{width:100%;border-collapse:collapse;font-size:15px;}
+  .tbl th{text-align:left;padding:10px 10px;color:var(--accent-soft);font-size:12.5px;text-transform:uppercase;
+    letter-spacing:0.08em;border-bottom:2px solid var(--border);}
+  .tbl td{padding:11px 10px;border-bottom:1px solid #22304a;color:#cbd5e1;vertical-align:top;}
+  .tbl tr:last-child td{border-bottom:none;}
+  .tbl td b{color:var(--text);}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  /* stage blocks */
+  .stage{border:1px solid var(--border);border-radius:20px;margin-bottom:26px;overflow:hidden;background:var(--bg2);}
+  .stage-head{display:flex;align-items:center;gap:16px;padding:20px 22px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap;}
+  .stage-n{width:54px;height:54px;border-radius:15px;display:flex;align-items:center;justify-content:center;
+    font-size:22px;font-weight:800;color:#0b0f14;flex:none;}
+  .stage-t{flex:1;min-width:220px;}
+  .stage-t h3{font-size:22px;font-weight:800;letter-spacing:-0.01em;}
+  .stage-t span{font-size:14px;color:var(--dim);}
+  .stage-meta{font-family:ui-monospace,monospace;font-size:12.5px;color:var(--dim);text-align:right;}
+  .stage-note{padding:16px 22px;color:#cbd5e1;font-size:16px;border-bottom:1px solid var(--border);background:rgba(139,92,246,0.05);}
+  .rows{padding:6px 10px 14px;}
+  .row{display:flex;align-items:flex-start;gap:12px;padding:12px 12px;border-radius:12px;}
+  .row:hover{background:var(--card);}
+  .row.plan{opacity:0.72;}
+  .chk{width:22px;height:22px;flex:none;margin-top:3px;accent-color:var(--accent);cursor:pointer;}
+  .rid{font-family:ui-monospace,monospace;font-weight:800;font-size:14px;width:42px;flex:none;color:var(--accent-soft);padding-top:2px;}
+  .rmain{flex:1;min-width:0;}
+  .rmain a{text-decoration:none;color:var(--text);font-weight:700;font-size:17px;}
+  .rmain a:hover{color:var(--accent-soft);}
+  .rmain .nolink{color:var(--dim);font-weight:700;font-size:17px;}
+  .rmeta{margin-top:5px;display:flex;flex-wrap:wrap;gap:7px;align-items:center;}
+  .chip{font-size:11.5px;font-family:ui-monospace,monospace;padding:3px 9px;border-radius:7px;background:var(--card-2);color:var(--dim);}
+  .chip.t{color:#0b0f14;font-weight:700;}
+  .chip.pre{background:rgba(139,92,246,0.16);color:var(--accent-soft);}
+  .chip.soon{background:rgba(251,191,36,0.15);color:var(--amber);font-weight:700;}
+  .chip.hard{background:rgba(248,113,113,0.16);color:#fca5a5;font-weight:700;}
+  /* progress */
+  .prog-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:22px;}
+  .bar{height:14px;border-radius:999px;background:#0b0f14;overflow:hidden;border:1px solid var(--border);margin:10px 0 8px;}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#8b5cf6,#38bdf8);width:0%;transition:width .35s ease;}
+  .prog-txt{font-family:ui-monospace,monospace;font-size:13.5px;color:var(--dim);}
+  .prog-txt b{color:var(--accent-soft);}
+  .spine{border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:16px;background:var(--card);}
+  .spine h4{font-size:18px;margin-bottom:6px;}
+  .spine p{color:var(--dim);font-size:14.5px;margin-bottom:12px;}
+  .flowline{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .flowline a,.flowline span.pl{font-family:ui-monospace,monospace;font-size:13px;font-weight:700;text-decoration:none;
+    background:var(--card-2);padding:6px 11px;border-radius:9px;color:var(--text);border:1px solid var(--border);}
+  .flowline a:hover{border-color:var(--accent);color:var(--accent-soft);}
+  .flowline span.pl{color:var(--dim);border-style:dashed;}
+  .flowline i{color:var(--dim);font-style:normal;}
+  .key{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 8px;}
+  .key b{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--dim);
+    background:var(--card);padding:6px 11px;border-radius:9px;border:1px solid var(--border);}
+  .key i{width:11px;height:11px;border-radius:3px;display:block;}
+  .quote{font-size:clamp(18px,2.6vw,24px);font-weight:700;color:var(--accent-soft);line-height:1.4;}
+  .footer{margin-top:44px;padding-top:22px;border-top:1px solid var(--border);color:var(--dim);font-size:14.5px;text-align:center;}
+  @media(max-width:640px){
+    .wrap{padding:24px 15px 80px;}
+    .rid{width:36px;font-size:13px;}
+    .rmain a,.rmain .nolink{font-size:16px;}
+    .stage-meta{text-align:left;width:100%;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="index.html">&larr; Advanced Library</a>
+
+  <div class="badge"><span class="dot"></span><span>Learning Path &middot; Built for a mechanical engineer moving into automation</span></div>
+  <h1><span class="e">&#129517;</span>Start Here</h1>
+  <p class="sub">The library is organised by <b>topic</b>. That is the wrong order to learn it in. This page puts every module in a <b>sequence</b>, tells you what each one assumes you already know, and gives you a twelve-week on-ramp that starts on ground you already stand on. <b>Nothing here is compulsory except the order.</b></p>
+
+  <div class="stats">
+    <div class="stat"><b>72</b><span>Modules ready</span></div>
+    <div class="stat"><b>8</b><span>Bridge primers ready</span></div>
+    <div class="stat"><b>6</b><span>Stages</span></div>
+    <div class="stat"><b>~143 h</b><span>Total reading</span></div>
+    <div class="stat"><b id="doneCount">0</b><span>You have finished</span></div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="label">YOUR PROGRESS</div>
+    <div class="bar"><i id="barfill"></i></div>
+    <div class="prog-txt" id="progtxt">Tick a module as you finish it. Progress is saved in this browser.</div>
+  </div>
+
+  <div class="card hi">
+    <div class="label">READ THIS FIRST &mdash; WHY THE MATERIAL FEELS HARD</div>
+    <p class="body">It is not you, and it is not a reading-speed problem. Three things are happening at once.</p>
+    <ol class="steps">
+      <li><b>The library has no order.</b> A57 Control Systems Theory sits next to A19 Bearings in the index, and nothing warns you that one assumes four other modules and a page of Laplace transforms while the other assumes a mechanical degree you already have. That is what this page fixes.</li>
+      <li><b>Three of the tracks are genuinely foreign to a mechanical background</b> &mdash; electrical, PLC/instrumentation, and networks. They are not harder than mechanics; they are <i>unfamiliar</i>, which feels identical from the inside. Eight bridge primers are available specifically to close that gap, using analogies you already own: voltage is pressure, current is flow, capacitance is an accumulator, inductance is inertia.</li>
+      <li><b>Every module is written at MSc depth on purpose.</b> They are reference documents you will return to for years, not articles you read once. <b>You are not supposed to absorb one in a single sitting</b>, and treating them that way is the fastest route to feeling stupid about material you actually understand.</li>
+    </ol>
+  </div>
+
+  <div class="card warn">
+    <div class="label">THE RESCUE PROTOCOL &mdash; WHEN A MODULE LOSES YOU</div>
+    <p class="body">Do not push harder. Run this instead; it takes ten minutes and it works on any module in the library.</p>
+    <ol class="steps">
+      <li><b>Name the gap out loud.</b> Is it a <i>word</i> you do not know, a <i>symbol</i> you cannot read, or a <i>step</i> you cannot follow? Three different problems, three different fixes. Most of the time it is a word, and one search ends it.</li>
+      <li><b>Check the prerequisite chips on this page.</b> If the module says &ldquo;after A30, A55&rdquo; and you have not read those, the module is not too hard &mdash; you are reading it out of order. Go back one link and return.</li>
+      <li><b>First pass: read only the <span style="color:#a3e635">CORE</span> blocks.</b> Skip every <span style="color:#fbbf24">STRETCH</span> and <span style="color:#c4b5fd">RESEARCH</span> block entirely. They are marked precisely so you can skip them. Roughly two-thirds of every module is CORE and it stands on its own.</li>
+      <li><b>Read page 1 and the recap page, then the middle.</b> The cold open tells you what the whole module is <i>for</i>; the recap tells you what you were supposed to keep. Reading those two first turns the middle from a wall of new material into a set of answers to questions you now have.</li>
+      <li><b>Play with the interactive demo before you read the derivation.</b> Move the sliders until the behaviour is obvious &mdash; then read why it does that. Intuition first, algebra second. This one habit is worth more than any other on this list.</li>
+      <li><b>Always attempt the predict-first card, even when guessing.</b> Being wrong on purpose is the single most effective study technique there is; the explanation lands about three times harder after a wrong guess than after a right one.</li>
+      <li><b>If a derivation blocks you, skip it and go to the worked examples.</b> Derivations are the <i>last</i> thing to master, not the first. Come back to page 18 after you have seen the result used twice; it will read completely differently.</li>
+    </ol>
+    <p class="body"><b>The two-pass rule.</b> Every module deserves two passes separated by at least a week: pass one is CORE only, no notes, no stopping &mdash; just get to the end. Pass two is everything, slowly, with a pen. Almost nobody does pass one properly, and it is the pass that makes pass two possible.</p>
+  </div>
+
+  <h2 class="sec">Your First Twelve Weeks</h2>
+  <p class="secsub">One focused block per week, roughly two to four hours. It starts on mechanical ground on purpose &mdash; weeks 1 and 2 exist to teach you the <i>format</i> while the content is still easy, so that in week 5 the difficulty is the subject rather than the shape of the page.</p>
+  <div class="card"><div class="scroll"><table class="tbl">
+      <tr><th>When</th><th>What</th><th>Why, and how to read it</th></tr>
+        <tr><td><b>Week 1</b></td><td><b>A19 Bearings</b></td><td>Home turf. Learn the <b>shape</b> of a module: cold open, theory, worked examples, problem set. Do the predict-first cards.</td></tr>
+        <tr><td><b>Week 2</b></td><td><b>A21 GD&amp;T &amp; Tolerances</b></td><td>Still home turf, and immediately useful. By now the format should feel routine rather than heavy.</td></tr>
+        <tr><td><b>Week 3</b></td><td><b><a href="B01_Electricity_For_Mechanical_Engineers_Primer.html" style="color:#c4b5fd">B01 Electricity for Mechanical Engineers</a></b></td><td>The first bridge. Voltage is pressure, current is flow, inductance is inertia &mdash; you already understand this subject in another language.</td></tr>
+        <tr><td><b>Week 4</b></td><td><b><a href="B02_Reading_Electrical_Control_Drawings_Primer.html" style="color:#c4b5fd">B02 Drawings</a> + <a href="B04_Sensors_Signals_4_20mA_Primer.html" style="color:#c4b5fd">B04 Sensors &amp; Signals</a></b></td><td>Two short primers. You now read a wiring diagram and know why a sensor sends 4&ndash;20&nbsp;mA instead of a voltage.</td></tr>
+        <tr><td><b>Week 5</b></td><td><b>A30 Three-Phase Power</b></td><td>First full electrical module. Take two sittings. The rotating-field animation is the part to sit with.</td></tr>
+        <tr><td><b>Week 6</b></td><td><b>A55 Electric Motors</b></td><td>Now the three-phase maths has a machine attached to it. This is the module that makes the electrical side click.</td></tr>
+        <tr><td><b>Week 7</b></td><td><b><a href="B03_What_A_PLC_Does_Primer.html" style="color:#c4b5fd">B03 What a PLC Actually Does</a></b></td><td>The single highest-leverage primer in the whole path. Do not skip to A07.</td></tr>
+        <tr><td><b>Week 8</b></td><td><b>A07 PLC &mdash; In Depth</b></td><td>Two or three sittings. Scan cycle first, addressing second, instructions last.</td></tr>
+        <tr><td><b>Week 9</b></td><td><b>A11 Industrial Sensors</b></td><td>Long, but you now have the electrical vocabulary for it. Read CORE only on the first pass.</td></tr>
+        <tr><td><b>Week 10</b></td><td><b><a href="B06_Control_Loop_Before_Maths_Primer.html">B06 The Control Loop</a> + A10 PID</b></td><td>Intuition before algebra. If A10 gets heavy, stop at the tuning section and come back after A50.</td></tr>
+        <tr><td><b>Week 11</b></td><td><b><a href="B07_Reading_PID_Control_Narrative_Primer.html">B07 P&amp;ID &amp; Narrative</a> + A12 Pneumatics</b></td><td>Back to mechanics, but taught as an automation system. A satisfying week &mdash; and it re-uses everything from weeks 1&ndash;10.</td></tr>
+        <tr><td><b>Week 12</b></td><td><b><a href="B08_Industrial_Software_Stack_Primer.html">B08 The Software Stack</a> + A14 SCADA &amp; HMI</b></td><td>Close the loop: sensor to PLC to screen. Then re-read your week-3 notes and see how far you have come.</td></tr>
+  </table></div></div>
+  <p class="body" style="color:#94a3b8;margin-top:-6px">After week 12 you have the whole of Stage&nbsp;2 within reach and the networks track becomes readable rather than cryptic. That is the point at which most people stop feeling like a visitor in this subject.</p>
+
+  <h2 class="sec">The Six Stages</h2>
+  <p class="secsub">Every module in the library, in order, with what it assumes. Tick them off as you go &mdash; the counter at the top updates. Modules marked <span class="chip hard" style="display:inline-block">maths-heavy</span> are worth saving for a week when you have energy; they are not harder to understand, only slower to read.</p>
+  <div class="key"><b><i style="background:#8b5cf6"></i>On-ramp</b><b><i style="background:#a3e635"></i>Mechanical</b><b><i style="background:#fbbf24"></i>Electrical</b><b><i style="background:#fb923c"></i>Fluid power</b><b><i style="background:#38bdf8"></i>Automation</b><b><i style="background:#f472b6"></i>Control theory</b><b><i style="background:#2dd4bf"></i>Networks</b><b><i style="background:#f87171"></i>Safety</b><b><i style="background:#c084fc"></i>Industry 4.0</b><b><i style="background:#60a5fa"></i>Robotics &amp; vision</b><b><i style="background:#34d399"></i>Manufacturing</b><b><i style="background:#94a3b8"></i>CAD</b><b><i style="background:#fda4af"></i>Condition monitoring</b><b><i style="background:#67e8f9"></i>Emerging</b><b><i style="background:#facc15"></i>Capstone</b></div>
+
+  <div class="stage" id="stage0">
+    <div class="stage-head">
+      <div class="stage-n" style="background:#8b5cf6">0</div>
+      <div class="stage-t"><h3>On-Ramp</h3><span>Bridge primers, written for a mechanical engineer</span></div>
+      <div class="stage-meta">8 modules &middot; 8 ready<br>~23.1 hours of reading</div>
+    </div>
+    <div class="stage-note">Eight short primers that build electrical, control and network intuition from mechanical analogies you already own. <b>All eight are now written and ready &mdash; the on-ramp is complete.</b> Start with <b>B01</b> &mdash; it is the foundation of the Electrical spine and assumes nothing &mdash; then <b>B02</b>, which teaches you to read the drawings every later module refers to, and then <b>B03</b>, the load-bearing primer of the whole path: once you can see the scan cycle, every automation module afterwards gets easier. B05 is deliberately self-contained, so it can be read at any point. Finish with <b>B08</b>, which ties the whole stack together and is the natural bridge into the A-series.</div>
+    <div class="rows">
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="B01" aria-label="mark B01 done">
+        <div class="rid">B01</div>
+        <div class="rmain"><a href="B01_Electricity_For_Mechanical_Engineers_Primer.html">Electricity for Mechanical Engineers</a>
+          <div class="rmeta"><span class="chip t" style="background:#8b5cf6">On-ramp</span><span class="chip">16 pages &middot; ~144 min</span><span class="chip pre">no prerequisites</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="B02" aria-label="mark B02 done">
+        <div class="rid">B02</div>
+        <div class="rmain"><a href="B02_Reading_Electrical_Control_Drawings_Primer.html">Reading Electrical &amp; Control Drawings</a>
+          <div class="rmeta"><span class="chip t" style="background:#8b5cf6">On-ramp</span><span class="chip">16 pages &middot; ~144 min</span><span class="chip pre">after B01</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="B03" aria-label="mark B03 done">
+        <div class="rid">B03</div>
+        <div class="rmain"><a href="B03_What_A_PLC_Does_Primer.html">What a PLC Actually Does</a>
+          <div class="rmeta"><span class="chip t" style="background:#8b5cf6">On-ramp</span><span class="chip">16 pages &middot; ~150 min</span><span class="chip pre">after B02</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="B04" aria-label="mark B04 done">
+        <div class="rid">B04</div>
+        <div class="rmain"><a href="B04_Sensors_Signals_4_20mA_Primer.html">Sensors, Signals &amp; the 4&ndash;20&nbsp;mA Loop</a>
+          <div class="rmeta"><span class="chip t" style="background:#8b5cf6">On-ramp</span><span class="chip">18 pages &middot; ~198 min</span><span class="chip pre">after B01</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="B05" aria-label="mark B05 done">
+        <div class="rid">B05</div>
+        <div class="rmain"><a href="B05_Industrial_Communication_Primer.html">Industrial Communication from Zero</a>
+          <div class="rmeta"><span class="chip t" style="background:#8b5cf6">On-ramp</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">no prerequisites</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="B06" aria-label="mark B06 done">
+        <div class="rid">B06</div>
+        <div class="rmain"><a href="B06_Control_Loop_Before_Maths_Primer.html">The Control Loop, Before the Maths</a>
+          <div class="rmeta"><span class="chip t" style="background:#8b5cf6">On-ramp</span><span class="chip">18 pages &middot; ~198 min</span><span class="chip pre">after B01, B04</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="B07" aria-label="mark B07 done">
+        <div class="rid">B07</div>
+        <div class="rmain"><a href="B07_Reading_PID_Control_Narrative_Primer.html">Reading a P&amp;ID and a Control Narrative</a>
+          <div class="rmeta"><span class="chip t" style="background:#8b5cf6">On-ramp</span><span class="chip">19 pages &middot; ~209 min</span><span class="chip pre">after B02, B04, B06</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="B08" aria-label="mark B08 done">
+        <div class="rid">B08</div>
+        <div class="rmain"><a href="B08_Industrial_Software_Stack_Primer.html">The Industrial Software Stack</a>
+          <div class="rmeta"><span class="chip t" style="background:#8b5cf6">On-ramp</span><span class="chip">19 pages &middot; ~214 min</span><span class="chip pre">after B03, B05, B07</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="stage" id="stage1">
+    <div class="stage-head">
+      <div class="stage-n" style="background:#a3e635">1</div>
+      <div class="stage-t"><h3>Foundations</h3><span>The physical building blocks</span></div>
+      <div class="stage-meta">12 modules &middot; 12 ready<br>~27.1 hours of reading</div>
+    </div>
+    <div class="stage-note">Start with the three mechanical modules: they are your home turf and they teach you how these documents are structured before the content gets unfamiliar. Then the electrical foundations, in the order given &mdash; three-phase before motors before drives, always.</div>
+    <div class="rows">
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A19" aria-label="mark A19 done">
+        <div class="rid">A19</div>
+        <div class="rmain"><a href="A19_Bearings_Deep_Dive.html">Bearings</a>
+          <div class="rmeta"><span class="chip t" style="background:#a3e635">Mechanical</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">no prerequisites</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A21" aria-label="mark A21 done">
+        <div class="rid">A21</div>
+        <div class="rmain"><a href="A21_GDT_Tolerances_Deep_Dive.html">GD&amp;T &amp; Tolerances</a>
+          <div class="rmeta"><span class="chip t" style="background:#a3e635">Mechanical</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">no prerequisites</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A20" aria-label="mark A20 done">
+        <div class="rid">A20</div>
+        <div class="rmain"><a href="A20_Gears_Deep_Dive.html">Gears &amp; Gear Trains</a>
+          <div class="rmeta"><span class="chip t" style="background:#a3e635">Mechanical</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A19</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A48" aria-label="mark A48 done">
+        <div class="rid">A48</div>
+        <div class="rmain"><a href="A48_Linkages_Kinematics_Deep_Dive.html">Linkages &amp; Kinematics</a>
+          <div class="rmeta"><span class="chip t" style="background:#a3e635">Mechanical</span><span class="chip">16 pages &middot; ~144 min</span><span class="chip pre">no prerequisites</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A47" aria-label="mark A47 done">
+        <div class="rid">A47</div>
+        <div class="rmain"><a href="A47_Fluid_Mechanics_Pumps_Deep_Dive.html">Fluid Mechanics &amp; Pumps</a>
+          <div class="rmeta"><span class="chip t" style="background:#a3e635">Mechanical</span><span class="chip">16 pages &middot; ~144 min</span><span class="chip pre">no prerequisites</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A30" aria-label="mark A30 done">
+        <div class="rid">A30</div>
+        <div class="rmain"><a href="A30_Three_Phase_Power_Deep_Dive.html">Three-Phase Power</a>
+          <div class="rmeta"><span class="chip t" style="background:#fbbf24">Electrical</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">after B01</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A55" aria-label="mark A55 done">
+        <div class="rid">A55</div>
+        <div class="rmain"><a href="A55_Electric_Motors_Deep_Dive.html">Electric Motors &amp; Machines</a>
+          <div class="rmeta"><span class="chip t" style="background:#fbbf24">Electrical</span><span class="chip">16 pages &middot; ~144 min</span><span class="chip pre">after A30</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A32" aria-label="mark A32 done">
+        <div class="rid">A32</div>
+        <div class="rmain"><a href="A32_Transformers_Deep_Dive.html">Transformers</a>
+          <div class="rmeta"><span class="chip t" style="background:#fbbf24">Electrical</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A30</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A44" aria-label="mark A44 done">
+        <div class="rid">A44</div>
+        <div class="rmain"><a href="A44_Domestic_Wiring_Deep_Dive.html">Domestic Wiring &amp; Consumer Units</a>
+          <div class="rmeta"><span class="chip t" style="background:#fbbf24">Electrical</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">after B01, B02</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A11" aria-label="mark A11 done">
+        <div class="rid">A11</div>
+        <div class="rmain"><a href="A11_Industrial_Sensors_Deep_Dive.html">Industrial Sensors</a>
+          <div class="rmeta"><span class="chip t" style="background:#38bdf8">Automation</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after B04</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A12" aria-label="mark A12 done">
+        <div class="rid">A12</div>
+        <div class="rmain"><a href="A12_Pneumatic_Systems_Deep_Dive.html">Pneumatic Systems</a>
+          <div class="rmeta"><span class="chip t" style="background:#fb923c">Fluid power</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A47</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A13" aria-label="mark A13 done">
+        <div class="rid">A13</div>
+        <div class="rmain"><a href="A13_Hydraulic_Systems_Deep_Dive.html">Hydraulic Systems</a>
+          <div class="rmeta"><span class="chip t" style="background:#fb923c">Fluid power</span><span class="chip">19 pages &middot; ~282 min</span><span class="chip pre">after A12, A47</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="stage" id="stage2">
+    <div class="stage-head">
+      <div class="stage-n" style="background:#38bdf8">2</div>
+      <div class="stage-t"><h3>Core Automation</h3><span>What an automation engineer uses every day</span></div>
+      <div class="stage-meta">10 modules &middot; 10 ready<br>~24.4 hours of reading</div>
+    </div>
+    <div class="stage-note">This is the working stage. If you only ever finish one stage, finish this one: it is the difference between a mechanical engineer who works near automation and one who does automation.</div>
+    <div class="rows">
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A07" aria-label="mark A07 done">
+        <div class="rid">A07</div>
+        <div class="rmain"><a href="A07_PLC_Deep_Dive.html">PLC &mdash; In Depth</a>
+          <div class="rmeta"><span class="chip t" style="background:#38bdf8">Automation</span><span class="chip">15 pages &middot; ~135 min</span><span class="chip pre">after B03</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A45" aria-label="mark A45 done">
+        <div class="rid">A45</div>
+        <div class="rmain"><a href="A45_PLC_Brands_Tools_Deep_Dive.html">PLC Brands &amp; Programming Tools</a>
+          <div class="rmeta"><span class="chip t" style="background:#38bdf8">Automation</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">after A07</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A60" aria-label="mark A60 done">
+        <div class="rid">A60</div>
+        <div class="rmain"><a href="A60_Sequential_Discrete_Control_Deep_Dive.html">Sequential &amp; Discrete Control Design</a>
+          <div class="rmeta"><span class="chip t" style="background:#38bdf8">Automation</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A07</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A51" aria-label="mark A51 done">
+        <div class="rid">A51</div>
+        <div class="rmain"><a href="A51_Motor_Starters_Control_Circuits_Deep_Dive.html">Motor Starters &amp; Control Circuits</a>
+          <div class="rmeta"><span class="chip t" style="background:#fbbf24">Electrical</span><span class="chip">16 pages &middot; ~144 min</span><span class="chip pre">after A30, A55, B02</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A46" aria-label="mark A46 done">
+        <div class="rid">A46</div>
+        <div class="rmain"><a href="A46_Control_Panel_Wiring_Deep_Dive.html">Industrial Control Panel Wiring</a>
+          <div class="rmeta"><span class="chip t" style="background:#fbbf24">Electrical</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">after A51, A44</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A50" aria-label="mark A50 done">
+        <div class="rid">A50</div>
+        <div class="rmain"><a href="A50_Instrumentation_Calibration_PID_Deep_Dive.html">Instrumentation, Calibration &amp; P&amp;ID</a>
+          <div class="rmeta"><span class="chip t" style="background:#38bdf8">Automation</span><span class="chip">16 pages &middot; ~144 min</span><span class="chip pre">after A11, <a href="B07_Reading_PID_Control_Narrative_Primer.html" style="color:inherit">B07</a></span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A10" aria-label="mark A10 done">
+        <div class="rid">A10</div>
+        <div class="rmain"><a href="A10_PID_Control_Deep_Dive.html">PID Control &mdash; In Depth</a>
+          <div class="rmeta"><span class="chip t" style="background:#f472b6">Control theory</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">after B06, A50</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A08" aria-label="mark A08 done">
+        <div class="rid">A08</div>
+        <div class="rmain"><a href="A08_VFD_Deep_Dive.html">VFD &mdash; In Depth</a>
+          <div class="rmeta"><span class="chip t" style="background:#fbbf24">Electrical</span><span class="chip">17 pages &middot; ~153 min</span><span class="chip pre">after A55, A30</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A09" aria-label="mark A09 done">
+        <div class="rid">A09</div>
+        <div class="rmain"><a href="A09_Servo_Motion_Deep_Dive.html">Servo &amp; Motion Control</a>
+          <div class="rmeta"><span class="chip t" style="background:#38bdf8">Automation</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A08, A10</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A14" aria-label="mark A14 done">
+        <div class="rid">A14</div>
+        <div class="rmain"><a href="A14_SCADA_HMI_Deep_Dive.html">SCADA &amp; HMI</a>
+          <div class="rmeta"><span class="chip t" style="background:#38bdf8">Automation</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A07</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="stage" id="stage3">
+    <div class="stage-head">
+      <div class="stage-n" style="background:#2dd4bf">3</div>
+      <div class="stage-t"><h3>Systems &amp; Integration</h3><span>How the pieces are joined</span></div>
+      <div class="stage-meta">17 modules &middot; 17 ready<br>~39.1 hours of reading</div>
+    </div>
+    <div class="stage-note">Networks, architecture and safety. This stage is where your three weak areas converge, so it is deliberately gated behind Stage 2 &mdash; a fieldbus module makes very little sense before you have owned a PLC scan cycle.</div>
+    <div class="rows">
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A01" aria-label="mark A01 done">
+        <div class="rid">A01</div>
+        <div class="rmain"><a href="A01_Modbus_RTU_Deep_Dive.html">Modbus RTU</a>
+          <div class="rmeta"><span class="chip t" style="background:#2dd4bf">Networks</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after B05, A07</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A02" aria-label="mark A02 done">
+        <div class="rid">A02</div>
+        <div class="rmain"><a href="A02_PROFINET_Deep_Dive.html">PROFINET</a>
+          <div class="rmeta"><span class="chip t" style="background:#2dd4bf">Networks</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A01</span><span class="chip hard">maths-heavy</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A03" aria-label="mark A03 done">
+        <div class="rid">A03</div>
+        <div class="rmain"><a href="A03_EtherCAT_Deep_Dive.html">EtherCAT</a>
+          <div class="rmeta"><span class="chip t" style="background:#2dd4bf">Networks</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A02</span><span class="chip hard">maths-heavy</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A05" aria-label="mark A05 done">
+        <div class="rid">A05</div>
+        <div class="rmain"><a href="A05_IO_Link_Deep_Dive.html">IO-Link</a>
+          <div class="rmeta"><span class="chip t" style="background:#2dd4bf">Networks</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A11, A01</span><span class="chip hard">maths-heavy</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A04" aria-label="mark A04 done">
+        <div class="rid">A04</div>
+        <div class="rmain"><a href="A04_CAN_Bus_Deep_Dive.html">CAN Bus</a>
+          <div class="rmeta"><span class="chip t" style="background:#2dd4bf">Networks</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A01</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A06" aria-label="mark A06 done">
+        <div class="rid">A06</div>
+        <div class="rmain"><a href="A06_OPC_UA_Deep_Dive.html">OPC UA</a>
+          <div class="rmeta"><span class="chip t" style="background:#2dd4bf">Networks</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A02, A14</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A37" aria-label="mark A37 done">
+        <div class="rid">A37</div>
+        <div class="rmain"><a href="A37_TSN_Deterministic_Ethernet_Deep_Dive.html">TSN &mdash; Deterministic Ethernet</a>
+          <div class="rmeta"><span class="chip t" style="background:#2dd4bf">Networks</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A02, A03</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A28" aria-label="mark A28 done">
+        <div class="rid">A28</div>
+        <div class="rmain"><a href="A28_Switching_Power_Electronics_Deep_Dive.html">Switching &amp; Power Electronics</a>
+          <div class="rmeta"><span class="chip t" style="background:#fbbf24">Electrical</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A30</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A29" aria-label="mark A29 done">
+        <div class="rid">A29</div>
+        <div class="rmain"><a href="A29_MOSFETs_Deep_Dive.html">MOSFETs</a>
+          <div class="rmeta"><span class="chip t" style="background:#fbbf24">Electrical</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">after A28</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A56" aria-label="mark A56 done">
+        <div class="rid">A56</div>
+        <div class="rmain"><a href="A56_Power_Quality_Harmonics_Deep_Dive.html">Power Quality &amp; Harmonics</a>
+          <div class="rmeta"><span class="chip t" style="background:#fbbf24">Electrical</span><span class="chip">16 pages &middot; ~144 min</span><span class="chip pre">after A30, A32, A08</span><span class="chip hard">maths-heavy</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A61" aria-label="mark A61 done">
+        <div class="rid">A61</div>
+        <div class="rmain"><a href="A61_DCS_Process_Automation_Architecture_Deep_Dive.html">DCS &amp; Process Automation Architecture</a>
+          <div class="rmeta"><span class="chip t" style="background:#38bdf8">Automation</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A14, A50</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A52" aria-label="mark A52 done">
+        <div class="rid">A52</div>
+        <div class="rmain"><a href="A52_Functional_Safety_SIL_Deep_Dive.html">Functional Safety &amp; SIL</a>
+          <div class="rmeta"><span class="chip t" style="background:#f87171">Safety</span><span class="chip">16 pages &middot; ~144 min</span><span class="chip pre">after A50, A60</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A53" aria-label="mark A53 done">
+        <div class="rid">A53</div>
+        <div class="rmain"><a href="A53_Alarm_Management_ISA182_Deep_Dive.html">Alarm Management (ISA-18.2)</a>
+          <div class="rmeta"><span class="chip t" style="background:#f87171">Safety</span><span class="chip">16 pages &middot; ~144 min</span><span class="chip pre">after A14, A52</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A54" aria-label="mark A54 done">
+        <div class="rid">A54</div>
+        <div class="rmain"><a href="A54_OT_Cybersecurity_Deep_Dive.html">OT Cybersecurity &amp; IEC 62443</a>
+          <div class="rmeta"><span class="chip t" style="background:#2dd4bf">Networks</span><span class="chip">16 pages &middot; ~144 min</span><span class="chip pre">after A02, A06</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A36" aria-label="mark A36 done">
+        <div class="rid">A36</div>
+        <div class="rmain"><a href="A36_Embedded_RaspberryPi_Deep_Dive.html">Industrial Embedded Systems &amp; Raspberry Pi</a>
+          <div class="rmeta"><span class="chip t" style="background:#38bdf8">Automation</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after B03, A11</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A31" aria-label="mark A31 done">
+        <div class="rid">A31</div>
+        <div class="rmain"><a href="A31_Digital_Twins_I40_Deep_Dive.html">Digital Twins &amp; Industry 4.0</a>
+          <div class="rmeta"><span class="chip t" style="background:#c084fc">Industry 4.0</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A06, A14</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A33" aria-label="mark A33 done">
+        <div class="rid">A33</div>
+        <div class="rmain"><a href="A33_Industry_4_5_Deep_Dive.html">Industry 4.0 &amp; 5.0</a>
+          <div class="rmeta"><span class="chip t" style="background:#c084fc">Industry 4.0</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A06, A31</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="stage" id="stage4">
+    <div class="stage-head">
+      <div class="stage-n" style="background:#f472b6">4</div>
+      <div class="stage-t"><h3>Advanced &amp; Specialist</h3><span>Depth in a direction you choose</span></div>
+      <div class="stage-meta">23 modules &middot; 23 ready<br>~44.5 hours of reading</div>
+    </div>
+    <div class="stage-note">Nothing here is required for competence and everything here is required for mastery. Pick the branch that matches the job you want; do not attempt them all in order.</div>
+    <div class="rows">
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A57" aria-label="mark A57 done">
+        <div class="rid">A57</div>
+        <div class="rmain"><a href="A57_Control_Systems_Theory_Deep_Dive.html">Control Systems Theory &amp; Dynamic Response</a>
+          <div class="rmeta"><span class="chip t" style="background:#f472b6">Control theory</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A10</span><span class="chip hard">maths-heavy</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A58" aria-label="mark A58 done">
+        <div class="rid">A58</div>
+        <div class="rmain"><a href="A58_Advanced_Process_Control_Deep_Dive.html">Advanced Process Control</a>
+          <div class="rmeta"><span class="chip t" style="background:#f472b6">Control theory</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A57</span><span class="chip hard">maths-heavy</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A59" aria-label="mark A59 done">
+        <div class="rid">A59</div>
+        <div class="rmain"><a href="A59_Control_Valves_Final_Elements_Deep_Dive.html">Control Valves &amp; Final Elements</a>
+          <div class="rmeta"><span class="chip t" style="background:#f472b6">Control theory</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A50, A58</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A15" aria-label="mark A15 done">
+        <div class="rid">A15</div>
+        <div class="rmain"><a href="A15_Robotics_ROS2_Deep_Dive.html">Robotics &amp; ROS 2</a>
+          <div class="rmeta"><span class="chip t" style="background:#60a5fa">Robotics &amp; vision</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A09, A36</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A17" aria-label="mark A17 done">
+        <div class="rid">A17</div>
+        <div class="rmain"><a href="A17_End_Effectors_Deep_Dive.html">End-Effectors &amp; Grippers</a>
+          <div class="rmeta"><span class="chip t" style="background:#60a5fa">Robotics &amp; vision</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A12, A15</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A16" aria-label="mark A16 done">
+        <div class="rid">A16</div>
+        <div class="rmain"><a href="A16_Machine_Vision_Deep_Dive.html">Machine Vision</a>
+          <div class="rmeta"><span class="chip t" style="background:#60a5fa">Robotics &amp; vision</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A11, A15</span><span class="chip hard">maths-heavy</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A35" aria-label="mark A35 done">
+        <div class="rid">A35</div>
+        <div class="rmain"><a href="A35_Cobot_Safety_Deep_Dive.html">Cobot Safety &mdash; ISO 10218 &amp; TS 15066</a>
+          <div class="rmeta"><span class="chip t" style="background:#f87171">Safety</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A15, A52</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A40" aria-label="mark A40 done">
+        <div class="rid">A40</div>
+        <div class="rmain"><a href="A40_CNC_Machining_GCode_Deep_Dive.html">CNC Machining &amp; G-Code</a>
+          <div class="rmeta"><span class="chip t" style="background:#34d399">Manufacturing</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A09, A21</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A64" aria-label="mark A64 done">
+        <div class="rid">A64</div>
+        <div class="rmain"><a href="A64_CNC_Machine_Design_Deep_Dive.html">Building a CNC Machine</a>
+          <div class="rmeta"><span class="chip t" style="background:#f472b6">Mechatronics</span><span class="chip">19 pages &middot; ~288 min</span><span class="chip pre">after A40, A09, A19</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A18" aria-label="mark A18 done">
+        <div class="rid">A18</div>
+        <div class="rmain"><a href="A18_Additive_3D_Printing_Deep_Dive.html">Additive / 3D Printing</a>
+          <div class="rmeta"><span class="chip t" style="background:#34d399">Manufacturing</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A21</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A49" aria-label="mark A49 done">
+        <div class="rid">A49</div>
+        <div class="rmain"><a href="A49_SolidWorks_Part_Modeling_Deep_Dive.html">SolidWorks Part Modeling</a>
+          <div class="rmeta"><span class="chip t" style="background:#94a3b8">CAD</span><span class="chip">16 pages &middot; ~144 min</span><span class="chip pre">after A21</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A62" aria-label="mark A62 done">
+        <div class="rid">A62</div>
+        <div class="rmain"><a href="A62_CSWA_Simulation_Exam_Guide.html">CSWA-Simulation Exam Guide</a>
+          <div class="rmeta"><span class="chip t" style="background:#94a3b8">CAD</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A49</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A41" aria-label="mark A41 done">
+        <div class="rid">A41</div>
+        <div class="rmain"><a href="A41_Thermal_Imaging_Deep_Dive.html">Thermal Imaging &amp; IR Thermography</a>
+          <div class="rmeta"><span class="chip t" style="background:#fda4af">Condition monitoring</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">after A11, A30</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A42" aria-label="mark A42 done">
+        <div class="rid">A42</div>
+        <div class="rmain"><a href="A42_Vibration_Analysis_Deep_Dive.html">Vibration Analysis &amp; Diagnostics</a>
+          <div class="rmeta"><span class="chip t" style="background:#fda4af">Condition monitoring</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">after A19, A41</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A43" aria-label="mark A43 done">
+        <div class="rid">A43</div>
+        <div class="rmain"><a href="A43_NDT_Ultrasound_Oil_Deep_Dive.html">NDT, Ultrasound &amp; Oil Analysis</a>
+          <div class="rmeta"><span class="chip t" style="background:#fda4af">Condition monitoring</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">after A42</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A22" aria-label="mark A22 done">
+        <div class="rid">A22</div>
+        <div class="rmain"><a href="A22_OEE_Deep_Dive.html">OEE</a>
+          <div class="rmeta"><span class="chip t" style="background:#34d399">Manufacturing</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">no prerequisites</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A23" aria-label="mark A23 done">
+        <div class="rid">A23</div>
+        <div class="rmain"><a href="A23_TPM_Deep_Dive.html">TPM</a>
+          <div class="rmeta"><span class="chip t" style="background:#34d399">Manufacturing</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A22</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A24" aria-label="mark A24 done">
+        <div class="rid">A24</div>
+        <div class="rmain"><a href="A24_5S_Deep_Dive.html">5S &mdash; Workplace Organisation</a>
+          <div class="rmeta"><span class="chip t" style="background:#34d399">Manufacturing</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">no prerequisites</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A25" aria-label="mark A25 done">
+        <div class="rid">A25</div>
+        <div class="rmain"><a href="A25_Root_Cause_Analysis_Deep_Dive.html">Root Cause Analysis</a>
+          <div class="rmeta"><span class="chip t" style="background:#34d399">Manufacturing</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">no prerequisites</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A26" aria-label="mark A26 done">
+        <div class="rid">A26</div>
+        <div class="rmain"><a href="A26_Lean_7_Wastes_Deep_Dive.html">Lean &amp; the 8 Wastes</a>
+          <div class="rmeta"><span class="chip t" style="background:#34d399">Manufacturing</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A24</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A27" aria-label="mark A27 done">
+        <div class="rid">A27</div>
+        <div class="rmain"><a href="A27_Six_Sigma_DMAIC_Deep_Dive.html">Six Sigma &amp; DMAIC</a>
+          <div class="rmeta"><span class="chip t" style="background:#34d399">Manufacturing</span><span class="chip">14 pages &middot; ~126 min</span><span class="chip pre">after A25, A26</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A38" aria-label="mark A38 done">
+        <div class="rid">A38</div>
+        <div class="rmain"><a href="A38_EV_Powertrain_Deep_Dive.html">EV Powertrain Engineering</a>
+          <div class="rmeta"><span class="chip t" style="background:#67e8f9">Emerging</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A55, A29</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A39" aria-label="mark A39 done">
+        <div class="rid">A39</div>
+        <div class="rmain"><a href="A39_Battery_Cells_BMS_Deep_Dive.html">Battery Cells &amp; BMS</a>
+          <div class="rmeta"><span class="chip t" style="background:#67e8f9">Emerging</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A38</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A34" aria-label="mark A34 done">
+        <div class="rid">A34</div>
+        <div class="rmain"><a href="A34_Nanotech_MEMS_Deep_Dive.html">Nanotechnology &amp; MEMS</a>
+          <div class="rmeta"><span class="chip t" style="background:#67e8f9">Emerging</span><span class="chip">10 pages &middot; ~90 min</span><span class="chip pre">after A11</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="stage" id="stage5">
+    <div class="stage-head">
+      <div class="stage-n" style="background:#facc15">5</div>
+      <div class="stage-t"><h3>Capstone</h3><span>Prove it</span></div>
+      <div class="stage-meta">1 modules &middot; 1 ready<br>~2.9 hours of reading</div>
+    </div>
+    <div class="stage-note">Integrative examinations that assume Stages 2 and 3 in full. Treat a capstone as a diagnostic: what you fail tells you which module to re-read.</div>
+    <div class="rows">
+      <div class="row">
+        <input class="chk" type="checkbox" data-m="A63" aria-label="mark A63 done">
+        <div class="rid">A63</div>
+        <div class="rmain"><a href="A63_Automation_Capstone_Exam.html">Automation Capstone Examination</a>
+          <div class="rmeta"><span class="chip t" style="background:#facc15">Capstone</span><span class="chip">19 pages &middot; ~171 min</span><span class="chip pre">after A07, A10, A14, A01, A52</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec">The Four Spines</h2>
+  <p class="secsub">The same modules again, arranged as four independent chains. If the six stages feel like too much at once, ignore them and just walk one spine from left to right.</p>
+  <div class="spine">
+    <h4>&#9889; The Electrical Spine</h4>
+    <p>Your first weak area. Every step assumes only the one before it. Nothing else in the library unlocks as much as this line does.</p>
+<div class="flowline"><a href="B01_Electricity_For_Mechanical_Engineers_Primer.html">B01</a><i>&rarr;</i><a href="B02_Reading_Electrical_Control_Drawings_Primer.html">B02</a><i>&rarr;</i><a href="A30_Three_Phase_Power_Deep_Dive.html">A30</a><i>&rarr;</i><a href="A55_Electric_Motors_Deep_Dive.html">A55</a><i>&rarr;</i><a href="A44_Domestic_Wiring_Deep_Dive.html">A44</a><i>&rarr;</i><a href="A51_Motor_Starters_Control_Circuits_Deep_Dive.html">A51</a><i>&rarr;</i><a href="A46_Control_Panel_Wiring_Deep_Dive.html">A46</a><i>&rarr;</i><a href="A08_VFD_Deep_Dive.html">A08</a><i>&rarr;</i><a href="A28_Switching_Power_Electronics_Deep_Dive.html">A28</a><i>&rarr;</i><a href="A29_MOSFETs_Deep_Dive.html">A29</a><i>&rarr;</i><a href="A56_Power_Quality_Harmonics_Deep_Dive.html">A56</a><i>&rarr;</i><a href="A32_Transformers_Deep_Dive.html">A32</a></div>
+  </div>
+  <div class="spine">
+    <h4>&#9881;&#65039; The Automation Spine</h4>
+    <p>Your second weak area, and the shortest path from mechanical engineer to automation engineer. Stop after A14 and you are already employable in this field.</p>
+<div class="flowline"><span class="pl">B03</span><i>&rarr;</i><a href="B04_Sensors_Signals_4_20mA_Primer.html">B04</a><i>&rarr;</i><a href="B06_Control_Loop_Before_Maths_Primer.html">B06</a><i>&rarr;</i><a href="A11_Industrial_Sensors_Deep_Dive.html">A11</a><i>&rarr;</i><a href="A07_PLC_Deep_Dive.html">A07</a><i>&rarr;</i><a href="A45_PLC_Brands_Tools_Deep_Dive.html">A45</a><i>&rarr;</i><a href="A60_Sequential_Discrete_Control_Deep_Dive.html">A60</a><i>&rarr;</i><a href="A50_Instrumentation_Calibration_PID_Deep_Dive.html">A50</a><i>&rarr;</i><a href="A10_PID_Control_Deep_Dive.html">A10</a><i>&rarr;</i><a href="A09_Servo_Motion_Deep_Dive.html">A09</a><i>&rarr;</i><a href="A14_SCADA_HMI_Deep_Dive.html">A14</a><i>&rarr;</i><a href="A61_DCS_Process_Automation_Architecture_Deep_Dive.html">A61</a></div>
+  </div>
+  <div class="spine">
+    <h4>&#127760; The Networks Spine</h4>
+    <p>Your third weak area. Deliberately last: a fieldbus makes no sense until you have owned a PLC scan cycle and a sensor signal. Read A01 slowly &mdash; it teaches the vocabulary all the others reuse.</p>
+<div class="flowline"><a href="B05_Industrial_Communication_Primer.html">B05</a><i>&rarr;</i><a href="B08_Industrial_Software_Stack_Primer.html">B08</a><i>&rarr;</i><a href="A01_Modbus_RTU_Deep_Dive.html">A01</a><i>&rarr;</i><a href="A02_PROFINET_Deep_Dive.html">A02</a><i>&rarr;</i><a href="A03_EtherCAT_Deep_Dive.html">A03</a><i>&rarr;</i><a href="A05_IO_Link_Deep_Dive.html">A05</a><i>&rarr;</i><a href="A04_CAN_Bus_Deep_Dive.html">A04</a><i>&rarr;</i><a href="A06_OPC_UA_Deep_Dive.html">A06</a><i>&rarr;</i><a href="A37_TSN_Deterministic_Ethernet_Deep_Dive.html">A37</a><i>&rarr;</i><a href="A54_OT_Cybersecurity_Deep_Dive.html">A54</a></div>
+  </div>
+  <div class="spine">
+    <h4>&#128295; The Mechanical Spine &mdash; your home turf</h4>
+    <p>Start here on day one, not because you need it, but because it teaches you how these documents are built while the content is still familiar.</p>
+<div class="flowline"><a href="A19_Bearings_Deep_Dive.html">A19</a><i>&rarr;</i><a href="A21_GDT_Tolerances_Deep_Dive.html">A21</a><i>&rarr;</i><a href="A20_Gears_Deep_Dive.html">A20</a><i>&rarr;</i><a href="A48_Linkages_Kinematics_Deep_Dive.html">A48</a><i>&rarr;</i><a href="A47_Fluid_Mechanics_Pumps_Deep_Dive.html">A47</a><i>&rarr;</i><a href="A12_Pneumatic_Systems_Deep_Dive.html">A12</a><i>&rarr;</i><a href="A13_Hydraulic_Systems_Deep_Dive.html">A13</a><i>&rarr;</i><a href="A42_Vibration_Analysis_Deep_Dive.html">A42</a><i>&rarr;</i><a href="A40_CNC_Machining_GCode_Deep_Dive.html">A40</a></div>
+  </div>
+
+  <div class="card hi">
+    <div class="label">HOW TO USE THIS PAGE FROM NOW ON</div>
+    <ol class="steps">
+      <li><b>Bookmark this page, not the index.</b> The index is a filing cabinet; this is the syllabus.</li>
+      <li><b>Never start a module whose prerequisite chips are unticked.</b> If you want it anyway, read the prerequisite's page&nbsp;2 first &mdash; ten minutes of definitions will save you an hour of confusion.</li>
+      <li><b>One module at a time, two passes, a week apart.</b> Finishing six modules properly beats starting twenty.</li>
+      <li><b>When a new module appears in the library, it will appear here too</b>, already placed in a stage with its prerequisites filled in.</li>
+    </ol>
+    <div style="margin-top:16px"><div class="quote">&ldquo;Out of order is not the same as too hard.&rdquo;</div></div>
+  </div>
+
+  <div class="footer">
+    <p><b>Start Here &mdash; The Learning Path</b><br>
+    <a href="index.html">&larr; Back to the Advanced Library</a></p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var KEY = 'aml_progress_v1';
+  var store = {};
+  try { store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch(e) { store = {}; }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e) {} }
+  var boxes = document.querySelectorAll('.chk');
+  var total = boxes.length;
+  function refresh(){
+    var n = 0, i;
+    for (i = 0; i < boxes.length; i++){ if (boxes[i].checked) n++; }
+    var pct = total ? (100 * n / total) : 0;
+    var fill = document.getElementById('barfill');
+    if (fill) fill.style.width = pct.toFixed(1) + '%';
+    var dc = document.getElementById('doneCount');
+    if (dc) dc.textContent = n;
+    var tx = document.getElementById('progtxt');
+    if (tx){
+      var msg;
+      if (n === 0) msg = 'Tick a module as you finish it. Progress is saved in this browser.';
+      else if (n < 6) msg = 'Started. The first three are the hardest to begin, not to read.';
+      else if (n < 16) msg = 'The format is routine by now. Keep the two-pass rule.';
+      else if (n < 32) msg = 'Past the halfway point of Stages 0 to 3 - the networks track should be readable now.';
+      else if (n < total) msg = 'Most of the library is behind you. Pick a spine and finish it.';
+      else msg = 'Every module ticked. Time for a capstone.';
+      tx.innerHTML = '<b>' + n + ' of ' + total + '</b> modules ticked &middot; ' + pct.toFixed(0) + ' % &middot; ' + msg;
+    }
+  }
+  for (var i = 0; i < boxes.length; i++){
+    (function(b){
+      var id = b.getAttribute('data-m');
+      if (store[id]) b.checked = true;
+      b.addEventListener('change', function(){
+        if (b.checked) store[id] = 1; else delete store[id];
+        save(); refresh();
+      });
+    })(boxes[i]);
+  }
+  refresh();
+})();
+</script>
+</body>
+</html>

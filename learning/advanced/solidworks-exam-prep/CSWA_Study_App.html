@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSWA Sustainability · Study App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #1a2825; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; color: #EFE7D6; font-size: 18px; line-height: 1.65; letter-spacing: 0.01em; min-height: 100vh; }
+  body.fs-14 { font-size: 14px; } body.fs-16 { font-size: 16px; } body.fs-18 { font-size: 18px; }
+  body.fs-20 { font-size: 20px; } body.fs-22 { font-size: 22px; } body.fs-24 { font-size: 24px; }
+  body.fs-26 { font-size: 26px; } body.fs-28 { font-size: 28px; }
+  .display { font-family: 'Fraunces', serif; letter-spacing: -0.01em; }
+  .container { max-width: 920px; margin: 0 auto; padding: 32px 24px 80px; }
+  .card { background: #243532; border-radius: 18px; padding: 28px; border: 1px solid #2f4641; }
+  .btn { background: #7DAB87; color: #14201D; border: none; padding: 14px 22px; border-radius: 12px; font-family: inherit; font-size: 1em; font-weight: 700; cursor: pointer; transition: all .15s; letter-spacing: 0.01em; }
+  .btn:hover { transform: translateY(-1px); background: #95C19F; }
+  .btn-ghost { background: transparent; color: #EFE7D6; border: 1px solid #4a6661; }
+  .btn-ghost:hover { background: #2f4641; transform: none; }
+  .topic-card { cursor: pointer; transition: all .2s; border: 1px solid #2f4641; }
+  .topic-card:hover { transform: translateY(-2px); border-color: #7DAB87; }
+  .progress-bar { height: 10px; background: #2f4641; border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #7DAB87, #95C19F); border-radius: 999px; transition: width .4s; }
+  .hook-box { background: #2f4641; border-left: 4px solid #D9A574; padding: 18px 20px; border-radius: 10px; margin: 18px 0; }
+  .key-list { list-style: none; padding: 0; margin: 16px 0 0; }
+  .key-list li { padding: 12px 0 12px 30px; position: relative; border-bottom: 1px solid #2f4641; }
+  .key-list li:last-child { border-bottom: none; }
+  .key-list li:before { content: '◆'; position: absolute; left: 8px; color: #7DAB87; }
+  .quiz-option { display: block; width: 100%; text-align: left; background: #2f4641; color: #EFE7D6; border: 2px solid #2f4641; padding: 16px 20px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; font-family: inherit; font-size: 1em; line-height: 1.5; transition: all .15s; }
+  .quiz-option:hover:not(:disabled) { border-color: #7DAB87; }
+  .quiz-option.correct { border-color: #8BC082; background: #2a4a36; }
+  .quiz-option.wrong { border-color: #C97A7A; background: #4a2c2c; }
+  .quiz-option:disabled { cursor: default; }
+  .nav-btn { background: #2f4641; color: #EFE7D6; border: 1px solid #4a6661; padding: 12px 18px; border-radius: 10px; cursor: pointer; font-family: inherit; font-size: 0.95em; display: inline-flex; align-items: center; gap: 8px; transition: all .15s; }
+  .nav-btn:hover:not(:disabled) { background: #7DAB87; color: #14201D; border-color: #7DAB87; }
+  .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #2f4641; font-size: 0.85em; font-weight: 700; }
+  .stat-card { background: #243532; border-radius: 14px; padding: 22px; border: 1px solid #2f4641; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+  .topic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .header-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .tab { background: transparent; color: #B5C9C4; border: 1px solid #2f4641; padding: 10px 18px; border-radius: 999px; cursor: pointer; font-family: inherit; font-size: 0.95em; font-weight: 700; transition: all .15s; }
+  .tab:hover { color: #EFE7D6; }
+  .tab.active { background: #EFE7D6; color: #1a2825; border-color: #EFE7D6; }
+  .icon-wrap { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+  .modal-bg { position: fixed; inset: 0; background: rgba(10,16,15,0.85); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
+  .modal { background: #243532; border-radius: 18px; padding: 28px; max-width: 460px; width: 100%; border: 1px solid #4a6661; }
+  .font-btn { background: #2f4641; color: #EFE7D6; border: 1px solid #4a6661; width: 44px; height: 44px; border-radius: 10px; cursor: pointer; font-size: 1.2em; font-family: inherit; font-weight: 700; }
+  .font-btn:hover { background: #7DAB87; color: #14201D; }
+  h1, h2, h3 { color: #EFE7D6; margin: 0; }
+  h1.display { font-size: 2.4em; line-height: 1.15; font-weight: 700; }
+  h2.display { font-size: 1.7em; line-height: 1.25; font-weight: 700; }
+  .subtle { color: #B5C9C4; }
+  select { background: #2f4641; color: #EFE7D6; border: 1px solid #4a6661; border-radius: 8px; padding: 8px 12px; font-family: inherit; font-size: 0.9em; }
+  .icon { display: inline-block; vertical-align: middle; }
+  .hidden { display: none !important; }
+  .row { display: flex; align-items: center; gap: 14px; }
+  .row-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; flex-wrap: wrap; }
+</style>
+</head>
+<body class="fs-18">
+<div id="app"></div>
+
+<script>
+// =================== ICONS (inline SVG) ===================
+const ICON_PATHS = {
+  leaf: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19.2 2.96a1 1 0 0 1 1.8.66c.21 4.5-1.4 7.85-4 10.93a1 1 0 0 1-.94.45A7 7 0 0 1 11 20"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>',
+  brain: '<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>',
+  bookOpen: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+  trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0z"/>',
+  chevronLeft: '<path d="m15 18-6-6 6-6"/>',
+  chevronRight: '<path d="m9 18 6-6-6-6"/>',
+  check: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  xCircle: '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>',
+  lightbulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+  sparkles: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
+  recycle: '<path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/><path d="m14 16-3 3 3 3"/><path d="M8.293 13.596 7.196 9.5 3.1 10.598"/><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888l3.943 6.843"/><path d="m13.378 9.633 4.096 1.098 1.097-4.096"/>',
+  globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+  award: '<path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/>',
+  type: '<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/>',
+  settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  barChart: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16h8"/><path d="M7 11h12"/><path d="M7 6h3"/>',
+  eye: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
+  star: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+  layers: '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/>',
+};
+function icon(name, size = 20, color = 'currentColor', strokeWidth = 2) {
+  const path = ICON_PATHS[name] || '';
+  return '<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="' + strokeWidth + '" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg>';
+}
+
+// =================== DATA ===================
+const TOPICS = [
+  { id: 't1', title: 'Foundations of Sustainability', icon: 'globe', color: '#7DAB87' },
+  { id: 't2', title: 'Product Life Cycle', icon: 'recycle', color: '#D9A574' },
+  { id: 't3', title: 'The Big 4 Impact Categories', icon: 'barChart', color: '#E8916B' },
+  { id: 't4', title: 'Life Cycle Assessment (LCA)', icon: 'layers', color: '#A89BC9' },
+  { id: 't5', title: 'SolidWorks Sustainability Tools', icon: 'settings', color: '#7FB3C9' },
+  { id: 't6', title: 'Sustainable Design Strategies', icon: 'lightbulb', color: '#C9A77F' },
+  { id: 't7', title: 'Standards & Regulations', icon: 'award', color: '#B589A8' },
+];
+
+const CARDS = {
+  t1: [
+    { id: 'c1-1', title: 'What is Sustainability?', body: 'The classic Brundtland definition (1987): "Development that meets the needs of the present without compromising the ability of future generations to meet their own needs."', hook: { label: 'Memory Hook', text: 'Think NOW vs LATER — never steal from your grandchildren to pay for today.' }, key: ['Coined by the Brundtland Commission (1987)', 'Core idea: balance present needs with future capacity', 'Foundation of all modern sustainable design'] },
+    { id: 'c1-2', title: 'The Triple Bottom Line — 3 Pillars', body: 'Sustainability rests on three equal pillars. A truly sustainable design satisfies all three.', hook: { label: 'Mnemonic: 3 Ps', text: 'People · Planet · Profit — also called Social · Environmental · Economic.' }, key: ['Environmental: conserve natural resources, reduce pollution', 'Social: equity, community, working conditions', 'Economic: profitability, long-term viability'] },
+    { id: 'c1-3', title: 'Why Engineers Design Sustainably', body: 'Engineers adopt sustainable design for one of three reasons. Expect to see this on the exam.', hook: { label: 'Mnemonic: PCI', text: 'P-C-I → Personal interest · Company intent · Industry regulations.' }, key: ['Personal Interest — driver of innovation, the engineer cares', 'Company Intent — sustainable design is "good business", cuts cost', 'Industry Regulations — laws like EU directives force compliance'] },
+    { id: 'c1-4', title: 'The Natural Step Framework', body: 'A scientific framework based on the laws of thermodynamics, defining 4 system conditions for a sustainable society.', hook: { label: 'Memory Hook', text: "Earth has limits — don't take too much, don't make too much junk, don't wreck nature, don't cheat people." }, key: ["1. Don't systematically increase substances from Earth's crust (mining, fossil fuels)", "2. Don't systematically increase synthetic substances faster than nature breaks them down", "3. Don't physically degrade nature (deforestation, habitat loss)", "4. Don't undermine people's ability to meet basic needs"] },
+  ],
+  t2: [
+    { id: 'c2-1', title: 'The 5 Life Cycle Stages', body: 'Every product passes through 5 stages from birth to death. SolidWorks Sustainability evaluates all five.', hook: { label: 'Mnemonic: RMTUE', text: 'Raw materials → Manufacturing → Transportation → Use → End-of-life. Say it: "Rats Make Tiny Ugly Earrings".' }, key: ['Raw Materials — extraction and processing of inputs', 'Manufacturing — energy and waste from production', 'Transportation — moving parts, assemblies, finished goods', 'Use — energy and consumables during product lifetime', 'End-of-Life — landfill, incineration, recycling, reuse'] },
+    { id: 'c2-2', title: 'Cradle-to-Grave vs Cradle-to-Cradle', body: "Two ways of thinking about a product's journey.", hook: { label: 'Visual Hook', text: 'Cradle-to-Grave = one-way street. Cradle-to-Cradle = loop. Aim for the loop.' }, key: ['Cradle-to-Grave: linear — raw material → use → landfill', 'Cradle-to-Cradle: circular — end-of-life feeds new raw material', 'LCA in SolidWorks uses cradle-to-grave by default', 'Sustainable design aspires to cradle-to-cradle'] },
+    { id: 'c2-3', title: 'Where Impact Comes From', body: 'Different products have different "hotspots". Knowing this directs your redesign effort.', hook: { label: 'Think Like This', text: 'A car: USE stage dominates (fuel). A plastic spoon: MATERIALS dominate. Always identify the hotspot first.' }, key: ['Energy-using products → Use stage is usually largest impact', 'Disposable / packaging → Materials & End-of-Life dominate', 'Heavy / global supply chain → Transportation matters more', 'Identifying the hotspot tells you where to redesign'] },
+  ],
+  t3: [
+    { id: 'c3-1', title: 'The Big 4 — Overview', body: 'SolidWorks Sustainability measures FOUR environmental impacts. These are the heart of the exam.', hook: { label: 'Mnemonic: CEAW', text: 'C-E-A-W → Carbon · Energy · Air · Water. Say "SEE-A-W" like seeing a wave.' }, key: ['Carbon Footprint (CO₂ equivalent)', 'Total Energy Consumption (MJ)', 'Air Acidification (SO₂ equivalent)', 'Water Eutrophication (PO₄ equivalent)'] },
+    { id: 'c3-2', title: 'Carbon Footprint', body: "Total greenhouse gas (GHG) emissions over the product's life, expressed as CO₂ equivalent.", hook: { label: 'Memory Hook', text: 'Carbon = Climate. Every CO₂, methane, etc. converted to one number in kg CO₂-eq.' }, key: ['Measured in: kg CO₂ equivalent (CO₂-eq)', 'Includes CO₂, methane, N₂O, refrigerants — all converted', 'Drives global warming / climate change', 'Governed by ISO 14067 standard'] },
+    { id: 'c3-3', title: 'Total Energy Consumption', body: 'All energy consumed across the entire life cycle — non-renewable AND renewable.', hook: { label: 'Memory Hook', text: 'Energy = total fuel bill of the product, from cradle to grave, in megajoules.' }, key: ['Measured in: MJ (megajoules)', 'Covers fossil + nuclear + renewable inputs', 'Includes "embodied energy" already in raw materials', 'Lower is always better'] },
+    { id: 'c3-4', title: 'Air Acidification', body: 'Emissions (mostly SO₂ and NOₓ) that cause acid rain — damaging forests, lakes, and buildings.', hook: { label: 'Memory Hook', text: 'AIR + ACID = trees die, statues melt. Picture a wilted leaf and a worn-down monument.' }, key: ['Measured in: kg SO₂ equivalent', 'Main sources: combustion of fossil fuels', 'Causes acid rain → damages ecosystems, infrastructure', 'Linked to respiratory health issues'] },
+    { id: 'c3-5', title: 'Water Eutrophication', body: 'Nutrient pollution (phosphates, nitrates) that triggers algal blooms, suffocating aquatic life.', hook: { label: 'Memory Hook', text: 'EUTRO = "too much food" for algae. Picture a green, choked lake — fish gasping.' }, key: ['Measured in: kg PO₄ equivalent', 'Main sources: fertilizers, sewage, industrial runoff', 'Causes algal blooms → oxygen depletion → dead zones', 'Damages drinking water and fisheries'] },
+  ],
+  t4: [
+    { id: 'c4-1', title: 'What is LCA?', body: 'Life Cycle Assessment: a scientific method to quantify the environmental impact of a product across its full life cycle. It powers SolidWorks Sustainability.', hook: { label: 'Memory Hook', text: 'LCA = the "environmental autopsy" of a product. Measure everything, from cradle to grave.' }, key: ['Internationally standardized methodology', 'Quantifies impacts (not just guesses)', 'Underlies every result SolidWorks Sustainability shows', 'Allows fair comparison between design alternatives'] },
+    { id: 'c4-2', title: 'ISO 14040/14044 — The 4 LCA Phases', body: 'The international standard ISO 14040 defines LCA in four sequential phases.', hook: { label: 'Mnemonic: GLI-I', text: 'Goal & scope → Life cycle Inventory → Impact assessment → Interpretation. "Good Lions Investigate Interesting things."' }, key: ['1. Goal & Scope — what are we studying and why?', '2. Inventory Analysis (LCI) — list all inputs and outputs', '3. Impact Assessment (LCIA) — translate inventory into impact categories', '4. Interpretation — draw conclusions, recommend changes'] },
+    { id: 'c4-3', title: 'Key ISO Standards', body: 'Memorize the numbers — they show up on the exam.', hook: { label: 'Number Hook', text: 'ISO 14040 / 14044 = LCA. ISO 14067 = Carbon footprint of products.' }, key: ['ISO 14040 — LCA Principles and Framework', 'ISO 14044 — LCA Requirements and Guidelines', 'ISO 14067 — Carbon footprint of products', 'ISO 14001 — Environmental Management Systems (background context)'] },
+    { id: 'c4-4', title: 'The GaBi LCA Database', body: 'SolidWorks Sustainability runs on the GaBi database — 20+ years of scientific material and process data.', hook: { label: 'Memory Hook', text: 'GaBi = the "library" SolidWorks reads from. Without it, no impact numbers.' }, key: ['Created by PE INTERNATIONAL (now Sphera)', 'Contains material, energy, and process life-cycle data', 'Updates can be downloaded inside SolidWorks', 'Lets you choose region-specific manufacturing data'] },
+  ],
+  t5: [
+    { id: 'c5-1', title: 'Two Tools: Xpress vs Full', body: 'SolidWorks ships two flavors of the sustainability tool. Know the difference.', hook: { label: 'Memory Hook', text: 'Xpress = lite, parts only, in every seat. Full Sustainability = parts + assemblies + reports, premium only.' }, key: ['SustainabilityXpress — parts only, included in core SolidWorks', 'SolidWorks Sustainability — parts + assemblies, Premium/Ultimate editions', 'Both use the GaBi LCA database', 'Full version supports configurations and detailed reporting'] },
+    { id: 'c5-2', title: 'The 4 Workflow Inputs', body: 'To run an analysis, you tell SolidWorks four things about your part.', hook: { label: 'Mnemonic: MM-RT', text: 'Material · Manufacturing process · Region of manufacture · Transportation to use region.' }, key: ['Material — class and name (e.g., AISI 304 steel)', 'Manufacturing process and region', 'Use region (where the product is used)', 'End-of-life scenario (recycle / landfill / incinerate)'] },
+    { id: 'c5-3', title: 'Find Similar Material', body: 'A critical tool: search the material library by engineering properties to find lower-impact alternatives.', hook: { label: 'Memory Hook', text: 'Same strength, less footprint. Filter by what matters, swap for greener.' }, key: ['Filter by mechanical properties (yield, density, etc.)', 'Returns candidates that meet your engineering needs', 'Compare environmental impact side-by-side', 'Powerful way to reduce footprint without redesign'] },
+    { id: 'c5-4', title: 'Baseline & Reports', body: 'Set a baseline before you make changes, then track improvements as percentages.', hook: { label: 'Memory Hook', text: 'No baseline = no proof of improvement. Always lock the baseline first.' }, key: ['Set Baseline — captures current design as reference', 'All changes shown as % vs baseline (green = better, red = worse)', 'Generate Report — exports a sustainability report (PDF/Word)', 'Reports help technical AND non-technical staff collaborate'] },
+  ],
+  t6: [
+    { id: 'c6-1', title: 'Strategy 1 — Material Selection', body: 'The single biggest lever you have. Most impact comes from material choice.', hook: { label: 'Memory Hook', text: 'Choose materials that are recycled, recyclable, abundant, and locally sourced.' }, key: ['Prefer recycled content (lower extraction impact)', 'Prefer recyclable materials (better end-of-life)', 'Avoid hazardous / restricted substances', 'Match material strength to actual need — no over-spec'] },
+    { id: 'c6-2', title: 'Strategy 2 — Lightweighting', body: 'Less material = less of every impact category. Reduce mass without sacrificing function.', hook: { label: 'Memory Hook', text: 'Half the mass = roughly half the impact. Engineering for "just enough".' }, key: ['Topology optimization', 'Thinner walls where stress allows', 'Replace solids with ribbed structures', 'Especially powerful for transport-heavy products'] },
+    { id: 'c6-3', title: 'Strategy 3 — Manufacturing & Transport', body: "Where you make it and where it goes matter as much as what it's made of.", hook: { label: 'Memory Hook', text: 'Make it local. Ship it light. Pick clean energy regions.' }, key: ['Manufacture in regions with cleaner electricity grids', 'Source materials close to manufacturing site', 'Manufacture close to end-use region', 'Choose lower-impact transport modes (rail > truck > air)'] },
+  { id: 'c6-4', title: 'Strategy 4 — Design for End-of-Life', body: "A green product is one that doesn't become landfill. Design for what comes after.", hook: { label: 'Memory Hook', text: '"Design for Disassembly" — if a person can\'t take it apart, the planet can\'t recycle it.' }, key: ['Use snap-fits / screws instead of adhesives and welds', 'Mark plastics with material codes', 'Minimize material variety per assembly', 'Plan for refurbishment, remanufacture, or recycling'] },
+  ],
+  t7: [
+    { id: 'c7-1', title: 'EU Regulations Matter Globally', body: "EU directives apply to any manufacturer selling into the EU — that's most of the world. Expect exam questions.", hook: { label: 'Memory Hook', text: 'Sustainable design ≠ automatic EU compliance. The EU has its own specific rules you must check.' }, key: ['EU regulations have global reach', 'Following sustainable design principles does NOT guarantee EU compliance', 'Address specific concerns like substance toxicity', 'Non-compliance can block your product from the EU market'] },
+    { id: 'c7-2', title: 'REACH', body: 'EU regulation governing chemical substances.', hook: { label: 'Acronym', text: 'R-E-A-Ch → Registration, Evaluation, Authorisation of Chemicals.' }, key: ['Aims to protect human health and environment from chemical risks', 'Manufacturers must register substances they use/import', 'Some substances need explicit authorisation', 'Applies if you import > 1 tonne/year into EU'] },
+    { id: 'c7-3', title: 'RoHS', body: 'Restriction of Hazardous Substances — specifically for electrical and electronic equipment.', hook: { label: 'Memory Hook', text: 'RoHS targets the "Big Bad Six" in your electronics — most famously lead and mercury.' }, key: ['Restricts: lead, mercury, cadmium, hexavalent chromium, PBB, PBDE', 'Plus 4 phthalates added in RoHS 3', 'Applies to electrical/electronic equipment', 'Drives use of lead-free solder and alternative substances'] },
+    { id: 'c7-4', title: 'WEEE & ELV', body: 'End-of-life directives for two product categories.', hook: { label: 'Memory Hook', text: 'WEEE = e-waste (Wee Electronics). ELV = End-of-Life Vehicles.' }, key: ['WEEE — Waste Electrical and Electronic Equipment', 'WEEE requires producers to take back and recycle electronics', 'ELV — End-of-Life Vehicles, similar duties for car makers', 'Both push "design for recycling" upstream into your CAD work'] },
+  ],
+};
+
+const QUESTIONS = [
+  { id: 'q1', topic: 't1', q: 'Which definition best matches sustainable development (Brundtland Commission)?', a: ['Maximizing economic growth at all costs', "Meeting present needs without compromising future generations' ability to meet theirs", 'Replacing all materials with biodegradable alternatives', 'Eliminating manufacturing in developed countries'], correct: 1, explain: 'The Brundtland Commission (1987) defined it as meeting present needs without compromising the ability of future generations to meet their own needs.' },
+  { id: 'q2', topic: 't1', q: 'What are the three pillars of sustainability (Triple Bottom Line)?', a: ['Reduce, Reuse, Recycle', 'People, Planet, Profit', 'Air, Water, Land', 'Design, Make, Use'], correct: 1, explain: 'The Triple Bottom Line: People (Social) · Planet (Environmental) · Profit (Economic). All three must be balanced.' },
+  { id: 'q3', topic: 't1', q: 'Engineers incorporate sustainability for one of three reasons. Which is NOT one of them?', a: ['Personal Interest', 'Company Intent', 'Industry Regulations', 'Marketing Trends'], correct: 3, explain: 'The three drivers are Personal Interest, Company Intent, and Industry Regulations — remember the mnemonic PCI.' },
+  { id: 'q4', topic: 't1', q: 'The Natural Step framework derives its four system conditions from:', a: ['EU environmental law', 'The laws of thermodynamics', 'The Brundtland Report', 'The Kyoto Protocol'], correct: 1, explain: "The Natural Step's four system conditions are derived from the laws of thermodynamics and our understanding of natural cycles." },
+  { id: 'q5', topic: 't2', q: 'Which is the correct order of product life cycle stages used in LCA?', a: ['Manufacturing → Raw Materials → Use → Transport → Disposal', 'Raw Materials → Manufacturing → Transportation → Use → End-of-Life', 'Design → Manufacturing → Sale → Use → Recycling', 'Raw Materials → Transportation → Use → Manufacturing → Disposal'], correct: 1, explain: 'The standard LCA order is Raw Materials → Manufacturing → Transportation → Use → End-of-Life. Mnemonic: RMTUE.' },
+  { id: 'q6', topic: 't2', q: 'Cradle-to-cradle design means:', a: ['A linear life cycle ending in landfill', 'A circular life cycle where end-of-life material feeds new production', 'The product never reaches consumers', 'Only the manufacturing stage is analysed'], correct: 1, explain: 'Cradle-to-cradle is circular — end-of-life material becomes input for new products, unlike linear cradle-to-grave.' },
+  { id: 'q7', topic: 't3', q: 'SolidWorks Sustainability measures four impact categories. Which is NOT one of them?', a: ['Carbon Footprint', 'Total Energy Consumption', 'Noise Pollution', 'Water Eutrophication'], correct: 2, explain: 'The four categories are Carbon Footprint, Total Energy Consumption, Air Acidification, and Water Eutrophication (CEAW). Noise is not measured.' },
+  { id: 'q8', topic: 't3', q: 'Carbon footprint is measured in:', a: ['kg SO₂ equivalent', 'kg CO₂ equivalent', 'Megajoules (MJ)', 'kg PO₄ equivalent'], correct: 1, explain: 'Carbon footprint is reported in kg CO₂ equivalent — all greenhouse gases converted to a single CO₂-equivalent value.' },
+  { id: 'q9', topic: 't3', q: 'Water eutrophication is caused primarily by:', a: ['Carbon dioxide emissions', 'Sulfur dioxide emissions', 'Nutrient pollution (phosphates, nitrates) causing algal blooms', 'Heavy metal contamination'], correct: 2, explain: 'Eutrophication is caused by nutrient pollution (mainly phosphates/nitrates) that trigger algal blooms, which deplete oxygen and kill aquatic life.' },
+  { id: 'q10', topic: 't3', q: 'Air acidification is measured in:', a: ['kg CO₂ equivalent', 'kg SO₂ equivalent', 'kg PO₄ equivalent', 'Megajoules (MJ)'], correct: 1, explain: 'Air acidification is reported in kg SO₂ equivalent — the gases responsible for acid rain.' },
+  { id: 'q11', topic: 't4', q: 'Which ISO standard governs Life Cycle Assessment principles and framework?', a: ['ISO 9001', 'ISO 14001', 'ISO 14040', 'ISO 14067'], correct: 2, explain: 'ISO 14040 defines LCA Principles and Framework. ISO 14044 covers requirements and guidelines. ISO 14067 is specifically for carbon footprint of products.' },
+  { id: 'q12', topic: 't4', q: 'Which is NOT one of the four phases of LCA per ISO 14040?', a: ['Goal & Scope Definition', 'Inventory Analysis', 'Material Procurement', 'Interpretation'], correct: 2, explain: 'The four LCA phases are: Goal & Scope, Inventory Analysis, Impact Assessment, and Interpretation. Material procurement is part of inventory data, not a phase.' },
+  { id: 'q13', topic: 't4', q: 'The database that powers SolidWorks Sustainability is:', a: ['GaBi', 'Ecoinvent', 'OpenLCA', 'Granta MI'], correct: 0, explain: 'SolidWorks Sustainability uses the GaBi LCA database, originally created by PE INTERNATIONAL (now Sphera).' },
+  { id: 'q14', topic: 't4', q: 'ISO 14067 specifically covers:', a: ['Environmental management systems', 'LCA requirements', 'Carbon footprint of products', 'End-of-life vehicle directives'], correct: 2, explain: 'ISO 14067:2018 is the standard for Greenhouse gases — Carbon footprint of products.' },
+  { id: 'q15', topic: 't5', q: 'What is the key difference between SustainabilityXpress and SolidWorks Sustainability (full)?', a: ['Xpress is faster', 'Xpress only analyses parts; full version analyses parts AND assemblies', 'Xpress uses a different database', 'They are the same tool with different names'], correct: 1, explain: 'SustainabilityXpress (in core SolidWorks) handles parts only. The full Sustainability tool (Premium/Ultimate) handles assemblies and configurations.' },
+  { id: 'q16', topic: 't5', q: 'When running a sustainability analysis, you must specify all of these EXCEPT:', a: ['Material', 'Manufacturing region', 'Use region', "Designer's name"], correct: 3, explain: "Required inputs: Material, Manufacturing process and region, Use region, and End-of-life scenario. The designer's name is irrelevant to the analysis." },
+  { id: 'q17', topic: 't5', q: 'The "Find Similar Material" tool helps you:', a: ['Find materials with identical chemical composition', 'Find materials that match engineering needs but with potentially lower environmental impact', 'Order materials from suppliers', 'Calculate the cost of materials'], correct: 1, explain: 'Find Similar Material searches the database for materials matching your engineering parameters, letting you compare environmental impacts and swap for a greener option.' },
+  { id: 'q18', topic: 't5', q: 'Why set a Baseline in SolidWorks Sustainability?', a: ['To meet ISO 14040 requirements', 'To establish a reference so improvements can be measured as a percentage change', 'It is a mandatory licensing requirement', 'To generate a part number'], correct: 1, explain: 'The baseline captures your current design state. All later changes are shown as a % difference vs baseline, so improvements are visible.' },
+  { id: 'q19', topic: 't6', q: 'For a heavy product shipped globally, which strategy usually delivers the biggest impact reduction?', a: ['Adding more documentation', 'Lightweighting and/or local manufacturing', 'Painting it green', 'Selling it online'], correct: 1, explain: 'For heavy, globally-shipped products, transport impact is large. Lightweighting (less mass to ship) and local manufacturing (shorter routes) both cut impact significantly.' },
+  { id: 'q20', topic: 't6', q: '"Design for Disassembly" supports which goal?', a: ['Faster assembly during manufacturing', 'Easier repair, refurbishment, and recycling at end-of-life', 'Lower material cost', 'Compliance with REACH only'], correct: 1, explain: 'Design for Disassembly makes products easier to take apart so components can be repaired, refurbished, or recycled — closing the material loop.' },
+  { id: 'q21', topic: 't7', q: 'Following sustainable design principles automatically ensures EU regulatory compliance.', a: ['True', 'False'], correct: 1, explain: 'False. Sustainable design is good practice, but EU directives like REACH and RoHS have specific substance and registration requirements you must verify separately.' },
+  { id: 'q22', topic: 't7', q: 'REACH is an EU regulation focused on:', a: ['Energy efficiency of appliances', 'Registration, Evaluation, and Authorisation of Chemicals', 'Recycling of vehicles', 'Restriction of greenhouse gases'], correct: 1, explain: 'REACH = Registration, Evaluation, Authorisation of Chemicals. It governs chemical substances placed on the EU market.' },
+  { id: 'q23', topic: 't7', q: 'RoHS applies specifically to:', a: ['All consumer goods sold in the EU', 'Electrical and electronic equipment', 'Motor vehicles', 'Food packaging'], correct: 1, explain: 'RoHS (Restriction of Hazardous Substances) restricts specific substances like lead and mercury in electrical and electronic equipment.' },
+  { id: 'q24', topic: 't7', q: 'WEEE stands for:', a: ['World Environmental Engineering Effort', 'Waste Electrical and Electronic Equipment', 'Weighted Environmental Energy Evaluation', 'Western European Emissions Estimate'], correct: 1, explain: 'WEEE = Waste Electrical and Electronic Equipment — the EU directive on take-back and recycling of electronics.' },
+  { id: 'q25', topic: 't3', q: 'Which life cycle stage usually dominates impact for an energy-using product like a fridge?', a: ['Raw materials', 'Manufacturing', 'Use', 'End-of-life'], correct: 2, explain: 'For energy-using products (fridges, cars, motors), the Use stage typically dominates because of cumulative energy consumption over years of operation.' },
+];
+
+// =================== STATE ===================
+const STORE_KEY = 'cswa-sus-progress-v1';
+const FONT_KEY = 'cswa-sus-font-v1';
+
+function loadProgress() {
+  try { const v = localStorage.getItem(STORE_KEY); return v ? JSON.parse(v) : { learned: {}, answered: {}, wrongQueue: [] }; }
+  catch { return { learned: {}, answered: {}, wrongQueue: [] }; }
+}
+function saveProgress() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state.progress)); } catch {} }
+function loadFont() { try { const v = localStorage.getItem(FONT_KEY); return v ? parseInt(v, 10) : 18; } catch { return 18; } }
+function saveFont() { try { localStorage.setItem(FONT_KEY, String(state.fontSize)); } catch {} }
+
+const state = {
+  view: 'home',
+  topicId: null,
+  cardIdx: 0,
+  quizMode: 'all',
+  quizIdx: 0,
+  quizAnswer: null,
+  showSettings: false,
+  fontSize: 18,
+  progress: { learned: {}, answered: {}, wrongQueue: [] },
+};
+
+function applyFont() {
+  document.body.classList.remove('fs-14','fs-16','fs-18','fs-20','fs-22','fs-24','fs-26','fs-28');
+  document.body.classList.add('fs-' + state.fontSize);
+}
+
+function quizPool() {
+  if (state.quizMode === 'review') return QUESTIONS.filter(q => state.progress.wrongQueue.includes(q.id));
+  if (state.quizMode === 'all') return QUESTIONS;
+  return QUESTIONS.filter(q => q.topic === state.quizMode);
+}
+
+// =================== RENDER ===================
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function renderHeader() {
+  return '<div class="row-between" style="margin-bottom:24px">' +
+    '<div class="row" style="cursor:pointer" onclick="go(\'home\')">' +
+      '<div class="icon-wrap" style="background:#7DAB87">' + icon('leaf', 28, '#14201D', 2.5) + '</div>' +
+      '<div><div class="display" style="font-size:1.4em;font-weight:700">CSWA · Sustainability</div>' +
+      '<div class="subtle" style="font-size:0.85em">Your study companion</div></div>' +
+    '</div>' +
+    '<button class="nav-btn" onclick="toggleSettings()">' + icon('type', 18) + ' Aa</button>' +
+  '</div>';
+}
+
+function renderTabs() {
+  const wq = state.progress.wrongQueue.length;
+  const t = (id, label, extra) => '<button class="tab' + (state.view === id || (id === 'review' && state.view === 'quiz' && state.quizMode === 'review') ? ' active' : '') + '" onclick="' + (id === 'review' ? "openReview()" : "go('" + id + "')") + '">' + label + (extra || '') + '</button>';
+  return '<div class="header-tabs">' +
+    t('home', 'Home') +
+    t('learn', 'Learn') +
+    '<button class="tab' + (state.view === 'quiz' && state.quizMode !== 'review' ? ' active' : '') + '" onclick="openQuiz()">Quiz</button>' +
+    t('review', 'Review', wq > 0 ? ' <span style="background:#D9A574;color:#14201D;border-radius:999px;padding:2px 8px;margin-left:6px;font-size:0.8em">' + wq + '</span>' : '') +
+  '</div>';
+}
+
+function renderHome() {
+  const totalCards = Object.values(CARDS).flat().length;
+  const learnedCount = Object.keys(state.progress.learned).length;
+  const answeredCount = Object.keys(state.progress.answered).length;
+  const correctCount = Object.values(state.progress.answered).filter(Boolean).length;
+  const accuracy = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
+
+  let html = '<h1 class="display" style="margin-bottom:12px">Hi Muditha — let\'s get you certified.</h1>' +
+    '<p class="subtle" style="font-size:1.05em;margin-bottom:28px;max-width:640px">Seven bite-sized modules, mnemonics for every concept, and a quiz that learns from your mistakes. Designed with low-glare colors and a high-legibility font.</p>';
+
+  html += '<div class="grid-3" style="margin-bottom:32px">' +
+    '<div class="stat-card"><div class="row" style="margin-bottom:10px">' + icon('bookOpen', 20, '#7DAB87') + '<div class="subtle" style="font-size:0.9em">Cards learned</div></div>' +
+    '<div class="display" style="font-size:2em;font-weight:700">' + learnedCount + '<span class="subtle" style="font-size:0.5em;font-weight:400"> / ' + totalCards + '</span></div>' +
+    '<div class="progress-bar" style="margin-top:12px"><div class="progress-fill" style="width:' + (learnedCount/totalCards*100) + '%"></div></div></div>' +
+
+    '<div class="stat-card"><div class="row" style="margin-bottom:10px">' + icon('target', 20, '#D9A574') + '<div class="subtle" style="font-size:0.9em">Questions answered</div></div>' +
+    '<div class="display" style="font-size:2em;font-weight:700">' + answeredCount + '<span class="subtle" style="font-size:0.5em;font-weight:400"> / ' + QUESTIONS.length + '</span></div>' +
+    '<div class="progress-bar" style="margin-top:12px"><div class="progress-fill" style="width:' + (answeredCount/QUESTIONS.length*100) + '%;background:linear-gradient(90deg,#D9A574,#E8B884)"></div></div></div>' +
+
+    '<div class="stat-card"><div class="row" style="margin-bottom:10px">' + icon('trophy', 20, '#A89BC9') + '<div class="subtle" style="font-size:0.9em">Accuracy</div></div>' +
+    '<div class="display" style="font-size:2em;font-weight:700">' + accuracy + '<span class="subtle" style="font-size:0.5em;font-weight:400">%</span></div>' +
+    '<div class="progress-bar" style="margin-top:12px"><div class="progress-fill" style="width:' + accuracy + '%;background:linear-gradient(90deg,#A89BC9,#B8ACD5)"></div></div></div>' +
+  '</div>';
+
+  html += '<h2 class="display" style="margin-bottom:16px">Pick a module</h2><div class="topic-grid" style="margin-bottom:28px">';
+  TOPICS.forEach((t, i) => {
+    const tCards = CARDS[t.id];
+    const tLearned = tCards.filter(c => state.progress.learned[c.id]).length;
+    html += '<div class="topic-card card" onclick="openTopic(\'' + t.id + '\')">' +
+      '<div class="row" style="margin-bottom:14px"><div class="icon-wrap" style="background:' + t.color + ';width:44px;height:44px;border-radius:11px">' + icon(t.icon, 22, '#14201D', 2.5) + '</div>' +
+      '<span class="badge subtle">Module ' + (i+1) + '</span></div>' +
+      '<div class="display" style="font-size:1.15em;font-weight:700;margin-bottom:12px">' + esc(t.title) + '</div>' +
+      '<div class="subtle" style="font-size:0.9em;margin-bottom:12px">' + tLearned + ' of ' + tCards.length + ' cards</div>' +
+      '<div class="progress-bar"><div class="progress-fill" style="width:' + (tLearned/tCards.length*100) + '%;background:' + t.color + '"></div></div>' +
+    '</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="card" style="background:linear-gradient(135deg,#243532,#2a3d39)"><div style="display:flex;align-items:flex-start;gap:14px">' +
+    icon('brain', 28, '#D9A574') +
+    '<div><div class="display" style="font-size:1.2em;font-weight:700;margin-bottom:8px">How this app helps you learn faster</div>' +
+    '<div style="font-size:0.95em;line-height:1.7"><strong>Chunking</strong> — concepts in small cards so nothing overwhelms.<br>' +
+    '<strong>Mnemonics</strong> — every card has a memory hook (CEAW, PCI, RMTUE…).<br>' +
+    '<strong>Active recall</strong> — the quiz forces retrieval, the strongest study technique.<br>' +
+    '<strong>Spaced repetition</strong> — wrong answers automatically queue for Review.</div></div></div></div>';
+
+  return html;
+}
+
+function renderLearnList() {
+  let html = '<h1 class="display" style="margin-bottom:20px">Choose a module to learn</h1><div class="topic-grid">';
+  TOPICS.forEach(t => {
+    const tCards = CARDS[t.id];
+    const tLearned = tCards.filter(c => state.progress.learned[c.id]).length;
+    html += '<div class="topic-card card" onclick="openTopic(\'' + t.id + '\')">' +
+      icon(t.icon, 28, t.color, 2.5) +
+      '<div class="display" style="font-size:1.1em;font-weight:700;margin-top:10px;margin-bottom:8px">' + esc(t.title) + '</div>' +
+      '<div class="subtle" style="font-size:0.9em">' + tLearned + '/' + tCards.length + ' cards learned</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderLearnCard() {
+  const t = TOPICS.find(x => x.id === state.topicId);
+  const cards = CARDS[state.topicId];
+  const card = cards[state.cardIdx];
+  const isLearned = !!state.progress.learned[card.id];
+
+  let html = '<button class="nav-btn" onclick="backToLearnList()" style="margin-bottom:20px">' + icon('chevronLeft', 18) + ' All modules</button>';
+
+  html += '<div class="row" style="margin-bottom:8px">' + icon(t.icon, 26, t.color, 2.5) +
+    '<span class="subtle">' + esc(t.title) + '</span>' +
+    '<span class="badge" style="margin-left:auto">' + (state.cardIdx + 1) + ' / ' + cards.length + '</span></div>';
+
+  html += '<div class="card" style="margin-top:16px">' +
+    '<h2 class="display" style="font-size:1.6em;margin-bottom:14px">' + esc(card.title) + '</h2>' +
+    '<p style="margin:0;font-size:1.02em">' + esc(card.body) + '</p>' +
+    '<div class="hook-box"><div class="row" style="margin-bottom:6px;gap:8px">' + icon('lightbulb', 18, '#D9A574') +
+      '<strong style="color:#D9A574;font-size:0.9em;letter-spacing:0.05em;text-transform:uppercase">' + esc(card.hook.label) + '</strong></div>' +
+      '<div style="font-size:1em">' + esc(card.hook.text) + '</div></div>' +
+    '<div style="margin-top:20px"><div class="row" style="margin-bottom:8px;gap:8px">' + icon('sparkles', 18, '#7DAB87') +
+      '<strong style="color:#7DAB87;font-size:0.9em;letter-spacing:0.05em;text-transform:uppercase">Key Points</strong></div>' +
+      '<ul class="key-list">' + card.key.map(k => '<li>' + esc(k) + '</li>').join('') + '</ul></div>' +
+    '<div class="nav-row">' +
+      '<button class="nav-btn" ' + (state.cardIdx === 0 ? 'disabled' : '') + ' onclick="prevCard()">' + icon('chevronLeft', 18) + ' Previous</button>' +
+      '<button class="' + (isLearned ? 'btn btn-ghost' : 'btn') + '" onclick="toggleLearned(\'' + card.id + '\')" style="display:inline-flex;align-items:center;gap:8px">' +
+        (isLearned ? icon('check', 18) + ' Learned' : 'Mark as Learned ' + icon('star', 16)) +
+      '</button>' +
+      '<button class="nav-btn" ' + (state.cardIdx === cards.length - 1 ? 'disabled' : '') + ' onclick="nextCard()">Next ' + icon('chevronRight', 18) + '</button>' +
+    '</div></div>';
+
+  html += '<div class="progress-bar" style="margin-top:20px"><div class="progress-fill" style="width:' + ((state.cardIdx + 1) / cards.length * 100) + '%;background:' + t.color + '"></div></div>';
+  return html;
+}
+
+function renderQuiz() {
+  const pool = quizPool();
+  if (pool.length === 0) {
+    return '<div class="card" style="text-align:center;padding:48px">' +
+      icon('trophy', 48, '#7DAB87') +
+      '<h2 class="display" style="margin:14px 0 10px">' + (state.quizMode === 'review' ? 'No questions to review' : 'No questions yet') + '</h2>' +
+      '<p class="subtle" style="margin-bottom:20px">' +
+        (state.quizMode === 'review' ? "You've got everything right so far — well done. Take the full quiz to find weak spots." : 'Pick a module to start.') +
+      '</p>' +
+      '<button class="btn" onclick="startQuiz(\'all\')">Take full quiz</button></div>';
+  }
+  const q = pool[Math.min(state.quizIdx, pool.length - 1)];
+  const topicOfQ = TOPICS.find(t => t.id === q.topic);
+  const modeLabel = state.quizMode === 'review' ? 'Review Mode' : state.quizMode === 'all' ? 'Full Quiz' : topicOfQ.title;
+
+  let optsHtml = '';
+  q.a.forEach((opt, i) => {
+    let cls = 'quiz-option';
+    if (state.quizAnswer !== null) {
+      if (i === q.correct) cls += ' correct';
+      else if (i === state.quizAnswer) cls += ' wrong';
+    }
+    optsHtml += '<button class="' + cls + '" ' + (state.quizAnswer !== null ? 'disabled' : '') + ' onclick="answerQuiz(' + i + ')">' +
+      '<span style="font-weight:700;margin-right:10px;color:' + (state.quizAnswer === null ? '#7DAB87' : 'inherit') + '">' + String.fromCharCode(65 + i) + '.</span>' +
+      esc(opt) +
+      (state.quizAnswer !== null && i === q.correct ? '<span style="float:right">' + icon('check', 20, '#8BC082') + '</span>' : '') +
+      (state.quizAnswer === i && i !== q.correct ? '<span style="float:right">' + icon('xCircle', 20, '#C97A7A') + '</span>' : '') +
+    '</button>';
+  });
+
+  let selectOpts = '<option value="all"' + (state.quizMode === 'all' ? ' selected' : '') + '>All topics</option>' +
+                   '<option value="review"' + (state.quizMode === 'review' ? ' selected' : '') + '>Review wrong</option>';
+  TOPICS.forEach(t => { selectOpts += '<option value="' + t.id + '"' + (state.quizMode === t.id ? ' selected' : '') + '>' + esc(t.title) + '</option>'; });
+
+  let html = '<div class="row" style="margin-bottom:14px;flex-wrap:wrap;gap:10px">' +
+    '<span class="badge">' + icon('target', 14) + esc(modeLabel) + '</span>' +
+    '<span class="badge subtle">Q ' + (state.quizIdx + 1) + ' of ' + pool.length + '</span>' +
+    '<div style="margin-left:auto"><select onchange="changeQuizMode(this.value)">' + selectOpts + '</select></div>' +
+  '</div>';
+
+  html += '<div class="card"><div class="display" style="font-size:1.3em;font-weight:700;margin-bottom:22px;line-height:1.45">' + esc(q.q) + '</div>';
+  html += '<div>' + optsHtml + '</div>';
+
+  if (state.quizAnswer !== null) {
+    const isCorrect = state.quizAnswer === q.correct;
+    html += '<div class="hook-box" style="border-left-color:' + (isCorrect ? '#8BC082' : '#C97A7A') + '">' +
+      '<div class="row" style="margin-bottom:6px;gap:8px">' +
+      (isCorrect ? icon('check', 18, '#8BC082') : icon('lightbulb', 18, '#D9A574')) +
+      '<strong style="color:' + (isCorrect ? '#8BC082' : '#D9A574') + ';font-size:0.9em;letter-spacing:0.05em;text-transform:uppercase">' + (isCorrect ? 'Correct' : 'Explanation') + '</strong></div>' +
+      '<div>' + esc(q.explain) + '</div></div>';
+  }
+
+  html += '<div class="nav-row">' +
+    '<button class="nav-btn" ' + (state.quizIdx === 0 ? 'disabled' : '') + ' onclick="prevQuiz()">' + icon('chevronLeft', 18) + ' Previous</button>';
+  if (state.quizAnswer !== null && state.quizIdx < pool.length - 1) {
+    html += '<button class="btn" onclick="nextQuiz()">Next question ' + icon('chevronRight', 18) + '</button>';
+  } else if (state.quizAnswer !== null && state.quizIdx === pool.length - 1) {
+    html += '<button class="btn" onclick="restartQuiz()">' + icon('refresh', 18) + ' Start over</button>';
+  }
+  html += '</div></div>';
+
+  html += '<div class="progress-bar" style="margin-top:20px"><div class="progress-fill" style="width:' + ((state.quizIdx + 1) / pool.length * 100) + '%"></div></div>';
+  return html;
+}
+
+function renderSettings() {
+  if (!state.showSettings) return '';
+  return '<div class="modal-bg" onclick="toggleSettings()"><div class="modal" onclick="event.stopPropagation()">' +
+    '<div class="row-between" style="margin-bottom:20px"><h2 class="display" style="font-size:1.4em">Display &amp; Reset</h2>' +
+    '<button class="nav-btn" onclick="toggleSettings()">Close</button></div>' +
+    '<div style="margin-bottom:24px">' +
+      '<div class="row" style="margin-bottom:10px;gap:8px">' + icon('eye', 18, '#7DAB87') + '<strong>Font size</strong></div>' +
+      '<div class="subtle" style="font-size:0.9em;margin-bottom:14px">Make the text bigger or smaller for comfort.</div>' +
+      '<div class="row" style="gap:14px">' +
+        '<button class="font-btn" onclick="changeFont(-2)">−</button>' +
+        '<div style="font-size:1.1em;font-weight:700;min-width:60px;text-align:center">' + state.fontSize + 'px</div>' +
+        '<button class="font-btn" onclick="changeFont(2)">+</button>' +
+        '<button class="nav-btn" onclick="resetFont()" style="margin-left:8px">Reset</button>' +
+      '</div>' +
+    '</div>' +
+    '<div><div class="row" style="margin-bottom:10px;gap:8px">' + icon('refresh', 18, '#C97A7A') + '<strong>Reset all progress</strong></div>' +
+      '<div class="subtle" style="font-size:0.9em;margin-bottom:14px">Clear learned cards, quiz answers, and the review queue.</div>' +
+      '<button class="nav-btn" onclick="resetProgress()" style="border-color:#C97A7A;color:#C97A7A">Reset progress</button></div>' +
+  '</div></div>';
+}
+
+function render() {
+  let body = '';
+  if (state.view === 'home') body = renderHome();
+  else if (state.view === 'learn' && !state.topicId) body = renderLearnList();
+  else if (state.view === 'learn' && state.topicId) body = renderLearnCard();
+  else if (state.view === 'quiz') body = renderQuiz();
+
+  document.getElementById('app').innerHTML =
+    '<div class="container">' + renderHeader() + renderTabs() + body + '</div>' + renderSettings();
+}
+
+// =================== ACTIONS ===================
+function go(view) { state.view = view; state.topicId = null; render(); }
+function openTopic(id) { state.view = 'learn'; state.topicId = id; state.cardIdx = 0; render(); }
+function backToLearnList() { state.topicId = null; render(); }
+function prevCard() { if (state.cardIdx > 0) { state.cardIdx--; render(); } }
+function nextCard() { const cards = CARDS[state.topicId]; if (state.cardIdx < cards.length - 1) { state.cardIdx++; render(); } }
+function toggleLearned(id) { state.progress.learned[id] = !state.progress.learned[id]; if (!state.progress.learned[id]) delete state.progress.learned[id]; saveProgress(); render(); }
+function openQuiz() { state.view = 'quiz'; state.quizMode = 'all'; state.quizIdx = 0; state.quizAnswer = null; render(); }
+function openReview() { state.view = 'quiz'; state.quizMode = 'review'; state.quizIdx = 0; state.quizAnswer = null; render(); }
+function startQuiz(mode) { state.quizMode = mode; state.quizIdx = 0; state.quizAnswer = null; render(); }
+function changeQuizMode(mode) { state.quizMode = mode; state.quizIdx = 0; state.quizAnswer = null; render(); }
+function answerQuiz(idx) {
+  if (state.quizAnswer !== null) return;
+  const pool = quizPool();
+  const q = pool[state.quizIdx];
+  state.quizAnswer = idx;
+  const correct = idx === q.correct;
+  state.progress.answered[q.id] = correct;
+  const wrongSet = new Set(state.progress.wrongQueue);
+  if (correct) wrongSet.delete(q.id); else wrongSet.add(q.id);
+  state.progress.wrongQueue = [...wrongSet];
+  saveProgress();
+  render();
+}
+function prevQuiz() { if (state.quizIdx > 0) { state.quizIdx--; state.quizAnswer = null; render(); } }
+function nextQuiz() { state.quizIdx++; state.quizAnswer = null; render(); }
+function restartQuiz() { state.quizIdx = 0; state.quizAnswer = null; render(); }
+function toggleSettings() { state.showSettings = !state.showSettings; render(); }
+function changeFont(delta) { state.fontSize = Math.max(14, Math.min(28, state.fontSize + delta)); saveFont(); applyFont(); render(); }
+function resetFont() { state.fontSize = 18; saveFont(); applyFont(); render(); }
+function resetProgress() {
+  if (confirm('Reset all progress? This cannot be undone.')) {
+    state.progress = { learned: {}, answered: {}, wrongQueue: [] };
+    saveProgress();
+    render();
+  }
+}
+
+// =================== BOOT ===================
+state.progress = loadProgress();
+state.fontSize = loadFont();
+applyFont();
+render();
+</script>
+</body>
+</html>

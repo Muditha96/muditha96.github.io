@@ -5,7 +5,7 @@ window.portfolioData = {
   profile: {
     name: "Muditha Priyasad",
     role: "Mechanical Design | Industrial Automation | R&D Engineer",
-    credential: "BSc (Hons) in Mechanical Engineering | IESL Associate Member: AM-32795",
+    credential: "BSc (Hons) in Mechanical Engineering | SOLIDWORKS Design Professional (CSWP) | IESL Associate Member: AM-32795",
     subtitle: "Machine Design | Factory Automation | PLC/HMI Support | Jigs & Fixtures | Rapid Prototyping",
     summary: "I design, build and troubleshoot factory machines, fixtures and low-cost automation—from mechanical concepts and pneumatics to PLC/HMI support and production commissioning.",
     status: "Open to Engineering Opportunities",
@@ -32,7 +32,7 @@ window.portfolioData = {
   stats: [
     { value: "15+", label: "Delivered Projects" },
     { value: "2+", label: "Years Experience" },
-    { value: "10", label: "Qualifications & Certifications" },
+    { value: "11", label: "Qualifications & Certifications" },
     { value: "20+", label: "MTone Custom Jobs" }
   ],
 
@@ -766,8 +766,9 @@ window.portfolioData = {
     { name: "BSc (Hons) Mechanical Engineering", issuer: "University of Jaffna", detail: "Faculty of Engineering - Oct 2017 to Feb 2024.", image: "assets/certificates/img/university-of-jaffna-degree.jpg" },
     { name: "IESL Associate Member", issuer: "Institution of Engineers Sri Lanka", detail: "Membership AM-32795." },
     { name: "Associate Engineer Registration (2025)", issuer: "Engineering Council, Sri Lanka", detail: "Registration No. 218944. Certificate issued 01 April 2025 and states validity through 31 December 2025.", image: "assets/certificates/img/engineering-council-associate-engineer.jpg", file: "assets/certificates/engineering-council-associate-engineer.pdf" },
-    { name: "Certified SOLIDWORKS Associate in Mechanical Design", issuer: "Dassault Systemes SOLIDWORKS", detail: "CSWA - Mechanical Design certification.", image: "assets/certificates/img/Certificate_C-T7NHSLZ59X.jpg", file: "assets/certificates/Certificate_C-T7NHSLZ59X.pdf" },
-    { name: "Certified SOLIDWORKS Associate in Additive Manufacturing", issuer: "Dassault Systemes SOLIDWORKS", detail: "CSWA-AM - Additive Manufacturing certification.", image: "assets/certificates/img/Certificate_C-UQGLWM7JCK.jpg", file: "assets/certificates/Certificate_C-UQGLWM7JCK.pdf" },
+    { name: "SOLIDWORKS Design Professional (CSWP)", issuer: "Dassault Systèmes SOLIDWORKS", detail: "Issued 31 August 2026. Certificate ID: C-ZPJADGEXF3.", badge: "assets/images/certification-badges/cswp-design-professional.png", image: "assets/certificates/img/cswp-c-zpjadgexf3.jpg", file: "assets/certificates/Certificate%20C-ZPJADGEXF3.pdf" },
+    { name: "Certified SOLIDWORKS Associate in Mechanical Design", issuer: "Dassault Systemes SOLIDWORKS", detail: "CSWA - Mechanical Design certification.", badge: "assets/images/certification-badges/cswa-mechanical-design.png", image: "assets/certificates/img/Certificate_C-T7NHSLZ59X.jpg", file: "assets/certificates/Certificate_C-T7NHSLZ59X.pdf" },
+    { name: "Certified SOLIDWORKS Associate in Additive Manufacturing", issuer: "Dassault Systemes SOLIDWORKS", detail: "CSWA-AM - Additive Manufacturing certification.", badge: "assets/images/certification-badges/cswa-additive-manufacturing.png", image: "assets/certificates/img/Certificate_C-UQGLWM7JCK.jpg", file: "assets/certificates/Certificate_C-UQGLWM7JCK.pdf" },
     { name: "PLC Training", issuer: "University of Moratuwa", detail: "PLC training - Robotics & Control Systems Laboratory, 2025.", image: "assets/certificates/img/plc-moratuwa.jpg" },
     { name: "PLC Programming Course", issuer: "Epic Engineering", detail: "Industrial PLC programming - 2024." },
     { name: "Maintenance of Industrial Plant & Machinery", issuer: "NERDC", detail: "Maintenance of Industrial Plant & Machinery - 2026.", image: "assets/certificates/img/nerdc-maintenance.jpg" },

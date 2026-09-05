@@ -1188,3 +1188,83 @@ body {
     border-bottom: 1px solid var(--ds-line);
   }
 }
+
+
+/* SOLIDWORKS certification badges and September 2026 Learning Lab update. */
+.cert-heading {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  margin: .2rem 0 .5rem;
+}
+
+.cert-heading > div {
+  min-width: 0;
+}
+
+.cert-heading .eyebrow,
+.cert-heading h3 {
+  margin-top: 0 !important;
+}
+
+.cert-heading h3 {
+  margin-bottom: 0 !important;
+}
+
+.cert-badge {
+  display: block;
+  flex: 0 0 72px;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+
+.home-cert-badges {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  margin: 0 0 .3rem;
+}
+
+.home-cert-badges a {
+  display: inline-flex;
+  border-radius: .35rem;
+}
+
+.home-cert-badges img {
+  display: block;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.learning-page .learning-update p:not(.eyebrow) {
+  margin: .45rem 0 0;
+  color: var(--ds-muted);
+  font-size: var(--ds-small);
+  line-height: 1.5;
+}
+
+.learning-page .learning-update a {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.learning-page .learning-update a:hover strong,
+.learning-page .learning-update a:focus-visible strong {
+  color: var(--ds-accent-strong);
+}
+
+@media (max-width: 620px) {
+  .learning-page .learning-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .cert-badge {
+    flex-basis: 64px;
+    width: 64px;
+    height: 64px;
+  }
+}

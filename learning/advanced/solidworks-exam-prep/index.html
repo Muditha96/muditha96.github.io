@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SolidWorks Exam Preparation · MTone Engineering Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #1a2825;
+    font-family: 'Atkinson Hyperlegible', system-ui, sans-serif;
+    color: #EFE7D6; font-size: 18px; line-height: 1.7;
+    letter-spacing: 0.01em; min-height: 100vh;
+  }
+  body.fs-16 { font-size: 16px; } body.fs-18 { font-size: 18px; }
+  body.fs-20 { font-size: 20px; } body.fs-22 { font-size: 22px; }
+  body.fs-24 { font-size: 24px; } body.fs-26 { font-size: 26px; }
+  .display { font-family: 'Fraunces', serif; letter-spacing: -0.01em; }
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  a { color: #95C19F; }
+  h1 { font-size: 2.1em; margin: 0 0 8px; line-height: 1.25; }
+  h2 { font-size: 1.35em; margin: 40px 0 16px; color: #C9DCCC; }
+  .sub { color: #A9BDB5; margin: 0 0 4px; }
+
+  .topbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+            justify-content: space-between; margin-bottom: 28px; }
+  .crumb { color: #A9BDB5; font-size: .9em; }
+  .crumb a { color: #A9BDB5; }
+
+  .sizer { display: flex; gap: 8px; align-items: center; }
+  .sizer span { color: #A9BDB5; font-size: .85em; }
+  .btn-sm { background: transparent; color: #EFE7D6; border: 1px solid #4a6661;
+            padding: 6px 14px; border-radius: 9px; font-family: inherit;
+            font-size: .9em; cursor: pointer; }
+  .btn-sm:hover { background: #2f4641; }
+
+  .card { background: #243532; border-radius: 18px; padding: 26px;
+          border: 1px solid #2f4641; margin-bottom: 18px; }
+  .card.live:hover { border-color: #7DAB87; }
+  .card.pending { border-style: dashed; border-color: #4a6661; background: #1f2e2b; }
+
+  .card-head { display: flex; flex-wrap: wrap; gap: 10px;
+               align-items: baseline; justify-content: space-between; }
+  .card h3 { margin: 0; font-size: 1.2em; }
+  .card p { margin: 10px 0 0; color: #C9DCCC; }
+  .meta { color: #A9BDB5; font-size: .88em; margin-top: 12px; }
+  .path { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+          font-size: .85em; color: #A9BDB5; word-break: break-all; }
+
+  .tag { display: inline-block; padding: 3px 12px; border-radius: 999px;
+         font-size: .78em; font-weight: 700; letter-spacing: .03em; white-space: nowrap; }
+  .tag-live    { background: #7DAB87; color: #14201D; }
+  .tag-pending { background: #3d5450; color: #D8C9A3; }
+  .tag-related { background: #2f4641; color: #C9DCCC; }
+
+  .open { display: inline-block; margin-top: 16px; background: #7DAB87;
+          color: #14201D; text-decoration: none; padding: 12px 22px;
+          border-radius: 12px; font-weight: 700; }
+  .open:hover { background: #95C19F; }
+
+  .notice { background: #2b2118; border: 1px solid #5a4632; border-radius: 14px;
+            padding: 22px 26px; margin-bottom: 30px; }
+  .notice h2 { margin-top: 0; color: #E8C98A; font-size: 1.15em; }
+  .notice ul { margin: 10px 0 0; padding-left: 22px; }
+  .notice li { margin-bottom: 8px; color: #DCCBA8; }
+  .notice code { background: #3a2d20; padding: 2px 7px; border-radius: 5px;
+                 font-size: .88em; color: #F0D9A8; }
+
+  footer { margin-top: 50px; padding-top: 22px; border-top: 1px solid #2f4641;
+           color: #A9BDB5; font-size: .9em; }
+</style>
+</head>
+<body class="fs-18">
+<div class="container">
+
+  <div class="topbar">
+    <div class="crumb"><a href="../index.html">&larr; Advance Micro Learning</a></div>
+    <div class="sizer">
+      <span>Text size</span>
+      <button class="btn-sm" id="dec" aria-label="Decrease text size">A&minus;</button>
+      <button class="btn-sm" id="inc" aria-label="Increase text size">A+</button>
+    </div>
+  </div>
+
+  <h1 class="display">SolidWorks Exam Preparation</h1>
+  <p class="sub">MTone Engineering Academy · certification track</p>
+  <p class="sub">CSWA &middot; CSWA-AM &middot; CSWP (passed) &nbsp;|&nbsp; CSWA-SD &middot; CSWA-S (study materials)</p>
+  <p class="sub">CSWP awarded 31 August 2026. <a href="../../../skills.html#certifications">View certification evidence</a>.</p>
+
+  <div class="notice">
+    <h2>Status &mdash; 6 August 2026</h2>
+    <p style="margin:0;color:#DCCBA8;">Two courses were recovered from disk and filed here. Four
+    further items exist only as artifacts inside the <em>solidworks exam guide</em> project on
+    claude.ai and were never saved locally. Download each one and save it into this folder under
+    the filename listed on its card below &mdash; it will then open from this page automatically.
+    <br><br><strong>6 August:</strong> a complete exam guide and a unified three-exam study app were
+    built from the official Dassault sources and now cover CSWA-SD, CSWA-S and CSWP directly — see
+    the two cards below. They do not depend on any of the missing artifacts.</p>
+    <ul>
+      <li>The Sustainability course here is the <strong>29 June build with 40 questions</strong>. The project was later expanded to <strong>99 questions</strong>; that newer build is not on this machine.</li>
+      <li>Nothing in <code>advance micro learning</code> was modified &mdash; this is an additive folder only.</li>
+    </ul>
+  </div>
+
+  <h2>Built 6 August 2026</h2>
+
+  <div class="card live">
+    <div class="card-head">
+      <h3>The Complete SOLIDWORKS Certification Exam Guide</h3>
+      <span class="tag tag-live">NEW</span>
+    </div>
+    <p>Every exam in the programme with current prices, the full testing-system rules, and deep
+    preparation sections for CSWA-SD, CSWA-S and CSWP &mdash; including the <strong>official CSWP
+    sample exam reproduced in full with Dassault's own answer key</strong>, the four places where
+    published SOLIDWORKS material contradicts itself, an exam-day checklist and a costed roadmap.
+    Every figure verified against solidworks.com and the official certification blog, February 2026.</p>
+    <div class="meta">12 sections &middot; 46 KB &middot; built 6 August 2026</div>
+    <div class="path">SolidWorks_Complete_Exam_Guide.html</div>
+    <a class="open" href="SolidWorks_Complete_Exam_Guide.html">Open guide</a>
+  </div>
+
+  <div class="card live">
+    <div class="card-head">
+      <h3>SOLIDWORKS Exam Study App &middot; CSWA-SD + CSWA-S + CSWP</h3>
+      <span class="tag tag-live">NEW</span>
+    </div>
+    <p>One app for CSWA-SD, CSWA-S and CSWP practice. 133 practice questions, 90 lessons and 26 topics,
+    with instant-feedback practice, a mistakes-only review mode, and timed mock exams that mirror
+    each real format. The CSWP bank includes the <strong>five official sample-exam questions with
+    the real answer key</strong>. Progress is saved per exam in the browser.</p>
+    <div class="meta">CSWA-SD 45 Q &middot; CSWA-S 48 Q &middot; CSWP 40 Q &middot; 172 KB &middot; built 6 August 2026</div>
+    <div class="path">SolidWorks_Exam_Study_App.html</div>
+    <a class="open" href="SolidWorks_Exam_Study_App.html">Open study app</a>
+  </div>
+
+  <h2>Available now</h2>
+
+  <div class="card live">
+    <div class="card-head">
+      <h3>CSWA-SD Sustainability &middot; Lecture Course</h3>
+      <span class="tag tag-live">ON DISK</span>
+    </div>
+    <p>Full lecture course covering sustainable design definitions, green chemistry, product
+    stewardship, redesign levels, the metrics accuracy ladder, audience-specific communication,
+    and toxicity measurement limitations.</p>
+    <div class="meta">40 questions &middot; 124 KB &middot; last modified 29 June 2026</div>
+    <div class="path">cswa-sd-sustainability-course.html</div>
+    <a class="open" href="cswa-sd-sustainability-course.html">Open course</a>
+  </div>
+
+  <div class="card live">
+    <div class="card-head">
+      <h3>CSWA Sustainability &middot; Study App</h3>
+      <span class="tag tag-live">ON DISK</span>
+    </div>
+    <p>Companion quiz application for the Sustainability track.</p>
+    <div class="meta">54 KB &middot; last modified 7 June 2026</div>
+    <div class="path">CSWA_Study_App.html</div>
+    <a class="open" href="CSWA_Study_App.html">Open study app</a>
+  </div>
+
+  <h2>Related modules already in Advance Micro Learning</h2>
+
+  <div class="card live">
+    <div class="card-head">
+      <h3>A49 &middot; SolidWorks Part Modeling &amp; Design Intent</h3>
+      <span class="tag tag-related">EXISTING MODULE</span>
+    </div>
+    <p>Advanced deep dive on part modelling and design intent. Left in place, not moved.</p>
+    <a class="open" href="../A49_SolidWorks_Part_Modeling_Deep_Dive.html">Open A49</a>
+  </div>
+
+  <div class="card live">
+    <div class="card-head">
+      <h3>A62 &middot; CSWA-Simulation Exam: Full Guide</h3>
+      <span class="tag tag-related">EXISTING MODULE</span>
+    </div>
+    <p>Advanced deep dive covering the CSWA-Simulation exam. Left in place, not moved.</p>
+    <a class="open" href="../A62_CSWA_Simulation_Exam_Guide.html">Open A62</a>
+  </div>
+
+  <h2>Awaiting download from the claude.ai project</h2>
+
+  <div class="card pending">
+    <div class="card-head">
+      <h3>CSWA-SD Sustainability &middot; 99-question build</h3>
+      <span class="tag tag-pending">NOT ON DISK</span>
+    </div>
+    <p>The expanded Sustainability course. Includes the two teaching corrections made mid-session:
+    screening-level LCA <em>can</em> be used in marketing, and transportation must be included in the
+    seven-step lifecycle stage enumeration. The printable concept sheet was updated to match.</p>
+    <div class="meta">Expected: 99 questions &middot; supersedes the 40-question build above</div>
+    <div class="path">Save as &rarr; cswa-sd-sustainability-course-v99.html</div>
+  </div>
+
+  <div class="card pending">
+    <div class="card-head">
+      <h3>CSWA-S Simulation Course</h3>
+      <span class="tag tag-pending">NOT ON DISK</span>
+    </div>
+    <p>Built on the Sustainability engine in a steel-blue theme. Configured for the real exam
+    format: 120 minutes, 20 questions, 100 points, 70% pass mark, 3 hands-on problems.</p>
+    <div class="meta">7 modules &middot; 32 lessons &middot; 48 questions &middot; 7 visual study aids incl. an inline SVG stress-strain curve</div>
+    <div class="path">Save as &rarr; cswa-s-simulation-course.html</div>
+  </div>
+
+  <div class="card pending">
+    <div class="card-head">
+      <h3>CSWP Master Course</h3>
+      <span class="tag tag-pending">NOT ON DISK</span>
+    </div>
+    <p>Violet theme, sketching through exam strategy. Exam facts sourced from the Dassault sample
+    exam PDF: Segment 1 &mdash; 70 min, Segment 2 &mdash; 50 min, Segment 3 &mdash; 80 min;
+    Tangix TesterPRO client; Excel required for design tables; exams cannot be paused.</p>
+    <div class="meta">9 modules &middot; 43 questions &middot; 5 visual aids</div>
+    <div class="path">Save as &rarr; cswp-master-course.html</div>
+  </div>
+
+  <div class="card pending">
+    <div class="card-head">
+      <h3>CSWP Practice Ladder &middot; tracker</h3>
+      <span class="tag tag-pending">NOT ON DISK</span>
+    </div>
+    <p>Built from 89 official Dassault practice problem PDFs. Per-problem checkboxes,
+    difficulty and duration tags, per-level progress indicators, localStorage persistence.
+    Levels 3, 5, 6, 7, 8, 9 and 10 were still outstanding when the tracker was last updated.</p>
+    <div class="meta">Incomplete &mdash; 7 of 10 levels still to be sourced</div>
+    <div class="path">Save as &rarr; cswp-practice-ladder.html</div>
+  </div>
+
+  <h2>Archive</h2>
+  <div class="card">
+    <p style="margin-top:0;">Three earlier builds of the Sustainability course are kept in
+    <span class="path">_archive\</span> for diffing: <span class="path">.original</span>,
+    <span class="path">.before-gemini</span> and
+    <span class="path">.before-gemini-visual-guide</span>. All three contain 40 questions.</p>
+  </div>
+
+  <footer>
+    Additive folder created 5 August 2026. No existing file in
+    <span class="path">advance micro learning</span> was modified.
+    See <span class="path">STATUS.md</span> for the full recovery checklist.
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var sizes = ['fs-16','fs-18','fs-20','fs-22','fs-24','fs-26'];
+    var i = 1;
+    function apply() {
+      document.body.className = sizes[i];
+    }
+    document.getElementById('inc').addEventListener('click', function () {
+      if (i < sizes.length - 1) { i++; apply(); }
+    });
+    document.getElementById('dec').addEventListener('click', function () {
+      if (i > 0) { i--; apply(); }
+    });
+  })();
+</script>
+</body>
+</html>

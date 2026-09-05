@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Industrial Communication from Zero &mdash; Bridge Primer B05 | Micro Learning</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0b0f14;
+    --card: #1a2230;
+    --card-2: #232d3f;
+    --card-3: #2b3650;
+    --accent: #8b5cf6;        /* bridge violet - B-series on-ramp */
+    --accent-soft: #c4b5fd;
+    --accent-2: #a3e635;      /* link lime */
+    --accent-3: #2dd4bf;      /* teal - the Networks track colour */
+    --teal: #2dd4bf;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --purple: #c084fc;
+    --orange: #f59e0b;
+    --danger: #f87171;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(139,92,246,0.16), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(163,230,53,0.06), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    line-height: 1.65; letter-spacing: 0.01em;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 28px 90px; }
+
+  .page { margin-bottom: 30px; animation: fadeUp 0.7s ease both; }
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #0b0f14; background: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(139,92,246,0.40);
+  }
+  .page-title { font-size: clamp(26px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .page-sub { font-size: clamp(15px, 2vw, 18px); color: var(--text-dim); margin-bottom: 22px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    border: 1px solid var(--border); margin-bottom: 22px;
+  }
+  .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+
+  h1.hero { font-size: clamp(38px, 6.5vw, 66px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 14px; }
+  h1.hero .emoji { font-size: 0.8em; margin-right: 10px; }
+  .hero-sub { font-size: clamp(17px, 2.4vw, 23px); color: var(--text-dim); margin-bottom: 18px; }
+
+  .connect {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(139,92,246,0.14), rgba(163,230,53,0.06));
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:14px; padding:14px 18px; margin-bottom:30px; font-size:14px;
+  }
+  .connect .pill { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color: var(--accent-soft); background: rgba(139,92,246,0.20); padding:4px 10px; border-radius:8px; }
+  .connect a { color: var(--accent-soft); font-weight:600; text-decoration:none; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 30px 28px; margin-bottom: 20px; }
+  .label { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .lead { font-size: clamp(18px, 2.4vw, 23px); font-weight: 500; line-height: 1.5; }
+  p.body { font-size: 16px; color: #d7dee8; margin-top: 12px; }
+  p.body strong { color: var(--text); }
+  .hl { color: var(--accent-soft); font-weight: 700; }
+  .hl2 { color: var(--accent-2); font-weight: 700; }
+  .hl3 { color: var(--accent-3); font-weight: 700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mini { background: var(--card-2); border-radius:14px; padding:18px; border-top:3px solid var(--accent); }
+  .mini h4 { font-size:15px; margin-bottom:6px; }
+  .mini p { font-size:14px; color: var(--text-dim); }
+  .mini .big { font-size:26px; font-weight:800; color: var(--accent-soft); font-family: ui-monospace, monospace; }
+  .c-blue { border-top-color: var(--blue)!important; } .c-blue .big{color:var(--blue)}
+  .c-pink { border-top-color: var(--pink)!important; } .c-pink .big{color:var(--pink)}
+  .c-amb  { border-top-color: var(--amber)!important; } .c-amb .big{color:var(--amber)}
+  .c-teal { border-top-color: var(--teal)!important; } .c-teal .big{color:var(--teal)}
+  .c-purp { border-top-color: var(--purple)!important; } .c-purp .big{color:var(--purple)}
+  .c-grn  { border-top-color: var(--green)!important; } .c-grn .big{color:var(--green)}
+  .c-org  { border-top-color: var(--orange)!important; } .c-org .big{color:var(--orange)}
+  .c-red  { border-top-color: var(--danger)!important; } .c-red .big{color:var(--danger)}
+  .c-sky  { border-top-color: var(--accent-3)!important; } .c-sky .big{color:var(--accent-3)}
+
+  .stage { background: linear-gradient(160deg, #11161f, #0a0d12); border:1px solid var(--border); border-radius:16px; padding:22px 16px; margin-top:6px; }
+  svg.illus { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px; font-style:italic; }
+
+  .tbl-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:560px; }
+  th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background: var(--card-2); color: var(--accent-soft); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  td b { color: var(--text); }
+  .mono { font-family: ui-monospace, monospace; }
+
+  .eqn { font-family: ui-monospace, monospace; font-size:15px; line-height:1.9; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:10px; color:#cbd5e1; overflow-x:auto; white-space:pre-wrap; }
+  .eqn b { color: var(--accent-soft); } .eqn .v2{color:var(--accent-2)} .eqn .v3{color:var(--accent-3)}
+
+  .tips { list-style:none; display:grid; gap:12px; }
+  .tips li { display:flex; gap:14px; background:var(--card-2); padding:16px 18px; border-radius:12px; border-left:4px solid var(--accent); font-size:15px; }
+  .tips li .num { width:26px; height:26px; flex-shrink:0; background:var(--accent); color:#0b0f14; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+
+  .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fail { background: linear-gradient(145deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); border:1px solid rgba(248,113,113,0.25); border-radius:14px; padding:16px; }
+  .fail .ft { display:flex; align-items:center; gap:8px; font-weight:700; color:#fca5a5; margin-bottom:6px; font-size:15px; }
+  .fail p { font-size:13.5px; color:var(--text-dim); }
+
+  .memory { background: linear-gradient(135deg, #8b5cf6, #083344); color: #fff7ed; text-align:center; padding:38px 26px; border:none; border-radius:22px; }
+  .memory .label { color: rgba(255,255,255,0.88); }
+  .memory .quote { font-size: clamp(24px, 3.6vw, 36px); font-weight:800; letter-spacing:-0.01em; }
+
+  .quiz { border:2px dashed var(--accent); background:var(--card); }
+  .quiz .quiz-q { font-size:19px; font-weight:500; margin-bottom:16px; }
+  .quiz-answer { background:var(--card-2); padding:16px; border-radius:12px; font-size:16px; color:var(--text-dim); cursor:pointer; user-select:none; margin-bottom:12px; }
+  .quiz-answer .tap { display:block; text-align:center; color:var(--accent-soft); font-weight:600; }
+  .quiz-answer.revealed .tap { display:none; }
+  .quiz-answer .hidden { display:none; }
+  .quiz-answer.revealed .hidden { display:block; color:var(--text); }
+  .quiz-answer.revealed { border:1px solid var(--accent); background: rgba(139,92,246,0.14); }
+
+  .footer { text-align:center; color:var(--text-dim); font-size:13px; margin-top:34px; line-height:1.8; }
+  .toc { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px; }
+  .toc a { font-size:12px; font-family:ui-monospace,monospace; color:var(--text-dim); border:1px solid var(--border); padding:6px 11px; border-radius:999px; text-decoration:none; transition:all .2s; }
+  .toc a:hover { color:var(--accent-soft); border-color:var(--accent); }
+  .back { display:inline-flex; align-items:center; gap:8px; color:var(--accent-soft); font-size:14px; text-decoration:none; margin-bottom:18px; }
+
+  .demo { background:var(--card-2); border-radius:14px; padding:20px; margin-top:8px; }
+  .demo-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:6px; }
+  .demo-row b { color:var(--accent-soft); font-family:ui-monospace,monospace; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:6px; margin:8px 0 4px; }
+  input[type=text]{ width:100%; background:var(--card-3); color:var(--text); border:1px solid var(--border); border-radius:10px; padding:11px 13px; font-family:ui-monospace,monospace; font-size:16px; letter-spacing:0.08em; margin:8px 0 4px; }
+  input[type=text]:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(139,92,246,0.18); }
+  .demo-out { font-family:ui-monospace,monospace; font-size:15px; color:#cbd5e1; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:12px; line-height:1.9; }
+  .demo-out b { color:var(--accent-soft); }
+  .seg { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .seg button { flex:1; min-width:70px; background:var(--card-3); color:var(--text-dim); border:1px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#0b0f14; border-color:var(--accent); }
+
+
+  /* ===== ENGAGEMENT LAYER (new in A11) ===== */
+  #prog { position:fixed; top:0; left:0; height:4px; width:0%; z-index:60;
+          background:linear-gradient(90deg, var(--accent-2), var(--accent)); box-shadow:0 0 12px rgba(139,92,246,0.6); transition:width .12s linear; }
+  #pchip { position:fixed; top:12px; right:12px; z-index:61; background:rgba(15,20,25,0.86);
+           border:1px solid var(--border); color:var(--text-dim); font-family:ui-monospace,monospace;
+           font-size:12px; padding:6px 12px; border-radius:999px; backdrop-filter:blur(8px); }
+  #pchip b { color:var(--accent-soft); }
+
+  .tier { display:inline-block; font-family:ui-monospace,monospace; font-size:10.5px; font-weight:800;
+          letter-spacing:0.12em; padding:3px 9px; border-radius:6px; margin-left:10px; vertical-align:middle; }
+  .t-core   { background:rgba(163,230,53,0.16); color:#bef264; border:1px solid rgba(163,230,53,0.4); }
+  .t-stretch{ background:rgba(139,92,246,0.16); color:#c4b5fd; border:1px solid rgba(139,92,246,0.4); }
+  .t-res    { background:rgba(192,132,252,0.16); color:#a5f3fc; border:1px solid rgba(192,132,252,0.4); }
+
+  .predict { background:linear-gradient(150deg, rgba(163,230,53,0.09), rgba(139,92,246,0.03));
+             border:2px solid rgba(163,230,53,0.35); border-radius:18px; padding:24px 22px; margin-bottom:20px; }
+  .predict .p-tag { display:inline-flex; align-items:center; gap:8px; font-family:ui-monospace,monospace;
+             font-size:11.5px; font-weight:800; letter-spacing:0.16em; color:#0b0f14; background:var(--accent-2);
+             padding:4px 11px; border-radius:999px; margin-bottom:12px; }
+  .predict .p-q { font-size:18px; font-weight:600; line-height:1.45; margin-bottom:14px; }
+  .p-opts { display:grid; gap:9px; margin-bottom:4px; }
+  .p-opts button { text-align:left; background:var(--card-2); color:var(--text); border:1px solid var(--border);
+             border-radius:12px; padding:13px 16px; font-size:15px; font-family:inherit; cursor:pointer; transition:all .18s; }
+  .p-opts button:hover { border-color:var(--accent-2); }
+  .p-opts button.picked { border-color:var(--accent); background:rgba(139,92,246,0.12); font-weight:600; }
+  .p-opts button.right  { border-color:#a3e635; background:rgba(163,230,53,0.16); }
+  .p-opts button.wrong  { border-color:#f87171; background:rgba(248,113,113,0.12); }
+  .p-opts.done button { cursor:default; }
+  .p-ans { display:none; margin-top:14px; padding-top:14px; border-top:1px dashed var(--border); font-size:15.5px; color:#d7dee8; }
+  .p-ans.show { display:block; animation:fadeUp .45s ease both; }
+  .p-verdict { display:block; font-weight:800; font-size:16px; margin-bottom:8px; }
+
+  .checkpoint { display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:center;
+             background:var(--bg-2); border:1px dashed var(--accent); border-radius:16px;
+             padding:16px 20px; margin:26px 0 8px; text-align:center; }
+  .checkpoint .cp-t { font-family:ui-monospace,monospace; font-size:12px; font-weight:800; letter-spacing:0.14em;
+             color:#0b0f14; background:var(--accent); padding:4px 11px; border-radius:999px; }
+  .checkpoint p { font-size:14px; color:var(--text-dim); margin:0; }
+  .checkpoint p b { color:var(--text); }
+
+  .career { display:flex; gap:12px; align-items:flex-start; background:rgba(139,92,246,0.07);
+             border-left:3px solid var(--accent-3); border-radius:0 12px 12px 0; padding:14px 18px; margin-top:16px; }
+  .career .ci { font-size:17px; line-height:1.2; }
+  .career p { font-size:14.5px; color:#cbd5e1; font-style:italic; margin:0; }
+  .rt { font-family:ui-monospace,monospace; font-size:11.5px; color:var(--text-dim); margin-left:10px; letter-spacing:0.06em; }
+  .legend { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .legend span { font-size:13px; color:var(--text-dim); }
+
+
+  /* ===== RICH VISUAL LAYER ===== */
+  .hero-illus { background:linear-gradient(165deg,#141b24,#080b10); border:1px solid var(--border);
+                border-radius:20px; padding:6px; margin-bottom:18px; overflow:hidden; }
+  .hero-illus svg { display:block; width:100%; height:auto; border-radius:16px; }
+  .vkey { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:12px; font-size:12.5px; color:var(--text-dim); }
+  .vkey b { display:inline-flex; align-items:center; gap:6px; font-weight:600; }
+  .vkey i { width:12px; height:12px; border-radius:3px; display:inline-block; font-style:normal; }
+
+  /* gentle, large-amplitude motion only - keratoconus friendly */
+  .anim-pulse   { animation: aPulse 3.2s ease-in-out infinite; transform-origin:center; }
+  .anim-wave    { animation: aWave 3.6s linear infinite; }
+  .anim-beam    { animation: aBeam 2.8s ease-in-out infinite; }
+  .anim-spin    { animation: aSpin 9s linear infinite; transform-origin:center; }
+  .anim-slide   { animation: aSlide 5s ease-in-out infinite; }
+  .anim-flex    { animation: aFlex 3.4s ease-in-out infinite; }
+  .anim-glow    { animation: aGlow 3s ease-in-out infinite; }
+  @keyframes aPulse { 0%,100%{opacity:0.25; transform:scale(0.92);} 50%{opacity:0.95; transform:scale(1.06);} }
+  @keyframes aWave  { 0%{opacity:0; r:14;} 15%{opacity:0.9;} 100%{opacity:0; r:120;} }
+  @keyframes aBeam  { 0%,100%{opacity:0.35;} 50%{opacity:1;} }
+  @keyframes aSpin  { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  @keyframes aSlide { 0%,100%{transform:translateX(0);} 50%{transform:translateX(120px);} }
+  @keyframes aFlex  { 0%,100%{transform:scaleX(1);} 50%{transform:scaleX(1.05);} }
+  @keyframes aGlow  { 0%,100%{opacity:0.45;} 50%{opacity:1;} }
+  @media (prefers-reduced-motion: reduce) {
+    .anim-pulse,.anim-wave,.anim-beam,.anim-spin,.anim-slide,.anim-flex,.anim-glow { animation:none !important; opacity:0.85 !important; }
+  }
+
+  @media (min-width: 820px) and (max-width: 1180px) {
+    .container { padding: 44px 44px 110px; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 22px 16px 60px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+  }
+  @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+  @keyframes pulse { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.4);opacity:0.7;} }
+  td.c-red, span.c-red, .mini .c-red, b.c-red { color: var(--danger)!important; }
+  td.c-grn, span.c-grn, .mini .c-grn, b.c-grn { color: var(--green)!important; }
+  td.c-amb, span.c-amb, .mini .c-amb, b.c-amb { color: var(--amber)!important; }
+</style></head>
+<body>
+<div id="prog"></div>
+<div id="pchip">page <b id="pnow">1</b> / 14</div>
+<div class="container">
+
+  <a class="back" href="START_HERE.html">&larr; Learning Path</a>
+
+  <div class="badge"><span class="dot"></span><span>Bridge Primer B05 &middot; On-Ramp &middot; Written for a mechanical engineer &middot; No prior electronics assumed</span></div>
+  <h1 class="hero"><span class="emoji">&#128225;</span>Industrial Communication from Zero</h1>
+  <p class="hero-sub">Every protocol in this library &mdash; Modbus, PROFINET, EtherCAT, IO-Link, CAN, OPC&nbsp;UA, TSN &mdash; is the <b>same six ideas</b> arranged differently: a voltage on a wire, a bit, a frame, a checksum, a rule about who may talk, and a promise about <i>when</i>. Learn those six once and the eight advanced modules stop being eight subjects and become eight variations. This primer starts at &ldquo;what is a signal&rdquo; and ends with you able to read any protocol datasheet in the field.</p>
+
+  <div class="connect">
+    <span class="pill">&#9670; ON-RAMP</span>
+    <span>This primer unlocks the whole Networks track. Read it before:</span>
+    <a href="A01_Modbus_RTU_Deep_Dive.html">A01 Modbus &rarr;</a>
+    <a href="A02_PROFINET_Deep_Dive.html">A02 PROFINET &rarr;</a>
+    <a href="A03_EtherCAT_Deep_Dive.html">A03 EtherCAT &rarr;</a>
+    <a href="A05_IO_Link_Deep_Dive.html">A05 IO-Link &rarr;</a>
+    <a href="A04_CAN_Bus_Deep_Dive.html">A04 CAN &rarr;</a>
+    <a href="A06_OPC_UA_Deep_Dive.html">A06 OPC UA &rarr;</a>
+    <a href="A37_TSN_Deterministic_Ethernet_Deep_Dive.html">A37 TSN &rarr;</a>
+    <a href="A54_OT_Cybersecurity_Deep_Dive.html">A54 OT Security &rarr;</a>
+  </div>
+
+  <div class="toc">
+    <a href="#p1">1 &middot; Cold Open</a>
+    <a href="#p2">2 &middot; What a Signal Is</a>
+    <a href="#p3">3 &middot; Bits, Bytes &amp; Meaning</a>
+    <a href="#p4">4 &middot; The Serial Frame</a>
+    <a href="#p5">5 &middot; The Physical Layer</a>
+    <a href="#p6">6 &middot; Topology</a>
+    <a href="#p7">7 &middot; Frames &amp; Checksums</a>
+    <a href="#p8">8 &middot; Who Talks When</a>
+    <a href="#p9">9 &middot; Time &amp; Determinism</a>
+    <a href="#p10">10 &middot; The Layer Model</a>
+    <a href="#p11">11 &middot; The Landscape in 2026</a>
+    <a href="#p12">12 &middot; Choosing a Protocol</a>
+    <a href="#p13">13 &middot; Security in One Page</a>
+    <a href="#p14">14 &middot; Your Route from Here</a>
+  </div>
+
+  <div class="hero-illus">
+    <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The six ideas behind every industrial protocol">
+      <defs>
+        <linearGradient id="hb5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0d1520"/><stop offset="100%" stop-color="#070a0f"/></linearGradient>
+        <linearGradient id="hbw" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.9"/><stop offset="100%" stop-color="#2dd4bf" stop-opacity="0.9"/></linearGradient>
+      </defs>
+      <rect width="900" height="300" fill="url(#hb5)" rx="16"/>
+      <text x="450" y="30" text-anchor="middle" fill="#c4b5fd" font-family="ui-monospace,monospace" font-size="13" letter-spacing="3">EVERY PROTOCOL IS THESE SIX THINGS</text>
+
+      <rect x="40" y="58" width="820" height="6" rx="3" fill="url(#hbw)"/>
+
+      <g font-size="12.5">
+        <rect x="40" y="86" width="126" height="86" rx="11" fill="#1a2230" stroke="#8b5cf6" stroke-width="2"/>
+        <path d="M56 140 h18 v-24 h18 v24 h18 v-24 h18 v24 h12" fill="none" stroke="#c4b5fd" stroke-width="2.5"/>
+        <text x="103" y="118" text-anchor="middle" fill="#c4b5fd" font-weight="700">1 &middot; a voltage</text>
+        <text x="103" y="190" text-anchor="middle" fill="#94a3b8">page 2 &amp; 5</text>
+
+        <rect x="180" y="86" width="126" height="86" rx="11" fill="#1a2230" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="243" y="118" text-anchor="middle" fill="#c4b5fd" font-weight="700">2 &middot; a bit</text>
+        <text x="243" y="146" text-anchor="middle" fill="#a3e635" font-family="ui-monospace,monospace" font-size="15">1011 0010</text>
+        <text x="243" y="190" text-anchor="middle" fill="#94a3b8">page 3</text>
+
+        <rect x="320" y="86" width="126" height="86" rx="11" fill="#1a2230" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="383" y="118" text-anchor="middle" fill="#c4b5fd" font-weight="700">3 &middot; a frame</text>
+        <g stroke="#2dd4bf" stroke-width="1.6" fill="none">
+          <rect x="336" y="132" width="22" height="18"/><rect x="358" y="132" width="22" height="18"/>
+          <rect x="380" y="132" width="34" height="18"/><rect x="414" y="132" width="16" height="18"/>
+        </g>
+        <text x="383" y="190" text-anchor="middle" fill="#94a3b8">page 4 &amp; 7</text>
+
+        <rect x="460" y="86" width="126" height="86" rx="11" fill="#1a2230" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="523" y="118" text-anchor="middle" fill="#c4b5fd" font-weight="700">4 &middot; a checksum</text>
+        <text x="523" y="148" text-anchor="middle" fill="#fbbf24" font-family="ui-monospace,monospace" font-size="14">CRC 0x4B2E</text>
+        <text x="523" y="190" text-anchor="middle" fill="#94a3b8">page 7</text>
+
+        <rect x="600" y="86" width="126" height="86" rx="11" fill="#1a2230" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="663" y="114" text-anchor="middle" fill="#c4b5fd" font-weight="700">5 &middot; who talks</text>
+        <text x="663" y="140" text-anchor="middle" fill="#94a3b8" font-size="11.5">poll &middot; token &middot; collide</text>
+        <text x="663" y="156" text-anchor="middle" fill="#94a3b8" font-size="11.5">&middot; schedule</text>
+        <text x="663" y="190" text-anchor="middle" fill="#94a3b8">page 8</text>
+
+        <rect x="740" y="86" width="120" height="86" rx="11" fill="#132a2a" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="800" y="114" text-anchor="middle" fill="#5eead4" font-weight="700">6 &middot; WHEN</text>
+        <text x="800" y="142" text-anchor="middle" fill="#2dd4bf" font-size="11.5">the industrial bit</text>
+        <text x="800" y="190" text-anchor="middle" fill="#94a3b8">page 9</text>
+      </g>
+
+      <path d="M40 226 h820" stroke="#334155" stroke-width="1.5" stroke-dasharray="6 6"/>
+      <text x="450" y="252" text-anchor="middle" fill="#94a3b8" font-size="13">Modbus &middot; PROFINET &middot; EtherCAT &middot; IO-Link &middot; CAN &middot; OPC UA &middot; TSN &mdash; all six ideas, different dials</text>
+      <text x="450" y="280" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">Only idea 6 is unique to industry. Office networks have the other five and do not care when the data arrives.</text>
+    </svg>
+  </div>
+
+  <!-- ============ PAGE 1 ============ -->
+  <section class="page" id="p1">
+    <div class="page-tag">Page 1 / 14<span class="rt">&middot; ~10 min</span></div>
+    <h2 class="page-title">A Plant That Made a Nine-Million-Rupee Decision on Data That Was Twenty-Seven Seconds Old</h2>
+
+    <div class="card">
+      <div class="label">COLD OPEN &mdash; KADUWELA, PLASTIC INJECTION MOULDING <span class="tier t-core">CORE</span></div>
+      <p class="lead">Eighteen injection moulding machines. Last year the plant added energy meters and a machine-data system: an RS-485 cable daisy-chained around the shop floor, <b>Modbus RTU at 9600 baud</b>, feeding a SCADA package that logs every five seconds and draws the utilisation dashboard the production manager looks at every morning.</p>
+      <p class="body">The system &ldquo;works&rdquo;. There are no alarms. The dashboard is populated, the trends are smooth, and machine&nbsp;12 has been showing <b>94&nbsp;% utilisation</b> for months &mdash; which is why the plant was three weeks from ordering a nineteenth machine for <b class="c-red">LKR&nbsp;9.2&nbsp;million</b> to relieve it.</p>
+      <p class="body">Machine&nbsp;12's own cycle counter says its real utilisation is <b class="c-amb">63&nbsp;%</b>. Nothing is broken. Three ordinary communication faults &mdash; one in each of the three layers this primer teaches &mdash; are between the shop floor and that dashboard, and every one of them is invisible from the screen.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">FAULT 1 &mdash; SOMEBODY TURNED A LINE INTO A STAR <span class="tier t-core">CORE</span></div>
+      <p class="body">RS-485 is a <b>transmission line</b>. It must be one cable, run from one end of the plant to the other, with a matched resistor at each end &mdash; and nothing hanging off the middle. When machines 7, 11 and 15 were added, an electrician did the natural thing and ran a spur to each from the nearest point on the trunk: <b>12&nbsp;m, 18&nbsp;m and 9&nbsp;m</b> of cable, hanging off the middle of the line like branches.</p>
+      <div class="eqn">Every unterminated branch reflects the signal back down the cable.
+The rule for how long a branch may safely be:
+
+   signal travels in cable at roughly   <b>0.2 m per nanosecond</b>
+   the transceiver's edge takes         <b>100 ns</b> to rise
+   so the edge is physically            100 &times; 0.2 = <b>20 m long</b>
+
+   a stub must be under about 1/10 of that   &rarr;  <b class="c-grn">2 m maximum</b>
+
+   theirs are <b class="c-red">12 m, 18 m and 9 m</b> &mdash; six to nine times over.
+
+Result: the reflected edge arrives back while the real bit is still
+being read, and the receiver sometimes reads the sum of the two.
+Errors are random, worse at some addresses than others, and they
+look exactly like "a faulty meter".</div>
+      <p class="body">Two termination resistors were also missing entirely &mdash; the installer fitted one, at the panel, because that was the end he could see.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">FAULT 2 &mdash; THE POLLING BUDGET NOBODY ADDED UP <span class="tier t-core">CORE</span></div>
+      <p class="body">Modbus RTU is strictly <b>one question at a time</b>. The SCADA asks a machine for some registers, waits for the answer, then asks the next machine. So the update rate of the whole system is the sum of every question and every answer &mdash; and, critically, of every <b>timeout</b>.</p>
+      <div class="eqn">At 9600 baud, 8 data bits + even parity + 1 stop = <b>11 bits per character</b>
+
+   one bit      = 1/9600            = <b>104.17 &micro;s</b>
+   one character = 11 &times; 104.17     = <b>1.146 ms</b>
+
+   request  (8 bytes)                =  9.17 ms
+   device turnaround (typical)       = 10.00 ms
+   response (10 registers, 25 bytes) = 28.65 ms
+   silent interval t3.5              =  4.01 ms
+   ------------------------------------------------
+   one poll                          = <b>51.82 ms</b>
+
+The SCADA reads 40 registers per machine in <b>4 blocks of 10</b>, because
+whoever configured it copied the vendor's example:
+   16 live machines &times; 4 polls &times; 51.82 ms = <b>3.32 s</b>
+
+And then the part that matters. <b>Two machines were scrapped last year
+and never removed from the poll list.</b> Each dead address is asked
+4 times, each attempt waits a 1000 ms timeout, and the driver retries
+3 times before giving up:
+
+   2 machines &times; 4 polls &times; 3 tries &times; 1000 ms = <b class="c-red">24.00 s</b>
+   ------------------------------------------------
+   TOTAL SCAN TIME                    = <b class="c-red">27.32 s</b>
+
+<b>Two absent devices own 88 % of the entire network's time.</b></div>
+      <p class="body">Now the fault that actually cost LKR&nbsp;9.2&nbsp;million. The SCADA logs every <b>5&nbsp;seconds</b>, but the underlying value only changes every <b>27&nbsp;seconds</b>. So five or six identical readings are logged for every one real measurement. The machine cycle is 42&nbsp;s. Sampling a 42-second process every 27 seconds and then repeating each sample five times does not produce a smooth trend &mdash; it produces an <b>aliased</b> one, and aliased data looks <i>more</i> confident than the real thing, not less. Machine&nbsp;12's idle periods fell into the gaps.</p>
+      <div class="career"><span class="ci">&#128200;</span><p><b>Sampling faster than your data updates does not give you more information.</b> It gives you the same number repeated, and it makes a noisy, sparse measurement look like a clean, dense one. Before you trust any industrial dashboard, ask one question: <i>how often does the number underneath actually change?</i> If nobody in the building knows, the dashboard is decoration.</p></div>
+    </div>
+
+    <div class="card">
+      <div class="label">FAULT 3 &mdash; THE TWO ENDS OF THE PLANT ARE NOT AT THE SAME ZERO <span class="tier t-stretch">STRETCH</span></div>
+      <p class="body">RS-485 works by comparing two wires against <i>each other</i> rather than against ground, which is why it survives a factory at all (<a href="#p5">page&nbsp;5</a>). But the receiver still has to be able to <b>see</b> both wires: they must stay within a window of roughly <b>&minus;7&nbsp;V to +12&nbsp;V</b> relative to the receiver's own ground. Outside that window the comparison is meaningless.</p>
+      <div class="eqn">The trunk runs <b>240 m</b> across a shop floor with a 55 kW extruder on it.
+
+   measured ground-to-ground voltage, machines idle    <b>0.4 V</b>
+   measured with the extruder running                  <b class="c-amb">9.4 V</b>
+   measured transient at extruder start           <b class="c-red">31 V peak</b>
+
+   &minus;7 V to +12 V window  &rarr;  <b class="c-red">exceeded on every start</b>
+
+Symptom: a burst of CRC errors every time the extruder starts, six or
+seven times a shift, which the SCADA logs as "communication fault" and
+then recovers from &mdash; so nobody investigates it.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">THE REPAIR, AND WHAT IT DID NOT NEED <span class="tier t-core">CORE</span></div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Fix</th><th>Layer</th><th>Cost</th></tr>
+        <tr><td>Re-route 40 m of trunk so machines 7, 11, 15 sit <b>on</b> the line, not on spurs</td><td>Physical</td><td>LKR 48,000</td></tr>
+        <tr><td>Fit the missing 120 &Omega; termination at the far end</td><td>Physical</td><td>LKR 900</td></tr>
+        <tr><td>Split the run with an <b>isolated repeater</b> at 130 m; shield earthed at one end only</td><td>Physical</td><td>LKR 62,000</td></tr>
+        <tr><td>Delete the two scrapped devices from the poll list</td><td>Configuration</td><td class="c-grn">free</td></tr>
+        <tr><td>Re-map to one contiguous 40-register block per machine</td><td>Configuration</td><td class="c-grn">free</td></tr>
+        <tr><td>Timeout 1000 &rarr; 300 ms, retries 3 &rarr; 1</td><td>Configuration</td><td class="c-grn">free</td></tr>
+        <tr><td>Log interval set to the measured scan time, not to a round number</td><td>Configuration</td><td class="c-grn">free</td></tr>
+        <tr><td>Commissioning, testing and documentation</td><td>&mdash;</td><td>LKR 54,000</td></tr>
+      </table></div>
+      <div class="eqn">Scan time   <b class="c-red">27.32 s</b>  &rarr;  16 &times; (9.17 + 10 + 97.40 + 4.01) = <b class="c-grn">1.93 s</b>
+
+                        <b class="c-grn">14.2 times faster, at the same 9600 baud.</b>
+
+Total cost <b>LKR 164,900</b>. The nineteenth machine was not ordered.
+
+And the thing everybody tries first:
+   raise the network from 9600 to <b>115200 baud</b> &mdash; twelve times faster
+   &rarr; scan time 27.32 s becomes <b class="c-red">24.95 s</b>. A <b>9 % improvement.</b>
+
+Because the dominant term was never the transmission speed. It was
+two timeouts on machines that no longer existed.</div>
+    </div>
+
+    <div class="predict">
+      <div class="p-tag">PREDICT FIRST</div>
+      <div class="p-q">You inherit an industrial network that drops messages intermittently. Where is the fault most likely to be?</div>
+      <div class="p-opts">
+        <button onclick="pk(this,0)">A &mdash; The protocol itself &mdash; it is the wrong protocol for the job</button>
+        <button onclick="pk(this,1)">B &mdash; The wiring, termination or grounding</button>
+        <button onclick="pk(this,2)">C &mdash; The PLC or SCADA software</button>
+        <button onclick="pk(this,3)">D &mdash; The devices &mdash; one of them is faulty</button>
+      </div>
+      <div class="p-ans" data-correct="1">
+        <span class="p-verdict"></span>
+        <b>B &mdash; and it is not close.</b> The rule of thumb every experienced integrator will give you is roughly <b>60&nbsp;% physical layer, 30&nbsp;% configuration, 10&nbsp;% everything else</b>. It is a field heuristic rather than a measured statistic, but it will point you at the right half of the problem more often than any other single sentence in this primer. The reason is structural: the physical layer is the only part installed by hand, in a hurry, by someone who cannot see the consequence &mdash; a missing resistor, a stub, a shield earthed at both ends, a cable run beside a VFD. <b>D is the most expensive wrong answer</b>, because a device that reports errors is usually the <i>victim</i> of the fault rather than its cause, and replacing it moves the symptom to its neighbour. <b>The discipline: never open a protocol manual until you have checked termination, stub length, shield earthing and cable routing.</b>
+      </div>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>Three faults, three layers: a <b>wire</b> problem, a <b>timing</b> problem, and a <b>grounding</b> problem. Notice that not one of them was about Modbus. That is the thesis of this primer &mdash; <b>the protocol is rarely the hard part</b>, and you can diagnose most of an industrial network before you know which protocol it speaks.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 ============ -->
+  <section class="page" id="p2">
+    <div class="page-tag">Page 2 / 14<span class="rt">&middot; ~9 min</span></div>
+    <h2 class="page-title">What a Signal Actually Is &mdash; and Why Digital Survives a Factory</h2>
+
+    <div class="card">
+      <div class="label">START FROM SOMETHING YOU ALREADY KNOW <span class="tier t-core">CORE</span></div>
+      <p class="lead">A communication cable carries a <b>voltage that changes with time</b>. That is the whole of the physical layer. If electricity is unfamiliar, borrow the plumbing you already understand &mdash; the analogy is not a teaching crutch, it is a genuine mathematical correspondence that engineers use in both directions.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>Fluid / mechanical</th><th>Electrical</th><th>What it means on a cable</th></tr>
+        <tr><td><b>Pressure</b> (bar)</td><td><b>Voltage</b> (V)</td><td>The &ldquo;push&rdquo;. A signal <i>is</i> a changing voltage.</td></tr>
+        <tr><td><b>Flow rate</b> (l/min)</td><td><b>Current</b> (A)</td><td>How much charge moves. Signal wires carry almost none.</td></tr>
+        <tr><td><b>Restriction</b> (an orifice)</td><td><b>Resistance</b> (&Omega;)</td><td>Termination resistors, cable resistance</td></tr>
+        <tr><td><b>Accumulator</b> (stores pressure)</td><td><b>Capacitance</b> (F)</td><td>Cable capacitance &mdash; it <b>rounds off your edges</b> and limits length</td></tr>
+        <tr><td><b>Inertia of a moving mass</b></td><td><b>Inductance</b> (H)</td><td>Cable inductance &mdash; resists sudden change, causes ringing</td></tr>
+        <tr><td>Pressure &times; flow = power</td><td>V &times; I = power</td><td>Identical equation, identical units of watts</td></tr>
+        <tr><td>Water hammer in a long pipe</td><td><b>Reflection</b> on a line</td><td>Exactly fault&nbsp;1 on <a href="#p1">page&nbsp;1</a>. Same physics, same fix: match the far end.</td></tr>
+      </table></div>
+      <p class="body">That last row is worth pausing on, because it is the single best gift your mechanical background gives you here. <b>An unterminated cable is hydraulic water hammer.</b> A pressure wave travels down a pipe, hits a closed valve, and comes back. An electrical edge travels down a cable, hits an unmatched end, and comes back. Engineers fix both the same way &mdash; make the far end look like more pipe, or more cable. A 120&nbsp;&Omega; termination resistor is an <b>orifice sized to swallow the wave</b>.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">ANALOGUE, DIGITAL, AND WHY THE FACTORY CHOSE DIGITAL <span class="tier t-core">CORE</span></div>
+      <div class="hero-illus">
+        <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Analogue signal degraded by noise versus a digital signal regenerated cleanly">
+          <defs><linearGradient id="sb5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0d1520"/><stop offset="100%" stop-color="#070a0f"/></linearGradient></defs>
+          <rect width="900" height="320" fill="url(#sb5)" rx="16"/>
+          <text x="450" y="28" text-anchor="middle" fill="#c4b5fd" font-family="ui-monospace,monospace" font-size="13" letter-spacing="3">NOISE IS PERMANENT IN ANALOGUE AND TEMPORARY IN DIGITAL</text>
+
+          <text x="60" y="64" fill="#f87171" font-size="14" font-weight="800">ANALOGUE &mdash; the damage accumulates</text>
+          <path d="M60 110 q30 -34 60 0 t60 0 t60 0 t60 0" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+          <text x="70" y="140" fill="#94a3b8" font-size="11">sent</text>
+          <path d="M380 110 q8 -12 14 4 q7 -30 15 -2 q9 -20 13 6 q8 -26 14 -4 q7 -14 12 8 q9 -30 14 -2 q8 -18 13 4 q9 -22 14 2 q7 -12 12 6"
+                fill="none" stroke="#f87171" stroke-width="2.5"/>
+          <text x="392" y="140" fill="#94a3b8" font-size="11">received &mdash; and there is no way to know what it should have been</text>
+          <path d="M330 100 h34" stroke="#64748b" stroke-width="2"/><polygon points="372,100 360,94 360,106" fill="#64748b"/>
+          <text x="347" y="88" text-anchor="middle" fill="#64748b" font-size="10">200 m</text>
+
+          <path d="M40 168 h820" stroke="#334155" stroke-width="1" stroke-dasharray="5 5"/>
+
+          <text x="60" y="196" fill="#4ade80" font-size="14" font-weight="800">DIGITAL &mdash; the damage is thrown away at every hop</text>
+          <path d="M60 250 v-30 h26 v30 h26 v-30 h26 v30 h13 v-30 h26 v30 h26" fill="none" stroke="#a3e635" stroke-width="2.5"/>
+          <text x="70" y="278" fill="#94a3b8" font-size="11">sent</text>
+
+          <path d="M330 236 h34" stroke="#64748b" stroke-width="2"/><polygon points="372,236 360,230 360,242" fill="#64748b"/>
+          <path d="M380 252 q6 -6 10 -4 q4 -28 12 -26 q5 -3 9 2 q4 26 11 28 q6 3 9 -2 q5 -30 12 -26 q4 -2 7 4 q5 26 12 26 q5 1 9 -4 q5 -28 12 -24 q4 -2 8 4 q4 24 11 26"
+                fill="none" stroke="#fbbf24" stroke-width="2.5"/>
+          <text x="392" y="292" fill="#94a3b8" font-size="11">received &mdash; noisy, but every sample is still clearly above or below the line</text>
+          <path d="M376 236 h136" stroke="#f472b6" stroke-width="1.6" stroke-dasharray="4 4"/>
+          <text x="518" y="240" fill="#f472b6" font-size="11">threshold</text>
+
+          <path d="M556 236 h30" stroke="#64748b" stroke-width="2"/><polygon points="594,236 582,230 582,242" fill="#64748b"/>
+          <text x="572" y="224" text-anchor="middle" fill="#64748b" font-size="10">repeater</text>
+          <path d="M606 250 v-30 h26 v30 h26 v-30 h26 v30 h13 v-30 h26 v30 h26" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+          <text x="700" y="278" fill="#4ade80" font-size="11.5" font-weight="700">regenerated &mdash; identical to what was sent</text>
+
+          <text x="450" y="312" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">This is the whole argument for digital fieldbuses. A 4&ndash;20 mA loop degrades once and forever; a digital link is perfect or it fails an error check.</text>
+        </svg>
+      </div>
+      <p class="body">An <b>analogue</b> signal carries its meaning in its exact value: 12.4&nbsp;mA <i>means</i> 52.5&nbsp;&deg;C, so anything that changes the value changes the meaning. Noise added anywhere along the cable is permanent and undetectable &mdash; the receiver has no way to know the sender meant 12.4 and not 12.6.</p>
+      <p class="body">A <b>digital</b> signal carries its meaning in <i>which side of a threshold</i> it is on. Add noise and the value moves, but as long as it stays on the correct side of the line, the meaning is untouched &mdash; and the receiver can rebuild a perfectly clean copy. That single property, called <b>regeneration</b>, is why a digital network can cross a factory through five switches and arrive bit-identical, and why an analogue signal cannot.</p>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>Digital does not degrade gracefully &mdash; it degrades suddenly.</b> This is the trade. An analogue signal gets slowly worse and you can see it coming on a trend. A digital link is perfect, perfect, perfect, then fails. There is no warning on the screen, which is why <i>error counters</i> matter so much (<a href="#p7">page&nbsp;7</a>) &mdash; they are the only early warning that exists.</span></li>
+        <li><span class="num">2</span><span><b>The noise in a factory is not random hiss.</b> It is switching: VFD output edges (<a href="A08_VFD_Deep_Dive.html">A08</a>), contactor coils collapsing, welding, and the inrush of a big motor. It arrives as bursts, coupled in by capacitance from a power cable running alongside yours &mdash; which is why cable segregation is a rule, not a preference.</span></li>
+        <li><span class="num">3</span><span><b>Faster edges are more fragile, not more robust.</b> A 100&nbsp;Mbit/s Ethernet edge is a hundred times shorter than a 9600-baud one, so a cable defect a hundred times smaller is enough to ruin it. Going faster is not automatically going better, and a great deal of industrial practice exists to manage exactly this.</span></li>
+      </ul>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>You should be able to say why a factory network is digital rather than analogue, in one sentence, using the word <b>threshold</b>. And you should have the water-hammer picture in your head for what an unterminated cable does &mdash; it comes back on <a href="#p5">page&nbsp;5</a>.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 ============ -->
+  <section class="page" id="p3">
+    <div class="page-tag">Page 3 / 14<span class="rt">&middot; ~11 min</span></div>
+    <h2 class="page-title">Bits, Bytes and Meaning &mdash; Where Beginners Lose Real Money</h2>
+
+    <div class="card">
+      <div class="label">THE VOCABULARY, ONCE <span class="tier t-core">CORE</span></div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Term</th><th>Size</th><th>Holds</th><th>Where you meet it</th></tr>
+        <tr><td><b>bit</b></td><td>1</td><td>0 or 1</td><td>A digital input. A valve open/closed. One lamp.</td></tr>
+        <tr><td>nibble</td><td>4 bits</td><td>0&ndash;15</td><td>One hex digit</td></tr>
+        <tr><td><b>byte</b> / octet</td><td>8 bits</td><td>0&ndash;255</td><td>The unit everything is measured in</td></tr>
+        <tr><td><b>word</b> / <b>register</b></td><td>16 bits</td><td>0&ndash;65535</td><td><b>The native unit of Modbus.</b> One analogue value.</td></tr>
+        <tr><td>double word</td><td>32 bits</td><td>0&ndash;4.29 billion</td><td>Energy totals, positions, a float</td></tr>
+        <tr><td>hex</td><td>notation</td><td>0&ndash;9, A&ndash;F</td><td>Written 0x1F4. Four bits per digit, so one byte is exactly two hex digits.</td></tr>
+      </table></div>
+      <p class="body">Hex exists for one reason: it lines up with binary. <b>0x1F4 = 0001&nbsp;1111&nbsp;0100 = 500.</b> When a manual tells you &ldquo;bit&nbsp;11 of register 0x0040 is the fault flag&rdquo;, hex is what lets you find bit&nbsp;11 by eye instead of by long division. Learn to read it and half of industrial documentation stops being cryptic.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">THE FOUR TRAPS THAT COST REAL MONEY <span class="tier t-core">CORE</span></div>
+      <p class="body">A register arrives as sixteen ones and zeroes. <b>Nothing in the message says what they mean.</b> The meaning lives entirely in the device's manual, and every one of these four mistakes ships to production somewhere every day.</p>
+      <div class="eqn"><b class="c-amb">TRAP 1 &mdash; SCALING.</b> A pressure transmitter sends <b>6382</b>.
+   Manual: "value &times; 0.01 bar".  True reading <b class="c-grn">63.82 bar</b>.
+   Read as raw:                     <b class="c-red">6382 bar</b> (obvious, harmless)
+   Read with the wrong factor &times;0.1: <b class="c-red">638.2 bar</b> (obvious)
+   Read with a <i>plausible</i> wrong factor: <b class="c-red">23.08 bar</b>
+   <b>The dangerous errors are the plausible ones.</b> Always verify a live
+   reading against a physical gauge before you trust a scale factor.
+
+<b class="c-amb">TRAP 2 &mdash; SIGNED OR UNSIGNED.</b> A temperature register reads <b>65526</b>.
+   As unsigned 16-bit:  <b class="c-red">65526</b>  &rarr; "sensor fault!"
+   As signed 16-bit:    <b class="c-grn">&minus;10</b>     &rarr; a cold morning.
+   Same bits. The difference is one checkbox in the SCADA tag.
+
+<b class="c-amb">TRAP 3 &mdash; WORD ORDER.</b> A 32-bit energy total in registers 40001-2.
+   Registers contain 0x0001 and 0x86A0.
+   High word first:  0x000186A0 = <b class="c-grn">100,000 kWh</b>
+   Low word first:   0x86A00001 = <b class="c-red">2,258,632,705 kWh</b>
+   <b>Both are "correct" Modbus.</b> The standard never defined it, so every
+   vendor chose. This single ambiguity is the most common fault in
+   industrial data collection anywhere in the world.
+
+<b class="c-amb">TRAP 4 &mdash; BIT-PACKED STATUS.</b> A drive's status word reads <b>0x0037</b>.
+   That is not "55 of something". It is eight separate flags:
+   0000 0000 0011 0111
+             |||| ||||-- bit 0  ready          = 1
+             |||| |||--- bit 1  running        = 1
+             |||| ||---- bit 2  fault          = 1  &#9664; the one that matters
+             |||| |----- bit 3  at speed       = 0
+             ||||------- bit 4  local/remote   = 1
+   Logging 0x0037 as a number and trending it is meaningless.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">INTERACTIVE &mdash; THE REGISTER DECODER <span class="tier t-core">CORE</span></div>
+      <p class="body">The single most useful tool a beginner can have in front of a live Modbus device. Type the raw register values a device is giving you and try every interpretation until one of them looks like reality. That is not cheating &mdash; it is exactly how commissioning engineers work when a vendor's manual is thin.</p>
+      <div class="demo">
+        <div class="demo-row"><span>Register 1 (first / lower address)</span><b>hex or decimal</b></div>
+        <input type="text" id="d1r1" value="0x0001" spellcheck="false">
+        <div class="demo-row"><span>Register 2 (next address, for 32-bit values)</span><b>hex or decimal</b></div>
+        <input type="text" id="d1r2" value="0x86A0" spellcheck="false">
+        <div class="demo-row"><span>Scale factor applied to 16-bit values</span><b>&times; <span id="d1s_v">1</span></b></div>
+        <div class="seg" id="d1s">
+          <button class="on" data-s="1">&times;1</button>
+          <button data-s="0.1">&times;0.1</button>
+          <button data-s="0.01">&times;0.01</button>
+          <button data-s="0.001">&times;0.001</button>
+          <button data-s="10">&times;10</button>
+        </div>
+        <div class="demo-out" id="d1out"></div>
+      </div>
+      <p class="body"><b>How to use it on a real device.</b> Pick a value you can verify physically &mdash; a temperature you can measure, a pressure with a gauge next to it, an energy total you can read off the meter's own display. Decode it every way the tool offers and keep the interpretation that matches the real world. <b>Then write the answer in the plant's tag documentation</b>, because the next person will otherwise repeat all of this.</p>
+    </div>
+
+    <div class="predict">
+      <div class="p-tag">PREDICT FIRST</div>
+      <div class="p-q">An energy meter reports a total that jumps from 65,530 to 4 between two readings. What has happened?</div>
+      <div class="p-opts">
+        <button onclick="pk(this,0)">A &mdash; A communication error corrupted the value</button>
+        <button onclick="pk(this,1)">B &mdash; The meter was reset by someone</button>
+        <button onclick="pk(this,2)">C &mdash; A 16-bit counter rolled over, and 10 units were consumed</button>
+        <button onclick="pk(this,3)">D &mdash; The scaling factor is wrong</button>
+      </div>
+      <div class="p-ans" data-correct="2">
+        <span class="p-verdict"></span>
+        <b>C &mdash; it rolled over, and the true consumption is 10 units, not &minus;65,526.</b> A 16-bit unsigned counter's largest value is 65,535; the next increment wraps to 0. So 65,530 &rarr; 65,535 &rarr; 0 &rarr; 4 is a normal increase of ten. Any software that subtracts the previous reading from the current one will record <b>&minus;65,526</b>, and a monthly total built by summing those differences will be catastrophically wrong once per rollover &mdash; usually as a huge <i>negative</i> spike that somebody then &ldquo;fixes&rdquo; by taking the absolute value, which quietly turns it into a huge positive one. <b>The correct handling</b> is to detect the wrap (new value less than old value, on a counter you know only increases) and add the modulus: difference = new &minus; old + 65,536. Better still, ask the vendor for a <b>32-bit</b> version of the same register, which most meters have and most integrators never look for &mdash; at 32 bits the same meter rolls over roughly every seventy years instead of every few days. <b>A is the trap</b>: it is the intuitive answer, and a checksum would have caught a genuine corruption (<a href="#p7">page&nbsp;7</a>), so a value that passes CRC and still looks wrong is almost never a transmission fault.
+      </div>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>Four traps to carry: <b>scaling, signed-ness, word order, bit packing</b>. Between them they cause more wrong industrial data than every wiring fault combined &mdash; and unlike wiring faults, they produce numbers that look completely reasonable.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 ============ -->
+  <section class="page" id="p4">
+    <div class="page-tag">Page 4 / 14<span class="rt">&middot; ~11 min</span></div>
+    <h2 class="page-title">The Serial Frame &mdash; How Eight Bits Cross One Wire</h2>
+
+    <div class="card">
+      <div class="label">WHY SERIAL WON <span class="tier t-core">CORE</span></div>
+      <p class="lead">You could send eight bits on eight wires at once. Early computers did. Industry does not, and the reason is the same reason a factory does not run eight hydraulic hoses where one will do: <b>every wire is a cost, a connector pin, a failure and a length limit</b>. Worse, eight parallel wires must all arrive at the <i>same instant</i>, and over 200&nbsp;m they will not &mdash; a problem called skew that gets harder the faster you go.</p>
+      <p class="body">So industry sends the bits one after another down a single path and pays for it in time. Everything on this page is the bookkeeping of that decision.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">THE UART FRAME &mdash; THE SHAPE OF ONE CHARACTER <span class="tier t-core">CORE</span></div>
+      <p class="body">The receiver has no separate clock wire, so it must work out where each bit begins from the data itself. The trick is nearly a century old and still in use everywhere: hold the line idle at logic&nbsp;1, and announce every character with a single <b>start bit</b> of logic&nbsp;0. The receiver sees that falling edge, waits half a bit time to land in the middle of the start bit, then samples every bit time after that.</p>
+      <div class="hero-illus">
+        <svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A UART character frame: start bit, eight data bits, parity and stop bit">
+          <defs><linearGradient id="fb5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0d1520"/><stop offset="100%" stop-color="#070a0f"/></linearGradient></defs>
+          <rect width="900" height="260" fill="url(#fb5)" rx="16"/>
+          <text x="450" y="28" text-anchor="middle" fill="#c4b5fd" font-family="ui-monospace,monospace" font-size="13" letter-spacing="3">ONE CHARACTER = 11 BIT TIMES TO CARRY 8 BITS OF DATA</text>
+
+          <path d="M40 116 h48" stroke="#64748b" stroke-width="3"/>
+          <text x="64" y="104" text-anchor="middle" fill="#64748b" font-size="11">idle = 1</text>
+          <path d="M88 116 v52 h60 v-52 h60 v52 h60 v0 h60 v-52 h60 v52 h60 v-52 h60 v52 h60 v-52 h60 v52 h60 v-52 h60"
+                fill="none" stroke="#a3e635" stroke-width="3"/>
+          <path d="M808 116 h52" stroke="#64748b" stroke-width="3"/>
+
+          <g stroke="#334155" stroke-width="1" stroke-dasharray="3 4">
+            <path d="M88 78 v112"/><path d="M148 78 v112"/><path d="M208 78 v112"/><path d="M268 78 v112"/>
+            <path d="M328 78 v112"/><path d="M388 78 v112"/><path d="M448 78 v112"/><path d="M508 78 v112"/>
+            <path d="M568 78 v112"/><path d="M628 78 v112"/><path d="M688 78 v112"/><path d="M748 78 v112"/><path d="M808 78 v112"/>
+          </g>
+
+          <g font-size="12" text-anchor="middle" font-family="ui-monospace,monospace">
+            <rect x="88" y="196" width="60" height="24" rx="4" fill="#7f1d1d"/><text x="118" y="213" fill="#fca5a5">START</text>
+            <rect x="148" y="196" width="480" height="24" rx="4" fill="#365314"/><text x="388" y="213" fill="#bef264">8 DATA BITS &mdash; least significant first</text>
+            <rect x="628" y="196" width="60" height="24" rx="4" fill="#78350f"/><text x="658" y="213" fill="#fdba74">PAR</text>
+            <rect x="688" y="196" width="120" height="24" rx="4" fill="#164e63"/><text x="748" y="213" fill="#7dd3fc">STOP</text>
+          </g>
+          <g font-size="11" text-anchor="middle" fill="#94a3b8">
+            <text x="178" y="240">0</text><text x="238" y="240">1</text><text x="298" y="240">0</text><text x="358" y="240">0</text>
+            <text x="418" y="240">1</text><text x="478" y="240">1</text><text x="538" y="240">0</text><text x="598" y="240">1</text>
+          </g>
+          <text x="118" y="70" text-anchor="middle" fill="#f87171" font-size="11">the falling edge</text>
+          <text x="118" y="56" text-anchor="middle" fill="#f87171" font-size="11">that starts the clock</text>
+          <text x="860" y="104" text-anchor="end" fill="#64748b" font-size="11">idle again</text>
+        </svg>
+      </div>
+      <div class="eqn">The notation you will see on every device: <b>9600 8E1</b>
+
+   9600 = baud            bits per second on the wire
+   8    = data bits
+   E    = parity          <b>N</b>one / <b>E</b>ven / <b>O</b>dd
+   1    = stop bits
+
+   frame = 1 start + 8 data + 1 parity + 1 stop = <b>11 bits</b>
+   to deliver <b>8 bits</b> of payload  &rarr;  efficiency 8/11 = <b class="c-amb">72.7 %</b>
+
+<b>Over a quarter of a serial link is spent on framing, always.</b>
+Modbus RTU's default is 8E1. If a device is set to 8N1 (10 bits) and the
+master to 8E1 (11 bits), you get parity and framing errors that look
+exactly like a cable fault &mdash; and the fix is a dropdown box.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">INTERACTIVE &mdash; BIT TIME, FRAME TIME, AND WHAT BAUD REALLY BUYS <span class="tier t-core">CORE</span></div>
+      <p class="body">Defaults are the Kaduwela plant on <a href="#p1">page&nbsp;1</a>: 9600&nbsp;8E1, a request of 8 bytes and a response of 25. Now raise the baud rate and watch the total move far less than you expect &mdash; because the device's own thinking time does not care how fast your cable is.</p>
+      <div class="demo">
+        <div class="demo-row"><span>Baud rate</span><b>select</b></div>
+        <div class="seg" id="d2b">
+          <button data-b="1200">1200</button><button data-b="9600" class="on">9600</button>
+          <button data-b="19200">19200</button><button data-b="38400">38400</button>
+          <button data-b="57600">57600</button><button data-b="115200">115200</button>
+        </div>
+        <div class="demo-row"><span>Frame format</span><b>select</b></div>
+        <div class="seg" id="d2f">
+          <button data-f="10">8N1 &middot; 10 bits</button>
+          <button class="on" data-f="11">8E1 &middot; 11 bits</button>
+          <button data-f="12">8N2 &middot; 12 bits</button>
+        </div>
+        <div class="demo-row"><span>Request length</span><b><span id="d2q_v">8</span> bytes</b></div>
+        <input type="range" id="d2q" min="4" max="64" step="1" value="8">
+        <div class="demo-row"><span>Response length</span><b><span id="d2r_v">25</span> bytes</b></div>
+        <input type="range" id="d2r" min="4" max="256" step="1" value="25">
+        <div class="demo-row"><span>Device turnaround time</span><b><span id="d2t_v">10</span> ms</b></div>
+        <input type="range" id="d2t" min="0" max="60" step="1" value="10">
+        <div class="demo-row"><span>Devices on the bus</span><b><span id="d2n_v">16</span></b></div>
+        <input type="range" id="d2n" min="1" max="64" step="1" value="16">
+        <div class="demo-out" id="d2out"></div>
+      </div>
+      <div class="eqn">Two details from the Modbus RTU specification worth knowing:
+
+  <b>t1.5</b>  a gap of 1.5 character times inside a frame means the frame
+        is broken &mdash; the receiver discards it.
+  <b>t3.5</b>  a gap of 3.5 character times means the frame has ended.
+        <b>Above 19200 baud this is fixed at 1.750 ms</b>, not calculated,
+        because at high speed the character-based figure becomes
+        shorter than the software can reliably measure.
+
+This is why "just increase the baud rate" stops helping around 19200:
+past that point the silent interval stops shrinking.</div>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>Be able to compute, without the tool: at 9600&nbsp;8E1, one character takes <b>1.146&nbsp;ms</b>. Everything else on a serial network is that number multiplied by a byte count and added to a turnaround. Most &ldquo;the network is too slow&rdquo; arguments end the moment somebody does this arithmetic.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 ============ -->
+  <section class="page" id="p5">
+    <div class="page-tag">Page 5 / 14<span class="rt">&middot; ~13 min</span></div>
+    <h2 class="page-title">The Physical Layer &mdash; the 60&nbsp;% of Faults That Live in the Cable</h2>
+
+    <div class="card">
+      <div class="label">THE ONE IDEA THAT MAKES INDUSTRIAL NETWORKS POSSIBLE <span class="tier t-core">CORE</span></div>
+      <p class="lead">A factory is electrically hostile: motors switch, drives chop, contactors collapse, and every one of those events couples a spike into every cable nearby. The single invention that lets data survive it is <b>differential signalling</b>, and it is worth understanding properly because it explains RS-485, CAN, PROFIBUS, Ethernet and single-pair Ethernet all at once.</p>
+      <div class="hero-illus">
+        <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Single-ended versus differential signalling with injected noise">
+          <defs><linearGradient id="db5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0d1520"/><stop offset="100%" stop-color="#070a0f"/></linearGradient></defs>
+          <rect width="900" height="300" fill="url(#db5)" rx="16"/>
+          <text x="450" y="28" text-anchor="middle" fill="#c4b5fd" font-family="ui-monospace,monospace" font-size="13" letter-spacing="3">NOISE HITS BOTH WIRES EQUALLY - SO THE DIFFERENCE SURVIVES</text>
+
+          <text x="50" y="62" fill="#f87171" font-size="13.5" font-weight="800">SINGLE-ENDED (RS-232) &mdash; measured against ground</text>
+          <path d="M60 96 h60 v-26 h60 v26 h60 v-26 h60 v26 h60" fill="none" stroke="#a3e635" stroke-width="2.5"/>
+          <path d="M420 84 h40" stroke="#64748b" stroke-width="2"/><polygon points="468,84 456,78 456,90" fill="#64748b"/>
+          <g><path d="M474 74 q8 22 16 0 q9 -26 17 4 q8 20 16 -6" fill="none" stroke="#fbbf24" stroke-width="2"/>
+             <text x="500" y="62" text-anchor="middle" fill="#fbbf24" font-size="11">noise +2 V</text></g>
+          <path d="M540 96 q6 -12 12 0 h44 v-26 q6 12 12 0 h44 v26 q7 -14 13 0 h42 v-26 q6 10 12 0 h44 v26 h40"
+                fill="none" stroke="#f87171" stroke-width="2.5"/>
+          <path d="M540 84 h280" stroke="#f472b6" stroke-width="1.4" stroke-dasharray="4 4"/>
+          <text x="836" y="88" fill="#f472b6" font-size="11">threshold</text>
+          <text x="680" y="126" text-anchor="middle" fill="#f87171" font-size="11.5" font-weight="700">noise crosses the threshold &mdash; bits corrupt</text>
+
+          <path d="M40 148 h820" stroke="#334155" stroke-width="1" stroke-dasharray="5 5"/>
+
+          <text x="50" y="180" fill="#4ade80" font-size="13.5" font-weight="800">DIFFERENTIAL (RS-485, CAN, Ethernet) &mdash; the two wires measured against each other</text>
+          <path d="M60 214 h60 v-22 h60 v22 h60 v-22 h60 v22 h60" fill="none" stroke="#2dd4bf" stroke-width="2.5"/>
+          <path d="M60 246 h60 v22 h60 v-22 h60 v22 h60 v-22 h60" fill="none" stroke="#8b5cf6" stroke-width="2.5"/>
+          <text x="44" y="210" text-anchor="end" fill="#2dd4bf" font-size="11">A</text>
+          <text x="44" y="252" text-anchor="end" fill="#c4b5fd" font-size="11">B</text>
+
+          <path d="M420 230 h40" stroke="#64748b" stroke-width="2"/><polygon points="468,230 456,224 456,236" fill="#64748b"/>
+          <text x="500" y="196" text-anchor="middle" fill="#fbbf24" font-size="11">same noise +2 V on BOTH</text>
+          <path d="M540 206 q6 -12 12 0 h44 v-22 q6 12 12 0 h44 v22 q7 -14 13 0 h42 v-22 q6 10 12 0 h44 v22 h40"
+                fill="none" stroke="#2dd4bf" stroke-width="2.5"/>
+          <path d="M540 238 q6 -12 12 0 h44 v22 q6 -12 12 0 h44 v-22 q7 14 13 0 h42 v22 q6 -10 12 0 h44 v-22 h40"
+                fill="none" stroke="#8b5cf6" stroke-width="2.5"/>
+          <text x="680" y="288" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="700">A &minus; B is unchanged &mdash; the noise subtracts itself out</text>
+        </svg>
+      </div>
+      <p class="body">Send the signal on <b>two</b> wires, twisted together, one carrying the inverse of the other. Any interference that couples into the pair couples into <i>both wires almost equally</i>, because they occupy the same physical space. The receiver does not look at either wire &mdash; it looks at <b>A&nbsp;minus&nbsp;B</b>, and in that subtraction the shared noise cancels. That is why the pair must be <b>twisted</b>: twisting is what guarantees both wires see the same field.</p>
+      <div class="eqn">RS-485 in numbers &mdash; memorise these four:
+
+   driver output          &ge; <b>1.5 V</b> differential into a loaded bus
+   receiver threshold      <b>&plusmn;200 mV</b>  &mdash; a 7.5&times; margin, which is
+                           why it works at 1200 m
+   common-mode range      <b>&minus;7 V to +12 V</b> &mdash; the limit fault 3 broke
+   termination            <b>120 &Omega;</b> at each end, matching the cable</div>
+      <p class="body"><b>The common-mode window is the one people forget.</b> Cancellation only works while the receiver can still <i>see</i> both wires within its input range. Two ends of a 240&nbsp;m plant sitting 31&nbsp;V apart during a motor start is outside that window, and no amount of twisting helps &mdash; the fix is <b>galvanic isolation</b>, which breaks the ground path entirely.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">THE THREE PHYSICAL LAYERS YOU WILL ACTUALLY MEET <span class="tier t-core">CORE</span></div>
+      <div class="tbl-wrap"><table>
+        <tr><th>&nbsp;</th><th>RS-232</th><th>RS-485</th><th>Ethernet 100BASE-TX</th></tr>
+        <tr><td>Signalling</td><td>Single-ended vs ground</td><td class="c-grn"><b>Differential pair</b></td><td class="c-grn"><b>Differential, 2 pairs, transformer-isolated</b></td></tr>
+        <tr><td>Devices</td><td class="c-red">2 &mdash; point to point</td><td><b>32</b> standard loads (up to 256 with 1/8-load drivers)</td><td>One per switch port</td></tr>
+        <tr><td>Distance</td><td class="c-red">~15 m</td><td class="c-grn"><b>1200 m</b> at 100 kbit/s</td><td>100 m per hop, unlimited via switches</td></tr>
+        <tr><td>Speed</td><td>up to 115.2 kbit/s</td><td>up to 10&ndash;35 Mbit/s (short)</td><td class="c-grn"><b>100 Mbit/s &ndash; 1 Gbit/s</b></td></tr>
+        <tr><td>Direction</td><td>Full duplex</td><td>Usually <b>half duplex</b> &mdash; one talker at a time</td><td class="c-grn">Full duplex</td></tr>
+        <tr><td>Isolation</td><td class="c-red">None</td><td>Optional &mdash; <b>fit it</b></td><td class="c-grn">Built in (the magnetics)</td></tr>
+        <tr><td>Topology</td><td>&mdash;</td><td class="c-amb"><b>Bus only</b> &mdash; no stars, no stubs</td><td class="c-grn">Star; ring with a protocol</td></tr>
+        <tr><td>Where</td><td>Config ports, legacy HMIs</td><td>Modbus RTU, PROFIBUS, many meters</td><td>PROFINET, EtherNet/IP, EtherCAT, OPC UA</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">SIX FIELD RULES THAT PREVENT MOST FAULTS <span class="tier t-core">CORE</span></div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>Terminate both ends, and only both ends.</b> 120&nbsp;&Omega; at each physical extremity of an RS-485 trunk &mdash; not at the panel because that is convenient, and never in the middle. Three terminations overload the driver; one gives you reflections. Check with a meter: an unpowered, properly terminated bus reads about <b>60&nbsp;&Omega;</b> across A&ndash;B (two 120s in parallel). That measurement takes ten seconds and settles the argument.</span></li>
+        <li><span class="num">2</span><span><b>No stubs longer than about 2&nbsp;m.</b> One cable in, one cable out, at every device. If a device is far from the trunk, move the trunk &mdash; do not spur to it. This is the single most-violated rule in industrial wiring.</span></li>
+        <li><span class="num">3</span><span><b>Earth the shield at one end only.</b> Earthed at both ends, the shield becomes a conductor between two different earth potentials and carries current &mdash; a ground loop, which injects exactly the noise the shield was fitted to stop. One end, at the panel, every time.</span></li>
+        <li><span class="num">4</span><span><b>Keep data cable away from power cable.</b> The practical rule is 200&nbsp;mm from any cable feeding a VFD or a contactor, and cross at 90&deg; where you must cross. A parallel run of 20&nbsp;m beside a drive output is a capacitor, and it will couple the drive's switching edges straight into your data.</span></li>
+        <li><span class="num">5</span><span><b>Use the cable the standard specifies.</b> Characteristic impedance is a real physical property &mdash; 120&nbsp;&Omega; for RS-485/PROFIBUS, 100&nbsp;&Omega; for Ethernet. Ordinary screened instrument cable is typically 50&ndash;80&nbsp;&Omega;, and every joint between mismatched cable is a small reflection. It works at 9600 baud over 50&nbsp;m and it will not work when the plant expands.</span></li>
+        <li><span class="num">6</span><span><b>Fit isolation on any run that crosses buildings, long distances, or a big load.</b> An isolated repeater breaks the common-mode problem permanently and costs less than one day of chasing intermittent faults.</span></li>
+      </ul>
+      <div class="memory">
+        <div class="label">THE SENTENCE TO CARRY</div>
+        <div class="quote">&ldquo;One line, two terminations, no stubs, one earth.&rdquo;</div>
+      </div>
+    </div>
+
+    <div class="predict">
+      <div class="p-tag">PREDICT FIRST</div>
+      <div class="p-q">A 400&nbsp;m RS-485 network works perfectly with 12 devices. Adding a 13th, 3&nbsp;m from the trunk, makes the whole bus unreliable &mdash; including devices far away from the new one. Why?</div>
+      <div class="p-opts">
+        <button onclick="pk(this,0)">A &mdash; 13 devices exceeds the RS-485 device limit</button>
+        <button onclick="pk(this,1)">B &mdash; The new device has a faulty transceiver</button>
+        <button onclick="pk(this,2)">C &mdash; The 3 m spur reflects, and reflections travel to every device</button>
+        <button onclick="pk(this,3)">D &mdash; The extra load has dropped the signal voltage below threshold</button>
+      </div>
+      <div class="p-ans" data-correct="2">
+        <span class="p-verdict"></span>
+        <b>C &mdash; and the clue is in the words &ldquo;including devices far away&rdquo;.</b> A reflection is not a local phenomenon. The edge travels down the spur, finds an unmatched end, and comes back onto the trunk as a second copy of itself, which then propagates in <i>both</i> directions to every device on the bus. So a fault created at one point degrades everything &mdash; and it degrades the most distant devices worst, because their own signal is weakest by the time the echo arrives. This is precisely why the symptom is so confusing in the field: the device you just added often works fine, and its neighbours three hundred metres away start failing. <b>A is wrong on the numbers</b> (the standard load limit is 32, and modern 1/8-load transceivers allow 256). <b>D is a real failure mode but the wrong one here</b> &mdash; excess load lowers the differential voltage gradually and symmetrically, which shows up as errors that get steadily worse with each device added, not as a step change on device thirteen. <b>The fix is not a resistor on the spur</b>, which would only add load; it is to re-route the trunk so the device sits on the line.
+      </div>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>You now hold the four RS-485 numbers (1.5&nbsp;V, 200&nbsp;mV, &minus;7/+12&nbsp;V, 120&nbsp;&Omega;) and the 60&nbsp;&Omega; meter check. That is enough to commission or condemn most serial networks in Sri&nbsp;Lankan industry, and it is the foundation <a href="A01_Modbus_RTU_Deep_Dive.html">A01</a> builds its RS-485 chapter on.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 ============ -->
+  <section class="page" id="p6">
+    <div class="page-tag">Page 6 / 14<span class="rt">&middot; ~9 min</span></div>
+    <h2 class="page-title">Topology &mdash; the Shape of the Network Decides How It Fails</h2>
+
+    <div class="card">
+      <div class="label">FIVE SHAPES, FIVE FAILURE MODES <span class="tier t-core">CORE</span></div>
+      <p class="lead">Topology is not an aesthetic choice. <b>The shape of the wiring determines what happens when one thing breaks</b>, and that is usually the only question a plant actually cares about.</p>
+      <div class="hero-illus">
+        <svg viewBox="0 0 900 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bus, star, ring, line and tree topologies with their failure modes">
+          <defs><linearGradient id="tb5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0d1520"/><stop offset="100%" stop-color="#070a0f"/></linearGradient></defs>
+          <rect width="900" height="330" fill="url(#tb5)" rx="16"/>
+          <text x="450" y="28" text-anchor="middle" fill="#c4b5fd" font-family="ui-monospace,monospace" font-size="13" letter-spacing="3">ASK NOT WHAT IT LOOKS LIKE, BUT WHAT HAPPENS WHEN A CABLE IS CUT</text>
+
+          <!-- BUS -->
+          <text x="110" y="66" text-anchor="middle" fill="#a3e635" font-size="13" font-weight="800">BUS</text>
+          <path d="M40 108 h140" stroke="#a3e635" stroke-width="3"/>
+          <g fill="#1a2230" stroke="#a3e635" stroke-width="2">
+            <rect x="52" y="118" width="26" height="20" rx="4"/><rect x="96" y="118" width="26" height="20" rx="4"/><rect x="140" y="118" width="26" height="20" rx="4"/>
+          </g>
+          <g stroke="#a3e635" stroke-width="2"><path d="M65 108 v10"/><path d="M109 108 v10"/><path d="M153 108 v10"/></g>
+          <rect x="34" y="102" width="8" height="12" fill="#f472b6"/><rect x="178" y="102" width="8" height="12" fill="#f472b6"/>
+          <text x="110" y="164" text-anchor="middle" fill="#f87171" font-size="11">a cut kills everything</text>
+          <text x="110" y="180" text-anchor="middle" fill="#64748b" font-size="10.5">RS-485, Modbus, PROFIBUS</text>
+
+          <!-- STAR -->
+          <text x="290" y="66" text-anchor="middle" fill="#2dd4bf" font-size="13" font-weight="800">STAR</text>
+          <rect x="272" y="98" width="36" height="24" rx="5" fill="#132a2a" stroke="#2dd4bf" stroke-width="2"/>
+          <text x="290" y="115" text-anchor="middle" fill="#5eead4" font-size="10">SW</text>
+          <g stroke="#2dd4bf" stroke-width="2"><path d="M280 122 L240 156"/><path d="M290 122 v34"/><path d="M300 122 L340 156"/></g>
+          <g fill="#1a2230" stroke="#2dd4bf" stroke-width="2">
+            <rect x="227" y="156" width="26" height="20" rx="4"/><rect x="277" y="156" width="26" height="20" rx="4"/><rect x="327" y="156" width="26" height="20" rx="4"/>
+          </g>
+          <text x="290" y="200" text-anchor="middle" fill="#4ade80" font-size="11">a cut kills one device</text>
+          <text x="290" y="216" text-anchor="middle" fill="#f87171" font-size="11">the switch kills all</text>
+          <text x="290" y="232" text-anchor="middle" fill="#64748b" font-size="10.5">PROFINET, EtherNet/IP</text>
+
+          <!-- RING -->
+          <text x="470" y="66" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="800">RING</text>
+          <path d="M470 92 L520 132 L500 190 L440 190 L420 132 Z" fill="none" stroke="#fbbf24" stroke-width="3"/>
+          <g fill="#1a2230" stroke="#fbbf24" stroke-width="2">
+            <rect x="457" y="82" width="26" height="20" rx="4"/><rect x="507" y="122" width="26" height="20" rx="4"/>
+            <rect x="487" y="180" width="26" height="20" rx="4"/><rect x="427" y="180" width="26" height="20" rx="4"/><rect x="407" y="122" width="26" height="20" rx="4"/>
+          </g>
+          <text x="470" y="222" text-anchor="middle" fill="#4ade80" font-size="11">survives ONE cut</text>
+          <text x="470" y="238" text-anchor="middle" fill="#64748b" font-size="10.5">MRP, PRP/HSR, ring EtherCAT</text>
+
+          <!-- LINE / DAISY CHAIN -->
+          <text x="660" y="66" text-anchor="middle" fill="#8b5cf6" font-size="13" font-weight="800">LINE / DAISY CHAIN</text>
+          <g fill="#1a2230" stroke="#8b5cf6" stroke-width="2">
+            <rect x="586" y="96" width="30" height="24" rx="5"/><rect x="634" y="96" width="30" height="24" rx="5"/>
+            <rect x="682" y="96" width="30" height="24" rx="5"/><rect x="730" y="96" width="30" height="24" rx="5"/>
+          </g>
+          <g stroke="#8b5cf6" stroke-width="3"><path d="M616 108 h18"/><path d="M664 108 h18"/><path d="M712 108 h18"/></g>
+          <path d="M556 108 h30" stroke="#8b5cf6" stroke-width="3"/>
+          <text x="660" y="146" text-anchor="middle" fill="#fbbf24" font-size="11">a cut kills everything downstream</text>
+          <text x="660" y="162" text-anchor="middle" fill="#4ade80" font-size="11">but the cabling is trivial</text>
+          <text x="660" y="178" text-anchor="middle" fill="#64748b" font-size="10.5">EtherCAT, IO-Link masters, drives</text>
+
+          <!-- TREE -->
+          <text x="660" y="212" text-anchor="middle" fill="#f472b6" font-size="13" font-weight="800">TREE &mdash; stars of stars</text>
+          <rect x="644" y="228" width="32" height="20" rx="4" fill="#2b1830" stroke="#f472b6" stroke-width="2"/>
+          <g stroke="#f472b6" stroke-width="2"><path d="M652 248 L612 274"/><path d="M668 248 L708 274"/></g>
+          <rect x="596" y="274" width="32" height="20" rx="4" fill="#2b1830" stroke="#f472b6" stroke-width="2"/>
+          <rect x="692" y="274" width="32" height="20" rx="4" fill="#2b1830" stroke="#f472b6" stroke-width="2"/>
+          <g stroke="#f472b6" stroke-width="1.6">
+            <path d="M604 294 v14"/><path d="M620 294 v14"/><path d="M700 294 v14"/><path d="M716 294 v14"/>
+          </g>
+          <text x="800" y="248" fill="#94a3b8" font-size="11">how every</text>
+          <text x="800" y="264" fill="#94a3b8" font-size="11">real plant</text>
+          <text x="800" y="280" fill="#94a3b8" font-size="11">actually looks</text>
+
+          <text x="230" y="290" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">Redundancy is bought with cable and</text>
+          <text x="230" y="308" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">a protocol that knows what to do with it.</text>
+        </svg>
+      </div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Topology</th><th>One cable cut</th><th>Cabling cost</th><th>Where it is used</th></tr>
+        <tr><td><b>Bus</b></td><td class="c-red">Whole segment down</td><td class="c-grn">Lowest</td><td>RS-485: Modbus RTU, PROFIBUS DP, many meters</td></tr>
+        <tr><td><b>Star</b></td><td class="c-grn">One device down</td><td>Highest &mdash; a cable per device</td><td>PROFINET, EtherNet/IP, most Ethernet plants</td></tr>
+        <tr><td><b>Line / daisy chain</b></td><td class="c-amb">Everything downstream</td><td class="c-grn">Very low</td><td>EtherCAT, drive strings, IO-Link masters, most machines</td></tr>
+        <tr><td><b>Ring</b></td><td class="c-grn"><b>Nothing &mdash; it heals</b></td><td>Line + one cable</td><td>MRP (PROFINET), PRP/HSR (IEC 62439), EtherCAT ring</td></tr>
+        <tr><td><b>Tree</b></td><td>Depends on the branch</td><td>Moderate</td><td>What every real plant becomes after five years</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">THINGS THAT ARE TRUE IN A FACTORY AND NOT IN AN OFFICE <span class="tier t-stretch">STRETCH</span></div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>A ring is not automatically redundant.</b> The cable makes a loop; a <i>protocol</i> makes it redundant. Without one, a loop is a broadcast storm that takes the network down in seconds. MRP recovers in about 200&nbsp;ms, RSTP in a second or more, and <b>PRP/HSR in zero</b> because they send everything twice on both paths. Match the recovery time to what the machine can tolerate.</span></li>
+        <li><span class="num">2</span><span><b>Unmanaged switches are cheap and they hide from you.</b> They cannot tell you a port is erroring, cannot prioritise time-critical traffic, cannot be segmented into VLANs, and cannot participate in a ring. On any network you will have to diagnose later, buy managed.</span></li>
+        <li><span class="num">3</span><span><b>Line topology is why machine builders love EtherCAT.</b> One cable in, one cable out, down a row of drives &mdash; no switch cabinet, no star wiring, minimal installation. The price is that a broken cable stops everything after it, which a ring closes for the cost of one more cable.</span></li>
+        <li><span class="num">4</span><span><b>Wireless is a topology decision, not a convenience.</b> It removes the cable failure mode and adds interference, coexistence and battery failure modes. Use it where cables genuinely cannot go &mdash; rotating tables, AGVs, moving cranes &mdash; and not to save installation cost.</span></li>
+      </ul>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>For any network you meet, answer two questions before anything else: <b>what shape is it, and what happens when one cable is cut?</b> If nobody on site can answer the second one, you have found the plant's real risk.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 7 ============ -->
+  <section class="page" id="p7">
+    <div class="page-tag">Page 7 / 14<span class="rt">&middot; ~10 min</span></div>
+    <h2 class="page-title">Frames and Checksums &mdash; How a Message Knows It Arrived Intact</h2>
+
+    <div class="card">
+      <div class="label">EVERY FRAME EVER MADE HAS THE SAME FIVE PARTS <span class="tier t-core">CORE</span></div>
+      <p class="lead">Once you see this pattern, every protocol datasheet in the library becomes readable. The names change; the structure does not.</p>
+      <div class="eqn">  +---------+---------+----------+--------------+-------+
+  |  START  | ADDRESS | CONTROL  |   PAYLOAD    | CHECK |
+  +---------+---------+----------+--------------+-------+
+
+  <b>START</b>    "a frame begins here"     &mdash; a silent gap (Modbus RTU),
+            a preamble (Ethernet), a colon (Modbus ASCII),
+            a dominant bit (CAN)
+  <b>ADDRESS</b>  who it is for            &mdash; a node number 1-247 (Modbus),
+            a 48-bit MAC (Ethernet), a message ID (CAN, which
+            addresses the <i>subject</i>, not the device)
+  <b>CONTROL</b>  what kind of message     &mdash; function code, EtherType,
+            service, command
+  <b>PAYLOAD</b>  the actual data          &mdash; the only part you care about,
+            and usually the smallest part
+  <b>CHECK</b>    "did this survive?"      &mdash; parity, LRC, CRC, FCS
+
+Modbus RTU, reading 10 registers from device 3:
+  [3.5 char silence] 03  03  00 64  00 0A  <b>C5 CD</b> [3.5 char silence]
+                     &#8593;   &#8593;   &#8593;      &#8593;      &#8593;
+                  addr func start  count  CRC-16</div>
+    </div>
+
+    <div class="card">
+      <div class="label">THREE WAYS TO CATCH AN ERROR, IN ORDER OF STRENGTH <span class="tier t-core">CORE</span></div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Method</th><th>Cost</th><th>Catches</th><th>Misses</th></tr>
+        <tr><td><b>Parity</b> &mdash; one bit per character, making the count of 1s even or odd</td><td>1 bit in 11 (9&nbsp;%)</td><td>Any <b>single</b> bit flip in that character</td><td class="c-red">Any <b>two</b> flips &mdash; and factory noise arrives in bursts, so two is common</td></tr>
+        <tr><td><b>Checksum / LRC</b> &mdash; add all the bytes, send the total</td><td>1&ndash;2 bytes per frame</td><td>Most single errors</td><td class="c-red">Any error that cancels &mdash; e.g. one byte +1 and another &minus;1. Also blind to <b>reordering</b>.</td></tr>
+        <tr><td><b>CRC</b> &mdash; treat the frame as one enormous binary number and send its remainder after division by a fixed polynomial</td><td>2&ndash;4 bytes per frame</td><td class="c-grn"><b>All</b> 1- and 2-bit errors, all odd numbers of errors, <b>every burst up to 16 bits</b>, and 99.998&nbsp;% of longer bursts</td><td>A vanishing fraction of long bursts</td></tr>
+      </table></div>
+      <p class="body">This is why <b>essentially every industrial protocol uses a CRC</b> &mdash; Modbus RTU a CRC-16, Ethernet a 32-bit FCS, CAN a 15-bit CRC. You do not need to compute one by hand; you need to know three things about it.</p>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>A CRC detects; it does not correct.</b> A frame that fails its CRC is <b>discarded silently</b> &mdash; not repaired, and usually not reported to your application. What happens next is the protocol's business: Modbus does nothing and the master times out; TCP retransmits; EtherCAT increments a counter and carries on; CAN retransmits automatically and eventually shuts a persistently faulty node off the bus.</span></li>
+        <li><span class="num">2</span><span><b>The error counters are the only early warning you get.</b> Because digital fails suddenly (<a href="#p2">page&nbsp;2</a>), a network at 0.001&nbsp;% errors and one at 0&nbsp;% look identical from the SCADA screen &mdash; until humidity, a new drive or a corroding connector pushes it over. Every managed switch, every PROFINET device and every serial gateway keeps CRC, alignment and discard counters. <b>Read them monthly and trend them.</b> A rising counter is a cable telling you it is about to fail, months in advance.</span></li>
+        <li><span class="num">3</span><span><b>A message that passes CRC and still looks wrong is not a network fault.</b> It is a scaling, sign, word-order or address fault &mdash; go back to <a href="#p3">page&nbsp;3</a>. This single distinction will save you days: <b>CRC failures are cable problems, plausible-but-wrong values are configuration problems</b>, and they are diagnosed in completely different places.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="label">ADDRESSING &mdash; THREE DIFFERENT IDEAS PEOPLE CONFUSE <span class="tier t-core">CORE</span></div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Address</th><th>Set by</th><th>Scope</th><th>Notes</th></tr>
+        <tr><td><b>Node / station address</b> (1&ndash;247 Modbus, 0&ndash;126 PROFIBUS)</td><td>You &mdash; DIP switches or software</td><td>This bus only</td><td>Two devices with the same address is the classic commissioning fault: both answer, the frames collide, and the master sees garbage</td></tr>
+        <tr><td><b>MAC address</b> (48-bit)</td><td>The manufacturer, permanently</td><td>This Ethernet segment</td><td>Globally unique. Never changes. This is what a switch actually uses.</td></tr>
+        <tr><td><b>IP address</b></td><td>You, or DHCP</td><td>Routable across networks</td><td>In OT, <b>always static</b> or DHCP-reserved. A device that changes address after a power cut is a plant that stops.</td></tr>
+        <tr><td><b>Device name</b> (PROFINET)</td><td>Engineering tool</td><td>The PROFINET network</td><td>PROFINET addresses by <i>name</i>, which is why a replacement device must be given the old one's name to work</td></tr>
+        <tr><td><b>Message ID</b> (CAN)</td><td>The system designer</td><td>The bus</td><td>Addresses the <b>subject</b>, not the recipient &mdash; anyone interested listens. A genuinely different model (<a href="A04_CAN_Bus_Deep_Dive.html">A04</a>).</td></tr>
+      </table></div>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>Two sentences to own: <b>&ldquo;every frame is start, address, control, payload, check&rdquo;</b> and <b>&ldquo;a CRC failure is a cable, a wrong-but-plausible number is a configuration&rdquo;</b>. The second one alone will redirect most of your troubleshooting correctly.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 8 ============ -->
+  <section class="page" id="p8">
+    <div class="page-tag">Page 8 / 14<span class="rt">&middot; ~11 min</span></div>
+    <h2 class="page-title">Who Talks When &mdash; the Rule That Decides Everything Else</h2>
+
+    <div class="card">
+      <div class="label">ONE WIRE, MANY DEVICES, ONE PROBLEM <span class="tier t-core">CORE</span></div>
+      <p class="lead">If two devices transmit at once on a shared medium, both messages are destroyed. Every protocol must therefore answer one question &mdash; <b>who may talk, and when?</b> There are only five families of answer in industrial use, and knowing which family a protocol belongs to tells you almost everything about its behaviour before you read a word of its manual.</p>
+      <div class="hero-illus">
+        <svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Four media-access methods shown as timelines">
+          <defs><linearGradient id="mb5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0d1520"/><stop offset="100%" stop-color="#070a0f"/></linearGradient></defs>
+          <rect width="900" height="340" fill="url(#mb5)" rx="16"/>
+          <text x="450" y="28" text-anchor="middle" fill="#c4b5fd" font-family="ui-monospace,monospace" font-size="13" letter-spacing="3">THE SAME BUS, FOUR RULES, FOUR DIFFERENT PROMISES ABOUT TIME</text>
+
+          <!-- polling -->
+          <text x="20" y="72" fill="#a3e635" font-size="12.5" font-weight="800">POLLING</text>
+          <text x="20" y="88" fill="#64748b" font-size="10.5">master asks each</text>
+          <path d="M150 78 h730" stroke="#334155" stroke-width="1.5"/>
+          <g font-size="10" text-anchor="middle" font-family="ui-monospace,monospace">
+            <rect x="152" y="64" width="52" height="14" rx="3" fill="#4c1d95"/><text x="178" y="75" fill="#ddd6fe">Q1</text>
+            <rect x="206" y="78" width="70" height="14" rx="3" fill="#365314"/><text x="241" y="89" fill="#bef264">A1</text>
+            <rect x="284" y="64" width="52" height="14" rx="3" fill="#4c1d95"/><text x="310" y="75" fill="#ddd6fe">Q2</text>
+            <rect x="338" y="78" width="70" height="14" rx="3" fill="#365314"/><text x="373" y="89" fill="#bef264">A2</text>
+            <rect x="416" y="64" width="52" height="14" rx="3" fill="#4c1d95"/><text x="442" y="75" fill="#ddd6fe">Q3</text>
+            <rect x="470" y="78" width="180" height="14" rx="3" fill="#7f1d1d"/><text x="560" y="89" fill="#fca5a5">TIMEOUT &mdash; device 3 is absent</text>
+            <rect x="658" y="64" width="52" height="14" rx="3" fill="#4c1d95"/><text x="684" y="75" fill="#ddd6fe">Q4</text>
+            <rect x="712" y="78" width="70" height="14" rx="3" fill="#365314"/><text x="747" y="89" fill="#bef264">A4</text>
+          </g>
+          <text x="880" y="108" text-anchor="end" fill="#fbbf24" font-size="11">predictable, but one absent device wrecks the budget</text>
+
+          <!-- token -->
+          <text x="20" y="150" fill="#2dd4bf" font-size="12.5" font-weight="800">TOKEN</text>
+          <text x="20" y="166" fill="#64748b" font-size="10.5">a permit is passed</text>
+          <path d="M150 156 h730" stroke="#334155" stroke-width="1.5"/>
+          <g font-size="10" text-anchor="middle" font-family="ui-monospace,monospace">
+            <rect x="152" y="142" width="120" height="14" rx="3" fill="#134e4a"/><text x="212" y="153" fill="#5eead4">node 1 holds token</text>
+            <rect x="276" y="142" width="24" height="14" rx="3" fill="#0e7490"/>
+            <rect x="304" y="142" width="150" height="14" rx="3" fill="#134e4a"/><text x="379" y="153" fill="#5eead4">node 2 holds token</text>
+            <rect x="458" y="142" width="24" height="14" rx="3" fill="#0e7490"/>
+            <rect x="486" y="142" width="100" height="14" rx="3" fill="#134e4a"/><text x="536" y="153" fill="#5eead4">node 3</text>
+            <rect x="590" y="142" width="24" height="14" rx="3" fill="#0e7490"/>
+            <rect x="618" y="142" width="140" height="14" rx="3" fill="#134e4a"/><text x="688" y="153" fill="#5eead4">node 4</text>
+          </g>
+          <text x="880" y="186" text-anchor="end" fill="#4ade80" font-size="11">bounded worst case, no master &mdash; but complex, and losing the token hurts</text>
+
+          <!-- csma -->
+          <text x="20" y="228" fill="#f87171" font-size="12.5" font-weight="800">CSMA/CD</text>
+          <text x="20" y="244" fill="#64748b" font-size="10.5">listen, talk, collide</text>
+          <path d="M150 234 h730" stroke="#334155" stroke-width="1.5"/>
+          <g font-size="10" text-anchor="middle" font-family="ui-monospace,monospace">
+            <rect x="152" y="220" width="90" height="14" rx="3" fill="#365314"/><text x="197" y="231" fill="#bef264">A sends</text>
+            <rect x="252" y="220" width="46" height="14" rx="3" fill="#7f1d1d"/>
+            <rect x="252" y="234" width="46" height="14" rx="3" fill="#7f1d1d"/>
+            <text x="275" y="264" text-anchor="middle" fill="#f87171" font-size="10">COLLISION</text>
+            <rect x="330" y="220" width="30" height="14" rx="3" fill="#78350f"/><text x="345" y="266" fill="#fbbf24" font-size="10">random backoff</text>
+            <rect x="380" y="220" width="110" height="14" rx="3" fill="#365314"/><text x="435" y="231" fill="#bef264">A retries</text>
+            <rect x="510" y="234" width="120" height="14" rx="3" fill="#1e40af"/><text x="570" y="245" fill="#bfdbfe">B sends</text>
+            <rect x="650" y="220" width="46" height="14" rx="3" fill="#7f1d1d"/>
+            <rect x="650" y="234" width="46" height="14" rx="3" fill="#7f1d1d"/>
+          </g>
+          <text x="880" y="282" text-anchor="end" fill="#f87171" font-size="11">no worst-case guarantee &mdash; which is why office Ethernet was never industrial</text>
+
+          <!-- scheduled -->
+          <text x="20" y="312" fill="#8b5cf6" font-size="12.5" font-weight="800">SCHEDULED</text>
+          <path d="M150 318 h730" stroke="#334155" stroke-width="1.5"/>
+          <g font-size="9.5" text-anchor="middle" font-family="ui-monospace,monospace">
+            <rect x="152" y="304" width="60" height="14" rx="2" fill="#4c1d95"/><text x="182" y="315" fill="#ddd6fe">slot 1</text>
+            <rect x="214" y="304" width="60" height="14" rx="2" fill="#5b21b6"/><text x="244" y="315" fill="#ddd6fe">slot 2</text>
+            <rect x="276" y="304" width="60" height="14" rx="2" fill="#4c1d95"/><text x="306" y="315" fill="#ddd6fe">slot 3</text>
+            <rect x="338" y="304" width="60" height="14" rx="2" fill="#5b21b6"/><text x="368" y="315" fill="#ddd6fe">slot 4</text>
+            <rect x="400" y="304" width="96" height="14" rx="2" fill="#1f2937"/><text x="448" y="315" fill="#94a3b8">best effort</text>
+            <rect x="498" y="304" width="60" height="14" rx="2" fill="#4c1d95"/><text x="528" y="315" fill="#ddd6fe">slot 1</text>
+            <rect x="560" y="304" width="60" height="14" rx="2" fill="#5b21b6"/><text x="590" y="315" fill="#ddd6fe">slot 2</text>
+            <rect x="622" y="304" width="60" height="14" rx="2" fill="#4c1d95"/><text x="652" y="315" fill="#ddd6fe">slot 3</text>
+            <rect x="684" y="304" width="60" height="14" rx="2" fill="#5b21b6"/><text x="714" y="315" fill="#ddd6fe">slot 4</text>
+            <rect x="746" y="304" width="96" height="14" rx="2" fill="#1f2937"/><text x="794" y="315" fill="#94a3b8">best effort</text>
+          </g>
+          <text x="880" y="338" text-anchor="end" fill="#c4b5fd" font-size="11">every device knows its slot &mdash; EtherCAT, PROFINET IRT, TSN</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">THE FIVE FAMILIES <span class="tier t-core">CORE</span></div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Family</th><th>How it works</th><th>Deterministic?</th><th>Used by</th></tr>
+        <tr><td><b>Master&ndash;slave polling</b></td><td>One master asks, one device answers. Nobody speaks unless spoken to.</td><td class="c-grn">Yes &mdash; but the guarantee is the <b>whole scan</b>, which can be seconds</td><td>Modbus RTU/TCP, PROFIBUS DP, IO-Link, most meters</td></tr>
+        <tr><td><b>Token passing</b></td><td>A permit circulates; only its holder may transmit.</td><td class="c-grn">Yes &mdash; bounded worst case, no master needed</td><td>PROFIBUS FMS, ControlNet, older cell buses</td></tr>
+        <tr><td><b>CSMA/CD</b></td><td>Listen; if quiet, transmit; if you collide, back off a <b>random</b> time and retry.</td><td class="c-red"><b>No</b> &mdash; random backoff has no worst case</td><td>Classic shared Ethernet (a hub). Historical.</td></tr>
+        <tr><td><b>CSMA/CR</b> &mdash; bitwise arbitration</td><td>Everyone starts talking; the message with the numerically lowest ID wins <b>without being destroyed</b> and the losers simply stop.</td><td class="c-grn">Yes for high-priority IDs; low-priority messages can starve</td><td><b>CAN</b> &mdash; and it is genuinely elegant (<a href="A04_CAN_Bus_Deep_Dive.html">A04</a>)</td></tr>
+        <tr><td><b>Scheduled / TDMA</b></td><td>Time is divided into repeating slots. Each device owns its slot.</td><td class="c-grn"><b>Yes, to microseconds</b></td><td>EtherCAT, PROFINET IRT, SERCOS, <b>TSN</b> (<a href="A37_TSN_Deterministic_Ethernet_Deep_Dive.html">A37</a>)</td></tr>
+      </table></div>
+      <div class="career"><span class="ci">&#128200;</span><p><b>The modern correction almost nobody is told.</b> People still explain industrial Ethernet's problems in terms of collisions &mdash; but a <b>switched, full-duplex</b> Ethernet network has <i>no collisions at all</i>. Every device has its own private wire to a switch port. CSMA/CD has been irrelevant to real plants for twenty years. The remaining non-determinism is <b>queuing</b>: two frames arriving at a switch destined for the same output port, where one must wait behind the other. That is a completely different problem, and it is the one TSN exists to solve &mdash; by scheduling gates on the switch's output queues rather than by managing collisions. If you understand that distinction you are ahead of most of the field.</p></div>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>For any protocol, ask which of the five families it belongs to. That one fact predicts its worst-case latency, whether losing one device stops everything, and whether it can do coordinated motion &mdash; before you have read anything else about it.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 9 ============ -->
+  <section class="page" id="p9">
+    <div class="page-tag">Page 9 / 14<span class="rt">&middot; ~12 min</span></div>
+    <h2 class="page-title">Time &mdash; the Only Thing That Makes This &ldquo;Industrial&rdquo;</h2>
+
+    <div class="card">
+      <div class="label">FOUR WORDS THAT ARE NOT SYNONYMS <span class="tier t-core">CORE</span></div>
+      <div class="grid-2">
+        <div class="mini c-sky"><h4>Latency</h4><p>How long <b>one</b> message takes, end to end. Measured in ms or &micro;s.</p></div>
+        <div class="mini c-sky"><h4>Cycle time</h4><p>How often the <b>whole</b> exchange repeats. The number a machine designer cares about.</p></div>
+        <div class="mini c-org"><h4>Jitter</h4><p>How much the latency <b>varies</b> between one cycle and the next. <b>The industrial number.</b></p></div>
+        <div class="mini c-teal"><h4>Throughput</h4><p>How much data per second. The number vendors advertise, and the least relevant of the four.</p></div>
+      </div>
+      <div class="eqn"><b>Determinism</b> is not speed. It is a <b>guarantee</b>:
+
+   "this message will arrive within X, every time, worst case"
+
+   A 100 Mbit/s link that is usually 1 ms but occasionally 40 ms
+   is <b class="c-red">useless</b> for motion control.
+   A 1 Mbit/s link that is always 2 ms &plusmn;10 &micro;s
+   is <b class="c-grn">perfect</b> for it.
+
+<b>Industry buys the guarantee, not the bandwidth.</b> Everything strange
+about industrial networking - scheduling, time synchronisation,
+summation frames, priority queues - exists to buy that guarantee.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">THE REQUIREMENT LADDER &mdash; MATCH THE PROTOCOL TO THE JOB <span class="tier t-core">CORE</span></div>
+      <div class="tbl-wrap"><table>
+        <tr><th>What you are doing</th><th>Cycle time needed</th><th>Jitter tolerance</th><th>Reasonable choices</th></tr>
+        <tr><td>Energy metering, OEE, dashboards</td><td>1&ndash;60 s</td><td>Anything</td><td>Modbus RTU/TCP, MQTT, OPC UA</td></tr>
+        <tr><td>Process control &mdash; temperature, level, flow</td><td>100&ndash;1000 ms</td><td>Loose</td><td>Modbus TCP, PROFIBUS PA, HART, Ethernet-APL</td></tr>
+        <tr><td>Machine sequencing, discrete I/O</td><td><b>10&ndash;50 ms</b></td><td>Few ms</td><td>PROFINET RT, EtherNet/IP, Modbus TCP, IO-Link</td></tr>
+        <tr><td>Coordinated motion, robotics</td><td class="c-amb"><b>1&ndash;4 ms</b></td><td class="c-amb"><b>&lt; 1 &micro;s</b> for true sync</td><td>EtherCAT, PROFINET IRT, SERCOS III, TSN</td></tr>
+        <tr><td>Drive current loop, CNC interpolation</td><td class="c-red"><b>62.5&ndash;250 &micro;s</b></td><td class="c-red">Nanoseconds</td><td>EtherCAT DC, SERCOS III &mdash; and usually a backplane, not a network</td></tr>
+        <tr><td>Safety functions</td><td>Set by the <b>safety response time</b> budget</td><td>Must be <b>bounded and proven</b></td><td>PROFIsafe, CIP Safety, FSoE, IO-Link Safety (<a href="A52_Functional_Safety_SIL_Deep_Dive.html">A52</a>)</td></tr>
+      </table></div>
+      <p class="body"><b>Read that table in both directions.</b> Downward, it tells you what to buy. Upward, it tells you what you are wasting: an EtherCAT network reading a temperature transmitter every 250&nbsp;&micro;s is answering a question the process asked once a minute, and somebody paid for it.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">INTERACTIVE &mdash; THE POLLING BUDGET <span class="tier t-core">CORE</span></div>
+      <p class="body">The Kaduwela plant, generalised. This is the calculation nobody did, and it takes thirty seconds. Set the dead devices to zero and watch what happens &mdash; then set the baud rate to 115200 with the dead devices back in, and watch what does not.</p>
+      <div class="demo">
+        <div class="demo-row"><span>Live devices on the bus</span><b><span id="d3n_v">16</span></b></div>
+        <input type="range" id="d3n" min="1" max="64" step="1" value="16">
+        <div class="demo-row"><span>Poll blocks per device</span><b><span id="d3b_v">4</span></b></div>
+        <input type="range" id="d3b" min="1" max="12" step="1" value="4">
+        <div class="demo-row"><span>Registers per block</span><b><span id="d3r_v">10</span></b></div>
+        <input type="range" id="d3r" min="1" max="125" step="1" value="10">
+        <div class="demo-row"><span>Device turnaround</span><b><span id="d3t_v">10</span> ms</b></div>
+        <input type="range" id="d3t" min="0" max="60" step="1" value="10">
+        <div class="demo-row"><span>Absent / non-responding devices still in the poll list</span><b><span id="d3d_v">2</span></b></div>
+        <input type="range" id="d3d" min="0" max="12" step="1" value="2">
+        <div class="demo-row"><span>Timeout per attempt</span><b><span id="d3o_v">1000</span> ms</b></div>
+        <input type="range" id="d3o" min="50" max="3000" step="50" value="1000">
+        <div class="demo-row"><span>Retries before giving up</span><b><span id="d3y_v">3</span></b></div>
+        <input type="range" id="d3y" min="1" max="6" step="1" value="3">
+        <div class="demo-row"><span>Baud rate</span><b>select</b></div>
+        <div class="seg" id="d3s">
+          <button data-s="1200">1200</button><button class="on" data-s="9600">9600</button>
+          <button data-s="19200">19200</button><button data-s="38400">38400</button><button data-s="115200">115200</button>
+        </div>
+        <div class="demo-out" id="d3out"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">TWO CONSEQUENCES PEOPLE GET WRONG <span class="tier t-core">CORE</span></div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>Never log faster than the data updates.</b> If the scan takes 27&nbsp;s, logging at 5&nbsp;s does not give you five times the resolution &mdash; it gives you the same value five times, and it makes a sparse measurement look dense and trustworthy. Set the log interval <i>from the measured scan time</i>, and if you need faster data, fix the scan, not the logger. As a working rule, <b>sample at least five times faster than the fastest change you actually care about</b>; below twice as fast, the trend you draw can be pure fiction.</span></li>
+        <li><span class="num">2</span><span><b>Every industrial link needs a watchdog and a defined failure action.</b> Ask of every device: <i>what does it do when the network goes quiet?</i> Hold last value, go to zero, go to a configured safe state, or trip? All four are correct answers in different applications and the wrong one is dangerous &mdash; a valve holding its last value forever because a switch died is a real accident mechanism. <b>Write the answer down for every actuator</b>, exactly as you would for loss of air (<a href="A12_Pneumatic_Systems_Deep_Dive.html">A12</a>, page&nbsp;12).</span></li>
+      </ul>
+    </div>
+
+    <div class="predict">
+      <div class="p-tag">PREDICT FIRST</div>
+      <div class="p-q">A machine needs 20&nbsp;ms cycle time. Your Modbus TCP link measures 4&nbsp;ms average, 6&nbsp;ms median, and 45&nbsp;ms at the 99.9th percentile. Is it good enough?</div>
+      <div class="p-opts">
+        <button onclick="pk(this,0)">A &mdash; Yes &mdash; 4 ms average is five times faster than needed</button>
+        <button onclick="pk(this,1)">B &mdash; No &mdash; the 45 ms tail breaks the guarantee</button>
+        <button onclick="pk(this,2)">C &mdash; Yes, if we increase the retry count</button>
+        <button onclick="pk(this,3)">D &mdash; Cannot say without knowing the bandwidth</button>
+      </div>
+      <div class="p-ans" data-correct="1">
+        <span class="p-verdict"></span>
+        <b>B &mdash; and the average is the least useful number on that list.</b> A machine cycle is not an average; it is a deadline, and a deadline is either met or missed. At the 99.9th percentile the link takes 45&nbsp;ms, which means that roughly <b>once in every thousand cycles</b> the machine does not get its data in time. At a 20&nbsp;ms cycle that is once every twenty seconds &mdash; about <b>4,300 missed deadlines per day</b>. What happens then depends entirely on the watchdog design: a held value, a jump, a fault trip, or a quiet corruption of a position. <b>Always ask for the tail, never the mean.</b> If a vendor quotes an average latency and cannot give you a 99.9th percentile or a worst case, they have not measured determinism &mdash; they have measured speed, and page&nbsp;9 exists to tell you those are different things. <b>C is worse than useless</b>: more retries lengthens the tail. The real fixes are to remove the queuing (a dedicated switch, VLAN separation, or taking non-critical traffic off the segment) or to move to a protocol that schedules rather than queues.
+      </div>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>The sentence that separates industrial from IT networking: <b>&ldquo;fast is an average, deterministic is a worst case, and only one of them keeps a machine running.&rdquo;</b></p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 10 ============ -->
+  <section class="page" id="p10">
+    <div class="page-tag">Page 10 / 14<span class="rt">&middot; ~10 min</span></div>
+    <h2 class="page-title">The Layer Model &mdash; and Why Every &ldquo;Industrial Ethernet&rdquo; Is a Different Cut</h2>
+
+    <div class="card">
+      <div class="label">SEVEN LAYERS, EXPLAINED AS A PARCEL <span class="tier t-core">CORE</span></div>
+      <p class="lead">The OSI model is the standard way to describe any network as a stack of jobs, each one using the one below it. It is easiest to hold as a parcel you are posting.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>#</th><th>Layer</th><th>Its job</th><th>The parcel</th></tr>
+        <tr><td>7</td><td><b>Application</b></td><td>What the data <b>means</b></td><td>The letter, in a language you both read</td></tr>
+        <tr><td>6</td><td>Presentation</td><td>Encoding, encryption</td><td>The alphabet and any code you agreed</td></tr>
+        <tr><td>5</td><td>Session</td><td>Starting and ending a conversation</td><td>&ldquo;Dear Sir&rdquo; and &ldquo;Yours faithfully&rdquo;</td></tr>
+        <tr><td>4</td><td><b>Transport</b></td><td>Reliable delivery, order, retries</td><td>Registered post &mdash; tracked, and re-sent if lost</td></tr>
+        <tr><td>3</td><td><b>Network</b></td><td>Getting between <i>different</i> networks</td><td>The city and country on the address</td></tr>
+        <tr><td>2</td><td><b>Data link</b></td><td>Framing, addressing, error check on one hop</td><td>The house number in this street; the sealed envelope</td></tr>
+        <tr><td>1</td><td><b>Physical</b></td><td>Volts, connectors, cable</td><td>The van, the road, the letterbox</td></tr>
+      </table></div>
+      <p class="body">Notice which layers this primer has already covered: <b>1</b> on page&nbsp;5, <b>2</b> on pages&nbsp;4, 7 and 8, and <b>7</b> on page&nbsp;3. That is not an accident, and it is the key to the whole subject.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">FIELDBUSES DELIBERATELY THROW LAYERS AWAY <span class="tier t-core">CORE</span></div>
+      <div class="hero-illus">
+        <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Where four industrial protocols cut into the OSI stack">
+          <defs><linearGradient id="lb5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0d1520"/><stop offset="100%" stop-color="#070a0f"/></linearGradient></defs>
+          <rect width="900" height="300" fill="url(#lb5)" rx="16"/>
+          <text x="450" y="26" text-anchor="middle" fill="#c4b5fd" font-family="ui-monospace,monospace" font-size="13" letter-spacing="3">SAME CABLE, FOUR DIFFERENT PLACES TO CUT IN</text>
+
+          <g font-size="11" text-anchor="end" fill="#94a3b8">
+            <text x="96" y="70">7 application</text><text x="96" y="102">4 transport</text>
+            <text x="96" y="134">3 network</text><text x="96" y="166">2 data link</text><text x="96" y="198">1 physical</text>
+          </g>
+          <g stroke="#334155" stroke-width="1" stroke-dasharray="4 4">
+            <path d="M106 78 h760"/><path d="M106 110 h760"/><path d="M106 142 h760"/><path d="M106 174 h760"/>
+          </g>
+
+          <!-- Modbus TCP -->
+          <text x="176" y="230" text-anchor="middle" fill="#a3e635" font-size="12" font-weight="700">Modbus TCP</text>
+          <text x="176" y="246" text-anchor="middle" fill="#64748b" font-size="10">the polite one</text>
+          <g><rect x="120" y="52" width="112" height="24" rx="4" fill="#365314"/><text x="176" y="69" text-anchor="middle" fill="#bef264" font-size="11">Modbus</text>
+             <rect x="120" y="84" width="112" height="24" rx="4" fill="#1f2937"/><text x="176" y="101" text-anchor="middle" fill="#94a3b8" font-size="11">TCP</text>
+             <rect x="120" y="116" width="112" height="24" rx="4" fill="#1f2937"/><text x="176" y="133" text-anchor="middle" fill="#94a3b8" font-size="11">IP</text>
+             <rect x="120" y="148" width="112" height="24" rx="4" fill="#1f2937"/><text x="176" y="165" text-anchor="middle" fill="#94a3b8" font-size="11">Ethernet MAC</text>
+             <rect x="120" y="180" width="112" height="24" rx="4" fill="#0e2030"/><text x="176" y="197" text-anchor="middle" fill="#7dd3fc" font-size="11">100BASE-TX</text></g>
+
+          <!-- PROFINET RT -->
+          <text x="352" y="230" text-anchor="middle" fill="#2dd4bf" font-size="12" font-weight="700">PROFINET RT</text>
+          <text x="352" y="246" text-anchor="middle" fill="#64748b" font-size="10">skips the middle</text>
+          <g><rect x="296" y="52" width="112" height="24" rx="4" fill="#134e4a"/><text x="352" y="69" text-anchor="middle" fill="#5eead4" font-size="11">PROFINET</text>
+             <rect x="296" y="84" width="112" height="56" rx="4" fill="#111827" stroke="#475569" stroke-dasharray="4 3"/>
+             <text x="352" y="118" text-anchor="middle" fill="#64748b" font-size="10.5">bypassed for RT</text>
+             <rect x="296" y="148" width="112" height="24" rx="4" fill="#134e4a"/><text x="352" y="165" text-anchor="middle" fill="#5eead4" font-size="11">VLAN priority</text>
+             <rect x="296" y="180" width="112" height="24" rx="4" fill="#0e2030"/><text x="352" y="197" text-anchor="middle" fill="#7dd3fc" font-size="11">100BASE-TX</text></g>
+
+          <!-- EtherCAT -->
+          <text x="528" y="230" text-anchor="middle" fill="#8b5cf6" font-size="12" font-weight="700">EtherCAT</text>
+          <text x="528" y="246" text-anchor="middle" fill="#64748b" font-size="10">rewrites layer 2</text>
+          <g><rect x="472" y="52" width="112" height="24" rx="4" fill="#4c1d95"/><text x="528" y="69" text-anchor="middle" fill="#ddd6fe" font-size="11">CoE / SoE</text>
+             <rect x="472" y="84" width="112" height="56" rx="4" fill="#111827" stroke="#475569" stroke-dasharray="4 3"/>
+             <text x="528" y="118" text-anchor="middle" fill="#64748b" font-size="10.5">not used at all</text>
+             <rect x="472" y="148" width="112" height="24" rx="4" fill="#5b21b6"/><text x="528" y="165" text-anchor="middle" fill="#ddd6fe" font-size="10.5">on-the-fly slave</text>
+             <rect x="472" y="180" width="112" height="24" rx="4" fill="#0e2030"/><text x="528" y="197" text-anchor="middle" fill="#7dd3fc" font-size="11">100BASE-TX</text></g>
+
+          <!-- OPC UA -->
+          <text x="704" y="230" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="700">OPC UA</text>
+          <text x="704" y="246" text-anchor="middle" fill="#64748b" font-size="10">meaning, not speed</text>
+          <g><rect x="648" y="36" width="112" height="40" rx="4" fill="#78350f"/><text x="704" y="52" text-anchor="middle" fill="#fdba74" font-size="11">information</text><text x="704" y="68" text-anchor="middle" fill="#fdba74" font-size="11">model + security</text>
+             <rect x="648" y="84" width="112" height="24" rx="4" fill="#1f2937"/><text x="704" y="101" text-anchor="middle" fill="#94a3b8" font-size="11">TCP or UDP</text>
+             <rect x="648" y="116" width="112" height="24" rx="4" fill="#1f2937"/><text x="704" y="133" text-anchor="middle" fill="#94a3b8" font-size="11">IP</text>
+             <rect x="648" y="148" width="112" height="24" rx="4" fill="#1f2937"/><text x="704" y="165" text-anchor="middle" fill="#94a3b8" font-size="11">Ethernet MAC</text>
+             <rect x="648" y="180" width="112" height="24" rx="4" fill="#0e2030"/><text x="704" y="197" text-anchor="middle" fill="#7dd3fc" font-size="11">any</text></g>
+
+          <text x="450" y="278" text-anchor="middle" fill="#64748b" font-size="11.5" font-style="italic">The lower you cut in, the faster and less routable you get. That single trade-off explains the entire industrial Ethernet market.</text>
+        </svg>
+      </div>
+      <div class="eqn"><b>THE TRADE-OFF, IN ONE LINE</b>
+
+   cut in <b>high</b> (on top of TCP/IP)   &rarr;  routable, firewalled, easy,
+                                       works across the internet,
+                                       <b class="c-amb">latency of milliseconds and no guarantee</b>
+
+   cut in <b>low</b>  (at layer 2)          &rarr;  microseconds, deterministic,
+                                       <b class="c-amb">cannot be routed, cannot cross a
+                                       normal switch, stays in the cell</b>
+
+Everything else is detail. When somebody asks "which industrial
+Ethernet is best", the honest answer is <b>"how low do you need to cut?"</b></div>
+      <p class="body">A last observation that saves a lot of confusion: an old serial fieldbus like Modbus RTU implements layers <b>1, 2 and 7 only</b>, and skips 3&ndash;6 entirely. It has no concept of routing, sessions or encryption, because on a single 1200&nbsp;m cable with one master, none of them is needed. That is not primitiveness &mdash; it is a design that matched its problem, which is why forty-seven-year-old Modbus is still the most widely implemented industrial protocol on earth.</p>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>Hold this picture. When <a href="A02_PROFINET_Deep_Dive.html">A02</a> explains real-time classes, or <a href="A03_EtherCAT_Deep_Dive.html">A03</a> explains processing-on-the-fly, or <a href="A06_OPC_UA_Deep_Dive.html">A06</a> explains information models, each is telling you <b>where in this stack it chose to cut</b>.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 11 ============ -->
+  <section class="page" id="p11">
+    <div class="page-tag">Page 11 / 14<span class="rt">&middot; ~12 min</span></div>
+    <h2 class="page-title">The Landscape in 2026 &mdash; What Actually Exists, and What Is Genuinely New</h2>
+
+    <div class="card">
+      <div class="label">THE MAP <span class="tier t-core">CORE</span></div>
+      <p class="lead">There are hundreds of industrial protocols and roughly a dozen that matter. Here they are, honestly ranked by what you will actually meet in a Sri&nbsp;Lankan plant, with the module that goes deep on each.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>Protocol</th><th>Class</th><th>Typical cycle</th><th>Where you meet it</th><th>Go deep</th></tr>
+        <tr><td><b>Modbus RTU</b></td><td>Serial, poll</td><td>0.1&ndash;30 s</td><td class="c-grn"><b>Everywhere.</b> Meters, drives, gensets, HVAC, weighing. Free, ancient, universal.</td><td><a href="A01_Modbus_RTU_Deep_Dive.html">A01</a></td></tr>
+        <tr><td><b>Modbus TCP</b></td><td>Ethernet, poll</td><td>10&ndash;500 ms</td><td>The same devices with an Ethernet port. Same data model, different transport.</td><td><a href="A01_Modbus_RTU_Deep_Dive.html">A01</a></td></tr>
+        <tr><td><b>PROFINET</b></td><td>Ethernet, L2 RT</td><td>1&ndash;10 ms (IRT: &micro;s)</td><td class="c-grn">Siemens-centric plants &mdash; the default in European-built machinery</td><td><a href="A02_PROFINET_Deep_Dive.html">A02</a></td></tr>
+        <tr><td><b>EtherNet/IP</b></td><td>Ethernet, CIP</td><td>1&ndash;10 ms</td><td>Rockwell/Allen-Bradley plants &mdash; the default in American-built machinery</td><td><a href="A02_PROFINET_Deep_Dive.html">A02</a> (contrast)</td></tr>
+        <tr><td><b>EtherCAT</b></td><td>Ethernet, L2 rewritten</td><td class="c-grn"><b>50 &micro;s &ndash; 1 ms</b></td><td>Machine builders, motion, robotics. One cable down a row of drives.</td><td><a href="A03_EtherCAT_Deep_Dive.html">A03</a></td></tr>
+        <tr><td><b>IO-Link</b></td><td>Point-to-point below the fieldbus</td><td>0.4&ndash;10 ms</td><td class="c-grn">The last three metres &mdash; sensors and valve manifolds with parameters and diagnostics</td><td><a href="A05_IO_Link_Deep_Dive.html">A05</a></td></tr>
+        <tr><td><b>CAN / CANopen</b></td><td>Serial, arbitration</td><td>1&ndash;100 ms</td><td>Vehicles, mobile plant, gensets, medical, small motion</td><td><a href="A04_CAN_Bus_Deep_Dive.html">A04</a></td></tr>
+        <tr><td><b>PROFIBUS DP</b></td><td>Serial, poll</td><td>1&ndash;10 ms</td><td>Legacy &mdash; huge installed base, no longer specified for new plants</td><td><a href="A02_PROFINET_Deep_Dive.html">A02</a></td></tr>
+        <tr><td><b>HART</b></td><td>Digital <b>on top of</b> 4&ndash;20 mA</td><td>seconds</td><td>Process instruments &mdash; the analogue loop still runs the control, the digital carries diagnostics</td><td><a href="A50_Instrumentation_Calibration_PID_Deep_Dive.html">A50</a></td></tr>
+        <tr><td><b>OPC UA</b></td><td>Information layer</td><td>100 ms &ndash; s</td><td class="c-grn">PLC to SCADA to MES to cloud. Carries <b>meaning</b>, not just numbers.</td><td><a href="A06_OPC_UA_Deep_Dive.html">A06</a></td></tr>
+        <tr><td><b>MQTT / Sparkplug</b></td><td>Publish&ndash;subscribe</td><td>event-driven</td><td>IIoT, remote sites, poor links, the Unified Namespace pattern</td><td><a href="A06_OPC_UA_Deep_Dive.html">A06</a>, <a href="A33_Industry_4_5_Deep_Dive.html">A33</a></td></tr>
+        <tr><td><b>TSN</b></td><td>Ethernet, scheduled</td><td class="c-grn">&micro;s, guaranteed</td><td>The convergence layer &mdash; time-critical and ordinary traffic on one wire</td><td><a href="A37_TSN_Deterministic_Ethernet_Deep_Dive.html">A37</a></td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">WHAT IS GENUINELY NEW &mdash; AND IT IS NOT WHAT THE MARKETING SAYS <span class="tier t-core">CORE</span></div>
+      <p class="body">Three things changed between 2025 and 2026 that will still matter in five years. Everything else in the trade press this year is a variation on them.</p>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>TSN finally has a published industrial profile.</b> <b>IEC/IEEE&nbsp;60802:2026</b> is now issued &mdash; the joint IEC/IEEE profile that selects <i>which</i> of the two dozen TSN sub-standards an industrial network must implement, with what defaults, plus YANG models so a device can describe its own capabilities as a machine-readable data sheet. This was the missing piece: TSN's individual mechanisms have existed for years, but without a profile every vendor implemented a different subset and nothing interoperated. Expect conformance-tested multi-vendor TSN to become real over the next two to three years, not immediately. See <a href="A37_TSN_Deterministic_Ethernet_Deep_Dive.html">A37</a>.</span></li>
+        <li><span class="num">2</span><span><b>Single-Pair Ethernet grew out of the process industry.</b> <b>Ethernet-APL</b> &mdash; 10BASE-T1L carrying data <i>and</i> power on one twisted pair, for up to 1,000&nbsp;m, in intrinsically safe hazardous areas &mdash; is in production use, developed jointly by FieldComm Group, ODVA, the OPC Foundation and PI. In <b>December 2025</b> those bodies published a unified SPE specification extending 10BASE-T1L and Power-over-Data-Line to <i>higher-powered devices in ordinary factory environments</i>, not just hazardous process ones, and <b>100BASE-T1L</b> is in development. The significance for a plant engineer: the four-wire-plus-power sensor cable, and the analogue 4&ndash;20&nbsp;mA loop it often replaces, finally have a two-wire Ethernet successor that reaches the field device.</span></li>
+        <li><span class="num">3</span><span><b>OPC UA is pushing down to the field level.</b> <b>OPC UA FX</b> (Field eXchange) extends OPC UA from its traditional home above the PLC down to controller-to-controller and controller-to-device communication, running over TSN so that time-critical and ordinary traffic share one secure network. A multi-vendor prototyping interoperability event ran in <b>February 2026</b>, and release candidates of the UAFX 1.00 series added new specification parts. It is real engineering with real momentum &mdash; and it is still early. Treat it as something to <i>watch and evaluate</i>, not something to specify on a plant that must run next year.</span></li>
+      </ul>
+      <div class="career"><span class="ci">&#128200;</span><p><b>The honest Sri&nbsp;Lankan read.</b> In the plants you will actually walk into, <b>Modbus RTU is still the most common thing on the wire</b>, PROFINET and EtherNet/IP dominate machinery imported from Europe and America respectively, EtherCAT arrives inside machine builders' equipment, and IO-Link is spreading fast because it needs no new network &mdash; it sits under whatever you already have. TSN, APL and OPC UA FX are genuinely important and almost entirely <b>greenfield</b>. Learn them so you can evaluate a proposal and are not sold something a site cannot support; do not expect to commission one this year. <b>The engineer who can make a twenty-year-old Modbus network reliable is worth more, today, in this country, than one who can recite the TSN sub-standards.</b></p></div>
+    </div>
+
+    <div class="card">
+      <div class="label">FIVE THINGS THAT ARE NOT NEW, AND KEEP BEING SOLD AS NEW <span class="tier t-stretch">STRETCH</span></div>
+      <div class="fail-grid">
+        <div class="fail"><div class="ft">&ldquo;Industrial Ethernet is faster&rdquo;</div><p>Its <b>bandwidth</b> is larger. Its <b>determinism</b> depends entirely on which layer it cuts into (<a href="#p10">page&nbsp;10</a>). Modbus TCP on office switches can be less predictable than Modbus RTU on a cable.</p></div>
+        <div class="fail"><div class="ft">&ldquo;Wireless removes cost&rdquo;</div><p>It removes cable and adds interference management, coexistence surveys, battery replacement and a security surface. It is a tool for places cable cannot go.</p></div>
+        <div class="fail"><div class="ft">&ldquo;Cloud connectivity&rdquo;</div><p>Almost always means an edge gateway polling the same registers you already have and posting them upward. The hard part is still <a href="#p3">page&nbsp;3</a> &mdash; knowing what the numbers mean.</p></div>
+        <div class="fail"><div class="ft">&ldquo;Protocol X is open&rdquo;</div><p>Check what is open: the specification, the conformance testing, or the implementation? Several &ldquo;open&rdquo; industrial protocols require membership to obtain a device ID.</p></div>
+        <div class="fail"><div class="ft">&ldquo;Gigabit will fix our latency&rdquo;</div><p>Latency on a lightly loaded industrial network is dominated by device turnaround and switch queuing, not by transmission time. Ten times the bandwidth typically buys a few per cent (<a href="#p1">page&nbsp;1</a>).</p></div>
+        <div class="fail"><div class="ft">&ldquo;It is a plug-and-play standard&rdquo;</div><p>Every industrial protocol has vendor-specific profiles, optional features and device description files. Interoperability is a conformance-testing achievement, not a promise on a datasheet.</p></div>
+      </div>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>You should now be able to look at any plant's network drawing and place every box in the table above &mdash; and to say, for each, which of the five media-access families it belongs to and roughly what cycle time it can promise.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 12 ============ -->
+  <section class="page" id="p12">
+    <div class="page-tag">Page 12 / 14<span class="rt">&middot; ~10 min</span></div>
+    <h2 class="page-title">Choosing &mdash; Seven Questions, in This Order</h2>
+
+    <div class="card">
+      <div class="label">ASK THESE BEFORE YOU OPEN A CATALOGUE <span class="tier t-core">CORE</span></div>
+      <ol class="tips" style="list-style:none">
+        <li><span class="num">1</span><span><b>What is already on this site?</b> Almost always the deciding question, and almost always asked last. A second protocol means a second set of spares, a second engineering tool, a second body of knowledge and a gateway that will be blamed for everything. <b>Matching the plant standard beats a technically better choice</b> unless the requirement genuinely cannot be met.</span></li>
+        <li><span class="num">2</span><span><b>What cycle time does the <i>process</i> need?</b> Not what the vendor offers &mdash; what the physics requires (<a href="#p9">page&nbsp;9</a>). A tank level does not need 1&nbsp;ms. Paying for determinism you cannot use is the most common over-specification in this field.</span></li>
+        <li><span class="num">3</span><span><b>How far, and through what?</b> 30&nbsp;m in a panel, 400&nbsp;m across a shed, 3&nbsp;km to a pump station and a hazardous area are four different problems with four different answers.</span></li>
+        <li><span class="num">4</span><span><b>How many devices, and will that number grow?</b> Design for the plant in five years. Retrofitting a bus that is full is far more expensive than over-sizing one now.</span></li>
+        <li><span class="num">5</span><span><b>Who supports it in this country?</b> A protocol with no local spares, no local training and no local integrator is a risk that lands on you personally at 2&nbsp;a.m. This weighs more heavily in Sri&nbsp;Lanka than in Germany, and it is a legitimate engineering criterion, not a compromise.</span></li>
+        <li><span class="num">6</span><span><b>What happens when it fails?</b> Topology (<a href="#p6">page&nbsp;6</a>) plus watchdog behaviour. Answer this <i>before</i> selection, because it may force a ring, and rings must be designed in, not added.</span></li>
+        <li><span class="num">7</span><span><b>Does the data need to leave the cell?</b> If it must reach SCADA, MES or a cloud, you need an information layer (OPC UA or MQTT) as well as a control layer. Plan the two together, not as an afterthought &mdash; the afterthought version is a PC in a corner running an unsupported script, and every plant has one.</span></li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <div class="label">INTERACTIVE &mdash; THE SELECTOR <span class="tier t-core">CORE</span></div>
+      <p class="body">A rule-based shortlist, not an oracle. Its value is that it shows you <b>why</b> &mdash; and it will tell you when your requirements are contradictory, which is the most useful thing a selection tool can do.</p>
+      <div class="demo">
+        <div class="demo-row"><span>What are you connecting?</span><b>select</b></div>
+        <div class="seg" id="d4w">
+          <button class="on" data-w="sensor">a field sensor or valve</button>
+          <button data-w="drive">a drive or motion axis</button>
+          <button data-w="io">PLC to remote I/O</button>
+          <button data-w="plc">PLC to PLC</button>
+          <button data-w="scada">PLC to SCADA</button>
+          <button data-w="cloud">plant to MES or cloud</button>
+        </div>
+        <div class="demo-row"><span>Cycle time the process actually needs</span><b>select</b></div>
+        <div class="seg" id="d4c">
+          <button data-c="1000">1 s or slower</button>
+          <button class="on" data-c="100">100 ms</button>
+          <button data-c="10">10 ms</button>
+          <button data-c="1">1 ms</button>
+          <button data-c="0.25">under 250 &micro;s</button>
+        </div>
+        <div class="demo-row"><span>Distance and environment</span><b>select</b></div>
+        <div class="seg" id="d4d">
+          <button class="on" data-d="panel">inside a machine or panel</button>
+          <button data-d="plant">across a plant, under 1 km</button>
+          <button data-d="site">across a site or remote</button>
+          <button data-d="hazard">hazardous area</button>
+        </div>
+        <div class="demo-row"><span>What the plant already runs</span><b>select</b></div>
+        <div class="seg" id="d4p">
+          <button class="on" data-p="none">nothing / greenfield</button>
+          <button data-p="siemens">Siemens</button>
+          <button data-p="rockwell">Rockwell</button>
+          <button data-p="mixed">a mix of machine builders</button>
+        </div>
+        <div class="demo-out" id="d4out"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">EIGHT MISTAKES THAT COST REAL PROJECTS <span class="tier t-core">CORE</span></div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Mistake</th><th>What it looks like six months later</th></tr>
+        <tr><td>Choosing on <b>bandwidth</b> instead of determinism</td><td>A gigabit network that misses a 10 ms deadline once a minute</td></tr>
+        <tr><td>Ignoring the existing plant standard</td><td>Two engineering tools, two spares kits, a gateway nobody understands</td></tr>
+        <tr><td>Designing the network without designing the <b>failure</b></td><td>A cut cable stops the plant, and the risk assessment never mentioned it</td></tr>
+        <tr><td>No spare capacity &mdash; bus or address space filled at commissioning</td><td>The next machine needs a whole new network</td></tr>
+        <tr><td>Unmanaged switches to save money</td><td>No diagnostics, no priority, no VLANs, no ring &mdash; and no way to find a fault</td></tr>
+        <tr><td>No documented register or tag map</td><td>The one person who knew leaves, and the data becomes uninterpretable (<a href="#p3">page&nbsp;3</a>)</td></tr>
+        <tr><td>Control and IT traffic on one flat network</td><td>A backup job or a security scan delays a machine (<a href="#p13">page&nbsp;13</a>)</td></tr>
+        <tr><td>Treating the gateway as the easy part</td><td>The gateway is where every word-order, scaling and timeout problem in this primer arrives at once</td></tr>
+      </table></div>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>If you can ask the seven questions and defend the answer, you can sit in a vendor meeting without being sold to. That is the practical goal of this primer.</p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 13 ============ -->
+  <section class="page" id="p13">
+    <div class="page-tag">Page 13 / 14<span class="rt">&middot; ~9 min</span></div>
+    <h2 class="page-title">Security in One Page &mdash; Why OT Is Not IT</h2>
+
+    <div class="card">
+      <div class="label">THE PRIORITY INVERSION <span class="tier t-core">CORE</span></div>
+      <p class="lead">IT security ranks its goals <b>Confidentiality, Integrity, Availability</b>. Operational technology ranks them in exactly the opposite order &mdash; and almost every conflict between an IT department and a plant comes from this one inversion.</p>
+      <div class="eqn">        IT                          OT
+   1. Confidentiality          1. <b class="c-grn">AVAILABILITY</b>   the plant must run
+   2. Integrity                2. Integrity      the data must be true
+   3. Availability             3. Confidentiality nobody will steal a
+                                                  conveyor's speed setpoint
+
+Consequences the IT department will find strange, and which are correct:
+   &bull; you cannot patch during production
+   &bull; you cannot reboot for updates
+   &bull; you cannot run an aggressive vulnerability scan on a live PLC
+     network - some PLCs fall over when scanned
+   &bull; an account lockout policy that locks out an operator at 3 a.m.
+     is a <b>safety</b> problem, not an inconvenience</div>
+    </div>
+
+    <div class="card">
+      <div class="label">THE UNCOMFORTABLE TRUTH ABOUT THE PROTOCOLS <span class="tier t-core">CORE</span></div>
+      <p class="body">Read this once and it will change how you design networks for the rest of your career. <b>Modbus, PROFINET&nbsp;RT, EtherCAT, CAN, PROFIBUS and most other control protocols have no authentication of any kind.</b> There is no password, no signature, no identity check. Any device physically connected to the wire can send any command to any node, and every node will obey.</p>
+      <div class="eqn">A laptop plugged into a Modbus network can write to any register on
+any device, at any time. This is not a vulnerability in Modbus.
+It is <b>the design</b>, from 1979, for a private cable inside a locked plant.
+
+Therefore:  <b class="c-grn">security comes from the network's shape, not from the protocol.</b>
+
+The formal name for this is <b>zones and conduits</b> (IEC 62443, see <a href="A54_OT_Cybersecurity_Deep_Dive.html">A54</a>):
+group assets by required protection into <b>zones</b>, and allow traffic
+between zones only through defined, controlled <b>conduits</b>.</div>
+      <p class="body">This is also why &ldquo;just put the PLCs on the office network so IT can reach them&rdquo; fails in four separate ways at once: broadcast traffic disturbs cycle times; a DHCP server changes a device's address after a power cut; a routine vulnerability scan can crash older controllers; and ransomware that lands on a laptop in accounts now has a route to a machine that moves a two-tonne press.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">THE REALISTIC MINIMUM FOR A PLANT LIKE YOURS <span class="tier t-core">CORE</span></div>
+      <p class="body">Not a compliance programme. Eight things a single competent engineer can do, in order of value per hour spent.</p>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>Know what is on the network.</b> An asset inventory &mdash; device, address, firmware, function, who supports it. Nothing else on this list is possible without it, and almost no plant has one.</span></li>
+        <li><span class="num">2</span><span><b>Separate control from office.</b> At minimum a managed switch with VLANs; properly, a firewall between the two with only the specific traffic you need crossing it. This one step removes most of the realistic risk.</span></li>
+        <li><span class="num">3</span><span><b>No direct internet exposure. Ever.</b> No PLC, HMI or gateway with a public IP, no port forwarded &ldquo;temporarily&rdquo; for a vendor. Internet-exposed industrial controllers are found by automated scanning within hours.</span></li>
+        <li><span class="num">4</span><span><b>Back up every PLC and HMI program, off the machine, and test the restore.</b> The most common serious OT incident in a plant this size is not an attack &mdash; it is a failed controller and a program nobody can find.</span></li>
+        <li><span class="num">5</span><span><b>Remote access through a VPN with multi-factor authentication</b>, enabled only when needed. Vendor remote support is the single most common way something unwanted arrives.</span></li>
+        <li><span class="num">6</span><span><b>Change default passwords and stop sharing one account.</b> Trivial, universally ignored, and the first thing any assessment will find.</span></li>
+        <li><span class="num">7</span><span><b>Control USB and the engineering laptop.</b> The laptop that touches every machine is the most dangerous object in the building.</span></li>
+        <li><span class="num">8</span><span><b>Enable and read the logs you already have.</b> Managed switches, firewalls and modern PLCs log more than anyone looks at (<a href="#p7">page&nbsp;7</a> &mdash; the same discipline as error counters).</span></li>
+      </ul>
+      <div class="career"><span class="ci">&#128200;</span><p>Security is where a mechanical engineer who understands the plant beats a security specialist who does not. <b>The specialist knows the attacks; you know what the machine does when it loses communication</b> &mdash; and that second question is what turns a vulnerability into a consequence, and a consequence into a business case. Learn enough IEC&nbsp;62443 vocabulary to hold the conversation (<a href="A54_OT_Cybersecurity_Deep_Dive.html">A54</a>) and let your process knowledge do the rest.</p></div>
+    </div>
+
+    <div class="checkpoint">
+      <span class="cp-t">CHECKPOINT</span>
+      <p>One sentence to carry into every network design meeting: <b>&ldquo;these protocols have no authentication, so the segmentation <i>is</i> the security.&rdquo;</b></p>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 14 ============ -->
+  <section class="page" id="p14">
+    <div class="page-tag">Page 14 / 14<span class="rt">&middot; ~10 min</span></div>
+    <h2 class="page-title">Your Route from Here</h2>
+
+    <div class="card">
+      <div class="label">TEN THINGS YOU CAN NOW DO <span class="tier t-core">CORE</span></div>
+      <p class="body">Tick these honestly. Anything unticked is a page to re-read, not a reason to stop.</p>
+      <div class="grid-2">
+        <div class="mini c-sky"><h4>Diagnose</h4><p>1&nbsp;&middot; Check termination with a meter (60&nbsp;&Omega;) &nbsp;&bull;&nbsp; 2&nbsp;&middot; Spot an illegal stub &nbsp;&bull;&nbsp; 3&nbsp;&middot; Tell a CRC fault from a configuration fault &nbsp;&bull;&nbsp; 4&nbsp;&middot; Find and read a device's error counters</p></div>
+        <div class="mini c-org"><h4>Calculate</h4><p>5&nbsp;&middot; Character time from baud and frame format &nbsp;&bull;&nbsp; 6&nbsp;&middot; A whole polling budget including timeouts &nbsp;&bull;&nbsp; 7&nbsp;&middot; The real update rate behind a dashboard</p></div>
+        <div class="mini c-teal"><h4>Decide</h4><p>8&nbsp;&middot; Place any protocol in one of the five access families &nbsp;&bull;&nbsp; 9&nbsp;&middot; Match a cycle-time requirement to a protocol class &nbsp;&bull;&nbsp; 10&nbsp;&middot; Say why segmentation is the security</p></div>
+        <div class="mini c-grn"><h4>And the habit</h4><p>Check the <b>physical layer</b> before the protocol manual, every single time. Sixty per cent of the faults are there.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">THE ORDERED PATH INTO THE DEEP MODULES <span class="tier t-core">CORE</span></div>
+      <p class="body">Read them in this order. Each one adds a specific idea that the next assumes &mdash; and every one of them opens with a real plant losing real money, which is the fastest way into a protocol you have never met.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>#</th><th>Module</th><th>What it adds that this primer could not</th></tr>
+        <tr><td>1</td><td><b><a href="A01_Modbus_RTU_Deep_Dive.html">A01 Modbus RTU</a></b></td><td>The whole of this primer, made concrete on one protocol: the serial scan-budget law, the RS-485 physical layer in depth, CRC algebra, and the word-order and endianness problem in full. <b>Read this one slowly &mdash; it teaches the vocabulary all the others reuse.</b></td></tr>
+        <tr><td>2</td><td><b><a href="A02_PROFINET_Deep_Dive.html">A02 PROFINET</a></b></td><td>The jump to Ethernet: frame-time budgets, the store-and-forward and blocking latency law through switches, conformance and net-load classes, and PROFIsafe response time.</td></tr>
+        <tr><td>3</td><td><b><a href="A03_EtherCAT_Deep_Dive.html">A03 EtherCAT</a></b></td><td>What &ldquo;processing on the fly&rdquo; really means: the summation-frame advantage, the chain law, the distributed-clock derivation, and why delay and jitter are different problems.</td></tr>
+        <tr><td>4</td><td><b><a href="A05_IO_Link_Deep_Dive.html">A05 IO-Link</a></b></td><td>The last three metres. The cycle law and its 72.7&nbsp;% efficiency ceiling, parameter bandwidth, and the asynchronous-cascade result &mdash; that a chain of samplers collapses to its slowest member.</td></tr>
+        <tr><td>5</td><td><b><a href="A04_CAN_Bus_Deep_Dive.html">A04 CAN Bus</a></b></td><td>A genuinely different model: addressing the subject rather than the device, bitwise arbitration, worst-case response-time analysis, and fault confinement.</td></tr>
+        <tr><td>6</td><td><b><a href="A06_OPC_UA_Deep_Dive.html">A06 OPC UA</a></b></td><td>Moving from numbers to <b>meaning</b>: information models, address spaces, subscriptions, security, and the &ldquo;latency &times; operation count is the budget&rdquo; law.</td></tr>
+        <tr><td>7</td><td><b><a href="A37_TSN_Deterministic_Ethernet_Deep_Dive.html">A37 TSN</a></b></td><td>How one wire carries time-critical and ordinary traffic: gPTP synchronisation, scheduled gates, frame preemption and dual-path redundancy.</td></tr>
+        <tr><td>8</td><td><b><a href="A54_OT_Cybersecurity_Deep_Dive.html">A54 OT Cybersecurity</a></b></td><td>Page&nbsp;13 of this primer, done properly: IEC&nbsp;62443 zones and conduits, the Purdue model, segmentation architecture and a real programme.</td></tr>
+      </table></div>
+      <p class="body">Two side paths worth taking when they become relevant rather than in sequence: <b><a href="A50_Instrumentation_Calibration_PID_Deep_Dive.html">A50 Instrumentation</a></b> for 4&ndash;20&nbsp;mA, HART and P&amp;IDs, and <b><a href="A14_SCADA_HMI_Deep_Dive.html">A14 SCADA &amp; HMI</a></b> for what happens to the data after it arrives.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">A FOUR-WEEK PRACTICAL PLAN <span class="tier t-core">CORE</span></div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Week</th><th>Do this with your hands</th><th>You will learn</th></tr>
+        <tr><td><b>1</b></td><td>Find every network cable in one machine or one line. Draw the topology on paper &mdash; every device, every switch, every termination. Do not use a computer.</td><td>More than any reading. Almost no plant has this drawing, and yours will immediately be the best document about that machine.</td></tr>
+        <tr><td><b>2</b></td><td>Get a USB-to-RS-485 adapter (a few thousand rupees) and free Modbus master software. Talk to one real device &mdash; an energy meter or a drive. Read a register you can verify against its own display.</td><td>Pages 3, 4 and 7 become physical. <b>This is the single highest-value afternoon in the whole track.</b></td></tr>
+        <tr><td><b>3</b></td><td>Measure the scan time of a live system: log timestamps and find how often a value actually changes. Compare with what the SCADA claims.</td><td>Page 9. You will very likely find the same aliasing the Kaduwela plant had.</td></tr>
+        <tr><td class="c-grn"><b>4</b></td><td class="c-grn">Read the error counters on every managed switch and serial gateway you can reach. Write them down. Repeat monthly.</td><td class="c-grn">You now have the only early-warning system a digital network offers &mdash; and a trend nobody else in the building has.</td></tr>
+      </table></div>
+      <div class="career"><span class="ci">&#128200;</span><p><b>Week 2 is the one that changes things.</b> A USB-to-RS-485 adapter and a free Modbus master turn this entire primer from reading into skill in about three hours, and they cost less than a good meal. Every concept on pages 3 to 9 becomes something you can see move on a screen. If you do only one thing from this page, do that.</p></div>
+    </div>
+
+    <div class="card">
+      <div class="label">GLOSSARY <span class="tier t-core">CORE</span></div>
+      <div class="tbl-wrap"><table>
+        <tr><th>Term</th><th>Meaning</th></tr>
+        <tr><td><b>Baud</b></td><td>Signal changes per second. On these systems, equal to bits per second on the wire &mdash; including framing overhead.</td></tr>
+        <tr><td><b>Common-mode</b></td><td>Voltage present on <i>both</i> wires of a pair equally. Differential receivers reject it &mdash; but only within a stated window (&minus;7 to +12&nbsp;V for RS-485).</td></tr>
+        <tr><td><b>CRC</b></td><td>Cyclic Redundancy Check. A remainder computed over the frame that detects essentially all realistic corruption. Detects; never corrects.</td></tr>
+        <tr><td><b>CSMA/CD, CSMA/CR</b></td><td>Collision Detection (back off randomly &mdash; not deterministic) and Collision Resolution (CAN's bitwise arbitration &mdash; deterministic).</td></tr>
+        <tr><td><b>Cycle time</b></td><td>How often the whole data exchange repeats.</td></tr>
+        <tr><td><b>Determinism</b></td><td>A guaranteed <b>worst-case</b> delivery time. Not speed.</td></tr>
+        <tr><td><b>Differential signalling</b></td><td>Sending on two wires and reading their difference, so shared noise cancels. The basis of RS-485, CAN and Ethernet.</td></tr>
+        <tr><td><b>Endianness / word order</b></td><td>Which half of a 32-bit value is sent first. Undefined by Modbus, and therefore the most common data fault in industry.</td></tr>
+        <tr><td><b>Fieldbus</b></td><td>A digital network reaching down to field devices, replacing point-to-point wiring.</td></tr>
+        <tr><td><b>Frame</b></td><td>One complete message: start, address, control, payload, check.</td></tr>
+        <tr><td><b>Jitter</b></td><td>Variation in latency between cycles. The number that decides whether motion can be coordinated.</td></tr>
+        <tr><td><b>Latency</b></td><td>Time for one message, end to end.</td></tr>
+        <tr><td><b>Master / slave</b></td><td>The polling model: one device asks, the others only answer. Now often called client/server or controller/device.</td></tr>
+        <tr><td><b>OT / IT</b></td><td>Operational Technology (things that move) versus Information Technology (things that compute). Different priorities &mdash; see page&nbsp;13.</td></tr>
+        <tr><td><b>Purdue model</b></td><td>The layered reference architecture (levels 0&ndash;5) used to describe plant network segmentation.</td></tr>
+        <tr><td><b>Register</b></td><td>A 16-bit value. The native unit of Modbus.</td></tr>
+        <tr><td><b>Repeater</b></td><td>A device that regenerates a signal, extending distance or device count &mdash; and, when isolated, breaking a ground loop.</td></tr>
+        <tr><td><b>Stub</b></td><td>A branch off a bus. Must be very short (~2&nbsp;m) or it reflects.</td></tr>
+        <tr><td><b>Termination</b></td><td>A resistor matching the cable's characteristic impedance, fitted at each end, that absorbs the signal instead of reflecting it.</td></tr>
+        <tr><td><b>Throughput</b></td><td>Data per second. The most advertised and least important of the four time quantities.</td></tr>
+        <tr><td><b>TSN</b></td><td>Time-Sensitive Networking &mdash; IEEE 802.1 mechanisms that make standard Ethernet deterministic. Industrial profile: <b>IEC/IEEE 60802:2026</b>.</td></tr>
+        <tr><td><b>Turnaround time</b></td><td>How long a device takes to think before answering. Frequently larger than the transmission time, and unaffected by baud rate.</td></tr>
+        <tr><td><b>UART</b></td><td>The hardware that turns bytes into serial bits and back, adding start, parity and stop bits.</td></tr>
+        <tr><td><b>Watchdog</b></td><td>A timer that detects lost communication and triggers a defined failure action. Every industrial link needs one.</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="label">HONEST GAPS &mdash; WHAT THIS PRIMER DID NOT COVER <span class="tier t-stretch">STRETCH</span></div>
+      <ul class="tips">
+        <li><span class="num">1</span><span><b>The mathematics of any specific protocol.</b> Deliberately &mdash; that is what A01 to A06 are for. This primer is the vocabulary, not the grammar.</span></li>
+        <li><span class="num">2</span><span><b>Wireless in depth</b> &mdash; WirelessHART, ISA-100, IO-Link Wireless, industrial Wi-Fi and private 5G. Each has its own coexistence and determinism story.</span></li>
+        <li><span class="num">3</span><span><b>Functional safety over networks</b> &mdash; PROFIsafe, CIP Safety, FSoE. The &ldquo;black channel&rdquo; principle deserves its own treatment (<a href="A52_Functional_Safety_SIL_Deep_Dive.html">A52</a>).</span></li>
+        <li><span class="num">4</span><span><b>Process instrumentation protocols</b> &mdash; HART, FOUNDATION Fieldbus, PROFIBUS PA and Ethernet-APL in practice (<a href="A50_Instrumentation_Calibration_PID_Deep_Dive.html">A50</a>).</span></li>
+        <li><span class="num">5</span><span><b>Practical network diagnostics with instruments</b> &mdash; oscilloscope on a bus, protocol analysers, PROFIBUS/PROFINET certification tools. The next thing to learn once you have done the four-week plan.</span></li>
+      </ul>
+    </div>
+
+    <div class="card memory">
+      <div class="label">MEMORY HOOK</div>
+      <div class="quote">&ldquo;A voltage, a bit, a frame, a checksum, a turn to speak &mdash; and a promise about when.&rdquo;</div>
+    </div>
+
+    <div class="footer">
+      <p><b>B05 &middot; Industrial Communication from Zero &mdash; Bridge Primer</b><br>
+      Part of the on-ramp series &middot; Next in the Networks spine:
+      <a href="A01_Modbus_RTU_Deep_Dive.html">A01 Modbus RTU</a><br>
+      <a href="START_HERE.html">&larr; The Learning Path</a> &middot;
+      <a href="index.html">Advanced Library</a></p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ---------- predict-first cards ---------- */
+function pk(btn, idx){
+  var opts = btn.parentNode;
+  if (opts.classList.contains('done')) return;
+  opts.classList.add('done');
+  var ans = opts.parentNode.querySelector('.p-ans');
+  var correct = parseInt(ans.getAttribute('data-correct'), 10);
+  var btns = opts.getElementsByTagName('button');
+  for (var i = 0; i < btns.length; i++){
+    if (i === correct) btns[i].classList.add('right');
+    if (i === idx && i !== correct) btns[i].classList.add('wrong');
+    if (i === idx) btns[i].classList.add('picked');
+  }
+  var v = ans.querySelector('.p-verdict');
+  if (v){
+    if (idx === correct){ v.innerHTML = '&#9989; Correct &mdash; and now the reasoning, which is the part worth keeping. '; }
+    else { v.innerHTML = '&#128161; Not this time &mdash; and that is exactly the moment the explanation sticks best. '; }
+  }
+  ans.classList.add('show');
+}
+
+/* ---------- progress bar + page chip ---------- */
+(function(){
+  var bar = document.getElementById('prog');
+  var chip = document.getElementById('pnow');
+  var pages = document.querySelectorAll('section.page');
+  var ticking = false;
+  function update(){
+    ticking = false;
+    var h = document.documentElement;
+    var max = (h.scrollHeight - h.clientHeight);
+    var pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+    if (bar) bar.style.width = pct + '%';
+    if (chip && pages.length){
+      var mid = window.innerHeight * 0.35, cur = 1;
+      for (var i = 0; i < pages.length; i++){
+        if (pages[i].getBoundingClientRect().top <= mid) cur = i + 1;
+      }
+      if (chip.textContent != cur) chip.textContent = cur;
+    }
+  }
+  function onScroll(){ if (!ticking){ ticking = true; window.requestAnimationFrame(update); } }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll);
+  update();
+})();
+
+/* ---------- demos ---------- */
+(function(){
+  function q05(id){ return document.getElementById(id); }
+  function v05(id){ var e = q05(id); return e ? parseFloat(e.value) : 0; }
+  function s05(id, t){ var e = q05(id + '_v'); if (e) e.innerHTML = t; }
+  function o05(id, html){ var e = q05(id); if (e) e.innerHTML = html; }
+  function f05(x, d){ return (isFinite(x) ? x.toFixed(d) : '--'); }
+  function bind05(ids, fn){
+    for (var i = 0; i < ids.length; i++){ var e = q05(ids[i]); if (e) e.addEventListener('input', fn); }
+    fn();
+  }
+  function seg05(groupId, attr, fn){
+    var g = q05(groupId); var cur = null;
+    if (!g) return function(){ return cur; };
+    var btns = g.getElementsByTagName('button');
+    for (var i = 0; i < btns.length; i++){
+      if (btns[i].className.indexOf('on') >= 0) cur = btns[i].getAttribute(attr);
+      (function(b){
+        b.addEventListener('click', function(){
+          for (var j = 0; j < btns.length; j++){ btns[j].classList.remove('on'); }
+          b.classList.add('on');
+          cur = b.getAttribute(attr);
+          fn();
+        });
+      })(btns[i]);
+    }
+    return function(){ return cur; };
+  }
+  var GOOD = '<b style="color:#4ade80">', BAD = '<b style="color:#f87171">', WARN = '<b style="color:#fbbf24">', E = '</b>';
+
+  function parseReg(txt){
+    if (!txt) return 0;
+    txt = txt.replace(/\s/g, '');
+    var n;
+    if (/^0[xX]/.test(txt)) n = parseInt(txt.slice(2), 16);
+    else if (/^[0-9]+$/.test(txt)) n = parseInt(txt, 10);
+    else n = parseInt(txt, 16);
+    if (!isFinite(n) || n < 0) n = 0;
+    return n & 0xFFFF;
+  }
+  function hex4(n){ var s = (n >>> 0).toString(16).toUpperCase(); while (s.length < 4) s = '0' + s; return '0x' + s; }
+  function bin16(n){
+    var s = '';
+    for (var i = 15; i >= 0; i--){ s += ((n >> i) & 1); if (i % 4 === 0 && i > 0) s += ' '; }
+    return s;
+  }
+  function toFloat(u32){
+    var buf = new ArrayBuffer(4), dv = new DataView(buf);
+    dv.setUint32(0, u32 >>> 0, false);
+    return dv.getFloat32(0, false);
+  }
+  function fmtF(x){
+    if (!isFinite(x)) return 'not a number';
+    var a = Math.abs(x);
+    if (a !== 0 && (a < 0.001 || a >= 1e7)) return x.toExponential(4);
+    return x.toFixed(4);
+  }
+
+  /* ===== D1 register decoder ===== */
+  (function(){
+    if (!q05('d1out')) return;
+    var getS;
+    function run(){
+      var r1 = parseReg(q05('d1r1') ? q05('d1r1').value : ''),
+          r2 = parseReg(q05('d1r2') ? q05('d1r2').value : '');
+      var sc = parseFloat(getS() || '1');
+      s05('d1s', sc);
+      var i16a = (r1 > 32767) ? r1 - 65536 : r1;
+      var i16b = (r2 > 32767) ? r2 - 65536 : r2;
+      var hiFirst = ((r1 << 16) >>> 0) + r2;
+      var loFirst = ((r2 << 16) >>> 0) + r1;
+      var s32hi = hiFirst > 2147483647 ? hiFirst - 4294967296 : hiFirst;
+      var s32lo = loFirst > 2147483647 ? loFirst - 4294967296 : loFirst;
+      var fhi = toFloat(hiFirst), flo = toFloat(loFirst);
+      var plaus = [];
+      if (Math.abs(fhi) > 1e-4 && Math.abs(fhi) < 1e6) plaus.push('float32 high-word-first');
+      if (Math.abs(flo) > 1e-4 && Math.abs(flo) < 1e6) plaus.push('float32 low-word-first');
+      if (hiFirst < 1e7) plaus.push('uint32 high-word-first');
+      if (loFirst < 1e7) plaus.push('uint32 low-word-first');
+      var hint = plaus.length
+        ? WARN + 'Plausible-looking interpretations: ' + plaus.join(', ') + '. Verify against a physical reading before you choose.' + E
+        : WARN + 'None of the 32-bit readings looks like a physical quantity. It is probably two independent 16-bit values.' + E;
+      o05('d1out',
+        '<b>Register 1</b> &nbsp; ' + hex4(r1) + ' &nbsp;=&nbsp; ' + r1 + ' &nbsp;=&nbsp; <span style="font-family:ui-monospace,monospace;color:#a3e635">' + bin16(r1) + '</span><br>' +
+        '<b>Register 2</b> &nbsp; ' + hex4(r2) + ' &nbsp;=&nbsp; ' + r2 + ' &nbsp;=&nbsp; <span style="font-family:ui-monospace,monospace;color:#a3e635">' + bin16(r2) + '</span><br>' +
+        '&nbsp;<br>' +
+        '<b>16-bit readings of register 1</b><br>' +
+        '&nbsp;&nbsp;unsigned &nbsp; <b>' + (r1 * sc).toFixed(sc < 1 ? 3 : 0) + '</b>' + (sc !== 1 ? ' &nbsp;(' + r1 + ' &times; ' + sc + ')' : '') + '<br>' +
+        '&nbsp;&nbsp;signed &nbsp;&nbsp;&nbsp; <b>' + (i16a * sc).toFixed(sc < 1 ? 3 : 0) + '</b>' + (i16a < 0 ? WARN + ' &nbsp;&#9668; negative only if the tag is set to signed' + E : '') + '<br>' +
+        '&nbsp;<br>' +
+        '<b>32-bit readings across both registers</b><br>' +
+        '&nbsp;&nbsp;uint32 high-word-first &nbsp; <b>' + hiFirst + '</b> &nbsp;(' + hex4(r1) + hex4(r2).slice(2) + ')<br>' +
+        '&nbsp;&nbsp;uint32 low-word-first &nbsp;&nbsp; <b>' + loFirst + '</b><br>' +
+        '&nbsp;&nbsp;int32 high-word-first &nbsp;&nbsp; <b>' + s32hi + '</b> &nbsp;&middot;&nbsp; low-word-first <b>' + s32lo + '</b><br>' +
+        '&nbsp;&nbsp;<b>float32</b> high-word-first &nbsp; <b>' + fmtF(fhi) + '</b><br>' +
+        '&nbsp;&nbsp;<b>float32</b> low-word-first &nbsp;&nbsp; <b>' + fmtF(flo) + '</b><br>' +
+        '&nbsp;<br>' + hint);
+    }
+    getS = seg05('d1s', 'data-s', run);
+    var a = q05('d1r1'), b = q05('d1r2');
+    if (a) a.addEventListener('input', run);
+    if (b) b.addEventListener('input', run);
+    run();
+  })();
+
+  /* ===== D2 baud / frame calculator ===== */
+  (function(){
+    if (!q05('d2out')) return;
+    var getB, getF;
+    function run(){
+      var baud = parseFloat(getB() || '9600'), fb = parseFloat(getF() || '11');
+      var qy = v05('d2q'), rs = v05('d2r'), ta = v05('d2t'), n = v05('d2n');
+      s05('d2q', qy); s05('d2r', rs); s05('d2t', ta); s05('d2n', n);
+      var bit = 1e6 / baud;
+      var ch = fb * bit / 1000;
+      var tq = qy * ch, tr = rs * ch;
+      var gap = (baud > 19200) ? 1.75 : 3.5 * ch;
+      var one = tq + ta + tr + gap;
+      var scan = one * n;
+      var payload = rs * 8;
+      var thru = payload / (one / 1000);
+      var eff = 100 * (8 / fb);
+      var wire = 100 * (tq + tr) / one;
+      var verdict;
+      if (scan <= 100) verdict = GOOD + '&#10003; whole-bus scan ' + f05(scan,1) + ' ms &mdash; fast enough for machine sequencing' + E;
+      else if (scan <= 1000) verdict = GOOD + '&#10003; whole-bus scan ' + f05(scan/1000,2) + ' s &mdash; fine for process and energy data' + E;
+      else if (scan <= 5000) verdict = WARN + '&#9888; whole-bus scan ' + f05(scan/1000,2) + ' s &mdash; log no faster than this' + E;
+      else verdict = BAD + '&#10007; whole-bus scan ' + f05(scan/1000,2) + ' s &mdash; any dashboard built on this is aliased' + E;
+      o05('d2out',
+        'bit time &nbsp; 1/' + baud + ' = <b>' + f05(bit,2) + ' &micro;s</b><br>' +
+        'character &nbsp; ' + f05(fb,0) + ' bits &times; ' + f05(bit,2) + ' &micro;s = <b>' + f05(ch,3) + ' ms</b><br>' +
+        'framing efficiency &nbsp; 8/' + f05(fb,0) + ' = <b>' + f05(eff,1) + ' %</b> &mdash; the rest is start, parity and stop<br>' +
+        '&nbsp;<br>' +
+        'request &nbsp; ' + f05(qy,0) + ' bytes = <b>' + f05(tq,2) + ' ms</b><br>' +
+        'device turnaround &nbsp; <b>' + f05(ta,2) + ' ms</b><br>' +
+        'response &nbsp; ' + f05(rs,0) + ' bytes = <b>' + f05(tr,2) + ' ms</b><br>' +
+        'silent interval t3.5 &nbsp; <b>' + f05(gap,2) + ' ms</b>' + (baud > 19200 ? ' <span style="color:#fbbf24">(fixed at 1.75 ms above 19200 baud)</span>' : '') + '<br>' +
+        '<b>one exchange &nbsp; ' + f05(one,2) + ' ms</b> &nbsp; of which only ' + f05(wire,0) + ' % is actually on the wire<br>' +
+        '&nbsp;<br>' +
+        f05(n,0) + ' devices &nbsp;&rarr;&nbsp; <b>' + f05(scan,1) + ' ms</b> per complete scan = <b>' + f05(1000/scan,2) + ' updates/second</b><br>' +
+        'useful throughput &nbsp; <b>' + f05(thru,0) + ' bits/s</b> out of ' + baud + ' baud<br>' +
+        verdict);
+    }
+    getB = seg05('d2b', 'data-b', run);
+    getF = seg05('d2f', 'data-f', run);
+    bind05(['d2q','d2r','d2t','d2n'], run);
+  })();
+
+  /* ===== D3 polling budget ===== */
+  (function(){
+    if (!q05('d3out')) return;
+    var getS;
+    function calc(baud, n, blocks, regs, ta, dead, tout, retries){
+      var ch = 11 * (1e6 / baud) / 1000;
+      var gap = (baud > 19200) ? 1.75 : 3.5 * ch;
+      var req = 8 * ch;
+      var resp = (5 + 2 * regs) * ch;
+      var one = req + ta + resp + gap;
+      var live = n * blocks * one;
+      var lost = dead * blocks * retries * tout;
+      return { one: one, live: live, lost: lost, total: live + lost };
+    }
+    function run(){
+      var baud = parseFloat(getS() || '9600');
+      var n = v05('d3n'), blocks = v05('d3b'), regs = v05('d3r'), ta = v05('d3t');
+      var dead = v05('d3d'), tout = v05('d3o'), retries = v05('d3y');
+      s05('d3n', n); s05('d3b', blocks); s05('d3r', regs); s05('d3t', ta);
+      s05('d3d', dead); s05('d3o', tout); s05('d3y', retries);
+      var now = calc(baud, n, blocks, regs, ta, dead, tout, retries);
+      var noDead = calc(baud, n, blocks, regs, ta, 0, tout, retries);
+      var fast = calc(115200, n, blocks, regs, ta, dead, tout, retries);
+      var oneBlock = calc(baud, n, 1, regs * blocks, ta, 0, tout, retries);
+      var deadShare = now.total > 0 ? 100 * now.lost / now.total : 0;
+      var verdict;
+      if (now.total <= 500) verdict = GOOD + '&#10003; ' + f05(now.total,0) + ' ms per scan' + E;
+      else if (now.total <= 3000) verdict = WARN + '&#9888; ' + f05(now.total/1000,2) + ' s per scan &mdash; set the log interval to at least this' + E;
+      else verdict = BAD + '&#10007; ' + f05(now.total/1000,2) + ' s per scan &mdash; a dashboard logging faster than this is showing repeated values' + E;
+      var punch = (deadShare > 40)
+        ? BAD + '&#9888; ' + f05(deadShare,0) + ' % of the entire network\'s time is spent waiting for devices that never answer. Remove them from the poll list before anything else.' + E
+        : (deadShare > 5 ? WARN + f05(deadShare,0) + ' % of the scan is timeouts.' + E
+                         : GOOD + 'Timeouts are only ' + f05(deadShare,1) + ' % of the scan &mdash; healthy.' + E);
+      o05('d3out',
+        'one exchange &nbsp; <b>' + f05(now.one,2) + ' ms</b> &nbsp;(' + f05(regs,0) + ' registers at ' + baud + ' baud)<br>' +
+        'live devices &nbsp; ' + f05(n,0) + ' &times; ' + f05(blocks,0) + ' blocks = <b>' + f05(now.live,0) + ' ms</b><br>' +
+        'absent devices &nbsp; ' + f05(dead,0) + ' &times; ' + f05(blocks,0) + ' &times; ' + f05(retries,0) + ' tries &times; ' + f05(tout,0) + ' ms = <b style="color:#f87171">' + f05(now.lost,0) + ' ms</b><br>' +
+        '<b>TOTAL SCAN &nbsp; ' + f05(now.total,0) + ' ms</b> &nbsp;=&nbsp; ' + f05(now.total/1000,2) + ' s &nbsp;&rarr;&nbsp; ' + f05(1000/now.total,2) + ' updates/second<br>' +
+        verdict + '<br>&nbsp;<br>' +
+        '<b>What each fix would actually buy</b><br>' +
+        '&nbsp;&nbsp;remove the absent devices &nbsp;&rarr;&nbsp; <b style="color:#4ade80">' + f05(noDead.total/1000,2) + ' s</b> &nbsp;(' + f05(now.total/Math.max(noDead.total,0.001),1) + '&times; faster)<br>' +
+        '&nbsp;&nbsp;raise the baud rate to 115200 &nbsp;&rarr;&nbsp; <b>' + f05(fast.total/1000,2) + ' s</b> &nbsp;(' + f05(now.total/Math.max(fast.total,0.001),2) + '&times; faster)<br>' +
+        '&nbsp;&nbsp;one contiguous block <b>and</b> no absent devices &nbsp;&rarr;&nbsp; <b style="color:#4ade80">' + f05(oneBlock.total/1000,2) + ' s</b> &nbsp;(' + f05(now.total/Math.max(oneBlock.total,0.001),1) + '&times; faster)<br>' +
+        '&nbsp;<br>' + punch);
+    }
+    getS = seg05('d3s', 'data-s', run);
+    bind05(['d3n','d3b','d3r','d3t','d3d','d3o','d3y'], run);
+  })();
+
+  /* ===== D4 protocol selector ===== */
+  (function(){
+    if (!q05('d4out')) return;
+    var getW, getC, getD, getP;
+    function run(){
+      var w = getW() || 'sensor', c = parseFloat(getC() || '100');
+      var d = getD() || 'panel', p = getP() || 'none';
+      var pick = '', why = '', alt = '', warn = '';
+
+      if (w === 'cloud'){
+        pick = 'OPC UA, or MQTT with Sparkplug';
+        why = 'Above the control layer you need an information model and security, not a cycle time. OPC UA carries meaning and browsable structure; MQTT with Sparkplug is lighter and better over poor or intermittent links, and is the usual basis of a Unified Namespace.';
+        alt = 'Modbus TCP through a gateway if all you need is a handful of numbers.';
+      } else if (w === 'scada'){
+        pick = (c <= 10) ? 'The plant fieldbus itself, read by the SCADA driver' : 'OPC UA, or Modbus TCP';
+        why = 'SCADA rarely needs better than a few hundred milliseconds. OPC UA gives you named, typed, browsable data and real security; Modbus TCP gives you numbers, cheaply, from almost anything.';
+        alt = 'MQTT if the link is unreliable or the site is remote.';
+      } else if (w === 'drive' || (c <= 1)){
+        pick = 'EtherCAT';
+        why = 'Below about 1 ms with coordinated axes, you need a scheduled protocol that rewrites the data-link layer. EtherCAT processes frames on the fly and synchronises clocks to well under a microsecond.';
+        alt = 'PROFINET IRT if the plant is Siemens; SERCOS III on some machine tools; TSN-based systems for greenfield.';
+        if (c > 1) { warn = 'Note: at ' + c + ' ms you may not need EtherCAT at all - check whether the axes must be coordinated with each other, or merely commanded.'; }
+      } else if (w === 'sensor'){
+        pick = 'IO-Link';
+        why = 'IO-Link sits underneath whatever fieldbus you already have, needs no new network, and adds parameters, diagnostics and automatic device replacement to sensors and valve manifolds. It is the highest-value change available in the last three metres.';
+        alt = (d === 'hazard' || c >= 1000) ? '4-20 mA with HART, or Ethernet-APL for a new process plant.' : 'Plain digital or analogue I/O where the device has no parameters worth reading.';
+      } else if (w === 'io' || w === 'plc'){
+        if (p === 'siemens') { pick = 'PROFINET'; why = 'Match the plant. One toolchain, one spares kit, one body of knowledge - and PROFINET RT comfortably meets a 1-10 ms requirement.'; alt = 'PROFIBUS DP only when extending an existing installation.'; }
+        else if (p === 'rockwell') { pick = 'EtherNet/IP'; why = 'Match the plant. CIP over Ethernet is the native language of a Rockwell installation and meets 1-10 ms.'; alt = 'Modbus TCP for third-party devices that speak nothing else.'; }
+        else if (c <= 10) { pick = 'PROFINET or EtherNet/IP'; why = 'At 10 ms and below you want a layer-2 real-time protocol rather than polling over TCP. Both are mature; the choice should follow your controller vendor and local support.'; alt = 'EtherCAT if the same network must also run motion.'; }
+        else { pick = 'Modbus TCP'; why = 'At ' + c + ' ms with no existing standard, Modbus TCP is free, universally supported, trivially diagnosed and adequate. Do not buy determinism you cannot use.'; alt = 'PROFINET or EtherNet/IP if you expect the requirement to tighten later.'; }
+      }
+
+      if (d === 'hazard'){
+        warn += (warn ? ' ' : '') + 'Hazardous area: the physical layer is now the binding constraint. Look at Ethernet-APL (10BASE-T1L, data and power on one pair, intrinsically safe, up to 1,000 m) or the traditional 4-20 mA / HART and PROFIBUS PA route. Whatever protocol you choose must run over an approved physical layer.';
+      }
+      if (d === 'site' && (w === 'io' || w === 'drive')){
+        warn += (warn ? ' ' : '') + 'Control-layer traffic across a site is a design smell. Put a local controller at the remote end and exchange summaries, rather than stretching a real-time bus over distance.';
+      }
+      if (d === 'plant' && c <= 1){
+        warn += (warn ? ' ' : '') + 'Sub-millisecond determinism across a whole plant is very hard and rarely necessary. Keep the fast loop inside the machine and exchange slower data between machines.';
+      }
+      if (p !== 'none' && w !== 'cloud' && pick.indexOf('PROFINET') < 0 && pick.indexOf('EtherNet/IP') < 0 && p !== 'mixed'){
+        warn += (warn ? ' ' : '') + 'This site already standardises on ' + (p === 'siemens' ? 'Siemens' : 'Rockwell') + '. A second protocol is justified only if the requirement genuinely cannot be met otherwise - and that argument should be written down.';
+      }
+
+      o05('d4out',
+        '<b style="color:#c4b5fd;font-size:17px">' + pick + '</b><br>&nbsp;<br>' +
+        '<b>Why</b> &nbsp; ' + why + '<br>&nbsp;<br>' +
+        (alt ? '<b>Also consider</b> &nbsp; ' + alt + '<br>&nbsp;<br>' : '') +
+        (warn ? WARN + '&#9888; ' + warn + E : GOOD + '&#10003; No contradictions in these requirements.' + E));
+    }
+    getW = seg05('d4w', 'data-w', run);
+    getC = seg05('d4c', 'data-c', run);
+    getD = seg05('d4d', 'data-d', run);
+    getP = seg05('d4p', 'data-p', run);
+    run();
+  })();
+})();
+</script>
+</body>
+</html>

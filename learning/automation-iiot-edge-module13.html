@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 13 — Industrial IoT & Edge Computing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --fh:'Syne',sans-serif;
+  --fb:'Space Grotesk',sans-serif;
+  --fm:'JetBrains Mono',monospace;
+  --bg:#07080e;
+  --bg2:#0d0f1a;
+  --bg3:#111320;
+  --accent:#00ffd0;
+  --yellow:#ffe033;
+  --green:#34d399;
+  --red:#ff3b5c;
+  --orange:#ff8c00;
+  --purple:#c084fc;
+  --sky:#38bfff;
+  --pink:#f472b6;
+  --cyan:#00e5ff;
+  --white:#edf2ff;
+  --muted:#4a6080;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--white);font-family:var(--fb);min-height:100vh;padding:24px 16px 48px}
+.poster{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+/* HERO */
+.hero{border-radius:16px;padding:36px 32px 32px;background:linear-gradient(145deg,#0a1f1c,#0d0f1a);border:1.5px solid rgba(0,255,208,0.35);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(0,255,208,0.12) 0%,transparent 70%);pointer-events:none}
+.hero-mod{font-family:var(--fm);font-size:11px;letter-spacing:3px;color:var(--accent);margin-bottom:10px}
+.hero-title{font-family:var(--fh);font-size:44px;line-height:1.05;color:var(--white);margin-bottom:8px}
+.hero-title span{color:var(--accent)}
+.hero-sub{font-size:15px;color:#8ba0c0;max-width:540px;line-height:1.6;margin-bottom:18px}
+.hero-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.pill{font-family:var(--fm);font-size:10px;letter-spacing:1.5px;padding:4px 12px;border-radius:20px;border:1px solid rgba(0,255,208,0.35);color:var(--accent);background:rgba(0,255,208,0.08)}
+.pill.alt{color:var(--purple);border-color:rgba(192,132,252,0.35);background:rgba(192,132,252,0.08)}
+.pill.alt2{color:var(--sky);border-color:rgba(56,191,255,0.35);background:rgba(56,191,255,0.08)}
+.time-chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--fm);font-size:11px;color:var(--muted);padding:5px 14px;border-radius:20px;border:1px solid rgba(74,96,128,0.4);background:rgba(255,255,255,0.03)}
+
+/* SECTION LABEL */
+.sec{display:flex;align-items:center;gap:10px;font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.sec::before{content:'';display:block;width:5px;height:18px;border-radius:3px;background:var(--accent);flex-shrink:0}
+
+/* CARD */
+.card{border-radius:12px;padding:16px;border:1.5px solid rgba(0,255,208,0.25);background:linear-gradient(145deg,rgba(0,255,208,0.07),rgba(0,255,208,0.02));position:relative;overflow:hidden;transition:transform 0.2s;cursor:default}
+.card:hover{transform:translateY(-3px)}
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.card.purple{border-color:rgba(192,132,252,0.25);background:linear-gradient(145deg,rgba(192,132,252,0.07),rgba(192,132,252,0.02))}
+.card.purple::after{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.card.sky{border-color:rgba(56,191,255,0.25);background:linear-gradient(145deg,rgba(56,191,255,0.07),rgba(56,191,255,0.02))}
+.card.sky::after{background:linear-gradient(90deg,transparent,var(--sky),transparent)}
+.card.yellow{border-color:rgba(255,224,51,0.25);background:linear-gradient(145deg,rgba(255,224,51,0.07),rgba(255,224,51,0.02))}
+.card.yellow::after{background:linear-gradient(90deg,transparent,var(--yellow),transparent)}
+
+/* GRIDS */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.card-h{font-family:var(--fm);font-size:11px;letter-spacing:2px;color:var(--accent);margin-bottom:8px}
+.card-h.purple{color:var(--purple)}
+.card-h.sky{color:var(--sky)}
+.card-h.yellow{color:var(--yellow)}
+.card-val{font-family:var(--fh);font-size:28px;color:var(--white);margin-bottom:4px}
+.card-sub{font-size:12px;color:#8ba0c0;line-height:1.5}
+
+/* DIAGRAM SECTION */
+.diag-wrap{background:var(--bg2);border-radius:12px;padding:20px;border:1.5px solid rgba(0,255,208,0.2)}
+
+/* ARCHITECTURE FLOW */
+.arch-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;padding:16px 0}
+.arch-box{background:rgba(0,255,208,0.1);border:1.5px solid rgba(0,255,208,0.35);border-radius:8px;padding:10px 14px;font-family:var(--fm);font-size:10px;letter-spacing:1px;color:var(--accent);text-align:center;min-width:90px}
+.arch-box.purple{background:rgba(192,132,252,0.1);border-color:rgba(192,132,252,0.35);color:var(--purple)}
+.arch-box.sky{background:rgba(56,191,255,0.08);border-color:rgba(56,191,255,0.3);color:var(--sky)}
+.arch-box.yellow{background:rgba(255,224,51,0.08);border-color:rgba(255,224,51,0.3);color:var(--yellow)}
+.arch-box.pink{background:rgba(244,114,182,0.08);border-color:rgba(244,114,182,0.3);color:var(--pink)}
+.arch-arrow{font-size:18px;color:var(--muted);flex-shrink:0}
+.arch-sub{font-size:10px;color:#8ba0c0;margin-top:4px;font-family:var(--fb)}
+
+/* PYRAMID */
+.pyramid{display:flex;flex-direction:column;gap:8px;align-items:center;padding:8px 0}
+.pyr-row{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border-radius:8px;padding:12px 16px;font-family:var(--fm);font-size:11px;letter-spacing:1px;text-align:center}
+.pyr-1{width:96%;background:rgba(0,255,208,0.10);border:1.5px solid rgba(0,255,208,0.35);color:var(--accent)}
+.pyr-2{width:80%;background:rgba(56,191,255,0.08);border:1.5px solid rgba(56,191,255,0.3);color:var(--sky)}
+.pyr-3{width:64%;background:rgba(192,132,252,0.08);border:1.5px solid rgba(192,132,252,0.3);color:var(--purple)}
+.pyr-4{width:48%;background:rgba(255,224,51,0.08);border:1.5px solid rgba(255,224,51,0.3);color:var(--yellow)}
+.pyr-sub{font-size:10px;color:#8ba0c0;font-family:var(--fb);margin-top:2px}
+
+/* PARAMS TABLE */
+.params-table{width:100%;border-collapse:collapse;font-size:12px}
+.params-table th{font-family:var(--fm);font-size:10px;letter-spacing:2px;color:var(--accent);text-align:left;padding:8px 12px;border-bottom:1.5px solid rgba(0,255,208,0.25);background:rgba(0,255,208,0.05)}
+.params-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--white);vertical-align:top}
+.params-table tr:hover td{background:rgba(0,255,208,0.05)}
+.param-code{font-family:var(--fm);font-size:11px;color:var(--accent)}
+.param-code.purple{color:var(--purple)}
+.param-code.sky{color:var(--sky)}
+.param-code.yellow{color:var(--yellow)}
+
+/* COMPARE TABLE */
+.cmp-table{width:100%;border-collapse:collapse;font-size:12px}
+.cmp-table th{font-family:var(--fm);font-size:10px;letter-spacing:1.5px;color:var(--accent);text-align:center;padding:8px;border-bottom:1.5px solid rgba(0,255,208,0.25);background:rgba(0,255,208,0.06)}
+.cmp-table th:first-child{text-align:left}
+.cmp-table td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);text-align:center;color:var(--white)}
+.cmp-table td:first-child{text-align:left;font-weight:600;color:#8ba0c0;font-family:var(--fm);font-size:11px}
+.cmp-table tr:hover td{background:rgba(0,255,208,0.04)}
+.check{color:var(--green);font-size:14px}
+.cross{color:var(--red);font-size:14px}
+.partial{color:var(--yellow);font-size:14px}
+
+/* TIPS FLOW */
+.tips-flow{display:flex;flex-direction:column;gap:0}
+.tip-row{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.tip-row:last-child{border-bottom:none}
+.tip-left{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;width:28px}
+.tip-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:12px;font-weight:700;flex-shrink:0}
+.tip-vline{width:2px;flex:1;min-height:12px;margin-top:4px;border-radius:2px}
+.n1 .tip-num{background:rgba(0,255,208,0.15);border:1.5px solid var(--accent);color:var(--accent)}
+.n1 .tip-vline{background:rgba(0,255,208,0.2)}
+.n2 .tip-num{background:rgba(192,132,252,0.15);border:1.5px solid var(--purple);color:var(--purple)}
+.n2 .tip-vline{background:rgba(192,132,252,0.2)}
+.n3 .tip-num{background:rgba(56,191,255,0.12);border:1.5px solid var(--sky);color:var(--sky)}
+.n3 .tip-vline{background:rgba(56,191,255,0.18)}
+.n4 .tip-num{background:rgba(255,224,51,0.12);border:1.5px solid var(--yellow);color:var(--yellow)}
+.n4 .tip-vline{background:rgba(255,224,51,0.18)}
+.n5 .tip-num{background:rgba(255,140,0,0.12);border:1.5px solid var(--orange);color:var(--orange)}
+.n5 .tip-vline{background:rgba(255,140,0,0.18)}
+.n6 .tip-num{background:rgba(244,114,182,0.12);border:1.5px solid var(--pink);color:var(--pink)}
+.n6 .tip-vline{background:rgba(244,114,182,0.18)}
+.tip-body{flex:1;padding-top:4px}
+.tip-h{font-family:var(--fm);font-size:12px;font-weight:600;color:var(--white);margin-bottom:5px}
+.tip-t{font-size:13px;color:#8ba0c0;line-height:1.6}
+.tip-t strong{color:var(--white)}
+.tip-t em{color:var(--yellow);font-style:normal}
+
+/* FAIL GRID */
+.fail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fail{background:rgba(255,59,92,0.06);border:1.5px solid rgba(255,59,92,0.2);border-radius:10px;padding:14px;position:relative;overflow:hidden}
+.fail::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.fail-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.fail-ico{font-size:16px}
+.fail-name{font-family:var(--fm);font-size:11px;font-weight:600;color:var(--red)}
+.fail-desc{font-size:12px;color:#8ba0c0;line-height:1.5}
+.fail-desc strong{color:var(--white)}
+
+/* PRO GRID */
+.pro-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pro{background:rgba(0,255,208,0.05);border:1.5px solid rgba(0,255,208,0.2);border-radius:10px;padding:14px}
+.pro-tag{font-family:var(--fm);font-size:11px;color:var(--accent);margin-bottom:7px;font-weight:600}
+.pro-text{font-size:12px;color:#8ba0c0;line-height:1.55}
+.pro-text em{color:var(--yellow);font-style:normal}
+
+/* INLINE MONO TAG */
+.mtag{font-family:var(--fm);font-size:11px;color:var(--accent);background:rgba(0,255,208,0.12);padding:2px 7px;border-radius:4px}
+.mtag.p{color:var(--purple);background:rgba(192,132,252,0.12)}
+.mtag.s{color:var(--sky);background:rgba(56,191,255,0.1)}
+
+/* SECTION WRAP */
+.section{background:var(--bg2);border-radius:14px;padding:20px}
+
+/* FOOTER */
+.footer{border-radius:12px;padding:18px 24px;background:var(--bg3);border:1px solid rgba(0,255,208,0.15);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.footer-name{font-family:var(--fh);font-size:15px;color:var(--accent)}
+.footer-std{font-family:var(--fm);font-size:10px;color:var(--muted);text-align:right;line-height:1.8}
+
+/* TRAFFIC BARS */
+.traffic-wrap{display:flex;flex-direction:column;gap:14px;padding:8px 0}
+.traffic-row{display:flex;align-items:center;gap:12px}
+.traffic-lbl{font-family:var(--fm);font-size:10px;color:var(--muted);width:120px;flex-shrink:0;text-align:right;line-height:1.4}
+.traffic-track{flex:1;height:28px;background:rgba(255,255,255,0.03);border-radius:6px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,0.05)}
+.traffic-bar{height:100%;display:flex;align-items:center;padding-left:10px;font-family:var(--fm);font-size:11px;font-weight:700;color:#07080e;border-radius:6px}
+.traffic-bar.poll{width:100%;background:linear-gradient(90deg,var(--red),#ff8c8c)}
+.traffic-bar.sub{width:3%;background:linear-gradient(90deg,var(--accent),#7dffe8);color:#07080e}
+
+/* SELECTION GUIDE */
+.sel-table{width:100%;border-collapse:collapse;font-size:12px}
+.sel-table th{font-family:var(--fm);font-size:10px;letter-spacing:1.5px;color:var(--accent);padding:8px 10px;border-bottom:1.5px solid rgba(0,255,208,0.2);background:rgba(0,255,208,0.05);text-align:left}
+.sel-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:top;color:var(--white);font-size:12px}
+.sel-table tr:hover td{background:rgba(0,255,208,0.04)}
+.badge{display:inline-block;font-family:var(--fm);font-size:9px;letter-spacing:1px;padding:2px 8px;border-radius:10px;margin:1px 2px}
+.badge.te{background:rgba(0,255,208,0.15);color:var(--accent);border:1px solid rgba(0,255,208,0.3)}
+.badge.pu{background:rgba(192,132,252,0.15);color:var(--purple);border:1px solid rgba(192,132,252,0.3)}
+.badge.sk{background:rgba(56,191,255,0.15);color:var(--sky);border:1px solid rgba(56,191,255,0.3)}
+.badge.ye{background:rgba(255,224,51,0.1);color:var(--yellow);border:1px solid rgba(255,224,51,0.25)}
+.badge.gr{background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.25)}
+.badge.pk{background:rgba(244,114,182,0.15);color:var(--pink);border:1px solid rgba(244,114,182,0.3)}
+
+@media(max-width:520px){
+  .hero-title{font-size:32px}
+  .grid2,.grid3,.fail-grid,.pro-grid{grid-template-columns:1fr}
+  .params-table,.cmp-table,.sel-table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .arch-flow{flex-direction:column}
+  .arch-arrow{transform:rotate(90deg)}
+  .pyr-1,.pyr-2,.pyr-3,.pyr-4{width:100%}
+  .traffic-lbl{width:80px;font-size:9px}
+  .footer{flex-direction:column;text-align:center}
+  .footer-std{text-align:center}
+}
+</style>
+</head>
+<body>
+<div class="poster">
+
+<!-- ═══════════════════════════════════════════════ HERO -->
+<div class="hero">
+  <div class="hero-mod">MODULE 13 · AUTOMATION SERIES</div>
+  <div class="hero-title">Industrial IoT &<br><span>Edge Computing</span></div>
+  <div class="hero-sub">From client-server polling to one-to-many telemetry: MQTT, OPC-UA PubSub, Sparkplug B, and the edge-vs-cloud split that powers modern digital twins — based on the OPC-UA PubSub & Industry 4.0 reference material.</div>
+  <div class="hero-pills">
+    <div class="pill">OPC-UA PUBSUB</div>
+    <div class="pill">MQTT</div>
+    <div class="pill alt">SPARKPLUG B</div>
+    <div class="pill alt">EDGE VS CLOUD</div>
+    <div class="pill alt2">IIOT ARCHITECTURE</div>
+    <div class="pill alt2">DIGITAL TWINS</div>
+  </div>
+  <div class="time-chip">⏱ 80 sec read</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ S01 — QUICK UNDERSTANDING -->
+<div class="section">
+  <div class="sec">01 — Quick Understanding</div>
+  <div class="grid2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-h">CLIENT-SERVER</div>
+      <div class="card-val">1-to-1</div>
+      <div class="card-sub">Classic OPC-UA: stateful session, full address-space model, security handshake per connection. Ideal for SCADA/MES talking to <strong>one specific machine</strong>.</div>
+    </div>
+    <div class="card purple">
+      <div class="card-h purple">PUBSUB</div>
+      <div class="card-val">1-to-many</div>
+      <div class="card-sub">Decoupled — publishers emit <strong>DataSetMessages</strong>; subscribers receive via UDP or an MQTT broker. Perfect for fan-out telemetry to cloud/analytics/digital twins.</div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card sky">
+      <div class="card-h sky">TRAFFIC REDUCTION</div>
+      <div class="card-val">~30×</div>
+      <div class="card-sub">2,000 tags polled at 10 Hz = <strong>20,000 msg/s</strong>. Subscription-based reporting on change ≈ <strong>600 msg/s</strong> worst case.</div>
+    </div>
+    <div class="card yellow">
+      <div class="card-h yellow">SPARKPLUG B</div>
+      <div class="card-val">B/D</div>
+      <div class="card-sub">Standardises MQTT topic namespace (<span class="mtag">spBv1.0/…</span>), payload encoding, and state via <strong>Birth/Death certificates</strong> — makes MQTT data self-describing.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ S02 — CORE ARCHITECTURE DIAGRAM -->
+<div class="section">
+  <div class="sec">02 — IIoT Architecture: Plant Floor to Cloud</div>
+  <div class="diag-wrap">
+    <div style="font-family:var(--fm);font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:12px">AUTOMATION PYRAMID — DATA PATH UPWARD</div>
+    <div class="pyramid">
+      <div class="pyr-row pyr-1">☁️ ERP / CLOUD / MES <span class="pyr-sub">&nbsp;— Digital Twin, Analytics, Historian</span></div>
+      <div class="pyr-row pyr-2">📊 SCADA / EDGE GATEWAY <span class="pyr-sub">&nbsp;— OPC-UA Server, MQTT Broker</span></div>
+      <div class="pyr-row pyr-3">🖥️ PLCs / CONTROLLERS <span class="pyr-sub">&nbsp;— Local control loops</span></div>
+      <div class="pyr-row pyr-4">🎯 SENSORS / DRIVES <span class="pyr-sub">&nbsp;— Field devices</span></div>
+    </div>
+
+    <div style="margin:18px 0 10px;font-family:var(--fm);font-size:10px;letter-spacing:2px;color:var(--muted)">PUBSUB-OVER-MQTT FLOW (THE DOMINANT PATTERN)</div>
+    <div class="arch-flow">
+      <div class="arch-box">
+        <div>PUBLISHER</div>
+        <div class="arch-sub">Edge / PLC (OPC-UA)</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box purple">
+        <div>MQTT BROKER</div>
+        <div class="arch-sub">Topic: spBv1.0/…</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box sky">
+        <div>CLOUD ANALYTICS</div>
+        <div class="arch-sub">Historian / Dashboard</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box yellow">
+        <div>DIGITAL TWIN</div>
+        <div class="arch-sub">Asset Admin Shell</div>
+      </div>
+    </div>
+    <div style="margin-top:14px;font-family:var(--fm);font-size:10px;color:var(--muted);text-align:center;letter-spacing:1px">"Publish once → broker fans out to many subscribers" — OPC-UA PubSub + Sparkplug B is the dominant pattern for streaming plant data to the cloud</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ S03 — MAIN TECHNICAL CONTENT -->
+<div class="section">
+  <div class="sec">03 — OPC-UA Information Model & Services (Edge Foundation)</div>
+
+  <div style="font-family:var(--fm);font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:10px">NODE EXAMPLE — SELF-DESCRIBING DATA POINT</div>
+  <div class="diag-wrap" style="margin-bottom:14px">
+    <svg viewBox="0 0 680 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+      <rect x="20" y="15" width="300" height="140" rx="8" fill="rgba(0,255,208,0.06)" stroke="#00ffd0" stroke-width="1.5"/>
+      <text x="36" y="38" fill="#00ffd0" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">Node</text>
+      <text x="36" y="60" fill="#edf2ff" font-family="JetBrains Mono,monospace" font-size="9.5">NodeId: ns=2;s=Pump_07.Outlet.</text>
+      <text x="36" y="73" fill="#edf2ff" font-family="JetBrains Mono,monospace" font-size="9.5">Temperature</text>
+      <text x="36" y="93" fill="#edf2ff" font-family="JetBrains Mono,monospace" font-size="9.5">NodeClass: Variable</text>
+      <text x="36" y="111" fill="#edf2ff" font-family="JetBrains Mono,monospace" font-size="9.5">DataType: Double  Value: 78.3</text>
+      <text x="36" y="129" fill="#edf2ff" font-family="JetBrains Mono,monospace" font-size="9.5">Status: Good</text>
+      <text x="36" y="147" fill="#edf2ff" font-family="JetBrains Mono,monospace" font-size="9.5">SourceTimestamp: 12:00:03</text>
+
+      <line x1="320" y1="85" x2="400" y2="85" stroke="#c084fc" stroke-width="2" marker-end="url(#arrow13)"/>
+      <text x="330" y="78" fill="#c084fc" font-family="JetBrains Mono,monospace" font-size="9">HasTypeDefinition</text>
+
+      <rect x="400" y="55" width="260" height="60" rx="8" fill="rgba(192,132,252,0.08)" stroke="#c084fc" stroke-width="1.5"/>
+      <text x="416" y="80" fill="#c084fc" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">AnalogItemType</text>
+      <text x="416" y="100" fill="#8ba0c0" font-family="JetBrains Mono,monospace" font-size="9">Reusable, vendor-neutral model</text>
+
+      <defs>
+        <marker id="arrow13" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c084fc"/></marker>
+      </defs>
+    </svg>
+  </div>
+
+  <div class="grid2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-h">REFERENCE TYPES</div>
+      <div class="card-sub"><span class="mtag">HasComponent</span> part-of &nbsp; <span class="mtag p">Organizes</span> folder<br><span class="mtag s">HasTypeDefinition</span> is-a &nbsp; <span class="mtag">HasProperty</span> metadata<br>Types like <strong>PumpType</strong> make models reusable across vendors.</div>
+    </div>
+    <div class="card sky">
+      <div class="card-h sky">SERVICE SET — THE WORKHORSE</div>
+      <div class="card-sub"><strong>Browse/Discover</strong> — explore address space<br><strong>Read/Write</strong> — one-shot, wasteful if polled<br><strong>Subscribe + MonitoredItems</strong> — event-driven, deadband-based<br><strong>Call</strong> — invoke Methods (Start, Calibrate)</div>
+    </div>
+  </div>
+
+  <div style="background:rgba(0,255,208,0.05);border:1px solid rgba(0,255,208,0.18);border-radius:8px;padding:12px;margin-bottom:12px">
+    <div style="font-family:var(--fm);font-size:11px;color:var(--accent);margin-bottom:6px">PYTHON — asyncua CLIENT READ</div>
+    <pre style="font-family:var(--fm);font-size:11px;color:#8ba0c0;line-height:1.7;overflow-x:auto;white-space:pre">from asyncua import Client
+async with Client("opc.tcp://plc.local:4840") as client:
+    node = client.get_node("ns=2;s=Pump_07.Outlet.Temperature")
+    val = await node.read_value()        # 78.3
+    dv  = await node.read_data_value()   # value + StatusCode + timestamp
+    print(val, dv.StatusCode, dv.SourceTimestamp)</pre>
+  </div>
+
+  <div style="font-family:var(--fm);font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:10px">SECURITY CHAIN (IEC 62443)</div>
+  <div class="arch-flow">
+    <div class="arch-box">
+      <div>SECURE CHANNEL</div>
+      <div class="arch-sub">Encrypt + Sign</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box purple">
+      <div>CREATE SESSION</div>
+      <div class="arch-sub">App certificates</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box sky">
+      <div>ACTIVATE</div>
+      <div class="arch-sub">User identity</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box yellow">
+      <div>DATA</div>
+      <div class="arch-sub">Read / Sub / Call</div>
+    </div>
+  </div>
+  <div style="margin-top:10px;font-size:12px;color:#8ba0c0;line-height:1.6">Production requires <strong style="color:var(--white)">SecurityMode = SignAndEncrypt</strong>, anonymous access disabled, and full session auditability per <strong style="color:var(--white)">IEC 62443</strong>.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ S04 — KEY PARAMETERS / TRAFFIC COMPARISON -->
+<div class="section">
+  <div class="sec">04 — Traffic Model: Polling vs Subscription</div>
+  <div class="diag-wrap" style="margin-bottom:14px">
+    <div style="font-family:var(--fm);font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:14px">2,000 TAGS · ~3% CHANGE/SEC</div>
+    <div class="traffic-wrap">
+      <div class="traffic-row">
+        <div class="traffic-lbl">READ/WRITE POLLING<br>at 10 Hz</div>
+        <div class="traffic-track"><div class="traffic-bar poll">20,000 msg/s</div></div>
+      </div>
+      <div class="traffic-row">
+        <div class="traffic-lbl">SUBSCRIBE +<br>MONITOREDITEMS</div>
+        <div class="traffic-track"><div class="traffic-bar sub">600 msg/s</div></div>
+      </div>
+    </div>
+    <div style="margin-top:14px;font-family:var(--fm);font-size:10px;color:var(--muted);text-align:center;letter-spacing:1px">≈ 30× reduction in message volume — "Subscribe, don't poll" is the core lesson</div>
+  </div>
+
+  <table class="params-table">
+    <thead>
+      <tr>
+        <th>TRANSPORT</th>
+        <th>ENDPOINT FORMAT</th>
+        <th>BEST FOR</th>
+        <th>NOTES</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="param-code">UA-TCP / Binary</span></td>
+        <td>opc.tcp://host:4840</td>
+        <td>Plant LAN</td>
+        <td>Default, compact and fast — single registered port (no DCOM port chaos)</td>
+      </tr>
+      <tr>
+        <td><span class="param-code purple">HTTPS</span></td>
+        <td>https://host (UA Binary/JSON)</td>
+        <td>Firewall / cloud</td>
+        <td>Works through standard web infrastructure and proxies</td>
+      </tr>
+      <tr>
+        <td><span class="param-code sky">WebSocket</span></td>
+        <td>opc.wss://host</td>
+        <td>Browser / cloud tunnel</td>
+        <td>Enables browser-based HMIs and cloud gateway tunneling</td>
+      </tr>
+      <tr>
+        <td><span class="param-code yellow">MQTT (PubSub)</span></td>
+        <td>spBv1.0/&lt;group&gt;/&lt;type&gt;/&lt;id&gt;</td>
+        <td>Telemetry fan-out</td>
+        <td>Sparkplug B topic namespace; broker handles 1-to-many delivery</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════ S05 — SELECTION GUIDE / EDGE VS CLOUD -->
+<div class="section">
+  <div class="sec">05 — Edge vs Cloud: Where to Put the Workload</div>
+  <table class="sel-table">
+    <thead>
+      <tr><th>WORKLOAD</th><th>EDGE</th><th>CLOUD</th><th>WHY</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Control loop / safety interlock</td>
+        <td><span class="badge te">✓ Required</span></td>
+        <td><span class="badge pk">✗ Too slow</span></td>
+        <td>Sub-ms determinism — cloud round-trip latency is unacceptable</td>
+      </tr>
+      <tr>
+        <td>OPC-UA server / MQTT broker</td>
+        <td><span class="badge te">✓ Hosted here</span></td>
+        <td><span class="badge sk">↔ Mirrors up</span></td>
+        <td>Edge gateway aggregates plant tags before publishing upward</td>
+      </tr>
+      <tr>
+        <td>Protocol translation (Modbus↔OPC-UA)</td>
+        <td><span class="badge te">✓ Edge gateway</span></td>
+        <td><span class="badge pk">✗</span></td>
+        <td>Legacy field devices rarely speak IP/MQTT directly</td>
+      </tr>
+      <tr>
+        <td>Short-term buffering (network loss)</td>
+        <td><span class="badge te">✓ Store & forward</span></td>
+        <td><span class="badge pk">✗</span></td>
+        <td>Edge caches DataSetMessages until broker connection restores</td>
+      </tr>
+      <tr>
+        <td>Historian / long-term trends</td>
+        <td><span class="badge ye">↔ Optional cache</span></td>
+        <td><span class="badge sk">✓ Primary store</span></td>
+        <td>Cloud offers scale and retention edge hardware can't match</td>
+      </tr>
+      <tr>
+        <td>Digital twin / asset admin shell</td>
+        <td><span class="badge pk">✗</span></td>
+        <td><span class="badge sk">✓ Cloud-native</span></td>
+        <td>Aggregates multi-site data; needs cloud compute & visualization</td>
+      </tr>
+      <tr>
+        <td>ML model training</td>
+        <td><span class="badge pk">✗</span></td>
+        <td><span class="badge sk">✓ Cloud</span></td>
+        <td>Heavy compute, large historical datasets</td>
+      </tr>
+      <tr>
+        <td>ML model inference (real-time)</td>
+        <td><span class="badge te">✓ Edge</span></td>
+        <td><span class="badge ye">↔ Train in cloud</span></td>
+        <td>Low-latency anomaly flags must act on the machine immediately</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:14px;font-family:var(--fm);font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:10px">COMPANION SPECIFICATIONS — INDUSTRY 4.0 INTEROPERABILITY LAYER</div>
+  <div class="grid3">
+    <div style="background:rgba(0,255,208,0.05);border:1px solid rgba(0,255,208,0.18);border-radius:8px;padding:10px">
+      <div style="font-family:var(--fm);font-size:11px;color:var(--accent);margin-bottom:4px">OPC UA for Machinery</div>
+      <div style="font-size:11px;color:#8ba0c0;line-height:1.45">Standard ObjectTypes for general machine identification & state</div>
+    </div>
+    <div style="background:rgba(192,132,252,0.05);border:1px solid rgba(192,132,252,0.18);border-radius:8px;padding:10px">
+      <div style="font-family:var(--fm);font-size:11px;color:var(--purple);margin-bottom:4px">Robotics / CNC</div>
+      <div style="font-size:11px;color:#8ba0c0;line-height:1.45">Vendor-neutral namespaces for robot cells and CNC controllers</div>
+    </div>
+    <div style="background:rgba(56,191,255,0.05);border:1px solid rgba(56,191,255,0.18);border-radius:8px;padding:10px">
+      <div style="font-family:var(--fm);font-size:11px;color:var(--sky);margin-bottom:4px">Pumps / PackML</div>
+      <div style="font-size:11px;color:#8ba0c0;line-height:1.45">Domain models agreed by VDMA; PackML for packaging state machines</div>
+    </div>
+  </div>
+  <div style="margin-top:10px;font-size:12px;color:#8ba0c0;line-height:1.6">Companion specs are the real Industry 4.0 enabler — named in <strong style="color:var(--white)">RAMI 4.0</strong> as the interoperability layer feeding SCADA, MES, and the digital twin asset administration shell.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ S06 — ENGINEERING TIPS -->
+<div class="section">
+  <div class="sec">06 — Engineering Tips</div>
+  <div class="tips-flow">
+    <div class="tip-row n1">
+      <div class="tip-left"><div class="tip-num">1</div><div class="tip-vline"></div></div>
+      <div class="tip-body">
+        <div class="tip-h">Subscribe, Don't Poll</div>
+        <div class="tip-t">Use <strong>Subscribe + MonitoredItems</strong> with a sensible <strong>deadband</strong> (e.g. ±0.5%) instead of cyclic Read. This is the single biggest lever for cutting network load — the 20,000 → 600 msg/s example is not a worst case, it's typical.</div>
+      </div>
+    </div>
+    <div class="tip-row n2">
+      <div class="tip-left"><div class="tip-num">2</div><div class="tip-vline"></div></div>
+      <div class="tip-body">
+        <div class="tip-h">Adopt Sparkplug B for MQTT, Not Raw JSON</div>
+        <div class="tip-t">Raw MQTT topics are <em>not self-describing</em> — every consumer needs custom mapping. Sparkplug B's <strong>NBIRTH/DBIRTH</strong> messages publish the full metric schema once, so any compliant subscriber can auto-discover tags without configuration.</div>
+      </div>
+    </div>
+    <div class="tip-row n3">
+      <div class="tip-left"><div class="tip-num">3</div><div class="tip-vline"></div></div>
+      <div class="tip-body">
+        <div class="tip-h">Use Birth/Death Certificates for State</div>
+        <div class="tip-t">An <strong>NDEATH</strong> message (sent via MQTT Last Will & Testament) tells the broker — and every subscriber — that an edge node went offline, <em>without waiting for a timeout</em>. Dashboards should treat missing NDEATH as a stale-data flag.</div>
+      </div>
+    </div>
+    <div class="tip-row n4">
+      <div class="tip-left"><div class="tip-num">4</div><div class="tip-vline"></div></div>
+      <div class="tip-body">
+        <div class="tip-h">Keep One Registered Port: 4840</div>
+        <div class="tip-t">OPC-UA's <strong>opc.tcp://host:4840</strong> replaces the dozens of dynamic ports OPC Classic/DCOM required. When opening firewalls for plant-to-IT traffic, this single port (plus MQTT's 8883 for TLS) is usually all that's needed.</div>
+      </div>
+    </div>
+    <div class="tip-row n5">
+      <div class="tip-left"><div class="tip-num">5</div><div class="tip-vline"></div></div>
+      <div class="tip-body">
+        <div class="tip-h">Edge Gateway = Protocol Translator + Buffer</div>
+        <div class="tip-t">Position the edge gateway to read legacy field protocols (Modbus, profile-specific fieldbuses), republish as OPC-UA/MQTT, and <strong>buffer DataSetMessages locally</strong> during cloud connectivity loss — replay on reconnect.</div>
+      </div>
+    </div>
+    <div class="tip-row n6">
+      <div class="tip-left"><div class="tip-num">6</div><div class="tip-vline"></div></div>
+      <div class="tip-body">
+        <div class="tip-h">Enforce SignAndEncrypt End-to-End</div>
+        <div class="tip-t">Never run production OPC-UA with <strong>SecurityMode = None</strong> or anonymous Sessions. Pair with MQTT TLS (port 8883) so the entire path from sensor to cloud is encrypted and auditable per <em>IEC 62443</em>.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ S07 — COMMON FAILURES -->
+<div class="section">
+  <div class="sec">07 — Common Failures</div>
+  <div class="fail-grid">
+    <div class="fail">
+      <div class="fail-top"><span class="fail-ico">📡</span><span class="fail-name">Message Storm from Polling</span></div>
+      <div class="fail-desc">Network saturates after adding tags. <strong>Cause:</strong> Client uses Read service in a tight loop instead of Subscribe. <strong>Fix:</strong> Convert to <strong>MonitoredItems</strong> with deadband filtering — typically cuts traffic by 20–30×.</div>
+    </div>
+    <div class="fail">
+      <div class="fail-top"><span class="fail-ico">👻</span><span class="fail-name">Stale Data Looks "Live"</span></div>
+      <div class="fail-desc">Dashboard shows last-known value after edge node loses power. <strong>Cause:</strong> No NDEATH/LWT configured on the MQTT client. <strong>Fix:</strong> Configure MQTT <strong>Last Will & Testament</strong> to publish NDEATH immediately on disconnect.</div>
+    </div>
+    <div class="fail">
+      <div class="fail-top"><span class="fail-ico">🔓</span><span class="fail-name">Anonymous OPC-UA in Production</span></div>
+      <div class="fail-desc">Unauthorized client reads/writes process tags. <strong>Cause:</strong> SecurityMode left at <strong>None</strong>, anonymous Sessions enabled "for testing." <strong>Fix:</strong> Enforce SignAndEncrypt + certificate-based Activate Session before go-live.</div>
+    </div>
+    <div class="fail">
+      <div class="fail-top"><span class="fail-ico">🧩</span><span class="fail-name">Every Integrator Maps Tags Differently</span></div>
+      <div class="fail-desc">Each new SCADA/cloud connection needs a custom tag-mapping spreadsheet. <strong>Cause:</strong> Raw MQTT topics with no agreed schema. <strong>Fix:</strong> Adopt <strong>Sparkplug B</strong> so NBIRTH/DBIRTH self-describe every metric.</div>
+    </div>
+    <div class="fail">
+      <div class="fail-top"><span class="fail-ico">🔌</span><span class="fail-name">Lost Data During Network Outage</span></div>
+      <div class="fail-desc">Gap appears in cloud historian after a WAN blip. <strong>Cause:</strong> Edge gateway has no local buffer; publishes drop silently. <strong>Fix:</strong> Enable <strong>store-and-forward</strong> buffering on the edge gateway with replay on reconnect.</div>
+    </div>
+    <div class="fail">
+      <div class="fail-top"><span class="fail-ico">🐌</span><span class="fail-name">Cloud Latency Breaks a Control Loop</span></div>
+      <div class="fail-desc">Operator notices delayed valve response after "moving logic to the cloud." <strong>Cause:</strong> Real-time control placed on a cloud round trip (50–200 ms+). <strong>Fix:</strong> Keep control loops on the PLC/edge; cloud only consumes telemetry, never closes the loop.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ S08 — PRO NOTES -->
+<div class="section">
+  <div class="sec">08 — Pro Engineer Notes</div>
+  <div class="pro-grid">
+    <div class="pro">
+      <div class="pro-tag">⭐ Real Industrial Example</div>
+      <div class="pro-text">A multi-vendor plant connects 200+ machines via <em>OPC-UA</em> at the edge, republishes through <em>PubSub-over-MQTT with Sparkplug B</em>, and feeds a cloud <em>digital twin</em> built on companion specs (OPC UA for Machinery). No custom drivers per machine — the companion spec IS the integration contract.</div>
+    </div>
+    <div class="pro">
+      <div class="pro-tag">⭐ Classic vs PubSub Is Not Either/Or</div>
+      <div class="pro-text">Keep <em>client-server</em> for engineering/diagnostic access (Browse, Call methods like Calibrate) and add a <em>PubSub publisher</em> on the same OPC-UA server for telemetry fan-out. Most modern stacks (e.g. asyncua, open62541) support both simultaneously.</div>
+    </div>
+    <div class="pro">
+      <div class="pro-tag">⭐ Sizing the MQTT Broker</div>
+      <div class="pro-text">At ~600 msg/s for 2,000 tags, a single broker instance handles this easily — but plan for <em>fan-out multiplier</em>: each subscriber (historian, dashboard, ML pipeline) receives its own copy. Broker throughput = publish rate × subscriber count.</div>
+    </div>
+    <div class="pro">
+      <div class="pro-tag">⭐ Memory Hook</div>
+      <div class="pro-text">"<em>OPC-UA describes the data. MQTT moves the data. Sparkplug B makes both speak the same language.</em>" Edge handles control and translation; cloud handles scale, history, and digital twins.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ FOOTER -->
+<div class="footer">
+  <div class="footer-name">Module 13 — Industrial IoT & Edge Computing</div>
+  <div class="footer-std">
+    OPC-UA PubSub / MQTT / Sparkplug B reference (OPC UA Deep Dive material)<br>
+    OPC 10000-14 (PubSub) · Eclipse Sparkplug B Specification v1.0<br>
+    IEC 62443 (Industrial Comm. Security) · RAMI 4.0 Reference Architecture<br>
+    OPC UA for Machinery / Robotics / Pumps Companion Specifications
+  </div>
+</div>
+
+</div><!-- /poster -->
+</body>
+</html>

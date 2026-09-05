@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The Complete SOLIDWORKS Certification Exam Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin:0; background:#1a2825;
+         font-family:'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
+         color:#EFE7D6; font-size:18px; line-height:1.72; letter-spacing:.01em;
+         -webkit-font-smoothing:antialiased; }
+  body.fs-16{font-size:16px} body.fs-18{font-size:18px} body.fs-20{font-size:20px}
+  body.fs-22{font-size:22px} body.fs-24{font-size:24px} body.fs-26{font-size:26px}
+  .display { font-family:'Fraunces', Georgia, serif; letter-spacing:-.01em; }
+  .wrap { max-width:940px; margin:0 auto; padding:28px 22px 110px; }
+  a { color:#95C19F; }
+
+  .topbar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;
+            padding:13px 22px; background:#1b2926; border-bottom:1px solid #2f4641;
+            position:sticky; top:0; z-index:50; }
+  .brand { display:flex; align-items:center; gap:11px; font-weight:700; font-size:.95em; }
+  .brand .dot { width:11px; height:11px; border-radius:50%; background:#7DAB87; box-shadow:0 0 12px #7DAB87; }
+  .btn { background:#7DAB87; color:#14201D; border:none; padding:10px 18px; border-radius:11px;
+         font-family:inherit; font-weight:700; font-size:.9em; cursor:pointer; text-decoration:none; display:inline-block; }
+  .btn:hover{ background:#95C19F; }
+  .btn.ghost { background:transparent; color:#EFE7D6; border:1px solid #4a6661; }
+  .btn.ghost:hover{ background:#2f4641; }
+  .btn.sm { padding:6px 13px; font-size:.85em; border-radius:9px; }
+
+  h1 { font-size:2.15em; margin:0 0 10px; line-height:1.2; }
+  h2 { font-size:1.5em; margin:52px 0 6px; color:#EFE7D6; scroll-margin-top:70px; }
+  h2 .n { color:#7DAB87; font-family:'Fraunces',serif; margin-right:12px; }
+  h3 { font-size:1.16em; margin:30px 0 8px; color:#C9DCCC; }
+  h4 { font-size:1.02em; margin:20px 0 6px; color:#C9DCCC; }
+  p { margin:12px 0 0; }
+  .lede { font-size:1.13em; color:#C9DCCC; }
+  .sub { color:#A9BDB5; margin:0 0 4px; }
+  .muted { color:#A9BDB5; }
+  .mono { font-family:ui-monospace,'Cascadia Mono',Consolas,monospace; font-size:.9em; }
+
+  .card { background:#243532; border:1px solid #2f4641; border-radius:18px; padding:24px 26px; margin:20px 0; }
+  .card.tight { padding:17px 20px; }
+  .grid { display:grid; gap:15px; }
+  .g2 { grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); }
+  .g3 { grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); }
+
+  .lvl { background:#1e2d2a; border:1px solid #2f4641; border-radius:15px; padding:20px; border-top:4px solid #7DAB87; }
+  .lvl.p { border-top-color:#A89BC9; } .lvl.e { border-top-color:#D9A574; }
+  .lvl .t { font-size:.76em; font-weight:700; letter-spacing:.1em; color:#7DAB87; }
+  .lvl.p .t { color:#A89BC9; } .lvl.e .t { color:#D9A574; }
+
+  .tbl-wrap { overflow-x:auto; border:1px solid #2f4641; border-radius:14px; margin:16px 0; }
+  table { width:100%; border-collapse:collapse; font-size:.93em; min-width:520px; }
+  th,td { padding:11px 14px; text-align:left; border-bottom:1px solid #2f4641; vertical-align:top; }
+  th { color:#C9DCCC; font-weight:700; background:#1e2d2a; }
+  tr:last-child td { border-bottom:none; }
+
+  .pill { display:inline-block; padding:3px 12px; border-radius:999px; font-size:.76em;
+          font-weight:700; letter-spacing:.03em; white-space:nowrap; }
+  .p-g { background:#2a4a36; color:#8BC082; }
+  .p-a { background:#3f4638; color:#D9A574; }
+  .p-r { background:#4a2c2c; color:#E5A3A3; }
+  .p-n { background:#2f4641; color:#C9DCCC; }
+  .p-v { background:#332b45; color:#C0B5DC; }
+
+  .box { border-radius:13px; padding:16px 19px; margin:18px 0; border-left:4px solid; }
+  .box .hl { font-size:.76em; font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-bottom:5px; }
+  .warn { background:#3a2f2c; border-color:#D9A574; } .warn .hl { color:#D9A574; }
+  .good { background:#22352b; border-color:#7DAB87; } .good .hl { color:#8BC082; }
+  .bad  { background:#33262a; border-color:#C97A7A; } .bad .hl { color:#E5A3A3; }
+  .info { background:#1e2d2a; border-color:#7FB3C9; } .info .hl { color:#9FCADD; }
+
+  ul,ol { margin:12px 0 0; padding-left:24px; }
+  li { margin:7px 0; }
+  ul.clean { list-style:none; padding:0; display:grid; gap:9px; }
+  ul.clean li { background:#1e2d2a; border-left:3px solid #7DAB87; border-radius:10px; padding:11px 15px; margin:0; }
+
+  .toc { background:#1e2d2a; border:1px solid #2f4641; border-radius:16px; padding:20px 24px; margin:26px 0; }
+  .toc ol { columns:2; column-gap:32px; margin:8px 0 0; }
+  .toc li { margin:5px 0; break-inside:avoid; }
+  .toc a { text-decoration:none; }
+  @media (max-width:640px){ .toc ol{columns:1} }
+
+  .spec { display:grid; grid-template-columns:auto 1fr; gap:6px 18px; margin:14px 0 0; font-size:.95em; }
+  .spec dt { color:#A9BDB5; } .spec dd { margin:0; font-weight:700; }
+
+  .q { background:#1e2d2a; border:1px solid #2f4641; border-radius:14px; padding:18px 20px; margin:14px 0; }
+  .q .lbl { font-size:.76em; font-weight:700; letter-spacing:.06em; color:#A89BC9; text-transform:uppercase; }
+  .ans { margin-top:12px; background:#22352b; border-left:3px solid #7DAB87; border-radius:10px; padding:11px 15px; }
+  .ans b { color:#8BC082; }
+  .params { font-family:ui-monospace,Consolas,monospace; font-size:.9em; background:#16211f;
+            border:1px solid #2f4641; border-radius:10px; padding:12px 15px; margin:12px 0; white-space:pre-wrap; }
+
+  .srcnote { font-size:.83em; color:#8FA39C; border-top:1px solid #2f4641; margin-top:34px; padding-top:16px; }
+  .fnote { font-size:.85em; color:#A9BDB5; margin-top:9px; }
+  hr { border:none; border-top:1px solid #2f4641; margin:44px 0; }
+  @media print { .topbar{position:static} body{background:#fff;color:#000} }
+</style>
+</head>
+<body class="fs-18">
+<div class="topbar">
+  <div class="brand"><span class="dot"></span><span>Complete SOLIDWORKS Certification Guide</span></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn ghost sm" onclick="fs(-2)">A&minus;</button>
+    <button class="btn ghost sm" onclick="fs(2)">A+</button>
+    <a class="btn sm" href="SolidWorks_Exam_Study_App.html">Open study app &rarr;</a>
+  </div>
+</div>
+<div class="wrap">
+
+<h1 class="display">The Complete SOLIDWORKS Certification Exam Guide</h1>
+<p class="lede">Every exam in the programme, what each one actually costs and demands, how the testing system works, and full preparation detail for the three certifications you are currently working through &mdash; CSWA-SD, CSWA-S and CSWP.</p>
+<p class="sub">Verified against solidworks.com and the official SOLIDWORKS certification blog, February 2026. Figures that differ between the live site and older published material are flagged explicitly in section&nbsp;9.</p>
+
+<div class="toc">
+  <b>Contents</b>
+  <ol>
+    <li><a href="#s1">The three levels</a></li>
+    <li><a href="#s2">The complete exam catalogue</a></li>
+    <li><a href="#s3">How the testing system works</a></li>
+    <li><a href="#s4">Getting exams free</a></li>
+    <li><a href="#s5">CSWA-SD &mdash; Sustainability</a></li>
+    <li><a href="#s6">CSWA-S &mdash; Simulation</a></li>
+    <li><a href="#s7">CSWP &mdash; Design Professional</a></li>
+    <li><a href="#s8">The official CSWP sample exam</a></li>
+    <li><a href="#s9">Naming and policy discrepancies</a></li>
+    <li><a href="#s10">Exam-day checklist</a></li>
+    <li><a href="#s11">Your roadmap from here</a></li>
+    <li><a href="#s12">Sources</a></li>
+  </ol>
+</div>
+
+<h2 id="s1"><span class="n">1</span>The three levels</h2>
+<p>Everything in the programme sits at one of three levels, and the level tells you what is being measured &mdash; recall, competence, or mastery.</p>
+<div class="grid g3">
+  <div class="lvl"><div class="t">ASSOCIATE</div><h4 style="margin-top:6px">CSWA and the -A specialties</h4>
+    <p class="muted" style="font-size:.92em">For users who have completed a beginner course. Proves fundamental knowledge and basic skills. The entry point for a career or a change of domain.</p></div>
+  <div class="lvl p"><div class="t">PROFESSIONAL</div><h4 style="margin-top:6px">CSWP and the -P specialties</h4>
+    <p class="muted" style="font-size:.92em">For users with a solid foundation who are actively using the software at work &mdash; the official guidance is around 40 hours a week for six months or more.</p></div>
+  <div class="lvl e"><div class="t">EXPERT</div><h4 style="margin-top:6px">CSWE, CSWE-S</h4>
+    <p class="muted" style="font-size:.92em">For seasoned professionals. Prerequisites apply, the exams are long and hard, and the retake wait is 90 days rather than 14.</p></div>
+</div>
+<div class="box info"><div class="hl">Worth knowing</div>
+Dassault report a community of over one million certified users, and the public directory alone lists more than 850,000. Certification is not rare &mdash; which is exactly why the <i>combination</i> you hold matters more than any single badge.</div>
+
+<h2 id="s2"><span class="n">2</span>The complete exam catalogue</h2>
+<p>Over thirty exams. Prices are North American, per attempt, and <b>exam credits do not expire until used</b>.</p>
+
+<h3>Design &amp; engineering</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Exam</th><th>Code</th><th>Price</th><th>Notes</th></tr>
+<tr><td>SOLIDWORKS Design Associate</td><td>CSWA</td><td>$99</td><td>3 h, 70% to pass. SW 2011+</td></tr>
+<tr><td>SOLIDWORKS Design Professional</td><td>CSWP</td><td>$99</td><td>Three segments, 3 h 20 m total. SW 2015+</td></tr>
+<tr><td>SOLIDWORKS Design Expert</td><td>CSWE</td><td>$149</td><td>Prerequisites apply. 90-day retake wait</td></tr>
+<tr><td>Sheet Metal Professional</td><td>CSWP-SM</td><td>$20</td><td>Formerly CSWPA-SM</td></tr>
+<tr><td>Weldments Professional</td><td>CSWP-WD</td><td>$20</td><td>Formerly CSWPA-WD</td></tr>
+<tr><td>Surfacing Professional</td><td>CSWP-SU</td><td>$20</td><td>Formerly CSWPA-SU</td></tr>
+<tr><td>Drawing Tools Professional</td><td>CSWP-DT</td><td>$20</td><td>Formerly CSWPA-DT</td></tr>
+<tr><td>Mold Making Professional</td><td>CSWP-MM</td><td>$20</td><td>Formerly CSWPA-MT / Mold Tools</td></tr>
+<tr><td>Electrical Design Associate</td><td>CSWA-E</td><td>$20</td><td>SOLIDWORKS Electrical</td></tr>
+<tr><td>MBD Professional</td><td>CSWP-MBD</td><td>$49</td><td>Model-based definition</td></tr>
+<tr><td>API Professional</td><td>CSWP-API</td><td>$49</td><td>Macros and automation</td></tr>
+<tr><td>xDesign Associate / Professional</td><td>&mdash;</td><td>$49 / $99</td><td><b>3D</b>EXPERIENCE cloud CAD</td></tr>
+<tr><td>xShape / xFrame / xSheetMetal / xMold Associate</td><td>&mdash;</td><td>$49 each</td><td><b>3D</b>EXPERIENCE role exams</td></tr>
+<tr><td>DraftSight 2D Associate / Professional</td><td>&mdash;</td><td class="p-g">FREE</td><td>Free for a limited time</td></tr>
+</table></div>
+
+<h3>Simulation</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Exam</th><th>Code</th><th>Price</th><th>Notes</th></tr>
+<tr><td>Simulation Associate</td><td>CSWA-S</td><td>$49</td><td>2 h, 20 questions, 70/100. SW Premium or Simulation 2012+</td></tr>
+<tr><td>Simulation Professional</td><td>CSWP-S</td><td>$49</td><td>The natural step after CSWA-S</td></tr>
+<tr><td>Simulation Expert</td><td>CSWE-S</td><td>$149</td><td>Additional exams required first</td></tr>
+<tr><td>Flow Simulation Professional</td><td>CSWP-Flow</td><td>$49</td><td>CFD</td></tr>
+</table></div>
+
+<h3>Manufacturing, governance and other</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Exam</th><th>Code</th><th>Price</th></tr>
+<tr><td>CAM Professional</td><td>CSWP-CAM</td><td>$49</td></tr>
+<tr><td>Additive Manufacturing Associate</td><td>CSWA-AM</td><td>$49</td></tr>
+<tr><td>PDM Associate</td><td>CSWA-PDM</td><td>$49</td></tr>
+<tr><td>PDM Administrator Professional</td><td>CPAP</td><td>$49</td></tr>
+<tr><td>DELMIA NC ShopFloor Programmer Associate</td><td>&mdash;</td><td>$49</td></tr>
+<tr><td>DELMIA Lean Team Player Associate</td><td>&mdash;</td><td>$49</td></tr>
+<tr><td>3DSwymer Associate</td><td>&mdash;</td><td>$49</td></tr>
+<tr><td>Collaborative Designer for SOLIDWORKS Associate</td><td>&mdash;</td><td>$49</td></tr>
+<tr><td>ENOVIA Collaborative Industry Innovator Associate</td><td>&mdash;</td><td>$49</td></tr>
+<tr><td>3DEXCITE Product Communicator Associate</td><td>&mdash;</td><td>$49</td></tr>
+</table></div>
+
+<div class="box warn"><div class="hl">The bargain in this table</div>
+The five design specialty exams are <b>$20 each</b>. They are the cheapest credential in the entire Dassault programme, they are what a CSWE requires anyway, and for a mechanical and automation engineer <b>Sheet Metal</b> and <b>Weldments</b> map directly onto machine-guarding, frames, brackets, hoppers and enclosures &mdash; the work you actually do. If you are going to spend anything beyond the three exams you are already sitting, spend it here.</div>
+
+<h2 id="s3"><span class="n">3</span>How the testing system works</h2>
+
+<h3>The client</h3>
+<p>All testing is delivered through the <b>Tangix TesterPRO Client</b>, downloaded from the <b>3D</b>EXPERIENCE Certification Center. It runs in its own window, separate from SOLIDWORKS.</p>
+<ul class="clean">
+  <li><b>Windows only.</b> It is not compatible with Macs.</li>
+  <li><b>An internet connection is required throughout.</b> There is no offline exam.</li>
+  <li>You may run the client on the same machine as SOLIDWORKS (recommended) or on a second machine beside it &mdash; but then you need a way to transfer the exam files between them.</li>
+  <li><b>Dual monitors is the preferred setup:</b> SOLIDWORKS on one screen, the tester on the other.</li>
+  <li>Most licence types are accepted: commercial, research, education, Student Edition, and <b>3D</b>EXPERIENCE SOLIDWORKS for Makers.</li>
+</ul>
+
+<h3>Rules that bite</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Rule</th><th>Detail</th></tr>
+<tr><td><b>No pausing</b></td><td>Once started, an exam cannot be paused. It auto-archives when the clock runs out.</td></tr>
+<tr><td><b>Crash recovery</b></td><td>The client is designed to resume after a crash or reboot &mdash; but <b>the timer does not stop</b>. Security software that wipes the temp folder can defeat recovery entirely.</td></tr>
+<tr><td><b>Retakes</b></td><td>14 days between attempts at Associate and Professional level; <b>90 days</b> at Expert level. No limit on the number of retakes, but a new credit is needed each time.</td></tr>
+<tr><td><b>Prerequisites</b></td><td>None for any Associate or Professional exam. Expert exams require CSWP plus a number of advanced Professional exams.</td></tr>
+<tr><td><b>Every exam is unique</b></td><td>Candidates receive individually generated exams, which is why no per-question feedback is ever released.</td></tr>
+<tr><td><b>Feedback</b></td><td>You get a score and the topic areas to study. Never the questions, never the answers, never the method.</td></tr>
+<tr><td><b>Languages</b></td><td>At least 7 on every exam (English, Spanish, Simplified Chinese, French, German, Japanese). Popular exams add Italian, Portuguese, Korean, Traditional Chinese and more.</td></tr>
+<tr><td><b>Extra time (ADA)</b></td><td>Available on request with proof of eligibility &mdash; email certification@solidworks.com.</td></tr>
+</table></div>
+
+<h3>After you pass</h3>
+<ul class="clean">
+  <li>A downloadable PDF certificate and business-card logos from your certification account.</li>
+  <li>A <b>Credly digital badge</b>, issued automatically for Associate, Professional and Expert certifications earned after 1 January 2025. Earlier ones can be generated retroactively from your account.</li>
+  <li>An optional listing in the public certified-user directory. <b>This is off by default</b> &mdash; you must switch "List in Online Directory" to Yes in your account settings.</li>
+  <li>Certificates can be validated by anyone via the QR code or certificate ID.</li>
+</ul>
+<div class="box good"><div class="hl">Two minutes that get you found</div>
+Turn on the directory listing and claim the Credly badge. A recruiter searching the directory for certified users in Sri Lanka cannot find you if the switch is off &mdash; and it is off unless you changed it.</div>
+
+<h2 id="s4"><span class="n">4</span>Getting exams free</h2>
+<p>There are four legitimate routes to a free exam credit, and most people pay because they do not know about them.</p>
+<div class="grid g2">
+  <div class="card tight"><h4>Academic Certification Provider</h4><p class="muted" style="font-size:.93em">If your institution is on subscription with enough licences, it can be approved to administer exams and allocate free opportunities to students. Instructors apply through the SOLIDWORKS Education team.</p></div>
+  <div class="card tight"><h4>Student licence</h4><p class="muted" style="font-size:.93em">Purchasing a student version of SOLIDWORKS comes with a free voucher for the CSWA and the CSWP.</p></div>
+  <div class="card tight"><h4>Subscription Service</h4><p class="muted" style="font-size:.93em">If your company holds a CAD licence on subscription, free exam vouchers are part of the benefits &mdash; along with 400+ on-demand MySolidWorks training videos.</p></div>
+  <div class="card tight"><h4>Events and user groups</h4><p class="muted" style="font-size:.93em">Certification days at <b>3D</b>EXPERIENCE World offer free exams to registered attendees, and local SOLIDWORKS User Group (SWUGN) meetings sometimes hand out vouchers.</p></div>
+</div>
+<p class="fnote">Bulk purchases can be converted into vouchers and distributed from a VirtualTester account &mdash; relevant if your employer ever wants to certify a team.</p>
+
+<hr>
+
+<h2 id="s5"><span class="n">5</span>CSWA-SD &mdash; Sustainability Associate</h2>
+<p class="lede">The odd one out, in three ways: it needs no software at all, it is proctored, and it has the highest pass mark in the whole Associate range.</p>
+
+<div class="card">
+<dl class="spec">
+<dt>Length</dt><dd>60 minutes, online <b>proctored</b></dd>
+<dt>Questions</dt><dd>30 questions, 1 point each</dd>
+<dt>Pass mark</dt><dd><span class="pill p-r">24 of 30 &mdash; 80%</span> not the usual 70%</dd>
+<dt>Format</dt><dd>Multiple choice and multi-answer only</dd>
+<dt>Software</dt><dd><b>None.</b> No SOLIDWORKS licence needed, no models to build</dd>
+<dt>Navigation</dt><dd>Answer in any order; a Summary Screen shows what is unanswered</dd>
+<dt>Retake</dt><dd>14 days</dd>
+<dt>Results</dt><dd>Score and topic areas only &mdash; individual question results are not given</dd>
+<dt>Old name</dt><dd>CSDA (Certified Sustainable Design Associate)</dd>
+</dl>
+</div>
+
+<div class="box bad"><div class="hl">The number everyone gets wrong</div>
+<b>You need 24 out of 30.</b> That is 80%, and it means you can afford <b>six wrong answers, not nine</b>. Candidates who prepare to a 70% standard are preparing to fail this exam by two marks. There is no partial credit and no weighting &mdash; every question is worth exactly one point.</div>
+
+<h3>What it is based on</h3>
+<p>The exam is drawn from the <b>SOLIDWORKS Sustainable Design Guide</b> &mdash; ten chapters, roughly three to four hours of reading, and designed to be read in any order. The three question categories are <b>Introduction to Sustainability</b>, <b>Sustainable Design</b> and <b>Environmental Assessment</b>.</p>
+
+<h3>The examinable objectives, stated officially</h3>
+<ul class="clean">
+  <li>Basic concepts of sustainability</li>
+  <li>Sustainable design concepts &mdash; <b>Design for Disassembly (DfD)</b>, <b>Extended Producer Responsibility (EPR)</b> and <b>biomimicry</b></li>
+  <li>The stages of a product life cycle</li>
+  <li>Sustainability and sustainable business</li>
+  <li>The many faces of sustainable design</li>
+  <li>Setting up an environmental assessment &mdash; environmental indicators and scope</li>
+  <li>Goal and scope variables &mdash; <b>system boundary</b> and <b>functional unit</b></li>
+  <li>The basic steps of a Life Cycle Assessment</li>
+  <li>Valuing a product environmental assessment</li>
+  <li>Making theory matter &mdash; initial analysis decisions</li>
+</ul>
+
+<h3>The six facts that carry the most marks</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Fact</th><th>Why it is tested</th></tr>
+<tr><td><b>Five life cycle stages:</b> raw material → manufacturing → <b>transportation</b> → use → end of life</td><td>The four-stage list that omits transportation is the single most common wrong answer in the exam</td></tr>
+<tr><td><b>Four indicators:</b> carbon footprint (CO₂e), total energy consumed (MJ), air acidification (SO₂e), water eutrophication (PO₄e)</td><td>You must know all four <i>with their units</i>. Air gets acid, water gets fed</td></tr>
+<tr><td><b>Functional unit</b> = quantified performance, not the object</td><td>"One cup" is wrong; "containing 300 ml once" is right. It is what makes two products comparable</td></tr>
+<tr><td><b>ISO 14040 / 14044</b> and the four LCA phases</td><td>Goal &amp; scope → inventory (LCI) → impact assessment (LCIA) → interpretation</td></tr>
+<tr><td><b>Triple bottom line</b> = environment, society, economy</td><td>Distractors routinely omit the <i>social</i> leg</td></tr>
+<tr><td><b>Xpress vs full Sustainability</b></td><td>Xpress is parts only, no use phase, limited materials. Both report the same four indicators</td></tr>
+</table></div>
+
+<div class="box warn"><div class="hl">A known teaching conflict &mdash; answer from the Guide</div>
+The Sustainable Design Guide treats <b>screening-level</b> assessment results as usable for communication and marketing claims. Much of the LCA literature disagrees, because ISO 14044 reserves public comparative assertions for critically reviewed full studies. <b>For the exam, follow the Guide.</b> For professional work, know the caveat. Similarly, remember that <b>transportation must appear</b> in any enumeration of the lifecycle stages &mdash; both points were established here from real exam content that contradicted earlier course material.</div>
+
+<h3>How to prepare</h3>
+<ol>
+  <li>Read the Sustainable Design Guide end to end once &mdash; three to four hours, and it is the actual source text.</li>
+  <li>Work the CSWA-SD topics in the study app until every topic shows 80% or better. <b>Set your personal target at 90%</b>, because the real pass mark is 80% and you want margin.</li>
+  <li>Review the SOLIDWORKS Sustainability tutorials, which the official guidance recommends even though no software is required.</li>
+  <li>Sit the app's mock exam &mdash; it mirrors the real format exactly: 30 questions, 60 minutes, 24 to pass.</li>
+</ol>
+
+<hr>
+
+<h2 id="s6"><span class="n">6</span>CSWA-S &mdash; Simulation Associate</h2>
+<p class="lede">Twenty questions, a hundred points, and three of those questions are hands-on FEA problems that can be worth twenty points each.</p>
+
+<div class="card">
+<dl class="spec">
+<dt>Length</dt><dd>2 hours (120 minutes)</dd>
+<dt>Questions</dt><dd>20 questions, 100 points total</dd>
+<dt>Pass mark</dt><dd><span class="pill p-a">70 of 100 &mdash; 70%</span></dd>
+<dt>Format</dt><dd><b>3 hands-on problems</b>, plus single-answer, multiple-choice, yes/no and multi-select</dd>
+<dt>Point spread</dt><dd>3 to 20 points per question, by difficulty</dd>
+<dt>Software</dt><dd>SOLIDWORKS Premium 2012+, or SOLIDWORKS Simulation 2012+, or Student Edition 2012+</dd>
+<dt>Retake</dt><dd>14 days</dd>
+<dt>Audience</dt><dd>6&ndash;9 months of SOLIDWORKS and Simulation experience</dd>
+</dl>
+</div>
+
+<div class="box info"><div class="hl">The arithmetic that should drive your exam plan</div>
+120 minutes ÷ 100 points = <b>1.2 minutes per point</b>. A 20-point hands-on problem has earned 24 minutes of your time; a 3-point theory question has earned three and a half. Sweep the cheap theory first, then attack the hands-on problems in descending point order. You can lose an entire 20-point problem and still pass with 80.</div>
+
+<h3>Assumed background knowledge</h3>
+<p>The official page states that you are expected to arrive with knowledge in these areas &mdash; they are not taught by the exam:</p>
+<ul class="clean">
+  <li>Basic view creation</li>
+  <li>Engineering mechanics &mdash; statics</li>
+  <li>Strength of materials</li>
+  <li>Finite Element Method / Finite Element Analysis theory</li>
+</ul>
+
+<h3>The applied objectives, officially listed</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Area</th><th>What is examinable</th></tr>
+<tr><td>Study setup</td><td>Defining a static analysis study; applying materials; working with solid and sheet metal models</td></tr>
+<tr><td>Elements</td><td>Defining <b>solid, shell and beam</b> elements; working with multibody parts as separate solid bodies</td></tr>
+<tr><td>Connections</td><td>Applying and modifying <b>connections, contact sets and contact type</b>; connector properties including no penetration and bonded</td></tr>
+<tr><td>Restraints &amp; loads</td><td><b>Standard and advanced</b> fixtures and external loads</td></tr>
+<tr><td>Units</td><td>Setting and modifying <b>SI / English</b> units</td></tr>
+<tr><td>Coordinate systems</td><td>Defining <b>local and global</b> coordinate systems</td></tr>
+<tr><td>Mechanics</td><td>Axial forces, shear forces, bending moments, <b>factor of safety</b></td></tr>
+<tr><td>Meshing</td><td>Creating different mesh <b>types, quality and parameters</b> for parts and assemblies</td></tr>
+<tr><td>Results</td><td>Setting up and modifying plots in the Results folder</td></tr>
+<tr><td>Solvers</td><td>Selecting different solvers as directed to optimise problems</td></tr>
+<tr><td>Judgement</td><td><b>Determining if results are valid and make sense</b>; understanding what Simulation can and cannot solve; using Simulation Help</td></tr>
+</table></div>
+
+<h3>The six things most likely to cost you marks</h3>
+<div class="tbl-wrap"><table>
+<tr><th>#</th><th>Trap</th><th>The correct position</th></tr>
+<tr><td>1</td><td>Units</td><td>SI stress defaults to <b>N/m²</b>. A legend reading 2.5e8 is <b>250 MPa</b>. 1 MPa = 1 N/mm² = 10⁶ N/m²</td></tr>
+<tr><td>2</td><td>"Fixed geometry" DOF</td><td>On a <b>solid</b> it removes 3 translations (solid nodes have no rotations). On a <b>shell</b> it removes 6</td></tr>
+<tr><td>3</td><td>Default contact</td><td>Global contact is <b>bonded</b>. Parts merely touching behave as one solid unless you define no-penetration</td></tr>
+<tr><td>4</td><td>Force "total" vs "per item"</td><td>900 N across three faces as <i>total</i> is 300 N each. As <i>per item</i> it is 2,700 N. A factor-of-three error</td></tr>
+<tr><td>5</td><td>Singularities</td><td>If refining the mesh keeps <b>increasing</b> the peak stress, it is a singularity, not a result. Model the fillet</td></tr>
+<tr><td>6</td><td>Yield strength</td><td>Not needed for the stress solve, only for the <b>factor of safety plot</b>. A study can solve and still refuse to give FOS</td></tr>
+</table></div>
+
+<div class="box good"><div class="hl">The 30-second validation that should precede every answer</div>
+<b>List the reaction forces.</b> The sum at the fixtures must equal the applied load in the opposite sense. If it does not, stop &mdash; do not report the stress. Then check the deformed shape at scale 1, and bound the answer with a hand calculation (σ = F/A, σ = Mc/I, δ = FL³/3EI) to within an order of magnitude.</div>
+
+<p class="fnote">A far deeper treatment of every one of these topics &mdash; solver theory, element formulation, mesh metrics, convergence, hand verification &mdash; already exists in your library as <b>A62 CSWA Simulation Exam Guide</b> (19 pages). This section is the exam-facts layer; A62 is the physics.</p>
+
+<hr>
+
+<h2 id="s7"><span class="n">7</span>CSWP &mdash; Design Professional</h2>
+<p class="lede">Three segments, bought and scored separately, taken in any order. Pass one and it never has to be repeated.</p>
+
+<div class="card">
+<dl class="spec">
+<dt>Total length</dt><dd>3 hours 20 minutes across all three segments</dd>
+<dt>Software</dt><dd>SOLIDWORKS 2015 or later, <b>plus Microsoft Excel</b> for design tables</dd>
+<dt>Prerequisite</dt><dd>None (K&ndash;12 academic candidates must hold CSWA first)</dd>
+<dt>Retake</dt><dd>14 days <b>per segment</b>; only the failed segment is repurchased</dd>
+<dt>Award</dt><dd>CSWP is granted automatically once all three segments are passed</dd>
+</dl>
+</div>
+
+<div class="tbl-wrap"><table>
+<tr><th>Segment</th><th>Time</th><th>Pass</th><th>Ratio</th><th>Subject</th></tr>
+<tr><td><b>1</b> &mdash; Part modelling from a drawing</td><td>70 min</td><td>75 of 105</td><td>71.4%</td><td>Equations, linked dimensions, parameter updates, mass properties</td></tr>
+<tr><td><b>2</b> &mdash; Configurations &amp; design tables</td><td>50 min</td><td>77 of 104</td><td>74.0%</td><td>Deriving configurations, Excel design tables, rearranging features</td></tr>
+<tr><td><b>3</b> &mdash; Assembly modelling</td><td>80 min</td><td>77 of 109</td><td>70.6%</td><td>Mates, subassemblies, collision, interference, coordinate systems</td></tr>
+</table></div>
+
+<div class="box warn"><div class="hl">Three different pass marks</div>
+Note that the three segments do <b>not</b> share a pass percentage: 71.4%, 74.0% and 70.6%. Segment 2 is the strictest and the shortest. Do not carry a single "70% will do" assumption into all three.</div>
+
+<h3>Segment 1 &mdash; what it really tests</h3>
+<p>You build a part from a drawing whose dimensions are labelled A, B, C, D, E and driven by equations such as X = A/3. Then the exam changes those parameters &mdash; repeatedly &mdash; and asks for the new mass each time.</p>
+<p><b>The modelling is not the exam. The re-modelling is the exam.</b> A model that rebuilds cleanly when five dimensions change at once passes comfortably. A fragile one fails every update question and runs out of clock. Official topics:</p>
+<ul>
+  <li>Creating a part from a drawing</li>
+  <li>Using <b>linked dimensions</b> and equations to aid modelling; using equations to relate dimensions</li>
+  <li>Updating parameters and dimension sizes</li>
+  <li>Modifying geometry on the initial part to create a more complex part</li>
+  <li>Modifying parameters at different stages <b>while maintaining all other dimensions and design intent</b></li>
+  <li>Mass property analysis</li>
+</ul>
+
+<h3>Segment 2 &mdash; configurations and design tables</h3>
+<ul>
+  <li>Creating configurations <b>from other configurations</b> (derived configurations)</li>
+  <li>Changing configurations</li>
+  <li>Creating configurations using a <b>Design Table</b> &mdash; requires Excel installed</li>
+  <li>Changing or rearranging features of an existing part</li>
+  <li>Mass properties</li>
+</ul>
+<p>Design table syntax worth having cold: rows are configurations, columns are parameters. <span class="mono">D1@Sketch1</span> drives a dimension; <span class="mono">$STATE@Fillet1</span> takes <span class="mono">S</span> or <span class="mono">U</span> for suppression; <span class="mono">$COMMENT</span> and <span class="mono">$PRP@Description</span> handle comments and properties. Cell A1 is reserved, configuration names run down column A from A3, headers across row 2.</p>
+<div class="box bad"><div class="hl">Mass properties report the ACTIVE configuration</div>
+Nothing on screen warns you which configuration is active when you open Mass Properties. Reading the mass with the wrong one active is the classic way to lose Segment 2, and the number looks perfectly reasonable.</div>
+
+<h3>Segment 3 &mdash; assemblies</h3>
+<ul>
+  <li>Creating an assembly; adding parts; inserting subassemblies</li>
+  <li><b>Rigid and flexible subassemblies</b> &mdash; a rigid subassembly will not articulate, and gives wrong motion answers silently</li>
+  <li>Replacing a part with another part</li>
+  <li>Basic and <b>advanced</b> mates (Width, Limit, Symmetric, Path, Linear Coupler) and mechanical mates (Gear, Cam, Screw, Slot, Hinge, Rack and Pinion)</li>
+  <li><b>Collision detection</b> when moving a part &mdash; dynamic</li>
+  <li><b>Interference detection</b> &mdash; static, and it reports a <b>volume</b></li>
+  <li>Creating a <b>coordinate system</b>, and using it to perform mass property analysis</li>
+</ul>
+<div class="box info"><div class="hl">Why coordinate systems and mass properties always appear together</div>
+Mass and volume are frame-independent. <b>Centre of mass and moments of inertia are not.</b> The exam pairs the two topics to check you understand that &mdash; and reporting the centre of mass in the default frame when a custom coordinate system was asked for gives three plausible, wrong numbers.</div>
+
+<hr>
+
+<h2 id="s8"><span class="n">8</span>The official CSWP sample exam</h2>
+<p class="lede">Dassault publish a free CSWP practice exam containing five real questions with the answer key. It is drawn from Segment 1 &mdash; which the guide itself calls <b>the hardest segment</b> &mdash; and it is the closest thing to genuine exam content that exists in public.</p>
+
+<div class="box warn"><div class="hl">Read this before using it</div>
+The exam parameters and answer key are reproduced in full below. <b>The drawings are not</b> &mdash; the geometry lives in images inside the official PDF, which is free to download from solidworks.com. Model from the images, then use these numbers to check yourself. Do not try to reverse-engineer the geometry from the masses; that turns a rehearsal into a puzzle and teaches you nothing.
+<p style="margin-top:10px"><a class="btn sm" href="https://www.solidworks.com/sites/default/files/cswpsampleexam.pdf">Download the official CSWP sample exam PDF &rarr;</a></p></div>
+
+<h3>Common setup for all five questions</h3>
+<div class="params">Unit system   : MMGS (millimetre, gram, second)
+Decimal places: 2
+Part origin   : Arbitrary
+Material      : Alloy Steel,  density = 0.0077 g/mm³   (= 7,700 kg/m³)
+Holes         : All holes through all unless shown otherwise
+F (constant)  : Hole Wizard, ANSI Metric Counterbore
+                Type  : Hex Bolt — ANSI B18.2.3.5M
+                Size  : M8      Fit: Close
+                Through hole Ø15.00 · Counterbore Ø30.00 × 10.00 deep
+                End condition: Through All</div>
+
+<div class="q">
+<div class="lbl">Question 1 &mdash; Stage 1, initial part &middot; multiple choice</div>
+<p>Build the part. A = 213 · B = 200 · C = 170 · D = 130 · E = 41 mm &nbsp;·&nbsp; X = A/3 &nbsp;·&nbsp; Y = B/3 + 10 mm</p>
+<p><b>What is the mass of the part in grams?</b><br>a) 14139.65 &nbsp; b) 14298.56 &nbsp; c) 15118.41 &nbsp; d) 14207.34</p>
+<div class="ans">Official answer: <b>d) 14207.34 g</b><br><span class="muted" style="font-size:.92em">The distractors are built from plausible modelling errors. If your answer is not one of the four, your model is wrong &mdash; that is exactly what the options are for. Questions 2, 3 and 5 give you no such safety net.</span></div>
+</div>
+
+<div class="q">
+<div class="lbl">Question 2 &mdash; update parameters &middot; fill in the blank</div>
+<p>A = 225 · B = 210 · C = 176 · D = 137 · E = 39 mm &nbsp;·&nbsp; X = A/3 &nbsp;·&nbsp; Y = B/3 + 10 mm</p>
+<div class="ans">Official answer: <b>16490.45 g</b></div>
+</div>
+
+<div class="q">
+<div class="lbl">Question 3 &mdash; update parameters &middot; fill in the blank</div>
+<p>A = 209 · B = 218 · C = 169 · D = 125 · E = 41 mm &nbsp;·&nbsp; X = A/3 &nbsp;·&nbsp; Y = B/3 + 10 mm</p>
+<div class="ans">Official answer: <b>15100.47 g</b><br><span class="muted" style="font-size:.92em">B has increased while A and D decreased, and the mass lands between the answers to Q1 and Q2. Checking the <i>direction</i> of change is a cheap way to catch a broken rebuild.</span></div>
+</div>
+
+<div class="q">
+<div class="lbl">Question 4 &mdash; Stage 2, modify &middot; multiple choice</div>
+<p>Modify the part per the Stage 2 images; changes are concentrated in areas AA, BB and CC.</p>
+<p>A = 221 · B = 211 · C = 165 · D = 121 · E = 37 mm &nbsp;·&nbsp; X = A/3 &nbsp;·&nbsp; <b>Y = B/3 + 15 mm</b></p>
+<p><b>What is the mass of the part in grams?</b><br>a) 13095.40 &nbsp; b) 13206.40 &nbsp; c) 13313.35 &nbsp; d) 13395.79</p>
+<div class="ans">Official answer: <b>b) 13206.40 g</b><br><span class="muted" style="font-size:.92em"><b>The examinable moment of the whole paper: the equation for Y changed from +10 to +15.</b> A candidate who typed the value as a number now has to hunt for it under time pressure. A candidate who used a global variable edits one character.</span></div>
+</div>
+
+<div class="q">
+<div class="lbl">Question 5 &mdash; Stage 2, update parameters &middot; fill in the blank</div>
+<p>A = 229 · B = 217 · C = 163 · D = 119 · E = 34 mm &nbsp;·&nbsp; X = A/3 &nbsp;·&nbsp; Y = B/3 + 15 mm</p>
+<div class="ans">Official answer: <b>14208.00 g</b><br><span class="muted" style="font-size:.92em">Note that 14208.00 is only 0.66 g from the Q1 answer of 14207.34, on entirely different geometry and parameters. Coincidences like this are why you must actually rebuild rather than pattern-match.</span></div>
+</div>
+
+<h3>The three official hints</h3>
+<ul class="clean">
+  <li><b>Hint 1 &mdash;</b> use <b>linked dimensions</b> (also called shared values) to manage dimensions that must stay equal across stages.</li>
+  <li><b>Hint 2 &mdash;</b> <b>rename your dimensions to A, B, C, D…</b> so you can see at a glance which ones the exam is asking you to change.</li>
+  <li><b>Hint 3 &mdash;</b> as an alternative to Hint 2, drive the changing parameters from a <b>Design Table</b>.</li>
+</ul>
+<p>The guide adds two pieces of process advice: <b>save a version of the model after each question</b>, so you can recover and so you can fix errors found later; and do not print the exam &mdash; practise switching between the tester window and SOLIDWORKS, because that is what the real thing feels like.</p>
+<div class="box bad"><div class="hl">Stated plainly by Dassault</div>
+No solutions or methodology will ever be shared by the certification team, for this sample or the real exam. The published disclaimer is blunt: being a professional-level certified user includes the ability to research SOLIDWORKS functionality yourself. The answer key above is all there is.</div>
+
+<hr>
+
+<h2 id="s9"><span class="n">9</span>Naming and policy discrepancies</h2>
+<p>Published SOLIDWORKS material spans many years and does not always agree with itself. These four conflicts matter, and in each case the <b>live site wins</b>.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Point</th><th>Older published material</th><th>Live site, 2026</th><th>Use</th></tr>
+<tr><td>Specialty exam names</td><td><b>CSWPA</b>-SM / WD / SU / DT / Mold Tools</td><td><b>CSWP-SM / WD / SU / DT / MM</b> at $20</td><td class="p-a">Both circulate. The URLs still say cswpa-</td></tr>
+<tr><td>CSWA retake wait</td><td>30 days</td><td><b>14 days</b></td><td class="p-g">14 days</td></tr>
+<tr><td>Crash during exam</td><td>Answers not recoverable, no refund</td><td>TesterPRO is <b>designed to resume</b> after a crash or reboot; timer keeps running</td><td class="p-g">Live site &mdash; but never rely on it</td></tr>
+<tr><td>Proctoring</td><td>CSWP described as "non-proctored"</td><td>CSWA-SD is explicitly <b>online proctored</b></td><td class="p-a">Varies by exam &mdash; check yours</td></tr>
+</table></div>
+<div class="box info"><div class="hl">The CSWE prerequisite, for later</div>
+The official CSWP guide states that passing the CSWP <b>plus four of the five specialty (CSWPA) exams</b> is the prerequisite for attempting the CSWE. At $20 per specialty exam, the full expert path is far cheaper than most people assume &mdash; the specialties total $80.</div>
+
+<h2 id="s10"><span class="n">10</span>Exam-day checklist</h2>
+<div class="grid g2">
+<div class="card tight"><h4>The week before</h4>
+<ul style="padding-left:20px">
+<li>Confirm your exam credit or voucher is in your account</li>
+<li>Download and install the TesterPRO client, and log in once</li>
+<li>Confirm <b>Excel is installed and opens</b> (CSWP Segment 2)</li>
+<li>Confirm your SOLIDWORKS version meets the minimum</li>
+<li>Sit the mock exam in the study app and clear every topic to target</li>
+</ul></div>
+<div class="card tight"><h4>The hour before</h4>
+<ul style="padding-left:20px">
+<li>Open and warm up SOLIDWORKS <b>before</b> starting the clock</li>
+<li>Set up dual monitors if you have them</li>
+<li>Create and note a download folder for exam files</li>
+<li>Close everything else; disable updates and sleep</li>
+<li>Check your internet connection is stable &mdash; it is required throughout</li>
+</ul></div>
+<div class="card tight"><h4>During</h4>
+<ul style="padding-left:20px">
+<li><b>Set units and decimal places first</b>, before modelling</li>
+<li>Apply the exact material named and verify the density</li>
+<li>Rename dimensions to the exam's letters as you build</li>
+<li>Save a copy of the model after each question</li>
+<li>If your answer is not among the options, the model is wrong &mdash; go back</li>
+<li>Use the Summary Screen; answer in any order</li>
+</ul></div>
+<div class="card tight"><h4>After</h4>
+<ul style="padding-left:20px">
+<li>Download your certificate and business-card logo</li>
+<li>Claim your <b>Credly badge</b></li>
+<li>Switch <b>"List in Online Directory" to Yes</b></li>
+<li>If you failed: 14 days, new credit, and the results screen names the topics to study</li>
+</ul></div>
+</div>
+
+<h2 id="s11"><span class="n">11</span>Your roadmap from here</h2>
+<p>Based on the certification status recorded in this project: <b>CSWA passed</b>, <b>CSWA-AM passed</b>, with CSWA-SD, CSWA-S and CSWP in progress.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Order</th><th>Exam</th><th>Why this order</th><th>Cost</th></tr>
+<tr><td><b>1</b></td><td><b>CSWA-SD</b></td><td>No software, no modelling, pure knowledge &mdash; it is entirely a reading and drilling exercise, and the fastest credential you can add. Target 90% in practice because the real bar is 80%</td><td>$49*</td></tr>
+<tr><td><b>2</b></td><td><b>CSWP Segment 2</b></td><td>The shortest segment at 50 minutes, and the most self-contained. Passing one segment banks it permanently and builds momentum, and segments may be taken in any order</td><td>~$33</td></tr>
+<tr><td><b>3</b></td><td><b>CSWP Segment 3</b></td><td>Assemblies are closer to everyday automation work than parametric part rebuilding. 80 minutes, the most generous clock</td><td>~$33</td></tr>
+<tr><td><b>4</b></td><td><b>CSWP Segment 1</b></td><td>Officially the hardest. Leave it until the other two are banked, and rehearse with the official sample exam in section 8 until a five-parameter change takes under a minute</td><td>~$33</td></tr>
+<tr><td><b>5</b></td><td><b>CSWA-S</b></td><td>Needs real Simulation practice time, and A62 in your library already covers the theory to MSc depth. Sit it when you can commit modelling hours</td><td>$49</td></tr>
+<tr><td><b>6</b></td><td><b>CSWP-SM + CSWP-WD</b></td><td>$20 each, directly relevant to guarding, frames, brackets and enclosures, and two of the four specialties the CSWE requires</td><td>$40</td></tr>
+</table></div>
+<p class="fnote">*CSWA-SD is not listed separately in the current online catalogue; the specialty Associate exams are priced at $49. Confirm the current credit price at checkout, and check first whether a subscription or academic voucher covers it.</p>
+
+<div class="box good"><div class="hl">The strategic point</div>
+Certifications compound when they tell one story. <b>CSWA + CSWA-AM + CSWP + Sheet Metal + Weldments</b> reads as "this person designs and builds real manufactured hardware". Adding CSWA-S on top says they can also justify it numerically. That is a coherent and rather unusual profile for a mechanical and automation engineer &mdash; considerably more valuable than any one badge on its own.</div>
+
+<h2 id="s12"><span class="n">12</span>Sources</h2>
+<ul class="clean">
+<li><a href="https://www.solidworks.com/solidworks-certification-program">SOLIDWORKS Certification Program</a> &mdash; catalogue, prices, testing instructions, FAQ. Page updated December 2025.</li>
+<li><a href="https://www.solidworks.com/certifications/cswa-design-associate">CSWA exam information</a> &mdash; 3 hours, 70%, 14-day retake, SW 2011+.</li>
+<li><a href="https://www.solidworks.com/certifications/solidworks-design-professional">CSWP exam information</a> &mdash; the three segments, times, pass marks and full topic lists. Page updated May 2026.</li>
+<li><a href="https://www.solidworks.com/certifications/simulation-cswa-simulation">CSWA-S exam information</a> &mdash; 120 minutes, 20 questions, 100 points, 70 to pass, 3 hands-on problems.</li>
+<li><a href="https://blogs.solidworks.com/products/solidworks/lesson-12-solidworks-academic-certification-understanding-and-taking-the-solidworks-sustainability-associate-cswa-sd-exam/">CSWA-SD, official SOLIDWORKS blog</a> &mdash; 60 minutes, 30 questions, 24 to pass, proctored, no software. Updated January 2026.</li>
+<li><a href="https://www.solidworks.com/sites/default/files/cswpsampleexam.pdf">Official CSWP sample exam (PDF)</a> &mdash; the five practice questions and answer key in section 8.</li>
+<li><a href="https://www.solidworks.com/sites/default/files/cswasampleexam.zip">Official CSWA sample exam (ZIP)</a>.</li>
+<li><a href="https://3dexperience.virtualtester.com/#login">3DEXPERIENCE Certification Center</a> &mdash; account, vouchers, certificates, directory listing.</li>
+</ul>
+
+<div class="srcnote">
+Compiled February 2026 for the Micro Learning advanced library. All exam formats, durations, pass marks, prices and policies above are taken from the official Dassault Syst&egrave;mes sources listed in section 12 &mdash; not from recollection or third-party sites. Prices are North American and subject to change; confirm at checkout.
+<br><br>
+The five questions in section 8 are reproduced from the <b>freely published official CSWP sample exam</b>, which Dassault provide expressly for practice. Live exam content is covered by a confidentiality agreement that every candidate accepts before starting, and no live questions appear anywhere in this guide or the study app.
+<br><br>
+Companion material in this library: <b>A49</b> SolidWorks Part Modeling &amp; Design Intent · <b>A62</b> CSWA Simulation Exam Guide (19 pages) · <b>SolidWorks_Exam_Study_App.html</b> (133 practice questions across the three exams).
+</div>
+
+</div>
+<script>
+var _fs = 18;
+try { var v = parseInt(localStorage.getItem('swg.font'), 10); if (v >= 16 && v <= 26) _fs = v; } catch (e) {}
+function apply() { document.body.className = 'fs-' + _fs; }
+function fs(d) {
+  _fs = Math.max(16, Math.min(26, _fs + d));
+  try { localStorage.setItem('swg.font', String(_fs)); } catch (e) {}
+  apply();
+}
+apply();
+</script>
+</body>
+</html>

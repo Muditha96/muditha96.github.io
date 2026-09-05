@@ -265,7 +265,11 @@ function renderEditableContent(){
       const link = cert.file
         ? `<a class="text-link" href="${escapeHtml(cert.file)}" target="_blank" rel="noopener noreferrer">View certificate (PDF)</a>`
         : '';
-      return `<article class="glass-card cert-card">${thumb}<p class="eyebrow">${escapeHtml(cert.issuer)}</p><h3>${escapeHtml(cert.name)}</h3><p>${escapeHtml(cert.detail)}</p>${link}</article>`;
+      const title = `<p class="eyebrow">${escapeHtml(cert.issuer)}</p><h3>${escapeHtml(cert.name)}</h3>`;
+      const heading = cert.badge
+        ? `<div class="cert-heading"><img class="cert-badge" src="${escapeHtml(cert.badge)}" alt="${escapeHtml(cert.name)} badge" width="72" height="72" loading="lazy" decoding="async"><div>${title}</div></div>`
+        : title;
+      return `<article class="glass-card cert-card">${thumb}${heading}<p>${escapeHtml(cert.detail)}</p>${link}</article>`;
     }).join('');
     document.querySelectorAll('.cert-thumb').forEach(b => {
       if (b.dataset.bound) return; b.dataset.bound='1';

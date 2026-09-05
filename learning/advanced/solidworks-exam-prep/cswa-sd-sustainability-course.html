@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSWA-SD Sustainability · Lecture Course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #1a2825; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; color: #EFE7D6; font-size: 18px; line-height: 1.7; letter-spacing: 0.01em; min-height: 100vh; }
+  body.fs-14 { font-size: 14px; } body.fs-16 { font-size: 16px; } body.fs-18 { font-size: 18px; }
+  body.fs-20 { font-size: 20px; } body.fs-22 { font-size: 22px; } body.fs-24 { font-size: 24px; }
+  body.fs-26 { font-size: 26px; } body.fs-28 { font-size: 28px; }
+  .display { font-family: 'Fraunces', serif; letter-spacing: -0.01em; }
+  .container { max-width: 880px; margin: 0 auto; padding: 32px 24px 80px; }
+  .card { background: #243532; border-radius: 18px; padding: 28px; border: 1px solid #2f4641; }
+  .btn { background: #7DAB87; color: #14201D; border: none; padding: 14px 22px; border-radius: 12px; font-family: inherit; font-size: 1em; font-weight: 700; cursor: pointer; transition: all .15s; }
+  .btn:hover { transform: translateY(-1px); background: #95C19F; }
+  .btn-ghost { background: transparent; color: #EFE7D6; border: 1px solid #4a6661; }
+  .btn-ghost:hover { background: #2f4641; transform: none; }
+  .topic-card { cursor: pointer; transition: all .2s; border: 1px solid #2f4641; }
+  .topic-card:hover { transform: translateY(-2px); border-color: #7DAB87; }
+  .progress-bar { height: 10px; background: #2f4641; border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #7DAB87, #95C19F); border-radius: 999px; transition: width .4s; }
+  .lecture p { margin: 0 0 16px; font-size: 1.02em; }
+  .lecture p:last-child { margin-bottom: 0; }
+  .hook-box { background: #2f4641; border-left: 4px solid #D9A574; padding: 18px 20px; border-radius: 10px; margin: 20px 0; }
+  .trap-box { background: #3a2f2c; border-left: 4px solid #D98A74; padding: 18px 20px; border-radius: 10px; margin: 20px 0; }
+  .key-list { list-style: none; padding: 0; margin: 16px 0 0; }
+  .key-list li { padding: 12px 0 12px 30px; position: relative; border-bottom: 1px solid #2f4641; }
+  .key-list li:last-child { border-bottom: none; }
+  .key-list li:before { content: '◆'; position: absolute; left: 8px; color: #7DAB87; }
+  .quiz-option { display: block; width: 100%; text-align: left; background: #2f4641; color: #EFE7D6; border: 2px solid #2f4641; padding: 16px 20px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; font-family: inherit; font-size: 1em; line-height: 1.5; transition: all .15s; }
+  .quiz-option:hover:not(:disabled) { border-color: #7DAB87; }
+  .quiz-option.selected { border-color: #D9A574; background: #3f4638; }
+  .quiz-option.correct { border-color: #8BC082; background: #2a4a36; }
+  .quiz-option.wrong { border-color: #C97A7A; background: #4a2c2c; }
+  .quiz-option:disabled { cursor: default; }
+  .nav-btn { background: #2f4641; color: #EFE7D6; border: 1px solid #4a6661; padding: 12px 18px; border-radius: 10px; cursor: pointer; font-family: inherit; font-size: 0.95em; display: inline-flex; align-items: center; gap: 8px; transition: all .15s; }
+  .nav-btn:hover:not(:disabled) { background: #7DAB87; color: #14201D; border-color: #7DAB87; }
+  .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #2f4641; font-size: 0.85em; font-weight: 700; }
+  .stat-card { background: #243532; border-radius: 14px; padding: 22px; border: 1px solid #2f4641; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; }
+  .topic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+  .header-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .tab { background: transparent; color: #B5C9C4; border: 1px solid #2f4641; padding: 10px 18px; border-radius: 999px; cursor: pointer; font-family: inherit; font-size: 0.95em; font-weight: 700; transition: all .15s; }
+  .tab:hover { color: #EFE7D6; }
+  .tab.active { background: #EFE7D6; color: #1a2825; border-color: #EFE7D6; }
+  .icon-wrap { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+  .modal-bg { position: fixed; inset: 0; background: rgba(10,16,15,0.85); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
+  .modal { background: #243532; border-radius: 18px; padding: 28px; max-width: 460px; width: 100%; border: 1px solid #4a6661; }
+  .font-btn { background: #2f4641; color: #EFE7D6; border: 1px solid #4a6661; width: 44px; height: 44px; border-radius: 10px; cursor: pointer; font-size: 1.2em; font-family: inherit; font-weight: 700; }
+  .font-btn:hover { background: #7DAB87; color: #14201D; }
+  h1, h2, h3 { color: #EFE7D6; margin: 0; }
+  h1.display { font-size: 2.3em; line-height: 1.15; font-weight: 700; }
+  h2.display { font-size: 1.7em; line-height: 1.25; font-weight: 700; }
+  .subtle { color: #B5C9C4; }
+  select { background: #2f4641; color: #EFE7D6; border: 1px solid #4a6661; border-radius: 8px; padding: 8px 12px; font-family: inherit; font-size: 0.9em; }
+  .icon { display: inline-block; vertical-align: middle; }
+  .row { display: flex; align-items: center; gap: 14px; }
+  .row-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; flex-wrap: wrap; }
+  .fact-row { display: flex; gap: 10px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid #2f4641; }
+  .fact-row:last-child { border-bottom: none; }
+  .fact-k { color: #B5C9C4; min-width: 130px; font-size: 0.92em; }
+  .fact-v { font-weight: 700; }
+  .lesson-link { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; border: 1px solid #2f4641; cursor: pointer; margin-bottom: 10px; transition: all .15s; background: #243532; }
+  .lesson-link:hover { border-color: #7DAB87; transform: translateX(2px); }
+  .dot { width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; }
+  .quiz-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .result-list { margin-top: 18px; display: grid; gap: 12px; }
+  .result-item { background: #2f4641; border-radius: 12px; padding: 14px 16px; border-left: 4px solid #C97A7A; }
+
+  .study-aid { background: #1e2d2a; border: 1px dashed #4a6661; border-radius: 12px; padding: 18px; margin: 22px 0; }
+  .study-aid h3 { margin: 0 0 12px; font-size: 1.12em; }
+  .visual-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin: 16px 0; }
+  .metric-card { background: #2a3d39; border-radius: 10px; padding: 16px; border: 1px solid #3d5953; }
+  .metric-val { font-family: 'Fraunces', serif; font-size: 1.55em; color: #EFE7D6; font-weight: 700; margin-top: 4px; }
+  .comparison-split { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .mini-panel { background: #243532; border-radius: 10px; padding: 16px; border-left: 4px solid #7DAB87; }
+  .mini-panel h4 { margin: 0 0 8px; font-size: 1.02em; color: #EFE7D6; }
+  .mini-panel p { margin: 0 0 10px; font-size: 0.9em; line-height: 1.5; }
+  .mini-panel ul { margin: 0; padding-left: 18px; color: #B5C9C4; font-size: 0.86em; line-height: 1.55; }
+  .flow-container { display: flex; flex-direction: column; gap: 10px; background: #1b2926; padding: 14px; border-radius: 10px; border: 1px solid #2f4641; margin: 14px 0; }
+  .flow-step { background: #243532; border-left: 4px solid #7DAB87; padding: 12px 14px; border-radius: 0 8px 8px 0; }
+  .impact-table-wrap { overflow-x: auto; margin-top: 14px; }
+  .impact-table { width: 100%; border-collapse: collapse; min-width: 620px; font-size: 0.9em; }
+  .impact-table th { color: #B5C9C4; border-bottom: 2px solid #2f4641; padding: 10px; text-align: left; }
+  .impact-table td { border-bottom: 1px solid #2f4641; padding: 12px 10px; vertical-align: top; }
+  .impact-table tr:last-child td { border-bottom: none; }
+  @media (max-width: 640px) { .study-aid { padding: 14px; } .visual-grid, .comparison-split { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="fs-18">
+<div id="app"></div>
+<script>
+// =================== ICONS ===================
+const ICON_PATHS = {
+  leaf: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19.2 2.96a1 1 0 0 1 1.8.66c.21 4.5-1.4 7.85-4 10.93a1 1 0 0 1-.94.45A7 7 0 0 1 11 20"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>',
+  brain: '<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>',
+  bookOpen: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+  trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0z"/>',
+  chevronLeft: '<path d="m15 18-6-6 6-6"/>',
+  chevronRight: '<path d="m9 18 6-6-6-6"/>',
+  check: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  xCircle: '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>',
+  lightbulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+  sparkles: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
+  alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+  recycle: '<path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/><path d="m14 16-3 3 3 3"/><path d="M8.293 13.596 7.196 9.5 3.1 10.598"/><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888l3.943 6.843"/><path d="m13.378 9.633 4.096 1.098 1.097-4.096"/>',
+  barChart: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16h8"/><path d="M7 11h12"/><path d="M7 6h3"/>',
+  layers: '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/>',
+  settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  award: '<path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/>',
+  type: '<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/>',
+  eye: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
+  star: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+  compass: '<path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/><circle cx="12" cy="12" r="10"/>',
+  flask: '<path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.58 16.5h12.85"/>',
+};
+function icon(name, size = 20, color = 'currentColor', sw = 2) {
+  return '<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-linejoin="round">' + (ICON_PATHS[name] || '') + '</svg>';
+}
+
+
+const EXTRA_TEMPLATES = {
+  tripleBottomLine: `
+    <div class="study-aid">
+      <h3 class="display">Visual Study Aid: Balanced Systems Model</h3>
+      <div class="visual-grid">
+        <div class="metric-card" style="border-top:4px solid #7DAB87"><span class="subtle" style="font-size:0.85em;text-transform:uppercase">Social Pillar</span><div class="metric-val">People</div><p style="font-size:0.9em;line-height:1.45;margin:8px 0 0">Worker safety, community wellbeing, fair access, and basic human needs.</p><div class="subtle" style="font-size:0.84em;margin-top:10px"><strong>Example:</strong> safer material choices, conflict-free sourcing, and low-emission materials for factory and customer health.</div></div>
+        <div class="metric-card" style="border-top:4px solid #D9A574"><span class="subtle" style="font-size:0.85em;text-transform:uppercase">Environmental Pillar</span><div class="metric-val">Planet</div><p style="font-size:0.9em;line-height:1.45;margin:8px 0 0">The designer's direct lever: material, energy, emissions, waste, and end-of-life impact.</p><div class="subtle" style="font-size:0.84em;margin-top:10px"><strong>Example:</strong> reducing part weight can lower raw material use and downstream shipping fuel.</div></div>
+        <div class="metric-card" style="border-top:4px solid #E8916B"><span class="subtle" style="font-size:0.85em;text-transform:uppercase">Economic Pillar</span><div class="metric-val">Profit</div><p style="font-size:0.9em;line-height:1.45;margin:8px 0 0">A solution must remain financially viable or it cannot keep delivering benefits.</p><div class="subtle" style="font-size:0.84em;margin-top:10px"><strong>Example:</strong> part consolidation can reduce assembly time, fasteners, and labor cost.</div></div>
+      </div>
+    </div>`,
+  naturalStep: `
+    <div class="study-aid">
+      <h3 class="display">Visual Study Aid: The Natural Step Boundaries</h3>
+      <div class="visual-grid">
+        <div class="mini-panel" style="border-left-color:#D9A574"><h4>1. Crust Extraction</h4><p>Do not let substances from the Earth's crust steadily build up in nature.</p><div class="subtle" style="font-size:0.86em">Examples: mined metals and fossil fuels.</div></div>
+        <div class="mini-panel" style="border-left-color:#D9A574"><h4>2. Synthetic Compounds</h4><p>Do not let human-made substances accumulate faster than nature can break them down.</p><div class="subtle" style="font-size:0.86em">Examples: persistent chemicals and plastics.</div></div>
+        <div class="mini-panel" style="border-left-color:#D9A574"><h4>3. Eco Degradation</h4><p>Do not physically degrade natural systems through over-harvesting or habitat damage.</p><div class="subtle" style="font-size:0.86em">Examples: deforestation and ecosystem collapse.</div></div>
+        <div class="mini-panel" style="border-left-color:#7DAB87"><h4>4. Human Needs</h4><p>Do not undermine people's ability to meet basic needs safely and fairly.</p><div class="subtle" style="font-size:0.86em">This is the social condition.</div></div>
+      </div>
+    </div>`,
+  circularity: `
+    <div class="study-aid">
+      <h3 class="display">Visual Study Aid: Linear vs Circular Material Flow</h3>
+      <div class="comparison-split">
+        <div>
+          <div class="badge" style="background:#3a2f2c;color:#D98A74;margin-bottom:10px">Cradle-to-Grave</div>
+          <div class="flow-container">
+            <div class="flow-step" style="border-left-color:#D98A74"><strong>Extraction</strong><br><span class="subtle">Raw material processing</span></div>
+            <div class="flow-step" style="border-left-color:#D98A74"><strong>Manufacturing</strong><br><span class="subtle">Part production and assembly</span></div>
+            <div class="flow-step" style="border-left-color:#D98A74"><strong>Use Phase</strong><br><span class="subtle">Customer service life</span></div>
+            <div class="flow-step" style="border-left-color:#D98A74;background:#3a2f2c"><strong>Landfill / Incineration</strong><br><span style="color:#D98A74">Materials are lost from the loop.</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="badge" style="background:#2f4641;color:#8BC082;margin-bottom:10px">Cradle-to-Cradle</div>
+          <div class="flow-container">
+            <div class="flow-step"><strong>Feedstock</strong><br><span class="subtle">Materials selected for future recovery</span></div>
+            <div class="flow-step"><strong>Clean Manufacturing</strong><br><span class="subtle">Low-loss processing and assembly</span></div>
+            <div class="flow-step"><strong>Use Phase</strong><br><span class="subtle">Durable service period</span></div>
+            <div class="flow-step" style="background:#243d39"><strong>End-of-Life Re-entry</strong><br><span style="color:#8BC082">Disassembly returns clean material streams.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>`,
+  engineeringStrategies: `
+    <div class="study-aid">
+      <h3 class="display">Visual Study Aid: Engineering Strategies</h3>
+      <div class="comparison-split">
+        <div class="mini-panel" style="border-left-color:#8BC082"><h4>Biomimicry</h4><p>Solve design problems by imitating nature's proven patterns.</p><ul><li>Velcro was inspired by plant burr hooks.</li><li>Kingfisher-shaped train noses reduce noise and energy use.</li></ul></div>
+        <div class="mini-panel" style="border-left-color:#7FB3C9"><h4>Dematerialization</h4><p>Deliver the same function with less physical material.</p><ul><li>Digital delivery can replace physical media.</li><li>Topology optimization can hollow low-stress CAD regions while preserving strength.</li></ul></div>
+        <div class="mini-panel" style="border-left-color:#D9A574"><h4>Design for Disassembly</h4><p>Make products easy to take apart for repair, reuse, remanufacture, and recycling.</p><ul><li>Avoid permanent adhesives and welds.</li><li>Use screws, clips, snap-fits, and standard fasteners.</li></ul></div>
+        <div class="mini-panel" style="border-left-color:#A89BC9"><h4>Product as a Service</h4><p>Sell the function instead of the object, which rewards durability and repairability.</p><ul><li>Leasing shifts incentive toward long-life products.</li><li>Lighting-as-a-service sells illumination instead of bulbs, rewarding efficient long-life hardware.</li></ul></div>
+      </div>
+    </div>`,
+  materialOptimization: `
+    <div class="study-aid">
+      <h3 class="display">Visual Study Aid: Material Optimization Matrix</h3>
+      <div class="impact-table-wrap"><table class="impact-table">
+        <thead><tr><th>Optimization Strategy</th><th>Engineering Action</th><th>Sustainability Impact</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Lightweighting</strong></td><td>Reduce wall thickness, remove low-stress material, or use lattice structures.</td><td>Lowers raw material demand, production energy, and transport emissions.</td></tr>
+          <tr><td><strong>Local Sourcing</strong></td><td>Select materials or suppliers closer to the assembly location.</td><td>Reduces transport distance and logistics-related footprint.</td></tr>
+          <tr><td><strong>Material Substitution</strong></td><td>Replace virgin or hazardous materials with recycled, recyclable, safer, or lower-impact alternatives.</td><td>Reduces resource depletion, restrictions risk, and end-of-life burden.</td></tr>
+          <tr><td><strong>Part Consolidation</strong></td><td>Replace multiple parts with one well-designed component where it does not harm repair or recycling.</td><td>Can reduce fasteners, assembly time, labor cost, energy use, and manufacturing complexity.</td></tr>
+        </tbody>
+      </table></div>
+    </div>`,
+  lifeCycleStages: `
+    <div class="study-aid">
+      <h3 class="display">Visual Study Aid: Product Life Cycle Map</h3>
+      <div class="visual-grid">
+        <div class="metric-card" style="border-top:4px solid #D9A574"><span class="badge" style="background:#3a2f2c;color:#D9A574">Stage 1</span><h4>Raw Materials</h4><p style="font-size:0.88em;line-height:1.45">Mining, harvesting, processing, and preparing the resources used in the product.</p></div>
+        <div class="metric-card" style="border-top:4px solid #E8916B"><span class="badge" style="background:#3a251c;color:#E8916B">Stage 2</span><h4>Manufacturing</h4><p style="font-size:0.88em;line-height:1.45">Molding, machining, forming, finishing, assembly, factory energy, scrap, and process emissions.</p></div>
+        <div class="metric-card" style="border-top:4px solid #7DAB87"><span class="badge" style="background:#1e3323;color:#7DAB87">Stage 3</span><h4>Use</h4><p style="font-size:0.88em;line-height:1.45">Operation, maintenance, consumables, replacement parts, and user energy consumption.</p></div>
+        <div class="metric-card" style="border-top:4px solid #A89BC9"><span class="badge" style="background:#2d263b;color:#A89BC9">Stage 4</span><h4>End of Life</h4><p style="font-size:0.88em;line-height:1.45">Reuse, repair, disassembly, recycling, incineration, or landfill.</p></div>
+      </div>
+      <div class="hook-box" style="margin-bottom:0"><strong>Transport check:</strong> transportation happens between these stages, so account for it repeatedly rather than treating it as only one isolated box.</div>
+    </div>`,
+  impactMetricMatrix: `
+    <div class="study-aid">
+      <h3 class="display">Visual Study Aid: SOLIDWORKS Sustainability Metric Matrix</h3>
+      <div class="impact-table-wrap"><table class="impact-table">
+        <thead><tr><th>Impact Area</th><th>Unit to Memorize</th><th>What it Signals</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Carbon Footprint</strong></td><td><span class="badge" style="color:#7DAB87">kg CO2-eq</span></td><td>Greenhouse gases trap heat in the atmosphere and drive climate change.</td></tr>
+          <tr><td><strong>Total Energy Consumption</strong></td><td><span class="badge" style="color:#A89BC9">Megajoules (MJ)</span></td><td>Cumulative renewable, non-renewable, and embodied energy demand.</td></tr>
+          <tr><td><strong>Air Acidification</strong></td><td><span class="badge" style="color:#D9A574">kg SO2-eq</span></td><td>Acid-rain-causing emissions that damage crops, alter soil chemistry, and decay buildings.</td></tr>
+          <tr><td><strong>Water Eutrophication</strong></td><td><span class="badge" style="color:#7FB3C9">kg PO4-eq</span></td><td>Nutrient pollution causes algal blooms, strips dissolved oxygen, and creates aquatic dead zones.</td></tr>
+        </tbody>
+      </table></div>
+    </div>`,
+  lcaFramework: `
+    <div class="study-aid">
+      <h3 class="display">Visual Study Aid: ISO 14040/14044 LCA Framework</h3>
+      <div class="flow-container">
+        <div class="flow-step" style="border-left-color:#7FB3C9"><strong>Phase 1: Goal &amp; Scope</strong><br><span class="subtle">Define the purpose, functional unit, and system boundary.</span></div>
+        <div class="flow-step" style="border-left-color:#7FB3C9"><strong>Phase 2: Inventory Analysis (LCI)</strong><br><span class="subtle">List material inputs, energy inputs, emissions, wastes, and outputs.</span></div>
+        <div class="flow-step" style="border-left-color:#7FB3C9"><strong>Phase 3: Impact Assessment (LCIA)</strong><br><span class="subtle">Classify and characterize impacts; normalization and weighting are optional.</span></div>
+        <div class="flow-step" style="border-left-color:#8BC082"><strong>Phase 4: Interpretation</strong><br><span class="subtle">Check significant findings, assumptions, completeness, limitations, and recommendations.</span></div>
+      </div>
+    </div>`
+};
+
+// =================== DATA: MODULES ===================
+const TOPICS = [
+  { id: 't1', title: 'Introduction to Sustainability', icon: 'globe', color: '#7DAB87' },
+  { id: 't2', title: 'Sustainable Design Concepts', icon: 'compass', color: '#D9A574' },
+  { id: 't3', title: 'The Product Life Cycle', icon: 'recycle', color: '#E8916B' },
+  { id: 't4', title: 'Environmental Impacts', icon: 'barChart', color: '#A89BC9' },
+  { id: 't5', title: 'Assessment Methods', icon: 'layers', color: '#7FB3C9' },
+  { id: 't6', title: 'Life Cycle Assessment (LCA)', icon: 'flask', color: '#C9A77F' },
+  { id: 't7', title: 'Interpreting & Communicating', icon: 'sparkles', color: '#86B89C' },
+  { id: 't8', title: 'Standards & Regulations', icon: 'award', color: '#B589A8' },
+];
+
+// Each lesson: { id, title, lecture:[paragraphs], hook:{label,text}, key:[...], trap?:"..." }
+const CARDS = {
+  t1: [
+    { id: 'l1-1', title: 'What Sustainability Really Means',
+      lecture: [
+        "Sustainability is one of the most-used and least-understood words in product design, so the exam expects the precise, original definition. In 1987 the World Commission on Environment and Development, known as the Brundtland Commission, defined sustainable development as 'development that meets the needs of the present without compromising the ability of future generations to meet their own needs.' Every idea in this course grows from that single sentence.",
+        "Notice what the definition does NOT say. It does not say 'stop using resources' or 'never manufacture anything.' It is about balance across time: meeting today's needs in a way that does not rob the people who come after us. Sustainability is therefore always a relationship between present needs and future capacity.",
+        "A second idea follows immediately, and the exam loves to test it: there is no such thing as a fully 'sustainable' or 'green' product, only a MORE sustainable or GREENER one. Sustainability is a relative, comparative concept. You can always ask 'greener than what?' This is exactly why environmental assessment is built around comparison rather than absolute labels."
+      ],
+      hook: { label: 'Memory Hook', text: "Brundtland in one breath: don't borrow from your grandchildren. And remember -- nothing is 'green', only 'greener'." },
+      key: ["Defined by the Brundtland Commission (1987)", "Meets present needs without compromising future generations", "Sustainability is RELATIVE -- only 'greener', never absolutely 'green'", "Balances present needs against future capacity"],
+      trap: "If an answer claims a product is fully 'sustainable' or '100% green', it is wrong. The guide insists sustainability is always relative and comparative." },
+    { id: 'l1-2', title: 'Why Engineers Care (the Business Case)',
+      lecture: [
+        "Design engineers fold sustainability into their work for one of three reasons, and the guide states them explicitly. Remember them as PCI: Personal interest, Company intent, and Industry regulation.",
+        "Personal interest is a powerful driver of innovation -- many engineers simply care about the impact of what they make. Company intent means the business has chosen sustainability as part of its strategy; importantly, sustainable design is treated as 'good business' because it reveals new ways to cut material and energy costs. Industry regulation is the external force: laws, especially in the EU, restrict certain substances and processes, and compliance is not optional.",
+        "See sustainability as an opportunity, not a constraint. The guide even notes industrial design appearing on lists of 'six-figure green jobs.' For the exam, the takeaway is that the three motivations sit side by side, and that the product designer plays a KEY role in delivering all of them."
+      ],
+      hook: { label: 'Mnemonic: PCI', text: "Three reasons = Personal interest, Company intent, Industry regulation." },
+      key: ["Personal Interest -- the engineer genuinely cares; drives innovation", "Company Intent -- sustainable design is 'good business', cuts material/energy cost", "Industry Regulation -- laws force compliance, especially in the EU", "The product designer plays a KEY role in sustainability"] },
+    { id: 'l1-3', title: 'Sustainable Business & Levels of Commitment',
+      lecture: [
+        "Sustainability is not only a design question; it is a business posture, and companies sit at different levels of commitment. At the most basic level a company merely complies with regulations. Higher up, companies treat environmental and social responsibility as core to their identity, and the most committed push it through their entire supply chain.",
+        "The guide uses real examples. Stonyfield Farm built social and environmental responsibility into its business model from the very beginning -- it is part of the company's identity. Walmart, from a very different motivation, requires its suppliers to evaluate and disclose the full environmental impact of their products, using its enormous scale to push sustainability upstream. Different motivations, but both move the whole market.",
+        "For the exam, hold this idea: corporate sustainability is a spectrum, from minimal compliance to deep, strategic, supply-chain-wide commitment. A company's level reflects how central these values are to how it decides what to make and do."
+      ],
+      hook: { label: 'Memory Hook', text: "Compliance at the bottom, mission at the top. Stonyfield = built-in values; Walmart = supply-chain pressure." },
+      key: ["Corporate sustainability ranges from basic compliance to mission-level commitment", "Stonyfield Farm: responsibility built into the business model from the start", "Walmart: requires suppliers to disclose full environmental impact", "Different motivations can both move the market"] },
+    { id: 'l1-4', title: 'Greenwashing',
+      lecture: [
+        "As sustainability sells, the temptation to exaggerate grows. Greenwashing is the term for marketing where a company's green claims outstrip its actual environmental reality -- touting the 'green' aspects of a product or process more loudly than the facts justify.",
+        "Greenwashing matters to you as a designer for two reasons. First, it erodes trust: when claims are exposed as hollow, customers discount all green messaging, including honest claims. Second, it is a trap you can fall into by accident -- for example, by making a marketing claim based on a quick, screening-level assessment that has not been rigorously verified.",
+        "The guide's antidote is rigor and honesty. If you intend to make an environmental claim for marketing, verify it with a full Life Cycle Assessment, not just a screening estimate. State what you measured, against what baseline, and within what boundaries. Honest, comparative, well-scoped claims are the opposite of greenwashing."
+      ],
+      hook: { label: 'Memory Hook', text: "Greenwashing = the message outruns the reality. Cure it with a full LCA before you market." },
+      key: ["Greenwashing: green claims that outstrip actual performance", "Erodes customer trust in all green messaging", "Often happens by over-claiming from a quick screening assessment", "Verify any marketing claim with a FULL LCA"] },
+    { id: 'l1-5', title: 'The Triple Bottom Line',
+      lecture: [
+        "Sustainability is usually pictured as three equal pillars, known as the Triple Bottom Line. Remember them as the 3 Ps: People, Planet, Profit -- equivalently Social, Environmental, and Economic.",
+        "The point of three pillars is balance. A design that is environmentally clean but bankrupts the company is not sustainable, because it cannot last. A profitable design that harms communities or workers fails the social pillar. True sustainable design seeks solutions that stand on all three legs at once.",
+        "Most of this course focuses on the environmental pillar, because that is where a product designer has the most direct leverage, but the exam expects you to know that environmental performance is only one of three, and that economic and social factors are full partners, not afterthoughts."
+      ],
+      hook: { label: 'Mnemonic: 3 Ps', text: "People, Planet, Profit (Social, Environmental, Economic). All three legs, or the stool falls." },
+      key: ["Triple Bottom Line = People, Planet, Profit", "Equivalent to Social, Environmental, Economic", "All three pillars are equal -- balance is the goal", "Environmental pillar = where designers have most leverage"],
+      extra: EXTRA_TEMPLATES.tripleBottomLine },
+    { id: 'l1-6', title: 'The Natural Step Framework',
+      lecture: [
+        "The Natural Step is a science-based sustainability framework you must recognize for the exam. It lays out four 'system conditions' for a sustainable society, and -- this is the detail that gets tested -- those conditions are derived from the laws of thermodynamics and natural cycles, not from politics or opinion.",
+        "In plain language the four conditions say: do not let concentrations of substances dug from the Earth's crust keep rising (mining, fossil fuels); do not let man-made substances build up faster than nature can break them down; do not progressively, physically degrade nature (deforestation, habitat loss); and do not undermine people's ability to meet their basic needs.",
+        "Three of the conditions are environmental and one is social, which ties the framework back to the Triple Bottom Line. The exam-ready facts: four system conditions, grounded in thermodynamics."
+      ],
+      hook: { label: 'Memory Hook', text: "Natural Step = 4 conditions from THERMODYNAMICS. Don't dig too much, don't dump too much, don't wreck nature, don't cheat people." },
+      key: ["A science-based framework with 4 system conditions", "Conditions derived from the laws of thermodynamics", "3 environmental conditions + 1 social condition", "Limits: crust substances, man-made buildup, degrading nature, harming basic needs"],
+      extra: EXTRA_TEMPLATES.naturalStep },
+  ],
+  t2: [
+    { id: 'l2-1', title: 'The Core Principle: Greener, Not Green',
+      lecture: [
+        "Before any specific technique, internalize the guiding principle of sustainable design: the basic purpose is to find ways to REDUCE a product's impacts, and by doing so arrive at a more sustainable solution. Not a perfect one -- a better one.",
+        "Two consequences follow. First, as we saw, there is no 'green' product, only a greener one; every design is judged relative to alternatives. Second, and the guide states this directly, the single greenest product is the one that is NEVER MADE. The most sustainable solution is often to avoid producing an unnecessary item at all, or to deliver the same function with far less material.",
+        "This reframes the designer's job. Before optimizing a part, ask whether it needs to exist, whether one part can do the work of three, or whether a service could replace a product entirely. Reduction comes first; only then do material and process optimizations matter."
+      ],
+      hook: { label: 'Memory Hook', text: "Reduce impacts, don't chase perfection. The greenest product is the one never made." },
+      key: ["Purpose of sustainable design = reduce impacts for a more sustainable solution", "There is no 'green' product, only a 'greener' one", "The greenest product is one that is never made", "Deliver the same function with less material and energy"],
+      trap: "'The most sustainable product is the one never made' is TRUE per the guide -- do not dismiss it as a trick answer." },
+    { id: 'l2-2', title: 'Design for Disassembly (DfD)',
+      lecture: [
+        "Design for Disassembly (DfD) is a named concept the exam explicitly expects you to know. It means designing a product so it can be taken apart easily at end-of-life, so that components and materials can be repaired, reused, remanufactured, or recycled instead of land-filled.",
+        "The practical moves are concrete: prefer mechanical fasteners (screws, snap-fits) over permanent joins (adhesives, welds) so parts separate cleanly; minimize the variety of materials in an assembly so sorting is easy; mark plastics with their material codes; and avoid permanently bonding dissimilar materials together.",
+        "DfD is powerful because end-of-life impact is decided long before disposal -- it is locked in by CAD decisions. If a person cannot take it apart, the planet cannot recycle it. That sentence captures why DfD belongs at the design stage, not the waste stage."
+      ],
+      hook: { label: 'Memory Hook', text: "DfD: if a human can't take it apart, the planet can't recycle it. Screws and snap-fits, not glue and welds." },
+      key: ["Design for Disassembly = design so it comes apart easily at end-of-life", "Use screws/snap-fits instead of adhesives/welds", "Minimize material variety; mark plastic types", "Enables repair, reuse, remanufacture, and recycling"] },
+    { id: 'l2-3', title: 'Extended Producer Responsibility (EPR)',
+      lecture: [
+        "Extended Producer Responsibility (EPR) is a policy and design concept that makes the manufacturer responsible for a product across its WHOLE life, including what happens after the customer is finished with it. The producer's responsibility is 'extended' beyond the point of sale to take-back, recycling, and safe disposal.",
+        "EPR flips the incentive. If you must pay to take back and recycle your own product, you suddenly care a great deal about Design for Disassembly, material choice, and durability. EU directives such as WEEE (for electronics) and ELV (for vehicles) are EPR written into law: they require producers to take responsibility for end-of-life.",
+        "For the exam, link the three ideas: EPR is the principle, DfD is how a designer responds to it, and WEEE/ELV are concrete regulations that enforce it."
+      ],
+      hook: { label: 'Memory Hook', text: "EPR = you own your product even after the customer throws it away. It's the reason DfD pays off." },
+      key: ["EPR = producer is responsible across the entire product life, including end-of-life", "Extends responsibility beyond the point of sale (take-back, recycling)", "Drives durability, recyclability, and Design for Disassembly", "Enforced by EU directives like WEEE and ELV"] },
+    { id: 'l2-4', title: 'Biomimicry',
+      lecture: [
+        "Biomimicry is the third named concept the exam calls out. It means designing by imitating nature's models, systems, and strategies -- treating billions of years of evolution as a research library of tested, efficient, low-waste solutions.",
+        "Classic examples: Velcro, inspired by burrs hooking onto fur; building ventilation modeled on termite mounds that stay cool without air conditioning; bullet-train noses shaped like a kingfisher's beak to cut noise. Nature builds at ambient temperature, with abundant materials, and with no permanent waste -- exactly the qualities sustainable design seeks.",
+        "The exam point is simple: biomimicry means innovation inspired by nature's proven, resource-efficient designs. Recognize the word and the idea."
+      ],
+      hook: { label: 'Memory Hook', text: "Biomimicry = copy nature's homework. Billions of years of R&D, no waste, ambient temperature." },
+      key: ["Biomimicry = designing by imitating nature's models and strategies", "Nature = a library of tested, low-waste, efficient solutions", "Examples: Velcro (burrs), cooling (termite mounds), train nose (kingfisher)", "A named sustainable-design concept on the exam"] },
+    { id: 'l2-5', title: 'Cradle-to-Cradle & the Hannover Principles',
+      lecture: [
+        "Two ways of seeing a product's journey sit at the heart of sustainable design. Cradle-to-Grave is a linear path: extract raw material, use the product, then bury or burn it -- a one-way street ending in waste. Cradle-to-Cradle is a closed loop: a product's end-of-life materials become the feedstock for new products, so 'waste equals food.'",
+        "Cradle-to-Cradle thinking comes from architect William McDonough and chemist Michael Braungart, who also authored the Hannover Principles (an appendix of the guide) -- design principles emphasizing the right of humanity and nature to coexist, eliminating the concept of waste, and relying on natural energy flows. You need not memorize all nine, but recognize the Hannover Principles as a foundational design philosophy.",
+        "SOLIDWORKS Sustainability, like most LCA tools, models cradle-to-grave by default. Sustainable design aspires to the cradle-to-cradle loop. Knowing the contrast, and that the goal is the loop, is the exam-ready takeaway."
+      ],
+      hook: { label: 'Memory Hook', text: "Cradle-to-Grave = one-way street to landfill. Cradle-to-Cradle = loop, 'waste = food' (McDonough & Braungart)." },
+      key: ["Cradle-to-Grave: linear, ends in landfill/incineration", "Cradle-to-Cradle: closed loop, end-of-life feeds new products", "Cradle-to-Cradle and the Hannover Principles: McDonough & Braungart", "LCA tools default to cradle-to-grave; design aspires to cradle-to-cradle"],
+      extra: EXTRA_TEMPLATES.circularity },
+    { id: 'l2-6', title: 'Practical Design Strategies',
+      lecture: [
+        "When it is time to actually reduce impact, four levers do most of the work. Material selection is the biggest: prefer recycled and recyclable materials, avoid hazardous or restricted substances, and never over-specify strength you do not need. Most of a typical product's impact is decided by what it is made of.",
+        "Lightweighting is the second lever: less mass means less of every impact -- fewer raw materials, less energy to make and to move. Manufacturing and transport is the third: make products in regions with cleaner electricity, source materials locally, and produce close to the point of use, choosing lower-impact transport modes (rail beats truck beats air).",
+        "End-of-life is the fourth, and it loops back to DfD and EPR: design so the product can be disassembled, refurbished, remanufactured, or recycled. The exam may ask which strategy gives the biggest win for a given product. The honest answer is: it depends on where that product's impact hotspot lies, which is the subject of life-cycle thinking."
+      ],
+      hook: { label: 'Memory Hook', text: "Four levers: Material, Mass, Manufacturing/transport, End-of-life. The biggest is usually MATERIAL." },
+      key: ["Material selection is usually the biggest lever", "Lightweighting cuts every impact category", "Make local, ship light, use clean-grid regions (rail > truck > air)", "Design end-of-life via DfD and EPR thinking"],
+      extra: EXTRA_TEMPLATES.engineeringStrategies + EXTRA_TEMPLATES.materialOptimization },
+  ],
+  t3: [
+    { id: 'l3-1', title: 'The Lifecycle Stages (and where transport fits)',
+      lecture: [
+        "Every product has a life cycle, and assessing it is the spine of environmental assessment. The core stages are: Raw Material extraction and processing; Manufacturing; Use; and End-of-Life (landfill, incineration, recycling, or reuse). Many courses add Transportation as a fifth stage, which is a fine working model, but the guide makes a subtler point worth knowing.",
+        "Strictly, transportation is NOT really a separate stage, because transport legs occur BETWEEN every other stage: raw materials travel to the factory, parts travel to assembly, finished goods travel to customers, and worn-out products travel to disposal. Transportation is a thread running through the whole life cycle rather than a single box. The exam has been known to test this exact nuance.",
+        "Either way, the practical message is the same: account for transport everywhere it occurs, and evaluate impacts at each stage and overall. Life-cycle thinking means never judging a product by one stage alone."
+      ],
+      hook: { label: 'Memory Hook', text: "Raw, Make, Use, End-of-life. Transport isn't one stage -- it happens BETWEEN every stage." },
+      key: ["Core stages: Raw Materials, Manufacturing, Use, End-of-Life", "Transportation occurs BETWEEN stages (a thread, not a single box)", "Assess impacts at each stage AND overall", "Never judge a product by a single stage"],
+      trap: "If asked whether transportation is a distinct lifecycle stage, remember the guide's nuance: it occurs BETWEEN the stages. Read the wording carefully.",
+      extra: EXTRA_TEMPLATES.lifeCycleStages },
+    { id: 'l3-2', title: 'Impact Hotspots',
+      lecture: [
+        "Different products carry their environmental weight in different places, and finding that hotspot is what directs your effort. For an energy-using product -- a refrigerator, a car, an electric motor -- the USE stage usually dominates, because energy consumed over years of operation dwarfs the one-time cost of making it.",
+        "For a disposable item or packaging -- a plastic cup, a wrapper -- the RAW MATERIAL and END-OF-LIFE stages dominate, because the product is made and discarded quickly with little 'use' energy. For heavy products shipped globally, transportation rises in importance.",
+        "The design implication is sharp: optimize the hotspot, not the easy part. Shaving material off a fridge's casing is almost pointless if most of its impact is the electricity it consumes; making it more efficient in use is what counts. Identify the hotspot first, then design."
+      ],
+      hook: { label: 'Memory Hook', text: "Find the hotspot first. Energy-users -> USE stage. Disposables -> MATERIALS & END-OF-LIFE." },
+      key: ["Energy-using products -> Use stage dominates", "Disposables/packaging -> Materials & End-of-Life dominate", "Heavy, globally-shipped goods -> Transport matters more", "Optimize the hotspot, not the convenient part"] },
+    { id: 'l3-3', title: 'Life Cycle Thinking',
+      lecture: [
+        "Life-cycle thinking is the habit of considering ALL stages before deciding a product is greener. It guards against the most common error in sustainability: shifting a burden from one stage to another and calling it an improvement.",
+        "A classic example: switching to a lighter material that lowers transport impact but is far more energy-intensive to produce may increase total impact. Or a 'biodegradable' product that only breaks down in industrial composting facilities most customers cannot access. Without looking across the whole life cycle, these trade-offs stay hidden.",
+        "This is why assessment, qualitative or quantitative, always frames the product across its full life. The exam rewards answers that consider the whole life cycle over answers that fixate on a single attribute such as 'recyclable' or 'lightweight.'"
+      ],
+      hook: { label: 'Memory Hook', text: "Whole life, or no verdict. Beware burden-shifting: fixing one stage can wreck another." },
+      key: ["Life-cycle thinking = weigh ALL stages before judging", "Prevents 'burden shifting' between stages", "A single good attribute does not make a product greener overall", "Underlies every assessment method"] },
+  ],
+  t4: [
+    { id: 'l4-1', title: 'The Big Four Impacts',
+      lecture: [
+        "Environmental assessment converts a product's physical flows into impact categories. SOLIDWORKS Sustainability reports four headline impacts, and you must know all four with their units. Remember them as CEAW: Carbon, Energy, Air, Water.",
+        "Carbon Footprint measures greenhouse gas emissions as kilograms of CO2-equivalent. Total Energy Consumption measures all energy used across the life cycle in megajoules (MJ). Air Acidification measures acid-rain-causing emissions as kilograms of SO2-equivalent. Water Eutrophication measures nutrient pollution as kilograms of PO4-equivalent (phosphate).",
+        "These four are not arbitrary -- each maps to a major, well-understood environmental problem: climate change, resource depletion, acid rain, and oxygen-starved dead zones in water. Lower is better in every category. Memorize the four names AND their units, because unit-matching questions are common."
+      ],
+      hook: { label: 'Mnemonic: CEAW', text: "Carbon (CO2), Energy (MJ), Air acidification (SO2), Water eutrophication (PO4)." },
+      key: ["Carbon Footprint -- kg CO2-equivalent", "Total Energy Consumption -- megajoules (MJ)", "Air Acidification -- kg SO2-equivalent", "Water Eutrophication -- kg PO4-equivalent (phosphate)"],
+      extra: EXTRA_TEMPLATES.impactMetricMatrix },
+    { id: 'l4-2', title: 'Carbon Footprint',
+      lecture: [
+        "Carbon footprint is the total greenhouse gas (GHG) emissions across a product's life, expressed as a single number in kilograms of CO2-equivalent. Different gases trap different amounts of heat, so methane, nitrous oxide, refrigerants and the rest are converted into the equivalent amount of CO2 using their global-warming potential, then added up.",
+        "It is the headline climate metric and the one most customers recognize. For energy-using products, the use stage usually dominates the carbon footprint, because burning fuel or drawing grid electricity over years releases far more CO2 than manufacturing did.",
+        "Exam essentials: units are kg CO2-equivalent, it covers all greenhouse gases (not just CO2), and it is the measure of a product's contribution to climate change. The related international standard is ISO 14067, carbon footprint of products."
+      ],
+      hook: { label: 'Memory Hook', text: "Carbon = Climate. Every greenhouse gas converted into one number: kg CO2-equivalent." },
+      key: ["Units: kg CO2-equivalent", "Includes all GHGs (CO2, methane, N2O, refrigerants), converted", "Drives global warming / climate change", "Related standard: ISO 14067"] },
+    { id: 'l4-3', title: 'Air Acidification',
+      lecture: [
+        "Air acidification measures emissions, mainly sulphur dioxide (SO2) and nitrogen oxides (NOx), that react with moisture in the atmosphere to form acid rain. It is reported in kilograms of SO2-equivalent.",
+        "The damage is visible and serious: acid rain harms forests, acidifies lakes and kills aquatic life, corrodes buildings and monuments, and the same emissions worsen respiratory health. The dominant source is the combustion of fossil fuels, in both manufacturing and the use stage.",
+        "Exam essentials: units are kg SO2-equivalent, the cause is mainly fossil-fuel combustion, and the effect is acid rain damaging ecosystems and infrastructure."
+      ],
+      hook: { label: 'Memory Hook', text: "Air + Acid = trees die, statues melt. Measured in kg SO2-equivalent." },
+      key: ["Units: kg SO2-equivalent", "Main source: combustion of fossil fuels (SO2, NOx)", "Causes acid rain, damaging ecosystems and infrastructure", "Also linked to respiratory health problems"] },
+    { id: 'l4-4', title: 'Water Eutrophication',
+      lecture: [
+        "Water eutrophication measures nutrient pollution, mainly phosphates and nitrates, that washes into waterways and triggers explosive algal growth. It is reported in kilograms of PO4-equivalent (phosphate).",
+        "The mechanism is the killer detail: excess nutrients feed algal blooms; when the algae die and decompose, the process consumes the dissolved oxygen in the water, suffocating fish and other aquatic life and creating 'dead zones.' Main sources are fertilizers, sewage, and industrial run-off.",
+        "Exam essentials: units are kg PO4-equivalent, the cause is nutrient (phosphate/nitrate) pollution, and the effect is algal blooms leading to oxygen depletion."
+      ],
+      hook: { label: 'Memory Hook', text: "Eutrophication = 'too much food' for algae. Green choked lake, fish gasping. Units: kg PO4-equivalent." },
+      key: ["Units: kg PO4-equivalent (phosphate)", "Main sources: fertilizers, sewage, industrial run-off", "Causes algal blooms -> oxygen depletion -> dead zones", "Damages fisheries and drinking water"] },
+    { id: 'l4-5', title: 'Total Energy & Midpoint vs Endpoint',
+      lecture: [
+        "Total Energy Consumption is the sum of all energy used across the life cycle, measured in megajoules (MJ). It counts non-renewable and renewable sources alike, and includes the 'embodied energy' already locked inside raw materials before you ever touch them. Lower is always better.",
+        "A deeper assessment idea the exam may probe is the difference between midpoint and endpoint impacts. An endpoint (or 'damage') effect is what we ultimately care about -- for example, the actual rise in global average temperature, or harm to human health. But endpoints are extremely hard to attribute to one product. So most methods measure the MIDPOINT instead: a measurable proxy earlier in the cause-and-effect chain, such as the mass of greenhouse gases emitted, which is known to lead to warming.",
+        "Exam essentials: energy is measured in MJ; most impact-assessment methodologies report MIDPOINT indicators because endpoint damage is so difficult to measure directly."
+      ],
+      hook: { label: 'Memory Hook', text: "Energy = MJ. Midpoint = the measurable proxy (GHGs emitted); Endpoint = the real damage (degrees of warming) -- harder to measure, so we use midpoints." },
+      key: ["Total Energy Consumption -- megajoules (MJ)", "Counts renewable + non-renewable + embodied energy", "Midpoint = measurable proxy (e.g., GHG mass); Endpoint = actual damage", "Most methods use MIDPOINT indicators"] },
+  ],
+  t5: [
+    { id: 'l5-1', title: 'The Assessment Spectrum',
+      lecture: [
+        "Environmental assessment is not a single tool but a spectrum of rigor, and the guide presents it that way under the heading 'Putting It All Together.' At the simplest end is intuition -- an experienced designer's gut feel. Next come product scorecards and conceptual life-cycle thinking: quick, structured ways to flag obvious issues without heavy data.",
+        "Further along is qualitative LCA, then life-cycle-based design assessment (the category SOLIDWORKS Sustainability falls into), and finally a full, formal Life Cycle Assessment with detailed inventory data. As you move along the spectrum, accuracy and confidence rise, but so do the time, cost, and data required.",
+        "The practical skill the exam wants is choosing the right level for the decision at hand. A quick screening-level tool is perfect for comparing two design options early on; a full LCA is reserved for high-stakes or public claims. Match the rigor of the method to the importance of the decision."
+      ],
+      hook: { label: 'Memory Hook', text: "Rigor is a dial: intuition -> scorecards -> qualitative -> design-level (SOLIDWORKS) -> full LCA. More rigor = more time, cost, and confidence." },
+      key: ["Assessment ranges from intuition to a full formal LCA", "Steps: intuition, scorecards, conceptual thinking, qualitative LCA, design-level, full LCA", "More rigor = more accuracy but more time, cost, and data", "Match the method's rigor to the importance of the decision"] },
+    { id: 'l5-2', title: 'Screening-Level vs Full LCA',
+      lecture: [
+        "A screening-level assessment, such as the one SOLIDWORKS Sustainability performs, is fast and uses built-in average data to estimate impacts and compare design options. It is ideal for guiding design decisions: you can quickly see whether switching a material or shedding mass moves the numbers in the right direction.",
+        "A full LCA is the rigorous, standards-based study (ISO 14040/14044) with detailed, product-specific inventory data, peer review, and defensible results. It costs far more time and money. The exam's key rule: if you found a greener option with a screening tool and now want to make a MARKETING claim about it, you must verify the result with a full LCA. A screening estimate is enough to guide design, but not to make a public environmental claim.",
+        "This is also the link back to greenwashing: making marketing claims on screening-level data alone is exactly how well-meaning designers greenwash by accident."
+      ],
+      hook: { label: 'Memory Hook', text: "Screening LCA = good enough to DESIGN. Full LCA = required to MARKET a claim." },
+      key: ["Screening-level LCA: fast, average data, great for comparing design options", "Full LCA: rigorous, product-specific, standards-based, costly", "To make a marketing claim, verify a screening result with a FULL LCA", "Marketing on screening data alone risks greenwashing"] },
+    { id: 'l5-3', title: 'Qualitative Tools & Initial Decisions',
+      lecture: [
+        "Before any numbers, every assessment requires initial decisions that shape everything after: which impacts you care about, and how far up and down the life cycle you will look. These early choices -- the impacts of interest and the extent of the study -- are what the guide calls 'making theory matter.'",
+        "Qualitative tools support these early decisions. A product scorecard lists relevant environmental attributes and rates them, surfacing obvious problems cheaply. Conceptual life-cycle thinking walks each stage and asks where the big impacts likely sit, without precise data. These tools will not give you exact kilograms of CO2, but they reliably point you toward the hotspots worth measuring.",
+        "Exam takeaway: assessment starts with deciding which impacts and what scope to consider; qualitative tools (scorecards, conceptual thinking) help make those initial decisions before committing to detailed measurement."
+      ],
+      hook: { label: 'Memory Hook', text: "First decide WHICH impacts and HOW FAR along the life cycle. Scorecards and conceptual thinking guide those first calls." },
+      key: ["Initial decisions: which impacts to focus on, and the scope of the study", "Product scorecards rate relevant attributes cheaply", "Conceptual life-cycle thinking locates likely hotspots without exact data", "Qualitative tools point you toward what is worth measuring"] },
+  ],
+  t6: [
+    { id: 'l6-1', title: 'What LCA Is (and ISO Standards)',
+      lecture: [
+        "Life Cycle Assessment (LCA) is the formal, scientific method for evaluating the environmental impacts of a product at each stage of its life and overall. It is the engine beneath SOLIDWORKS Sustainability and the gold standard the whole field references.",
+        "Crucially, an LCA is only useful for COMPARISON. A single impact number means little on its own; it gains meaning when compared against a previous version, a competitor, an alternative design, an industry benchmark, or a target. Keep this in mind -- the exam often frames LCA results as comparisons.",
+        "The governing standards are ISO 14040 (principles and framework) and ISO 14044 (requirements and guidelines). A related standard, ISO 14067, covers the carbon footprint of products specifically. Recognize these numbers."
+      ],
+      hook: { label: 'Number Hook', text: "ISO 14040 + 14044 = LCA. ISO 14067 = product carbon footprint. LCA is only useful for COMPARISON." },
+      key: ["LCA quantifies environmental impact at each life stage and overall", "Only meaningful as a COMPARISON (vs previous, competitor, alternative, benchmark, target)", "ISO 14040 = principles & framework; ISO 14044 = requirements", "ISO 14067 = carbon footprint of products"],
+      extra: EXTRA_TEMPLATES.lcaFramework },
+    { id: 'l6-2', title: 'Phase 1 -- Goal & Scope (Functional Unit & System Boundary)',
+      lecture: [
+        "Every LCA opens by defining its Goal and Scope, and this phase contains two concepts the exam explicitly says you must understand: the functional unit and the system boundary.",
+        "The FUNCTIONAL UNIT is the quantified basis of comparison -- the 'job' the product does, expressed so that alternatives can be compared fairly. You do not compare 'one light bulb to another'; you compare them per a function such as '1,000 hours of light at a given brightness.' Without a functional unit, comparisons are meaningless, because two products may not deliver the same service.",
+        "The SYSTEM BOUNDARY defines what is included in and excluded from the study -- how far up and down the life cycle you look. A cradle-to-gate boundary stops at the factory gate; cradle-to-grave continues through use and disposal. Choosing the boundary is a judgement call that strongly affects the result, so it must be stated clearly. Goal and scope, including these two variables, frame the entire study."
+      ],
+      hook: { label: 'Memory Hook', text: "Functional unit = the fair basis of comparison ('1000 hours of light'). System boundary = what's in vs out (cradle-to-gate vs cradle-to-grave)." },
+      key: ["Phase 1 = Goal & Scope definition", "Functional unit = quantified basis of comparison (the job done)", "System boundary = what is included/excluded; how far along the life cycle", "Both strongly shape the result and must be stated up front"],
+      trap: "Functional unit and system boundary are named explicitly in the exam objectives. Expect at least one question on each -- know the difference cold." },
+    { id: 'l6-3', title: 'Phase 2 -- Inventory Analysis (LCI)',
+      lecture: [
+        "The second phase is the Life Cycle Inventory (LCI). Here you compile a detailed list of every input and output that crosses the system boundary across all life-cycle stages: raw materials and energy in; products, co-products, emissions, and waste out.",
+        "This is the data-gathering phase, and it is typically the most laborious part of a full LCA, because it requires real quantities for every flow. In a screening tool like SOLIDWORKS Sustainability, this inventory comes pre-built from a database (such as GaBi), which is exactly why screening tools are fast.",
+        "Exam essentials: the inventory analysis lists all inputs and outputs (energy and materials in, emissions and waste out) for the defined system. It feeds the next phase, impact assessment."
+      ],
+      hook: { label: 'Memory Hook', text: "Inventory = the big shopping list: everything IN (energy, materials) and everything OUT (emissions, waste)." },
+      key: ["Phase 2 = Life Cycle Inventory (LCI)", "Lists all inputs and outputs crossing the system boundary", "Inputs: materials, energy; Outputs: emissions, waste, products", "Most labour-intensive phase of a full LCA; pre-built in screening tools"] },
+    { id: 'l6-4', title: 'Phase 3 -- Impact Assessment (LCIA)',
+      lecture: [
+        "The third phase, Life Cycle Impact Assessment (LCIA), translates the raw inventory list into meaningful environmental impacts. Two steps are always done: classification, which sorts each emission into the impact categories it contributes to (CO2 and methane to climate change; SO2 to acidification), and characterization, which converts everything within a category into a common unit using equivalency factors (all greenhouse gases into kg CO2-equivalent).",
+        "Two further steps are OPTIONAL: normalization and weighting. Normalization expresses a product's impact relative to a reference, such as the average per-person impact in a region, so you can see whether a number is large or small in context. Weighting then combines the different categories into a single overall score.",
+        "Exam essentials: classification and characterization are the mandatory LCIA steps; normalization and weighting are optional. The next lesson examines why weighting is the controversial one."
+      ],
+      hook: { label: 'Memory Hook', text: "LCIA steps: Classify -> Characterize (both required), then optionally Normalize -> Weight." },
+      key: ["Phase 3 = Impact Assessment (LCIA)", "Classification: sort emissions into impact categories (required)", "Characterization: convert to common units via equivalency factors (required)", "Normalization and weighting are OPTIONAL"] },
+    { id: 'l6-5', title: 'Phase 4 -- Interpretation',
+      lecture: [
+        "The fourth and final phase is Interpretation. Here you make sense of the results: identify the significant findings (which stages and impacts dominate), check the study for consistency and completeness, acknowledge limitations and assumptions, and draw conclusions and recommendations.",
+        "Interpretation is not a rubber stamp at the end; ISO frames LCA as iterative, so interpretation often sends you back to refine the goal, scope, inventory, or assessment. It is also where you decide whether the differences you found are actually meaningful -- a topic covered in the next module.",
+        "Exam essentials: interpretation draws conclusions and recommendations from the impact results, evaluates the study's reliability, and may loop back to earlier phases. The four phases in order are Goal & Scope, Inventory, Impact Assessment, Interpretation."
+      ],
+      hook: { label: 'Mnemonic: GI-II', text: "Goal & scope -> Inventory -> Impact assessment -> Interpretation. 'Good Idea, Investigate It.'" },
+      key: ["Phase 4 = Interpretation", "Identify significant findings; check consistency and completeness", "State assumptions, limitations, conclusions, recommendations", "LCA is iterative -- interpretation can loop back to earlier phases"] },
+    { id: 'l6-6', title: 'Normalization, Weighting & Single Scores',
+      lecture: [
+        "Decision-makers often want one number, so the optional steps can collapse many impacts into a single score, sometimes expressed in 'millipoints.' But getting there involves a step you must understand precisely for the exam: weighting.",
+        "WEIGHTING combines the different impact categories into one score by deciding how important each is relative to the others. The guide is emphatic that weighting is more of a POLITICAL than a scientific process: choosing to give global warming more weight than acidification is a values-based decision, not an objective fact, and different stakeholders genuinely disagree. NORMALIZATION, by contrast, simply rescales impacts against a reference model (national or global) so their relative size is clear.",
+        "Because weighting is subjective, many practitioners deliberately leave the impact scores broken out by category rather than merging them into one number. Exam trap: if an option claims weighting relies on objective science or proven scientific theory, it is WRONG -- weighting is values-based."
+      ],
+      hook: { label: 'Memory Hook', text: "Normalize = rescale against a reference. Weight = combine into one score, and that's POLITICAL, not scientific." },
+      key: ["A single score (e.g., millipoints) merges many impacts into one number", "Normalization rescales impacts against a national/global reference", "Weighting decides relative importance -- it is values-based / political", "Many practitioners keep categories separate to avoid hidden value judgements"],
+      trap: "Weighting is NOT scientific. Any answer saying weighting relies on tested scientific theory is wrong -- the guide calls it a political, values-based process." },
+  ],
+  t7: [
+    { id: 'l7-1', title: 'So What? Results Are for Comparison',
+      lecture: [
+        "Once you have impact results, the guide asks the blunt question that titles its fifth chapter: 'So what?' A bundle of impact numbers means nothing in isolation, because sustainability is a relative concept. Results become useful only when compared against something.",
+        "The standard comparison sets are: accepted standards or thresholds; the product's own previous versions; alternative design options you are weighing; and competitive benchmarks from rival products. Crucially, the guide stresses that the comparison set should be chosen EARLY, during goal and scope, so that the right data is gathered for the alternatives as part of the same study.",
+        "Exam essentials: environmental assessment results are meaningful only as comparisons -- against standards, previous or alternative designs, competitive benchmarks, or targets -- and the comparison should be planned from the start."
+      ],
+      hook: { label: 'Memory Hook', text: "'So what?' A number alone says nothing. Compare against: standards, previous/alternative designs, competitor benchmarks, targets." },
+      key: ["Results are meaningful only as COMPARISONS", "Compare against: standards, previous designs, alternatives, competitor benchmarks", "Choose the comparison set EARLY, during goal & scope", "Sustainability is relative, so context is everything"] },
+    { id: 'l7-2', title: 'Meaningful vs Trivial Differences',
+      lecture: [
+        "Not every difference between two designs matters. When you compare results, you must judge whether a difference is significant -- large enough, and certain enough, to base a decision on. A 2% difference produced by a screening tool with wide error bars may be noise, not a real improvement.",
+        "Significance depends on the products being compared and on the measurement approach: the more approximate the method, the larger a difference must be before you can trust it. This is why over-claiming from small differences is dangerous, and why marketing claims need the tighter certainty of a full LCA.",
+        "Exam essentials: when interpreting results, decide which differences are genuinely meaningful given the method's accuracy; small differences from a screening assessment may not be reliable enough to act on or advertise."
+      ],
+      hook: { label: 'Memory Hook', text: "Ask 'is this difference real, or just noise?' Rougher method = bigger difference needed before you trust it." },
+      key: ["Judge whether a difference is significant before acting on it", "Significance depends on the products and the measurement accuracy", "Small differences from a screening tool may be within the error margin", "Reliable certainty for claims requires a full LCA"] },
+    { id: 'l7-3', title: 'Communicating Results Honestly',
+      lecture: [
+        "The final skill is communicating environmental results to different audiences -- engineers, executives, marketers, customers -- without overstating them. Good communication states what was measured, the functional unit and system boundary used, the comparison baseline, and the confidence level. This transparency is what separates a credible claim from greenwashing.",
+        "Match the message to the audience: a designer needs the per-stage breakdown to act on; a customer needs an honest, comparative headline ('uses 30% less energy than the previous model, verified by full LCA'). Never present a screening estimate as a guaranteed fact, and never drop the context that makes a number meaningful.",
+        "Exam essentials: communicate results honestly and in context, verify public claims with a full LCA, and remember that breaking impacts out by category is often clearer and more honest than collapsing them into a single weighted score."
+      ],
+      hook: { label: 'Memory Hook', text: "Honest communication = state what, vs what, within what boundary, how sure. Skip any of those and you're greenwashing." },
+      key: ["Communicate what was measured, the baseline, the boundary, and the confidence", "Tailor detail to the audience (designer vs customer)", "Verify public/marketing claims with a full LCA", "Transparency is the opposite of greenwashing"] },
+  ],
+  t8: [
+    { id: 'l8-1', title: 'EU Regulations & Global Reach',
+      lecture: [
+        "Regulations are the 'industry' leg of why engineers design sustainably, and the European Union's rules carry the most weight. The single most important fact for the exam: EU directives apply to any manufacturer that sells INTO the EU, not just those based there -- so they reach manufacturers worldwide.",
+        "The second crucial point is one many candidates miss: following good sustainable-design principles does NOT automatically guarantee EU compliance. The directives target specific concerns, such as the toxicity of particular substances, with specific registration and restriction rules. A product can be thoughtfully 'green' and still violate a directive if it contains a banned substance or skips a required registration.",
+        "Exam essentials: EU regulations have global reach, and sustainable design and regulatory compliance are two different things you must satisfy separately."
+      ],
+      hook: { label: 'Memory Hook', text: "Sell into the EU = follow EU rules, wherever you are. And 'green' does NOT equal 'compliant'." },
+      key: ["EU directives apply to anyone selling into the EU -- global reach", "Sustainable design does NOT guarantee EU compliance", "Directives target specific concerns like substance toxicity", "Compliance must be checked separately from sustainability"],
+      trap: "True/false favourite: 'Adhering to sustainable design principles assures EU compliance.' The answer is FALSE -- they are separate requirements." },
+    { id: 'l8-2', title: 'RoHS',
+      lecture: [
+        "RoHS stands for the Restriction of Hazardous Substances. It places strict limits on specific hazardous materials used in electrical and electronic equipment, and it applies both to products made in the EU and to products imported into it.",
+        "The originally restricted substances are lead, mercury, cadmium, hexavalent chromium, and two brominated flame retardants (PBB and PBDE); a later update added four phthalates. The most famous practical effect is the shift to lead-free solder in electronics.",
+        "Exam essentials: RoHS = restriction of hazardous substances in electrical/electronic equipment; remember lead and mercury as the headline examples, and that it drove lead-free solder."
+      ],
+      hook: { label: 'Memory Hook', text: "RoHS = Restriction of Hazardous Substances. Targets electronics; famous for banishing lead (lead-free solder)." },
+      key: ["RoHS = Restriction of Hazardous Substances", "Applies to electrical and electronic equipment", "Restricts lead, mercury, cadmium, hex chromium, PBB, PBDE (+4 phthalates)", "Drove the move to lead-free solder"] },
+    { id: 'l8-3', title: 'REACH',
+      lecture: [
+        "REACH stands for Registration, Evaluation, Authorisation (and restriction) of Chemicals. It is the EU's broad framework for managing chemical substances, aimed at protecting human health and the environment from chemical risks.",
+        "Under REACH, manufacturers and importers must register the substances they place on the EU market (generally above one tonne per year), some substances of very high concern require explicit authorisation, and the most dangerous can be restricted outright. It is far broader than RoHS, covering chemicals across all kinds of products, not just electronics.",
+        "Exam essentials: REACH = Registration, Evaluation, Authorisation of Chemicals; it governs chemical substances broadly across the EU market."
+      ],
+      hook: { label: 'Acronym Hook', text: "REACH = Registration, Evaluation, Authorisation of CHemicals. Broad chemical control, not just electronics." },
+      key: ["REACH = Registration, Evaluation, Authorisation of Chemicals", "Protects human health and the environment from chemical risk", "Manufacturers/importers must register substances they place on the market", "Broader than RoHS -- covers chemicals across all products"] },
+    { id: 'l8-4', title: 'WEEE & ELV',
+      lecture: [
+        "WEEE and ELV are end-of-life directives, and both are Extended Producer Responsibility written into law. WEEE -- Waste Electrical and Electronic Equipment -- requires producers to take back and recycle electronic products at end-of-life, shifting the cost and duty of disposal onto the maker.",
+        "ELV -- End-of-Life Vehicles -- does the same for the automotive industry, setting recycling and recovery targets and restricting hazardous materials in vehicles. Both directives push 'design for recycling' upstream into the CAD stage, because the cheapest way to meet a take-back obligation is to design a product that comes apart and recycles easily in the first place.",
+        "Exam essentials: WEEE covers waste electronics, ELV covers end-of-life vehicles, and both embody Extended Producer Responsibility, reinforcing Design for Disassembly."
+      ],
+      hook: { label: 'Memory Hook', text: "WEEE = waste electronics (Wee Electronics). ELV = End-of-Life Vehicles. Both are EPR in legal form." },
+      key: ["WEEE = Waste Electrical and Electronic Equipment (take-back & recycling)", "ELV = End-of-Life Vehicles (recycling/recovery targets)", "Both are Extended Producer Responsibility in law", "Both push Design for Disassembly upstream into design"] },
+  ],
+};
+
+// =================== DATA: QUESTIONS ===================
+const QUESTIONS = [
+  { id: 'q1', topic: 't1', q: 'How did the Brundtland Commission define sustainable development?', a: ["Maximising economic output while minimising taxes", "Development that meets present needs without compromising future generations' ability to meet theirs", "Using only renewable materials in every product", "Eliminating all manufacturing waste"], correct: 1, explain: "The Brundtland Commission (1987) defined sustainable development as meeting present needs without compromising the ability of future generations to meet their own needs." },
+  { id: 'q2', topic: 't1', q: 'Which statement about products is TRUE according to the guide?', a: ["Any product made from recycled material is a green product", "There is no such thing as a green product, only a greener one", "A product becomes sustainable once it is recyclable", "Green and sustainable mean exactly the same thing"], correct: 1, explain: "Sustainability is relative. There is no fully green product, only a more sustainable or greener one -- everything is judged by comparison." },
+  { id: 'q3', topic: 't1', q: 'Select all reasons design engineers incorporate sustainability.', a: ["Personal interest", "Company intent", "Industry regulation", "Product colour preference"], correct: [0, 1, 2], explain: "The three drivers are Personal interest, Company intent, and Industry regulation -- remember PCI." },
+  { id: 'q4', topic: 't1', q: 'Greenwashing is best described as:', a: ["Cleaning products with eco-friendly detergent", "Marketing claims that outstrip a product's actual environmental performance", "A method of recycling grey water", "A required step in every LCA"], correct: 1, explain: "Greenwashing is when green marketing messages outstrip the real environmental performance of a product or company." },
+  { id: 'q5', topic: 't1', q: 'The four system conditions of The Natural Step are derived from:', a: ["EU directives", "The laws of thermodynamics", "The Brundtland Report", "Corporate sustainability surveys"], correct: 1, explain: "The Natural Step's four system conditions are derived from the laws of thermodynamics and natural cycles." },
+  { id: 'q6', topic: 't1', q: 'Select all three pillars of the Triple Bottom Line.', a: ["People", "Planet", "Profit", "Process"], correct: [0, 1, 2], explain: "The Triple Bottom Line is People, Planet, Profit -- equivalently Social, Environmental, Economic." },
+  { id: 'q7', topic: 't2', q: 'According to the guide, the single most sustainable solution is often:', a: ["A product made entirely of recycled plastic", "A product that is never made at all", "A product with the lowest purchase price", "A product shipped by sea instead of air"], correct: 1, explain: "The greenest product is one that is never made -- avoiding unnecessary items, or delivering the same function with far less material, is the most sustainable option." },
+  { id: 'q8', topic: 't2', q: 'Design for Disassembly (DfD) primarily aims to:', a: ["Speed up factory assembly", "Make products easy to take apart for repair, reuse, and recycling", "Reduce the purchase price", "Comply with REACH only"], correct: 1, explain: "DfD designs products to come apart easily at end-of-life so parts can be repaired, reused, remanufactured, or recycled." },
+  { id: 'q9', topic: 't2', q: 'Which design choice best supports Design for Disassembly?', a: ["Permanent adhesives and welds", "Screws and snap-fits instead of glue", "Bonding many dissimilar materials together", "Removing all fasteners"], correct: 1, explain: "Mechanical fasteners like screws and snap-fits let parts separate cleanly, unlike adhesives and welds." },
+  { id: 'q10', topic: 't2', q: 'Extended Producer Responsibility (EPR) means:', a: ["The customer is responsible for recycling", "The producer is responsible for the product across its whole life, including end-of-life", "Producers must extend product warranties", "Retailers must recycle packaging"], correct: 1, explain: "EPR makes the manufacturer responsible for the product across its entire life, including take-back and recycling after sale." },
+  { id: 'q11', topic: 't2', q: 'Biomimicry is:', a: ["Using only biodegradable materials", "Designing by imitating nature's models and strategies", "Mimicking competitor products", "A type of LCA software"], correct: 1, explain: "Biomimicry means innovating by imitating nature's proven, resource-efficient models, systems, and strategies." },
+  { id: 'q12', topic: 't2', q: 'Cradle-to-cradle design is associated with which idea?', a: ["A linear path ending in landfill", "A closed loop where end-of-life materials feed new products", "Burning all waste for energy", "Avoiding any end-of-life planning"], correct: 1, explain: "Cradle-to-cradle is a closed loop -- end-of-life material becomes feedstock for new products ('waste equals food')." },
+  { id: 'q13', topic: 't3', q: 'Why is transportation sometimes NOT listed as a single lifecycle stage?', a: ["Because it has no environmental impact", "Because transport legs occur between each of the other stages", "Because it only applies to heavy products", "Because software cannot measure it"], correct: 1, explain: "Transportation occurs between each lifecycle stage (materials to factory, goods to customer, etc.), so the guide treats it as a thread running through the whole life cycle rather than one stage." },
+  { id: 'q14', topic: 't3', q: 'For an energy-using product such as a refrigerator, which lifecycle stage usually dominates impact?', a: ["Raw materials", "Manufacturing", "Use", "End-of-life"], correct: 2, explain: "For energy-using products the Use stage dominates, because cumulative energy consumption over years outweighs the one-time manufacturing impact." },
+  { id: 'q15', topic: 't3', q: 'Life-cycle thinking mainly guards against:', a: ["High purchase prices", "Burden shifting -- improving one stage while worsening another", "Slow manufacturing", "Excessive documentation"], correct: 1, explain: "Considering all stages prevents burden shifting, where a change improves one stage but increases overall impact elsewhere." },
+  { id: 'q16', topic: 't4', q: 'Which impact category is NOT one of the four reported by SOLIDWORKS Sustainability?', a: ["Carbon footprint", "Total energy consumption", "Noise pollution", "Water eutrophication"], correct: 2, explain: "The four are Carbon Footprint, Total Energy Consumption, Air Acidification, and Water Eutrophication (CEAW). Noise is not one of them." },
+  { id: 'q17', topic: 't4', q: 'Carbon footprint is measured in:', a: ["kg SO2-equivalent", "kg CO2-equivalent", "Megajoules", "kg PO4-equivalent"], correct: 1, explain: "Carbon footprint is reported in kg CO2-equivalent, with all greenhouse gases converted to a single CO2-equivalent value." },
+  { id: 'q18', topic: 't4', q: 'Air acidification is measured in:', a: ["kg CO2-equivalent", "kg SO2-equivalent", "kg PO4-equivalent", "Megajoules"], correct: 1, explain: "Air acidification is reported in kg SO2-equivalent -- the emissions responsible for acid rain." },
+  { id: 'q19', topic: 't4', q: 'Water eutrophication is measured in, and caused by:', a: ["kg CO2-eq; carbon emissions", "kg PO4-eq; nutrient pollution causing algal blooms", "kg SO2-eq; acid rain", "MJ; energy use"], correct: 1, explain: "Eutrophication is measured in kg PO4-equivalent and is caused by nutrient pollution (phosphates/nitrates) that triggers algal blooms and oxygen depletion." },
+  { id: 'q20', topic: 't4', q: 'Total energy consumption is measured in:', a: ["Kilowatts", "Megajoules (MJ)", "kg CO2-equivalent", "Newtons"], correct: 1, explain: "Total energy consumption is measured in megajoules (MJ), counting renewable, non-renewable, and embodied energy." },
+  { id: 'q21', topic: 't4', q: 'Most impact-assessment methods measure MIDPOINT indicators because:', a: ["Endpoint damage effects are difficult to measure directly", "Midpoints are required by EU law", "Endpoints do not matter", "Midpoints are always more accurate"], correct: 0, explain: "Endpoint (damage) effects like actual temperature rise are very hard to attribute to one product, so methods use measurable midpoint proxies such as the mass of greenhouse gases emitted." },
+  { id: 'q22', topic: 't5', q: 'Environmental assessment methods range across a spectrum of:', a: ["Cost only", "Rigor -- from intuition to a full formal LCA", "Colour-coding", "Software brands"], correct: 1, explain: "Assessment ranges from intuition and scorecards through qualitative methods to a full LCA; more rigor brings more accuracy at more time and cost." },
+  { id: 'q23', topic: 't5', q: 'You found a greener option using a screening-level tool and want to advertise it. You should:', a: ["Publish the screening result as-is", "Verify the result with a full LCA before making the marketing claim", "Use intuition to confirm it", "Skip verification since screening is enough"], correct: 1, explain: "Screening data is fine to guide design, but a marketing claim must be verified with a full LCA; otherwise you risk greenwashing." },
+  { id: 'q24', topic: 't5', q: 'Before measuring anything, which initial assessment decisions are required? Select all that apply.', a: ["Which impact categories to focus on", "The scope or life-cycle boundary", "The marketing slogan", "The product colour"], correct: [0, 1], explain: "Early decisions about which impacts matter and how far up/down the life cycle to assess shape the entire study." },
+  { id: 'q25', topic: 't6', q: 'A Life Cycle Assessment is only truly useful when used to:', a: ["Generate a single absolute score", "Compare options (previous versions, alternatives, competitors, benchmarks)", "Replace all testing", "Set the product price"], correct: 1, explain: "LCA results are meaningful only as comparisons, since sustainability is a relative concept." },
+  { id: 'q26', topic: 't6', q: 'Which ISO standards define LCA principles and requirements? Select all that apply.', a: ["ISO 14040", "ISO 14044", "ISO 9001", "ISO 26000"], correct: [0, 1], explain: "ISO 14040 covers LCA principles and framework; ISO 14044 covers requirements and guidelines. (ISO 14067 specifically covers product carbon footprint.)" },
+  { id: 'q27', topic: 't6', q: 'In LCA goal and scope, the FUNCTIONAL UNIT is:', a: ["The factory that makes the product", "The quantified basis of comparison (the job the product performs)", "The heaviest component", "The software license type"], correct: 1, explain: "The functional unit is the quantified service basis (e.g., '1000 hours of light') that lets alternatives be compared fairly." },
+  { id: 'q28', topic: 't6', q: 'The SYSTEM BOUNDARY of an LCA defines:', a: ["The legal liability of the producer", "What is included in and excluded from the study (how far along the life cycle)", "The maximum file size", "The product warranty period"], correct: 1, explain: "The system boundary sets what the study includes/excludes -- for example cradle-to-gate versus cradle-to-grave." },
+  { id: 'q29', topic: 't6', q: 'Which Life Cycle Impact Assessment (LCIA) steps are mandatory? Select all that apply.', a: ["Classification", "Characterization", "Normalization", "Weighting"], correct: [0, 1], explain: "Classification (sorting emissions into categories) and characterization (converting to common units) are required; normalization and weighting are optional." },
+  { id: 'q30', topic: 't6', q: 'In LCA, weighting (combining impacts into one score) is best described as:', a: ["A purely objective scientific calculation", "More of a political, values-based process", "A required ISO step", "Identical to characterization"], correct: 1, explain: "The guide states weighting is more political than scientific: deciding that one impact matters more than another is a values-based judgement, and stakeholders disagree." },
+  { id: 'q31', topic: 't6', q: 'Normalization in LCA does what?', a: ["Combines impacts into a single weighted score", "Rescales a product's impacts against a reference model (national/global) to show relative size", "Sorts emissions into categories", "Lists all inputs and outputs"], correct: 1, explain: "Normalization expresses impacts relative to a reference (such as average per-person impact) so you can judge whether a value is large or small in context." },
+  { id: 'q32', topic: 't6', q: 'What are the four phases of an LCA, in order?', a: ["Inventory, Goal, Interpretation, Impact", "Goal & Scope, Inventory Analysis, Impact Assessment, Interpretation", "Classification, Characterization, Normalization, Weighting", "Design, Make, Use, Dispose"], correct: 1, explain: "The four phases are Goal & Scope, Inventory Analysis (LCI), Impact Assessment (LCIA), and Interpretation." },
+  { id: 'q33', topic: 't7', q: 'Results from a product environmental assessment can be compared to:', a: ["Only the current design", "Standards, previous or alternative designs, and competitive benchmarks", "Only competitor prices", "Nothing -- they are absolute"], correct: 1, explain: "Comparisons can be made against standards, previous/alternative designs, competitive benchmarks, and targets -- chosen early in the process." },
+  { id: 'q34', topic: 't7', q: 'When is a difference between two design results meaningful?', a: ["Always, no matter how small", "When it is large and certain enough given the method's accuracy", "Only when it exceeds 50%", "Never, for screening tools"], correct: 1, explain: "Significance depends on the products and the measurement approach; small differences from a rough method may be within the error margin." },
+  { id: 'q35', topic: 't7', q: 'Honest communication of environmental results should include which items? Select all that apply.', a: ["The comparison baseline", "The system boundary", "The confidence level or certainty", "Only the best single number"], correct: [0, 1, 2], explain: "Stating what was measured, against what baseline, within what boundary, and with what certainty is what distinguishes a credible claim from greenwashing." },
+  { id: 'q36', topic: 't8', q: 'EU directives such as RoHS affect:', a: ["Only companies located in the EU", "Manufacturers worldwide who sell into the EU", "Only electronics retailers", "Only raw-material suppliers"], correct: 1, explain: "EU directives apply to products made in OR imported into the EU, so they impact manufacturers worldwide." },
+  { id: 'q37', topic: 't8', q: 'True or False: following sustainable design principles assures compliance with EU directives.', a: ["True", "False"], correct: 1, explain: "False. Sustainable design and regulatory compliance are separate; directives have specific substance and registration rules you must verify independently." },
+  { id: 'q38', topic: 't8', q: 'RoHS specifically restricts hazardous substances in:', a: ["All food packaging", "Electrical and electronic equipment", "Motor vehicles only", "Construction materials"], correct: 1, explain: "RoHS restricts substances like lead and mercury in electrical and electronic equipment, and drove the move to lead-free solder." },
+  { id: 'q39', topic: 't8', q: 'REACH is the EU framework for:', a: ["Recycling vehicles", "Registration, Evaluation, and Authorisation of Chemicals", "Restricting greenhouse gases", "Energy labelling of appliances"], correct: 1, explain: "REACH governs chemical substances broadly -- Registration, Evaluation, Authorisation of Chemicals -- to protect health and the environment." },
+  { id: 'q40', topic: 't8', q: 'WEEE and ELV directives are examples of which principle?', a: ["Triple Bottom Line", "Extended Producer Responsibility", "Biomimicry", "Functional unit"], correct: 1, explain: "WEEE (waste electronics) and ELV (end-of-life vehicles) put end-of-life responsibility on the producer -- Extended Producer Responsibility in law." },
+];
+
+// =================== STATE ===================
+const STORE_KEY = 'cswa-sd-lecture-progress-v1';
+const FONT_KEY = 'cswa-sd-lecture-font-v1';
+const EXAM_QUESTION_COUNT = 30;
+const EXAM_PASS_SCORE = 24;
+const EXAM_TIME_LIMIT_MS = 60 * 60 * 1000;
+
+function emptyProgress() { return { learned: {}, answered: {}, wrongQueue: [] }; }
+function emptyExam() { return { active: false, complete: false, questions: [], answers: {}, startedAt: null, endsAt: null, expired: false }; }
+function normalizeProgress(progress) {
+  const base = emptyProgress();
+  if (!progress || typeof progress !== 'object') return base;
+  return {
+    learned: progress.learned && typeof progress.learned === 'object' ? progress.learned : {},
+    answered: progress.answered && typeof progress.answered === 'object' ? progress.answered : {},
+    wrongQueue: Array.isArray(progress.wrongQueue) ? progress.wrongQueue : []
+  };
+}
+function loadProgress() { try { const v = localStorage.getItem(STORE_KEY); return v ? normalizeProgress(JSON.parse(v)) : emptyProgress(); } catch { return emptyProgress(); } }
+function saveProgress() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state.progress)); } catch {} }
+function loadFont() { try { const v = localStorage.getItem(FONT_KEY); return v ? parseInt(v, 10) : 18; } catch { return 18; } }
+function saveFont() { try { localStorage.setItem(FONT_KEY, String(state.fontSize)); } catch {} }
+
+const state = { view: 'home', topicId: null, cardIdx: 0, quizMode: 'all', quizIdx: 0, quizAnswer: null, quizSelection: [], showSettings: false, fontSize: 18, progress: emptyProgress(), exam: emptyExam() };
+
+function applyFont() { document.body.classList.remove('fs-14','fs-16','fs-18','fs-20','fs-22','fs-24','fs-26','fs-28'); document.body.classList.add('fs-' + state.fontSize); }
+function quizPool() { if (state.quizMode === 'review') return QUESTIONS.filter(q => state.progress.wrongQueue.includes(q.id)); if (state.quizMode === 'all') return QUESTIONS; return QUESTIONS.filter(q => q.topic === state.quizMode); }
+function currentQuizPool() { if (!state.exam.active) return quizPool(); return state.exam.questions.map(id => QUESTIONS.find(q => q.id === id)).filter(Boolean); }
+function currentQuestion() { const pool = currentQuizPool(); return pool[Math.min(state.quizIdx, pool.length - 1)]; }
+function correctAnswers(q) { return Array.isArray(q.correct) ? q.correct.slice().sort((a, b) => a - b) : [q.correct]; }
+function isMultiQuestion(q) { return correctAnswers(q).length > 1; }
+function sameAnswerSet(a, b) { const aa = (a || []).slice().sort((x, y) => x - y); const bb = (b || []).slice().sort((x, y) => x - y); return aa.length === bb.length && aa.every((v, i) => v === bb[i]); }
+function answerText(q, answer) { return (answer || []).map(i => q.a[i]).filter(Boolean).join(', '); }
+function shuffleCopy(items) {
+  const out = items.slice();
+  for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [out[i], out[j]] = [out[j], out[i]]; }
+  return out;
+}
+function startExamSession() {
+  const questions = shuffleCopy(QUESTIONS).slice(0, Math.min(EXAM_QUESTION_COUNT, QUESTIONS.length)).map(q => q.id);
+  const now = Date.now();
+  return { active: true, complete: false, questions, answers: {}, startedAt: now, endsAt: now + EXAM_TIME_LIMIT_MS, expired: false };
+}
+function examTimeRemainingMs() { return state.exam.endsAt ? Math.max(0, state.exam.endsAt - Date.now()) : EXAM_TIME_LIMIT_MS; }
+function formatTime(ms) { const total = Math.ceil(ms / 1000); const m = Math.floor(total / 60); const s = total % 60; return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'); }
+function updateTimerBadge() { const el = document.getElementById('timerBadge'); if (el) el.textContent = 'Time left ' + formatTime(examTimeRemainingMs()); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// =================== RENDER ===================
+function renderHeader() {
+  return '<div class="row-between" style="margin-bottom:24px">' +
+    '<div class="row" style="cursor:pointer" onclick="go(\'home\')">' +
+      '<div class="icon-wrap" style="background:#7DAB87">' + icon('leaf', 28, '#14201D', 2.5) + '</div>' +
+      '<div><div class="display" style="font-size:1.35em;font-weight:700">CSWA-SD · Sustainability</div>' +
+      '<div class="subtle" style="font-size:0.85em">Lecture course &amp; exam prep</div></div></div>' +
+    '<button class="nav-btn" onclick="toggleSettings()">' + icon('type', 18) + ' Aa</button></div>';
+}
+function renderTabs() {
+  const wq = state.progress.wrongQueue.length;
+  const t = (id, label, extra) => '<button class="tab' + (state.view === id || (id === 'review' && state.view === 'quiz' && state.quizMode === 'review') ? ' active' : '') + '" onclick="' + (id === 'review' ? "openReview()" : "go('" + id + "')") + '">' + label + (extra || '') + '</button>';
+  return '<div class="header-tabs">' + t('home', 'Home') + t('learn', 'Lectures') +
+    '<button class="tab' + (state.view === 'quiz' && state.quizMode !== 'review' ? ' active' : '') + '" onclick="openQuiz()">Quiz</button>' +
+    t('review', 'Review', wq > 0 ? ' <span style="background:#D9A574;color:#14201D;border-radius:999px;padding:2px 8px;margin-left:6px;font-size:0.8em">' + wq + '</span>' : '') + '</div>';
+}
+function renderHome() {
+  const totalCards = Object.values(CARDS).flat().length;
+  const learnedCount = Object.keys(state.progress.learned).length;
+  const answeredCount = Object.keys(state.progress.answered).length;
+  const correctCount = Object.values(state.progress.answered).filter(Boolean).length;
+  const accuracy = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
+
+  let html = '<h1 class="display" style="margin-bottom:12px">Let\'s pass this one, Muditha.</h1>' +
+    '<p class="subtle" style="font-size:1.05em;margin-bottom:24px;max-width:660px">This is the full lecture course, rebuilt for the actual CSWA-SD exam. Every topic is taught properly -- the why, the examples, and the traps -- then reinforced with hooks, key points, and a 40-question quiz.</p>';
+
+  html += '<div class="card" style="margin-bottom:24px;background:linear-gradient(135deg,#243532,#2a3d39)">' +
+    '<div class="row" style="gap:10px;margin-bottom:14px">' + icon('alert', 22, '#D9A574') + '<div class="display" style="font-size:1.2em;font-weight:700">Know your target</div></div>' +
+    '<div class="fact-row"><div class="fact-k">Time</div><div class="fact-v">60 minutes</div></div>' +
+    '<div class="fact-row"><div class="fact-k">Questions</div><div class="fact-v">30 (1 point each)</div></div>' +
+    '<div class="fact-row"><div class="fact-k">Pass mark</div><div class="fact-v">24 / 30 = 80%</div></div>' +
+    '<div class="fact-row"><div class="fact-k">Format</div><div class="fact-v">Multiple choice &amp; multi-answer (select all that apply)</div></div>' +
+    '<div class="fact-row"><div class="fact-k">Categories</div><div class="fact-v">Intro to Sustainability · Environmental Assessment · Sustainable Design</div></div>' +
+    '<div class="fact-row"><div class="fact-k">Retake</div><div class="fact-v">14-day wait between attempts</div></div>' +
+    '<p class="subtle" style="margin:14px 0 0;font-size:0.92em">80% is a high bar, and multi-answer questions punish half-knowledge. The fix is understanding, not memorising -- so read the lectures, then test yourself.</p>' +
+    '<div class="nav-row" style="margin-top:18px"><button class="btn" onclick="startExam()">Start 30-question exam</button><button class="nav-btn" onclick="openQuiz()">Practice question bank</button></div></div>';
+
+  html += '<div class="grid-3" style="margin-bottom:28px">' +
+    '<div class="stat-card"><div class="row" style="margin-bottom:10px">' + icon('bookOpen', 20, '#7DAB87') + '<div class="subtle" style="font-size:0.9em">Lessons read</div></div>' +
+    '<div class="display" style="font-size:2em;font-weight:700">' + learnedCount + '<span class="subtle" style="font-size:0.5em;font-weight:400"> / ' + totalCards + '</span></div>' +
+    '<div class="progress-bar" style="margin-top:12px"><div class="progress-fill" style="width:' + (learnedCount/totalCards*100) + '%"></div></div></div>' +
+    '<div class="stat-card"><div class="row" style="margin-bottom:10px">' + icon('target', 20, '#D9A574') + '<div class="subtle" style="font-size:0.9em">Questions answered</div></div>' +
+    '<div class="display" style="font-size:2em;font-weight:700">' + answeredCount + '<span class="subtle" style="font-size:0.5em;font-weight:400"> / ' + QUESTIONS.length + '</span></div>' +
+    '<div class="progress-bar" style="margin-top:12px"><div class="progress-fill" style="width:' + (answeredCount/QUESTIONS.length*100) + '%;background:linear-gradient(90deg,#D9A574,#E8B884)"></div></div></div>' +
+    '<div class="stat-card"><div class="row" style="margin-bottom:10px">' + icon('trophy', 20, '#A89BC9') + '<div class="subtle" style="font-size:0.9em">Accuracy</div></div>' +
+    '<div class="display" style="font-size:2em;font-weight:700">' + accuracy + '<span class="subtle" style="font-size:0.5em;font-weight:400">%</span></div>' +
+    '<div class="progress-bar" style="margin-top:12px"><div class="progress-fill" style="width:' + accuracy + '%;background:linear-gradient(90deg,#A89BC9,#B8ACD5)"></div></div></div></div>';
+
+  html += '<h2 class="display" style="margin-bottom:16px">The eight modules</h2><div class="topic-grid" style="margin-bottom:28px">';
+  TOPICS.forEach((t, i) => {
+    const tCards = CARDS[t.id];
+    const tLearned = tCards.filter(c => state.progress.learned[c.id]).length;
+    html += '<div class="topic-card card" onclick="openTopic(\'' + t.id + '\')">' +
+      '<div class="row" style="margin-bottom:14px"><div class="icon-wrap" style="background:' + t.color + ';width:44px;height:44px;border-radius:11px">' + icon(t.icon, 22, '#14201D', 2.5) + '</div>' +
+      '<span class="badge subtle">Module ' + (i+1) + '</span></div>' +
+      '<div class="display" style="font-size:1.12em;font-weight:700;margin-bottom:12px">' + esc(t.title) + '</div>' +
+      '<div class="subtle" style="font-size:0.9em;margin-bottom:12px">' + tLearned + ' of ' + tCards.length + ' lessons</div>' +
+      '<div class="progress-bar"><div class="progress-fill" style="width:' + (tLearned/tCards.length*100) + '%;background:' + t.color + '"></div></div></div>';
+  });
+  html += '</div>';
+
+  html += '<div class="card"><div class="row" style="gap:10px;margin-bottom:10px">' + icon('brain', 24, '#D9A574') + '<div class="display" style="font-size:1.15em;font-weight:700">How to study for the 80% bar</div></div>' +
+    '<div style="font-size:0.96em;line-height:1.75">1. Read a module\'s lectures in the <strong>Lectures</strong> tab -- understand the why, not just the words.<br>' +
+    '2. Take that module\'s quiz from the topic dropdown.<br>' +
+    '3. The next day, open <strong>Review</strong> and clear every wrong answer -- that is your spaced-repetition drill.<br>' +
+    '4. Pay special attention to the orange <em>trap</em> boxes; those are the misconceptions that cost marks.</div></div>';
+  return html;
+}
+function renderLearnList() {
+  let html = '<h1 class="display" style="margin-bottom:8px">Lectures</h1><p class="subtle" style="margin-bottom:24px">Read top to bottom, or jump to a module. Each lesson teaches the concept, then gives you the hook and key points.</p>';
+  TOPICS.forEach((t, i) => {
+    const tCards = CARDS[t.id];
+    const tLearned = tCards.filter(c => state.progress.learned[c.id]).length;
+    html += '<div style="margin-bottom:26px"><div class="row" style="margin-bottom:12px;gap:10px">' + icon(t.icon, 22, t.color, 2.5) +
+      '<div class="display" style="font-size:1.25em;font-weight:700">' + (i+1) + '. ' + esc(t.title) + '</div>' +
+      '<span class="badge subtle" style="margin-left:auto">' + tLearned + '/' + tCards.length + '</span></div>';
+    tCards.forEach((c, ci) => {
+      const done = !!state.progress.learned[c.id];
+      html += '<div class="lesson-link" onclick="openTopicAt(\'' + t.id + '\',' + ci + ')">' +
+        '<div class="dot" style="background:' + (done ? '#7DAB87' : '#4a6661') + '"></div>' +
+        '<div style="flex:1">' + esc(c.title) + '</div>' +
+        (done ? icon('check', 18, '#7DAB87') : icon('chevronRight', 18, '#B5C9C4')) + '</div>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+function renderLearnCard() {
+  const t = TOPICS.find(x => x.id === state.topicId);
+  const cards = CARDS[state.topicId];
+  const card = cards[state.cardIdx];
+  const isLearned = !!state.progress.learned[card.id];
+
+  let html = '<button class="nav-btn" onclick="backToLearnList()" style="margin-bottom:20px">' + icon('chevronLeft', 18) + ' All lectures</button>';
+  html += '<div class="row" style="margin-bottom:8px">' + icon(t.icon, 26, t.color, 2.5) +
+    '<span class="subtle">' + esc(t.title) + '</span>' +
+    '<span class="badge" style="margin-left:auto">Lesson ' + (state.cardIdx + 1) + ' / ' + cards.length + '</span></div>';
+  html += '<div class="card" style="margin-top:16px">' +
+    '<h2 class="display" style="font-size:1.55em;margin-bottom:18px">' + esc(card.title) + '</h2>' +
+    '<div class="lecture">' + card.lecture.map(p => '<p>' + esc(p) + '</p>').join('') + '</div>';
+  if (card.extra) html += card.extra;
+  html += '<div class="hook-box"><div class="row" style="margin-bottom:6px;gap:8px">' + icon('lightbulb', 18, '#D9A574') +
+    '<strong style="color:#D9A574;font-size:0.9em;letter-spacing:0.05em;text-transform:uppercase">' + esc(card.hook.label) + '</strong></div>' +
+    '<div style="font-size:1em">' + esc(card.hook.text) + '</div></div>';
+  html += '<div style="margin-top:4px"><div class="row" style="margin-bottom:8px;gap:8px">' + icon('sparkles', 18, '#7DAB87') +
+    '<strong style="color:#7DAB87;font-size:0.9em;letter-spacing:0.05em;text-transform:uppercase">Key Points</strong></div>' +
+    '<ul class="key-list">' + card.key.map(k => '<li>' + esc(k) + '</li>').join('') + '</ul></div>';
+  if (card.trap) {
+    html += '<div class="trap-box"><div class="row" style="margin-bottom:6px;gap:8px">' + icon('alert', 18, '#D98A74') +
+      '<strong style="color:#D98A74;font-size:0.9em;letter-spacing:0.05em;text-transform:uppercase">Exam Trap</strong></div>' +
+      '<div>' + esc(card.trap) + '</div></div>';
+  }
+  html += '<div class="nav-row">' +
+    '<button class="nav-btn" ' + (state.cardIdx === 0 ? 'disabled' : '') + ' onclick="prevCard()">' + icon('chevronLeft', 18) + ' Previous</button>' +
+    '<button class="' + (isLearned ? 'btn btn-ghost' : 'btn') + '" onclick="toggleLearned(\'' + card.id + '\')" style="display:inline-flex;align-items:center;gap:8px">' +
+      (isLearned ? icon('check', 18) + ' Read' : 'Mark as Read ' + icon('star', 16)) + '</button>' +
+    '<button class="nav-btn" ' + (state.cardIdx === cards.length - 1 ? 'disabled' : '') + ' onclick="nextCard()">Next ' + icon('chevronRight', 18) + '</button></div></div>';
+  html += '<div class="progress-bar" style="margin-top:20px"><div class="progress-fill" style="width:' + ((state.cardIdx + 1) / cards.length * 100) + '%;background:' + t.color + '"></div></div>';
+  return html;
+}
+function renderExamResult() {
+  const pool = currentQuizPool();
+  const answeredCount = Object.keys(state.exam.answers).length;
+  const correctCount = pool.filter(q => state.exam.answers[q.id] && state.exam.answers[q.id].correct).length;
+  const passed = correctCount >= EXAM_PASS_SCORE;
+  const missed = pool.filter(q => !state.exam.answers[q.id] || !state.exam.answers[q.id].correct);
+  const scorePct = pool.length ? Math.round((correctCount / pool.length) * 100) : 0;
+
+  let html = '<div class="card" style="text-align:center;padding:42px 28px">' + icon(passed ? 'trophy' : 'target', 52, passed ? '#7DAB87' : '#D9A574') +
+    '<h1 class="display" style="margin:16px 0 8px">' + (passed ? 'Passed' : 'Keep reviewing') + '</h1>' +
+    '<div class="display" style="font-size:2.4em;font-weight:700;margin-bottom:4px">' + correctCount + ' / ' + pool.length + '</div>' +
+    '<p class="subtle" style="margin:0 0 18px">Score: ' + scorePct + '% · Pass target: ' + EXAM_PASS_SCORE + ' / ' + EXAM_QUESTION_COUNT + (state.exam.expired ? ' · Time expired' : '') + '</p>' +
+    '<div class="progress-bar" style="margin:0 auto 22px;max-width:360px"><div class="progress-fill" style="width:' + scorePct + '%;background:' + (passed ? '#7DAB87' : '#D9A574') + '"></div></div>' +
+    '<div class="nav-row" style="justify-content:center;margin-top:0"><button class="btn" onclick="startExam()">Retake 30-question exam</button><button class="nav-btn" onclick="openReview()">Review wrong answers</button><button class="nav-btn" onclick="openQuiz()">Practice bank</button></div></div>';
+
+  if (missed.length > 0) {
+    html += '<h2 class="display" style="margin:28px 0 12px">Questions to review</h2><div class="result-list">';
+    missed.forEach(q => {
+      const given = state.exam.answers[q.id] ? answerText(q, state.exam.answers[q.id].answer) : 'No answer';
+      html += '<div class="result-item"><div style="font-weight:700;margin-bottom:6px">' + esc(q.q) + '</div>' +
+        '<div class="subtle" style="font-size:0.92em">Your answer: ' + esc(given) + '</div>' +
+        '<div style="margin-top:6px">Correct: ' + esc(answerText(q, correctAnswers(q))) + '</div>' +
+        '<div class="subtle" style="margin-top:6px;font-size:0.92em">' + esc(q.explain) + '</div></div>';
+    });
+    html += '</div>';
+  }
+  return html;
+}
+function renderQuiz() {
+  if (state.exam.active && state.exam.complete) return renderExamResult();
+  const pool = currentQuizPool();
+  if (pool.length === 0) {
+    return '<div class="card" style="text-align:center;padding:48px">' + icon('trophy', 48, '#7DAB87') +
+      '<h2 class="display" style="margin:14px 0 10px">' + (state.quizMode === 'review' ? 'Nothing to review' : 'No questions yet') + '</h2>' +
+      '<p class="subtle" style="margin-bottom:20px">' + (state.quizMode === 'review' ? "You've cleared every wrong answer -- take the exam again to stay sharp." : 'Pick a module to start.') + '</p>' +
+      '<button class="btn" onclick="startExam()">Start 30-question exam</button></div>';
+  }
+  const q = currentQuestion();
+  const topicOfQ = TOPICS.find(t => t.id === q.topic);
+  const isExam = state.exam.active && !state.exam.complete;
+  const modeLabel = isExam ? 'Timed Exam' : state.quizMode === 'review' ? 'Review Mode' : state.quizMode === 'all' ? 'Practice Bank' : topicOfQ.title;
+  const correct = correctAnswers(q);
+  const isMulti = isMultiQuestion(q);
+  const answerLocked = state.quizAnswer !== null;
+
+  let optsHtml = '';
+  q.a.forEach((opt, i) => {
+    let cls = 'quiz-option';
+    const selectedNow = state.quizSelection.includes(i);
+    const selectedFinal = answerLocked && state.quizAnswer.includes(i);
+    if (answerLocked && isExam) { if (selectedFinal) cls += ' selected'; }
+    else if (answerLocked) { if (correct.includes(i)) cls += ' correct'; else if (selectedFinal) cls += ' wrong'; }
+    else if (selectedNow) cls += ' selected';
+    optsHtml += '<button class="' + cls + '" ' + (answerLocked ? 'disabled' : '') + ' onclick="chooseQuizOption(' + i + ')">' +
+      '<span style="font-weight:700;margin-right:10px;color:' + (!answerLocked ? '#7DAB87' : 'inherit') + '">' + String.fromCharCode(65 + i) + '.</span>' + esc(opt) +
+      (answerLocked && !isExam && correct.includes(i) ? '<span style="float:right">' + icon('check', 20, '#8BC082') + '</span>' : '') +
+      (answerLocked && !isExam && selectedFinal && !correct.includes(i) ? '<span style="float:right">' + icon('xCircle', 20, '#C97A7A') + '</span>' : '') + '</button>';
+  });
+
+  let selectOpts = '<option value="all"' + (state.quizMode === 'all' ? ' selected' : '') + '>All practice questions</option><option value="review"' + (state.quizMode === 'review' ? ' selected' : '') + '>Review wrong</option>';
+  TOPICS.forEach(t => { selectOpts += '<option value="' + t.id + '"' + (state.quizMode === t.id ? ' selected' : '') + '>' + esc(t.title) + '</option>'; });
+
+  let html = '<div class="quiz-meta">' +
+    '<span class="badge">' + icon(isExam ? 'award' : 'target', 14) + esc(modeLabel) + '</span>' +
+    '<span class="badge subtle">Q ' + (state.quizIdx + 1) + ' of ' + pool.length + '</span>' +
+    (isExam ? '<span id="timerBadge" class="badge">Time left ' + formatTime(examTimeRemainingMs()) + '</span><button class="nav-btn" onclick="finishExam(false)">Finish exam</button>' : '<button class="nav-btn" onclick="startExam()">Start exam mode</button><div style="margin-left:auto"><select onchange="changeQuizMode(this.value)">' + selectOpts + '</select></div>') + '</div>';
+  html += '<div class="card"><div class="display" style="font-size:1.25em;font-weight:700;margin-bottom:10px;line-height:1.45">' + esc(q.q) + '</div>' +
+    '<div class="subtle" style="font-size:0.92em;margin-bottom:18px">' + (isMulti ? 'Select all that apply, then check your answer.' : 'Choose one answer.') + '</div><div>' + optsHtml + '</div>';
+  if (answerLocked && !isExam) {
+    const isCorrect = sameAnswerSet(state.quizAnswer, correct);
+    html += '<div class="hook-box" style="border-left-color:' + (isCorrect ? '#8BC082' : '#C97A7A') + '">' +
+      '<div class="row" style="margin-bottom:6px;gap:8px">' + (isCorrect ? icon('check', 18, '#8BC082') : icon('lightbulb', 18, '#D9A574')) +
+      '<strong style="color:' + (isCorrect ? '#8BC082' : '#D9A574') + ';font-size:0.9em;letter-spacing:0.05em;text-transform:uppercase">' + (isCorrect ? 'Correct' : 'Explanation') + '</strong></div><div>' + esc(q.explain) + '</div></div>';
+  }
+  if (answerLocked && isExam) {
+    html += '<div class="hook-box"><div class="row" style="gap:8px">' + icon('check', 18, '#7DAB87') + '<strong>Answer saved</strong></div><div class="subtle" style="margin-top:6px">Explanations are shown after you finish the exam.</div></div>';
+  }
+  html += '<div class="nav-row"><button class="nav-btn" ' + (state.quizIdx === 0 ? 'disabled' : '') + ' onclick="prevQuiz()">' + icon('chevronLeft', 18) + ' Previous</button>';
+  if (!answerLocked && isMulti) html += '<button class="btn" ' + (state.quizSelection.length === 0 ? 'disabled' : '') + ' onclick="submitQuizAnswer()">Check answer</button>';
+  else if (answerLocked && state.quizIdx < pool.length - 1) html += '<button class="btn" onclick="nextQuiz()">Next question ' + icon('chevronRight', 18) + '</button>';
+  else if (answerLocked && state.quizIdx === pool.length - 1 && isExam) html += '<button class="btn" onclick="finishExam(false)">Finish exam</button>';
+  else if (answerLocked && state.quizIdx === pool.length - 1) html += '<button class="btn" onclick="restartQuiz()">' + icon('refresh', 18) + ' Start over</button>';
+  else html += '<span class="subtle" style="font-size:0.92em">Answer to continue.</span>';
+  html += '</div></div><div class="progress-bar" style="margin-top:20px"><div class="progress-fill" style="width:' + ((state.quizIdx + 1) / pool.length * 100) + '%"></div></div>';
+  return html;
+}
+function renderSettings() {
+  if (!state.showSettings) return '';
+  return '<div class="modal-bg" onclick="toggleSettings()"><div class="modal" onclick="event.stopPropagation()">' +
+    '<div class="row-between" style="margin-bottom:20px"><h2 class="display" style="font-size:1.4em">Display &amp; Reset</h2><button class="nav-btn" onclick="toggleSettings()">Close</button></div>' +
+    '<div style="margin-bottom:24px"><div class="row" style="margin-bottom:10px;gap:8px">' + icon('eye', 18, '#7DAB87') + '<strong>Font size</strong></div>' +
+      '<div class="subtle" style="font-size:0.9em;margin-bottom:14px">Make the text bigger or smaller for comfort.</div>' +
+      '<div class="row" style="gap:14px"><button class="font-btn" onclick="changeFont(-2)">&minus;</button>' +
+        '<div style="font-size:1.1em;font-weight:700;min-width:60px;text-align:center">' + state.fontSize + 'px</div>' +
+        '<button class="font-btn" onclick="changeFont(2)">+</button><button class="nav-btn" onclick="resetFont()" style="margin-left:8px">Reset</button></div></div>' +
+    '<div><div class="row" style="margin-bottom:10px;gap:8px">' + icon('refresh', 18, '#C97A7A') + '<strong>Reset all progress</strong></div>' +
+      '<div class="subtle" style="font-size:0.9em;margin-bottom:14px">Clear read lessons, quiz answers, and the review queue.</div>' +
+      '<button class="nav-btn" onclick="resetProgress()" style="border-color:#C97A7A;color:#C97A7A">Reset progress</button></div></div></div>';
+}
+function render() {
+  let body = '';
+  if (state.view === 'home') body = renderHome();
+  else if (state.view === 'learn' && !state.topicId) body = renderLearnList();
+  else if (state.view === 'learn' && state.topicId) body = renderLearnCard();
+  else if (state.view === 'quiz') body = renderQuiz();
+  document.getElementById('app').innerHTML = '<div class="container">' + renderHeader() + renderTabs() + body + '</div>' + renderSettings();
+  window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+}
+
+// =================== ACTIONS ===================
+function resetQuizAnswer() { state.quizAnswer = null; state.quizSelection = []; }
+function go(view) { state.exam = emptyExam(); state.view = view; state.topicId = null; resetQuizAnswer(); render(); }
+function openTopic(id) { state.exam = emptyExam(); state.view = 'learn'; state.topicId = id; state.cardIdx = 0; resetQuizAnswer(); render(); }
+function openTopicAt(id, idx) { state.exam = emptyExam(); state.view = 'learn'; state.topicId = id; state.cardIdx = idx; resetQuizAnswer(); render(); }
+function backToLearnList() { state.topicId = null; render(); }
+function prevCard() { if (state.cardIdx > 0) { state.cardIdx--; render(); } }
+function nextCard() { const cards = CARDS[state.topicId]; if (state.cardIdx < cards.length - 1) { state.cardIdx++; render(); } }
+function toggleLearned(id) { if (state.progress.learned[id]) delete state.progress.learned[id]; else state.progress.learned[id] = true; saveProgress(); render(); }
+function openQuiz() { state.exam = emptyExam(); state.view = 'quiz'; state.quizMode = 'all'; state.quizIdx = 0; resetQuizAnswer(); render(); }
+function openReview() { state.exam = emptyExam(); state.view = 'quiz'; state.quizMode = 'review'; state.quizIdx = 0; resetQuizAnswer(); render(); }
+function startExam() { state.exam = startExamSession(); state.view = 'quiz'; state.quizMode = 'exam'; state.quizIdx = 0; resetQuizAnswer(); render(); }
+function startQuiz(mode) { if (mode === 'exam') { startExam(); return; } state.exam = emptyExam(); state.quizMode = mode; state.quizIdx = 0; resetQuizAnswer(); render(); }
+function changeQuizMode(mode) { if (mode === 'exam') { startExam(); return; } state.exam = emptyExam(); state.quizMode = mode; state.quizIdx = 0; resetQuizAnswer(); render(); }
+function chooseQuizOption(idx) {
+  if (state.quizAnswer !== null) return;
+  const q = currentQuestion();
+  if (!q) return;
+  if (isMultiQuestion(q)) {
+    const selected = new Set(state.quizSelection);
+    if (selected.has(idx)) selected.delete(idx); else selected.add(idx);
+    state.quizSelection = [...selected].sort((a, b) => a - b);
+    render();
+    return;
+  }
+  state.quizSelection = [idx];
+  submitQuizAnswer();
+}
+function submitQuizAnswer() {
+  if (state.quizAnswer !== null || state.quizSelection.length === 0) return;
+  const q = currentQuestion();
+  if (!q) return;
+  const answer = state.quizSelection.slice().sort((a, b) => a - b);
+  const isCorrect = sameAnswerSet(answer, correctAnswers(q));
+  state.quizAnswer = answer;
+  if (state.exam.active) {
+    state.exam.answers[q.id] = { answer, correct: isCorrect };
+  } else {
+    state.progress.answered[q.id] = isCorrect;
+    const wrongSet = new Set(state.progress.wrongQueue);
+    if (isCorrect) wrongSet.delete(q.id); else wrongSet.add(q.id);
+    state.progress.wrongQueue = [...wrongSet];
+    saveProgress();
+  }
+  render();
+}
+function prevQuiz() {
+  if (state.quizIdx > 0) {
+    state.quizIdx--;
+    const q = currentQuestion();
+    state.quizAnswer = state.exam.active && q && state.exam.answers[q.id] ? state.exam.answers[q.id].answer.slice() : null;
+    state.quizSelection = state.quizAnswer ? state.quizAnswer.slice() : [];
+    render();
+  }
+}
+function nextQuiz() {
+  const pool = currentQuizPool();
+  if (state.quizIdx < pool.length - 1) {
+    state.quizIdx++;
+    const q = currentQuestion();
+    state.quizAnswer = state.exam.active && q && state.exam.answers[q.id] ? state.exam.answers[q.id].answer.slice() : null;
+    state.quizSelection = state.quizAnswer ? state.quizAnswer.slice() : [];
+    render();
+  }
+}
+function restartQuiz() { if (state.exam.active) startExam(); else { state.quizIdx = 0; resetQuizAnswer(); render(); } }
+function finishExam(expired) {
+  if (!state.exam.active) return;
+  const wrongSet = new Set(state.progress.wrongQueue);
+  currentQuizPool().forEach(q => {
+    const result = state.exam.answers[q.id];
+    if (!result || !result.correct) wrongSet.add(q.id); else wrongSet.delete(q.id);
+  });
+  state.progress.wrongQueue = [...wrongSet];
+  saveProgress();
+  state.exam.complete = true;
+  state.exam.expired = !!expired;
+  resetQuizAnswer();
+  render();
+}
+function toggleSettings() { state.showSettings = !state.showSettings; render(); }
+function changeFont(d) { state.fontSize = Math.max(14, Math.min(28, state.fontSize + d)); saveFont(); applyFont(); render(); }
+function resetFont() { state.fontSize = 18; saveFont(); applyFont(); render(); }
+function resetProgress() { if (confirm('Reset all progress? This cannot be undone.')) { state.progress = emptyProgress(); state.exam = emptyExam(); saveProgress(); render(); } }
+
+// =================== BOOT ===================
+state.progress = loadProgress();
+state.fontSize = loadFont();
+applyFont();
+render();
+setInterval(() => {
+  if (state.exam.active && !state.exam.complete) {
+    if (examTimeRemainingMs() <= 0) finishExam(true);
+    else updateTimerBadge();
+  }
+}, 1000);
+</script>
+</body>
+</html>

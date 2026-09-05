@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>SOLIDWORKS Exam Study App &middot; CSWA-SD &middot; CSWA-S &middot; CSWP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; background: #1a2825;
+    font-family: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
+    color: #EFE7D6; font-size: 18px; line-height: 1.7;
+    letter-spacing: 0.01em; min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body.fs-14 { font-size: 14px; } body.fs-16 { font-size: 16px; }
+  body.fs-18 { font-size: 18px; } body.fs-20 { font-size: 20px; }
+  body.fs-22 { font-size: 22px; } body.fs-24 { font-size: 24px; }
+  body.fs-26 { font-size: 26px; } body.fs-28 { font-size: 28px; }
+  .display { font-family: 'Fraunces', Georgia, serif; letter-spacing: -0.01em; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 20px 120px; }
+  a { color: #95C19F; }
+
+  /* ---- accent is re-pointed per exam ---- */
+  :root { --ac: #7DAB87; --ac2: #95C19F; --acd: #14201D; }
+
+  h1 { font-size: 2.0em; margin: 0 0 6px; line-height: 1.22; }
+  h2 { font-size: 1.3em; margin: 34px 0 14px; color: #C9DCCC; }
+  h3 { font-size: 1.12em; margin: 0 0 8px; }
+  p  { margin: 10px 0 0; }
+  .sub { color: #A9BDB5; margin: 0 0 4px; }
+  .muted { color: #A9BDB5; }
+  .mono { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size: .9em; }
+
+  .topbar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;
+            padding: 14px 20px; background:#1b2926; border-bottom:1px solid #2f4641;
+            position:sticky; top:0; z-index:40; }
+  .brand { display:flex; align-items:center; gap:12px; font-weight:700; }
+  .brand .dot { width:12px; height:12px; border-radius:50%; background:var(--ac); box-shadow:0 0 12px var(--ac); }
+  .toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+  button { font-family: inherit; font-size: 1em; cursor: pointer; }
+  .btn { background: var(--ac); color: var(--acd); border: none;
+         padding: 12px 22px; border-radius: 12px; font-weight: 700; }
+  .btn:hover { background: var(--ac2); }
+  .btn.ghost { background: transparent; color: #EFE7D6; border: 1px solid #4a6661; }
+  .btn.ghost:hover { background: #2f4641; }
+  .btn.sm { padding: 7px 14px; font-size: .86em; border-radius: 9px; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn.danger { background: transparent; color: #C97A7A; border: 1px solid #6b3f3f; }
+
+  .card { background:#243532; border-radius:18px; padding:26px; border:1px solid #2f4641; margin-bottom:18px; }
+  .card.tight { padding: 18px 20px; }
+  .grid { display:grid; gap:16px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); }
+
+  .pill { display:inline-block; padding:4px 13px; border-radius:999px; font-size:.76em;
+          font-weight:700; letter-spacing:.03em; white-space:nowrap; }
+  .pill-ac { background: var(--ac); color: var(--acd); }
+  .pill-q  { background:#2f4641; color:#C9DCCC; }
+  .pill-warn { background:#3f4638; color:#D9A574; }
+  .pill-bad  { background:#4a2c2c; color:#E5A3A3; }
+  .pill-good { background:#2a4a36; color:#8BC082; }
+
+  /* exam picker */
+  .exam-card { background:#243532; border:1px solid #2f4641; border-radius:18px; padding:24px;
+               display:flex; flex-direction:column; gap:12px; text-align:left; width:100%;
+               color:#EFE7D6; transition: border-color .15s; }
+  .exam-card:hover { border-color: var(--pc); }
+  .exam-card .code { font-size:.8em; font-weight:700; letter-spacing:.08em; color:var(--pc); }
+  .exam-card h3 { font-size:1.22em; margin:0; }
+  .exam-card .spec { color:#A9BDB5; font-size:.88em; }
+
+  .bar { height:10px; background:#1b2926; border-radius:999px; overflow:hidden; border:1px solid #2f4641; }
+  .bar > i { display:block; height:100%; background:var(--ac); border-radius:999px; }
+  .bar.pc > i { background: var(--pc); }
+
+  .stat { background:#1e2d2a; border:1px solid #2f4641; border-radius:14px; padding:16px 18px; }
+  .stat .n { font-size:1.9em; font-weight:700; color:var(--ac); font-family:'Fraunces',serif; line-height:1.1; }
+  .stat .l { color:#A9BDB5; font-size:.84em; }
+
+  /* spec table */
+  table { width:100%; border-collapse:collapse; font-size:.94em; }
+  th, td { padding:11px 13px; text-align:left; border-bottom:1px solid #2f4641; vertical-align:top; }
+  th { color:#C9DCCC; font-weight:700; }
+  tr:last-child td { border-bottom:none; }
+  .tbl-wrap { overflow-x:auto; border:1px solid #2f4641; border-radius:14px; }
+
+  /* topic rows */
+  .trow { display:flex; align-items:center; gap:14px; padding:14px 16px; background:#1e2d2a;
+          border:1px solid #2f4641; border-radius:14px; margin-bottom:10px; width:100%;
+          color:#EFE7D6; text-align:left; }
+  .trow:hover { border-color: var(--ac); }
+  .trow .ti { width:38px; height:38px; border-radius:10px; flex:0 0 auto;
+              display:flex; align-items:center; justify-content:center; font-weight:700;
+              background:#2a3d39; color:var(--ac); font-size:.9em; }
+  .trow .tt { flex:1 1 auto; }
+  .trow .tn { font-weight:700; }
+  .trow .tm { color:#A9BDB5; font-size:.82em; }
+
+  /* study card */
+  .lesson { background:#243532; border:1px solid #2f4641; border-radius:18px; padding:28px; }
+  .lesson h3 { font-size:1.35em; color:var(--ac2); }
+  .keylist { list-style:none; padding:0; margin:16px 0 0; display:grid; gap:10px; }
+  .keylist li { background:#1e2d2a; border-left:3px solid var(--ac); border-radius:10px;
+                padding:12px 15px; font-size:.95em; }
+  .hook { margin-top:16px; background:#2a3d39; border:1px dashed #4a6661; border-radius:12px; padding:14px 16px; }
+  .hook .hl { font-size:.78em; font-weight:700; letter-spacing:.05em; color:#D9A574; text-transform:uppercase; }
+  .trapbox { margin-top:16px; background:#3a2f2c; border-left:3px solid #D9A574; border-radius:10px; padding:13px 16px; }
+  .trapbox .hl { font-size:.78em; font-weight:700; letter-spacing:.05em; color:#D9A574; text-transform:uppercase; }
+
+  /* quiz */
+  .qtext { font-size:1.12em; font-weight:700; line-height:1.5; }
+  .opts { display:grid; gap:10px; margin-top:18px; }
+  .opt { text-align:left; background:#1e2d2a; border:1px solid #3a5450; color:#EFE7D6;
+         padding:14px 17px; border-radius:12px; line-height:1.5; display:flex; gap:12px; align-items:flex-start; }
+  .opt:hover:not(.locked) { border-color: var(--ac); background:#243532; }
+  .opt .mk { flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:#2f4641;
+             display:flex; align-items:center; justify-content:center; font-size:.8em; font-weight:700; }
+  .opt.sel { border-color: var(--ac); }
+  .opt.sel .mk { background: var(--ac); color: var(--acd); }
+  .opt.right { border-color:#7DAB87; background:#22352b; }
+  .opt.right .mk { background:#7DAB87; color:#14201D; }
+  .opt.wrong { border-color:#C97A7A; background:#33262a; }
+  .opt.wrong .mk { background:#C97A7A; color:#2a1717; }
+  .opt.locked { cursor: default; }
+  .explain { margin-top:16px; padding:16px 18px; border-radius:12px; background:#1e2d2a; border-left:3px solid var(--ac); }
+  .verdict { font-weight:700; margin-bottom:6px; }
+  .v-ok { color:#8BC082; } .v-no { color:#E5A3A3; }
+
+  .qbar { display:flex; align-items:center; justify-content:space-between; gap:12px;
+          flex-wrap:wrap; margin-bottom:16px; color:#A9BDB5; font-size:.88em; }
+  .timer { font-family: ui-monospace, monospace; font-weight:700; font-size:1.05em; color:#C9DCCC;
+           background:#1b2926; border:1px solid #2f4641; padding:6px 14px; border-radius:10px; }
+  .timer.warn { color:#D9A574; border-color:#6b5a3a; }
+  .timer.crit { color:#E5A3A3; border-color:#6b3f3f; }
+
+  .navrow { display:flex; gap:10px; flex-wrap:wrap; margin-top:22px; }
+  .spacer { flex:1 1 auto; }
+
+  /* summary grid for mock exam */
+  .sumgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(46px,1fr)); gap:8px; margin-top:14px; }
+  .sq { aspect-ratio:1; border-radius:9px; border:1px solid #3a5450; background:#1e2d2a;
+        color:#A9BDB5; font-size:.82em; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .sq.done { background:#2a3d39; color:#EFE7D6; border-color:var(--ac); }
+  .sq.cur { outline:2px solid var(--ac2); }
+  .sq.ok { background:#2a4a36; color:#8BC082; border-color:#4d7a5c; }
+  .sq.no { background:#4a2c2c; color:#E5A3A3; border-color:#7a4d4d; }
+
+  .banner { border-radius:14px; padding:18px 20px; margin-bottom:18px; border:1px solid; }
+  .banner.good { background:#22352b; border-color:#4d7a5c; }
+  .banner.bad  { background:#33262a; border-color:#7a4d4d; }
+  .banner .big { font-size:1.6em; font-weight:700; font-family:'Fraunces',serif; }
+
+  .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  .tab { background:#1e2d2a; border:1px solid #2f4641; color:#A9BDB5;
+         padding:9px 18px; border-radius:11px; font-size:.9em; }
+  .tab.on { background:var(--ac); color:var(--acd); border-color:var(--ac); font-weight:700; }
+
+  .empty { text-align:center; color:#A9BDB5; padding:40px 20px; }
+  .fnote { font-size:.84em; color:#A9BDB5; margin-top:10px; }
+  .srcnote { font-size:.8em; color:#8FA39C; border-top:1px solid #2f4641; margin-top:26px; padding-top:14px; }
+
+  @media (max-width:600px) {
+    .wrap { padding:18px 14px 110px; }
+    .card, .lesson { padding:20px 17px; border-radius:15px; }
+    h1 { font-size:1.65em; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body class="fs-18">
+<div class="topbar">
+  <div class="brand"><span class="dot"></span><span id="brandTxt">SOLIDWORKS Exam Study</span></div>
+  <div class="toolbar">
+    <button class="btn ghost sm" onclick="setFont(-2)" title="Smaller text">A&minus;</button>
+    <button class="btn ghost sm" onclick="setFont(2)" title="Larger text">A+</button>
+    <button class="btn ghost sm" onclick="go('home')">Home</button>
+  </div>
+</div>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ============================================================
+   SOLIDWORKS EXAM STUDY APP  —  data-driven, single file
+   Exams: CSWA-SD (Sustainability) · CSWA-S (Simulation) · CSWP
+   Exam specs verified against solidworks.com, Feb 2026.
+   ============================================================ */
+
+const EXAMS = {};
+
+/* ============================ CSWA-SD ============================ */
+EXAMS.sd = {
+  id: 'sd', code: 'CSWA-SD', name: 'Sustainability Associate',
+  accent: '#7DAB87', accent2: '#95C19F',
+  tagline: 'Pure knowledge exam. No SOLIDWORKS needed — and the highest pass mark of the three.',
+  spec: {
+    'Exam length': '60 minutes, online proctored',
+    'Questions': '30 questions, 1 point each',
+    'Pass mark': '24 / 30 — that is 80%, NOT the usual 70%',
+    'Format': 'Multiple choice and multi-answer only',
+    'Software needed': 'None. No SOLIDWORKS licence, no models to build',
+    'Order': 'Answer in any order; a Summary Screen shows what is unanswered',
+    'Retake': '14-day wait, new exam credit required',
+    'Results': 'Score and topic areas only — never the individual questions',
+    'Source text': 'The SOLIDWORKS Sustainable Design Guide, 10 chapters, ~3–4 h to read',
+    'Also known as': 'Formerly CSDA (Certified Sustainable Design Associate)'
+  },
+  mock: { count: 30, minutes: 60, passPoints: 24, totalPoints: 30 },
+  topics: [
+    { id:'t1', title:'Sustainability Foundations',      blurb:'Brundtland, triple bottom line, the Natural Step' },
+    { id:'t2', title:'Sustainable Design Concepts',     blurb:'DfD, EPR, biomimicry, cradle-to-cradle' },
+    { id:'t3', title:'The Product Life Cycle',          blurb:'The five stages — and the one everybody forgets' },
+    { id:'t4', title:'Environmental Indicators',        blurb:'The four dashboard numbers and their units' },
+    { id:'t5', title:'Assessment Goal & Scope',         blurb:'Functional unit, system boundary, cut-off' },
+    { id:'t6', title:'Life Cycle Assessment',           blurb:'ISO 14040/14044, the four phases, screening vs full' },
+    { id:'t7', title:'SOLIDWORKS Sustainability',       blurb:'Xpress vs full, baseline, Find Similar, reports' }
+  ],
+  cards: {
+    t1: [
+      { id:'sd1-1', title:'The Brundtland definition', body:'The single most quoted sentence in the whole subject, and the one the exam opens with. It comes from the 1987 UN World Commission on Environment and Development report <i>Our Common Future</i>, chaired by Gro Harlem Brundtland.',
+        key:['<b>Sustainable development:</b> development that meets the needs of the present without compromising the ability of future generations to meet their own needs','It is about <b>needs</b> — not comfort, not profit, not growth','It is explicitly <b>inter-generational</b>: the future generation is a stakeholder in today\'s decision'],
+        hook:{label:'Remember it as', text:'"Meet today\'s needs without stealing tomorrow\'s ability to meet theirs."'} },
+      { id:'sd1-2', title:'The triple bottom line', body:'Sustainability is not an environmental subject with an economic footnote. It is the intersection of three systems, and a design that wins on only one of them is not sustainable.',
+        key:['<b>Environment</b> — planet: resources, emissions, ecosystems','<b>Society</b> — people: health, labour, communities, equity','<b>Economy</b> — profit: viability, cost, growth','Often written <b>People, Planet, Profit</b>. All three, simultaneously'],
+        trap:'A question will offer an option that names only environment and economy. Sustainability always has the <b>social</b> leg — that is usually the discriminator between two plausible answers.' },
+      { id:'sd1-3', title:'The Natural Step — four system conditions', body:'A science-based framework for what a sustainable society must not do. It is phrased as four prohibitions, which makes it easy to test.',
+        key:['1 — Do not systematically increase concentrations of substances extracted from the <b>Earth\'s crust</b> (fossil fuels, metals, minerals)','2 — Do not systematically increase concentrations of substances <b>produced by society</b> (synthetics) faster than nature can break them down','3 — Do not systematically <b>degrade nature by physical means</b> (deforestation, over-harvesting, habitat destruction)','4 — Do not systematically undermine people\'s <b>capacity to meet their basic needs</b>'],
+        hook:{label:'Structure', text:'Three about the physical planet, one about people. Condition 4 is the social leg again — and the one most often missing from a wrong answer.'} },
+      { id:'sd1-4', title:'Why design decisions dominate', body:'The reason sustainability belongs in CAD rather than in a compliance department: the leverage is almost entirely at the front of the process.',
+        key:['A large majority of a product\'s lifetime environmental impact is <b>locked in during design</b>, when very little money has yet been spent','Once tooling is cut and a supply chain is signed, most of the impact is committed','This is why <b>screening early</b> beats <b>measuring precisely late</b>'],
+        hook:{label:'The shape of it', text:'Design spends little and decides much. Manufacturing spends much and decides little.'} }
+    ],
+    t2: [
+      { id:'sd2-1', title:'Design for Disassembly (DfD)', body:'Designing so the product can be taken apart at end of life — quickly, with common tools, without destroying the parts you want back.',
+        key:['Reduce the <b>number and variety</b> of fasteners','Prefer mechanical fasteners over <b>adhesives and welds</b> where recovery matters','Avoid <b>composite and co-moulded</b> material combinations that cannot be separated','Mark materials so a recycler can identify them','Make the high-value or hazardous parts the <b>easiest</b> to reach, not the hardest'],
+        trap:'DfD is not the same as Design for Recycling. Disassembly enables <b>reuse, repair and remanufacture</b> as well — which sit above recycling in the waste hierarchy.' },
+      { id:'sd2-2', title:'Extended Producer Responsibility (EPR)', body:'A policy instrument that makes the manufacturer financially or physically responsible for the product after the consumer has finished with it.',
+        key:['Shifts end-of-life cost from the municipality to the <b>producer</b>','Creates a direct commercial incentive to design for recovery','Examples: WEEE for electronics, ELV for vehicles, battery and packaging take-back schemes','It is a <b>policy/economic</b> mechanism, not a design technique'],
+        hook:{label:'One line', text:'EPR makes the company that made it, own it — for its whole life.'} },
+      { id:'sd2-3', title:'Biomimicry', body:'Solving engineering problems by emulating strategies that biological systems have already evolved.',
+        key:['Emulates nature\'s <b>forms, processes and systems</b>','Nature builds at ambient temperature and pressure, with local materials, and produces no waste','Classic examples: burr seeds → hook-and-loop fastener; kingfisher beak → train nose profile; termite mound ventilation → passive building cooling; lotus leaf → self-cleaning surfaces'],
+        trap:'Biomimicry means copying the <b>strategy</b>, not the appearance. A part shaped like a leaf is styling; a part that manages water like a leaf is biomimicry.' },
+      { id:'sd2-4', title:'Cradle-to-grave vs cradle-to-cradle', body:'Two mental models of a product\'s journey, and the difference between them is the whole argument of modern sustainable design.',
+        key:['<b>Cradle-to-grave</b> — linear: extract, make, use, dispose. The product ends as waste','<b>Cradle-to-gate</b> — a partial study: extraction up to the factory gate only. Excludes use and end-of-life','<b>Cradle-to-cradle</b> — circular: end-of-life material becomes feedstock for a new cycle, with no loss of quality','Cradle-to-cradle distinguishes <b>biological</b> nutrients (safely returned to nature) from <b>technical</b> nutrients (kept circulating in industry)'],
+        trap:'<b>Cradle-to-gate</b> is a legitimate scope, not a mistake — but an assessment that stops at the gate cannot say anything about the use phase, which for most powered products is the largest impact of all.' },
+      { id:'sd2-5', title:'Dematerialization and the other levers', body:'The everyday design moves that actually reduce impact, in rough order of how much they usually deliver.',
+        key:['<b>Dematerialization</b> — deliver the same function with less material','<b>Substitution</b> — same function, lower-impact material','<b>Energy efficiency in use</b> — dominant for anything powered','<b>Life extension</b> — durability, repairability, upgradeability','<b>Recycled content</b> and <b>recyclability</b>','<b>Localisation</b> — shorter, lighter, slower-mode transport'],
+        hook:{label:'Order matters', text:'Reduce → reuse → recycle. Recycling is the <i>last</i> of the three, not the first.'} }
+    ],
+    t3: [
+      { id:'sd3-1', title:'The five life cycle stages', body:'Every physical product passes through the same five stages. SOLIDWORKS Sustainability evaluates all five, and the exam will ask you to enumerate them.',
+        key:['1 — <b>Raw material extraction</b> and processing','2 — <b>Manufacturing</b>','3 — <b>Transportation</b>','4 — <b>Use</b>','5 — <b>End of life</b>'],
+        trap:'<b>Transportation is a stage in its own right.</b> A four-item list that jumps from manufacturing straight to use is the classic distractor — and it is the single most reliable wrong answer in this whole topic.' },
+      { id:'sd3-2', title:'What happens in each stage', body:'Knowing the boundaries matters, because assessment questions turn on which stage an impact belongs to.',
+        key:['<b>Raw material</b> — mining, drilling, harvesting, refining, and the material\'s own upstream burden','<b>Manufacturing</b> — the energy, water, scrap and emissions of turning stock into a part','<b>Transportation</b> — every movement: inbound material, inter-factory, distribution to market','<b>Use</b> — energy and consumables over the product\'s service life; maintenance and spares','<b>End of life</b> — landfill, incineration, recycling, reuse, remanufacture'],
+        hook:{label:'Mnemonic', text:'<b>R-M-T-U-E</b> — "Raw Materials Take Up Energy."'} },
+      { id:'sd3-3', title:'Which stage dominates?', body:'There is no universal answer, and the exam tests whether you know that the answer depends on the product.',
+        key:['<b>Powered products with a long service life</b> (motors, appliances, vehicles) — the <b>use</b> phase usually dominates, often overwhelmingly','<b>Passive products</b> (structural parts, furniture, packaging) — <b>raw material</b> extraction usually dominates','<b>Heavy or air-freighted goods</b> — transportation can become significant','Manufacturing dominates less often than intuition suggests'],
+        trap:'A design change that saves material but costs efficiency in use is usually a <b>net loss</b> for a powered product. Always ask which stage dominates before optimising.' }
+    ],
+    t4: [
+      { id:'sd4-1', title:'The four environmental indicators', body:'SOLIDWORKS Sustainability reports four impact numbers. You must know all four, their units, and what each one physically means.',
+        key:['<b>Carbon footprint</b> — mass of CO<sub>2</sub> equivalent (CO<sub>2</sub>e). Greenhouse gases, weighted by global warming potential','<b>Total energy consumed</b> — megajoules (MJ). All non-renewable primary energy, including the energy embedded in the fuel supply chain','<b>Air acidification</b> — SO<sub>2</sub> equivalent. Sulphur and nitrogen oxides that produce acid rain','<b>Water eutrophication</b> — PO<sub>4</sub> equivalent (phosphate). Nutrient loading that causes algal blooms and oxygen-starved dead zones'],
+        hook:{label:'Pair them', text:'Two are about <b>air</b> (carbon, acidification), one about <b>energy</b>, one about <b>water</b>.'} },
+      { id:'sd4-2', title:'Reading the indicators correctly', body:'Each is an equivalence unit — a way of adding up many different substances onto one scale by weighting each by its potency.',
+        key:['"CO<sub>2</sub> equivalent" does not mean the product emitted CO<sub>2</sub>. Methane, for example, is counted as its CO<sub>2</sub>-equivalent warming effect','The four indicators <b>can move in opposite directions</b>. A change that lowers carbon may raise eutrophication','There is no single "environmental score" that combines them — and inventing one is a value judgement, not a measurement'],
+        trap:'A question may show a material swap that improves three indicators and worsens the fourth. The correct engineering answer is that this is a <b>trade-off requiring a decision</b>, not an automatic improvement.' },
+      { id:'sd4-3', title:'Acidification and eutrophication in plain terms', body:'These two are the least familiar and therefore the most tested.',
+        key:['<b>Acidification</b> — SO<sub>x</sub> and NO<sub>x</sub> from burning fuels dissolve in atmospheric water and fall as acid rain, damaging forests, soils, freshwater and buildings','<b>Eutrophication</b> — nitrogen and phosphorus reaching water bodies fertilise algae; the bloom dies, decomposes, and consumes the dissolved oxygen, killing fish','Acidification is measured against <b>sulphur dioxide</b>; eutrophication against <b>phosphate</b>'],
+        hook:{label:'Do not swap them', text:'<b>Air</b> gets <b>acid</b> (SO<sub>2</sub>). <b>Water</b> gets <b>fed</b> (PO<sub>4</sub>).'} }
+    ],
+    t5: [
+      { id:'sd5-1', title:'Goal and scope — where every assessment starts', body:'Before a single number is calculated, an assessment must state what question it is answering and what it will count. Get this wrong and every subsequent figure is meaningless.',
+        key:['<b>Goal</b> — why the study is being done, and for whom','<b>Scope</b> — what is included: system boundary, functional unit, data quality, assumptions, limitations','Scope decisions are where most of the disagreement between two studies of the "same" product comes from'],
+        trap:'Two LCAs reaching opposite conclusions about the same product is usually not fraud. It is nearly always a <b>different functional unit or system boundary</b>.' },
+      { id:'sd5-2', title:'The functional unit', body:'The quantified performance of the product system, used as the reference to which all inputs and outputs are normalised. It is the single most important idea in this topic.',
+        key:['It measures <b>function delivered</b>, not the object','Bad: "one plastic cup". Good: "<b>containing 300 ml of liquid once</b>"','Bad: "one light bulb". Good: "<b>1,000 lumen-hours of illumination over 10 years</b>"','It is what makes two different products <b>comparable</b> — a reusable and a disposable cup can only be compared per use, not per item'],
+        hook:{label:'Test yourself', text:'If the unit names an object, it is wrong. If it names a <b>service, a quantity and a duration</b>, it is right.'} },
+      { id:'sd5-3', title:'System boundary and cut-off', body:'The line drawn around what the study counts. Everything outside it is assumed to be zero — which is a decision, not a fact.',
+        key:['Defines which <b>life cycle stages</b>, which processes and which geography are inside','<b>Cradle-to-grave</b>, <b>cradle-to-gate</b> and <b>gate-to-gate</b> are all boundary choices','<b>Cut-off criteria</b> state the threshold (by mass, energy or environmental relevance) below which a flow is excluded','Boundaries must be stated explicitly, or the study cannot be reviewed or reproduced'],
+        trap:'Excluding a stage does not make its impact zero. It makes it <b>unknown</b> — and a study that omits the use phase of a powered product has usually omitted most of the answer.' }
+    ],
+    t6: [
+      { id:'sd6-1', title:'What LCA is, and the standards', body:'Life Cycle Assessment is the formal, standardised method for compiling and evaluating the inputs, outputs and potential environmental impacts of a product system throughout its life.',
+        key:['<b>ISO 14040</b> — principles and framework','<b>ISO 14044</b> — requirements and guidelines','LCA is <b>comparative and relative</b>: it expresses potential impacts against a functional unit, not absolute damage at a place and time','It does not predict actual harm to a specific ecosystem'],
+        trap:'LCA measures <b>potential</b> impact. It is not a risk assessment and it is not a site-specific environmental impact statement.' },
+      { id:'sd6-2', title:'The four phases of an LCA', body:'ISO 14040 defines four phases, and they are iterative — later findings send you back to revise earlier ones.',
+        key:['1 — <b>Goal and scope definition</b>','2 — <b>Inventory analysis (LCI)</b> — compile every input and output flow: energy, materials, emissions, waste','3 — <b>Impact assessment (LCIA)</b> — translate inventory flows into impact categories such as carbon, acidification, eutrophication','4 — <b>Interpretation</b> — draw conclusions, check completeness and sensitivity, state limitations'],
+        hook:{label:'Interpretation is not last', text:'Interpretation runs <b>alongside</b> all three other phases, not only at the end. The arrows in the ISO diagram point both ways.'} },
+      { id:'sd6-3', title:'Screening LCA vs full LCA', body:'The practical distinction that decides which tool you reach for — and the one this exam has been known to test in a way that surprises people.',
+        key:['A <b>screening</b> (or streamlined) LCA uses generic database data and simplified assumptions to find the hot spots fast','A <b>full</b> LCA uses primary, product-specific data, documents everything, and can be independently reviewed','SOLIDWORKS Sustainability is a <b>screening</b> tool: it is built for fast design-stage comparison, not for certification','Screening results are directional — they tell you <b>where</b> to act, not a defensible absolute figure'],
+        trap:'The Sustainable Design Guide treats screening-level results as usable for <b>communication and marketing</b> claims. That contradicts many textbooks, which reserve public comparative assertions for reviewed full LCAs under ISO 14044. <b>Answer the exam from the Guide</b> — and know the professional caveat for real work.' },
+      { id:'sd6-4', title:'Data quality and where uncertainty lives', body:'An LCA is only as good as the inventory behind it, and the exam expects you to be able to say why.',
+        key:['<b>Generic/database</b> data is average, regional and dated; <b>primary</b> data comes from the actual supplier and process','Geography matters enormously — the same part made on different electricity grids has very different carbon','<b>Sensitivity analysis</b> tests whether a conclusion survives plausible changes in assumptions','If a conclusion flips under sensitivity analysis, it is not a conclusion'],
+        hook:{label:'The honest sentence', text:'"This is a screening result using generic data; the ranking is robust, the absolute values are not."'} }
+    ],
+    t7: [
+      { id:'sd7-1', title:'Sustainability Xpress vs full Sustainability', body:'Two products with the same engine and very different reach. Knowing which does what is straightforward marks.',
+        key:['<b>Sustainability Xpress</b> — included with SOLIDWORKS, <b>parts only</b>, limited material set, the four indicators','<b>SOLIDWORKS Sustainability</b> — full add-in: <b>assemblies</b>, configurations, the <b>use phase</b>, transportation, a much larger material database, and reporting','Both are screening tools driven by an underlying commercial LCA database','Both report the same four indicators'],
+        trap:'Xpress cannot assess an <b>assembly</b> and cannot model the <b>use phase</b>. If a question involves either, the answer requires full Sustainability.' },
+      { id:'sd7-2', title:'The inputs you must supply', body:'The tool cannot compute anything until it knows the four things that define the product\'s life.',
+        key:['<b>Material</b> — class and specific material','<b>Manufacturing process</b> and the <b>region</b> where it is made','<b>Use region</b> — where the product is used, which sets the energy grid and the duration','<b>Transportation</b> — mode and distance to market','<b>End of life</b> — the recycled / incinerated / landfill split'],
+        hook:{label:'Why region twice', text:'Made in one place, used in another. The <b>manufacturing region</b> sets the factory grid; the <b>use region</b> sets the in-service grid.'} },
+      { id:'sd7-3', title:'Baseline, comparison and Find Similar', body:'The three features that turn a number into a decision.',
+        key:['<b>Set Baseline</b> stores the current design so subsequent changes are shown as a delta — this is how the tool is meant to be used','The dashboard then shows each indicator as better or worse against that baseline','<b>Find Similar</b> searches for materials with comparable <b>mechanical properties</b> but lower environmental impact','<b>Financial impact</b> gives an indicative cost so the environmental and economic legs can be seen together'],
+        trap:'Find Similar filters on <b>engineering properties you choose</b> — it does not know your application. It proposes candidates; qualifying them is still your job.' },
+      { id:'sd7-4', title:'Reading the dashboard', body:'The output is a four-segment breakdown plus a life cycle split, and the split is where the insight is.',
+        key:['Each indicator is broken down by <b>life cycle stage</b>, so you can see which stage owns the impact','A material change moves the material and manufacturing bars; a duty-cycle change moves the use bar','Reports can be generated for the record, and the assumptions travel with them','The point of the tool is <b>relative comparison of alternatives</b>, at the moment the design is still cheap to change']
+      }
+    ]
+  },
+  questions: [
+    { id:'sdq1', topic:'t1', q:'How did the Brundtland Commission define sustainable development?', a:['Maximising economic output while minimising environmental regulation','Development that meets the needs of the present without compromising the ability of future generations to meet their own needs','Using only renewable materials in every product','Achieving zero waste in all manufacturing operations'], correct:1, explain:'The 1987 report <i>Our Common Future</i> defined it in exactly these terms. Note the two halves: present <b>needs</b>, and the future generation\'s <b>ability</b> to meet theirs.' },
+    { id:'sdq2', topic:'t1', q:'Which three dimensions make up the triple bottom line?', a:['Environment, society, economy','Environment, energy, emissions','Materials, manufacturing, transport','Reduce, reuse, recycle'], correct:0, explain:'People, Planet, Profit — environment, society and economy together. Options that omit the <b>social</b> dimension are the standard distractor.' },
+    { id:'sdq3', topic:'t1', q:'Which of the following are system conditions of The Natural Step? (Select all that apply.)', a:['Do not systematically increase concentrations of substances extracted from the Earth\'s crust','Do not systematically increase concentrations of substances produced by society','Do not systematically degrade nature by physical means','Do not systematically undermine people\'s capacity to meet their basic needs'], correct:[0,1,2,3], multi:true, explain:'All four. Three concern the physical planet; the fourth is social. A question that offers only the first three is testing whether you remember the social condition.' },
+    { id:'sdq4', topic:'t1', q:'Why is the design stage the highest-leverage point for reducing environmental impact?', a:['Because designers control the manufacturing budget','Because most of a product\'s lifetime impact is committed during design, before significant money has been spent','Because environmental regulations apply only to design documents','Because material costs are highest at the design stage'], correct:1, explain:'Design spends little and decides much. Once tooling and supply chains are committed, the impact is largely locked in regardless of later effort.' },
+    { id:'sdq5', topic:'t2', q:'What is the primary aim of Design for Disassembly?', a:['To reduce the number of parts in an assembly','To enable the product to be taken apart efficiently at end of life so components and materials can be recovered','To reduce assembly labour cost on the production line','To allow the product to be flat-packed for shipping'], correct:1, explain:'DfD targets <b>recovery</b> — reuse, repair, remanufacture and recycling. Easier factory assembly is a common and welcome side effect, but it is not the aim.' },
+    { id:'sdq6', topic:'t2', q:'Extended Producer Responsibility is best described as:', a:['A design technique for extending product life','A policy approach making the manufacturer responsible for the product at end of life','An extended warranty offered to consumers','A supplier quality management standard'], correct:1, explain:'EPR is a <b>policy/economic</b> instrument (WEEE, ELV, packaging and battery take-back). It shifts end-of-life cost onto the producer, which creates the incentive to design for recovery.' },
+    { id:'sdq7', topic:'t2', q:'Which of these is a genuine example of biomimicry?', a:['A car styled to resemble a shark','A train nose profiled like a kingfisher beak to reduce pressure wave on tunnel entry','A green-coloured package to signal environmental credentials','A logo based on a leaf'], correct:1, explain:'Biomimicry copies the functional <b>strategy</b>, not the appearance. The Shinkansen nose is the textbook case; the others are styling or marketing.' },
+    { id:'sdq8', topic:'t2', q:'In the cradle-to-cradle model, what happens to material at end of life?', a:['It is landfilled in a controlled facility','It becomes feedstock for a new cycle, as either a biological or a technical nutrient','It is incinerated with energy recovery','It is downcycled into a lower-grade application'], correct:1, explain:'Cradle-to-cradle is circular and distinguishes <b>biological</b> nutrients (safely returned to nature) from <b>technical</b> nutrients (kept circulating in industry) — ideally without loss of quality, which is what separates it from downcycling.' },
+    { id:'sdq9', topic:'t2', q:'A "cradle-to-gate" assessment excludes which stages?', a:['Raw material extraction','Manufacturing','Use and end of life','Transportation of raw materials'], correct:2, explain:'Cradle-to-gate runs from extraction up to the factory gate. It legitimately excludes <b>use and end of life</b> — which for a powered product usually means it excludes the largest impact.' },
+    { id:'sdq10', topic:'t2', q:'Order the waste hierarchy from most to least preferable.', a:['Recycle, reuse, reduce','Reduce, reuse, recycle','Reuse, recycle, reduce','Recycle, reduce, reuse'], correct:1, explain:'Reduce first (avoid the material entirely), then reuse (keep the object), then recycle (recover the material). Recycling is the <b>last</b> of the three, though it is usually the first people mention.' },
+    { id:'sdq11', topic:'t3', q:'List the five stages of a product life cycle as used by SOLIDWORKS Sustainability.', a:['Raw material, manufacturing, use, end of life, recycling','Raw material, manufacturing, transportation, use, end of life','Design, manufacturing, distribution, use, disposal','Extraction, refining, assembly, sale, disposal'], correct:1, explain:'Raw material → Manufacturing → <b>Transportation</b> → Use → End of life. Transportation is a stage in its own right, and a list that omits it is the single most common wrong answer in this exam.' },
+    { id:'sdq12', topic:'t3', q:'For an electric motor running continuously for fifteen years, which life cycle stage typically dominates total impact?', a:['Raw material extraction','Manufacturing','Transportation','Use'], correct:3, explain:'For powered products with long service lives the <b>use</b> phase dominates, usually overwhelmingly. This is why efficiency almost always beats material saving for such products.' },
+    { id:'sdq13', topic:'t3', q:'For a simple untreated structural bracket that consumes no energy in service, which stage typically dominates?', a:['Raw material extraction','Use','End of life','Transportation'], correct:0, explain:'For passive products the burden sits in the <b>material</b> — extraction and primary processing. There is no use-phase energy to dominate.' },
+    { id:'sdq14', topic:'t3', q:'A redesign reduces a pump\'s mass by 12% but lowers its efficiency by 3%. The pump runs 8,000 hours a year for 12 years. What is the most likely outcome?', a:['A clear environmental improvement, because less material is used','A likely net worsening, because the use phase dominates and efficiency was traded away','No change, because mass and efficiency effects cancel','It cannot be assessed without knowing the material'], correct:1, explain:'96,000 operating hours makes this a use-phase-dominated product. A 3% efficiency loss over that duration will normally swamp a one-off 12% material saving. <b>Establish which stage dominates before optimising.</b>' },
+    { id:'sdq15', topic:'t4', q:'Which four environmental indicators does SOLIDWORKS Sustainability report?', a:['Carbon footprint, total energy consumed, air acidification, water eutrophication','Carbon footprint, water usage, toxicity, ozone depletion','Energy, waste, emissions, cost','Global warming, acid rain, smog, landfill volume'], correct:0, explain:'Exactly these four, and you should be able to name all four with their units in any order.' },
+    { id:'sdq16', topic:'t4', q:'Air acidification is measured in equivalents of which substance?', a:['CO₂','SO₂','PO₄','CH₄'], correct:1, explain:'<b>Sulphur dioxide equivalent.</b> Acidification comes from SOₓ and NOₓ, expressed against SO₂. Remember: air gets acid (SO₂), water gets fed (PO₄).' },
+    { id:'sdq17', topic:'t4', q:'Water eutrophication is measured in equivalents of which substance?', a:['SO₂','NO₂','PO₄ (phosphate)','CO₂'], correct:2, explain:'<b>Phosphate equivalent.</b> Nitrogen and phosphorus reaching water fertilise algae; the bloom dies and decomposition strips the dissolved oxygen, killing fish.' },
+    { id:'sdq18', topic:'t4', q:'What are the units of the total energy consumed indicator?', a:['kilowatt-hours (kWh)','Megajoules (MJ)','Joules per kilogram (J/kg)','Tonnes of oil equivalent'], correct:1, explain:'Megajoules. It covers non-renewable primary energy, including the energy embedded in producing and delivering the fuel itself — not just the metered electricity.' },
+    { id:'sdq19', topic:'t4', q:'A material substitution lowers carbon footprint and energy but raises water eutrophication. What is the correct interpretation?', a:['The change is an improvement because three of four indicators improved','The change is a trade-off that requires an explicit decision, not an automatic improvement','The result is an error; indicators always move together','Eutrophication can be ignored as it is the least important indicator'], correct:1, explain:'The four indicators are independent and routinely move in opposite directions. There is no built-in single score, and combining them is a <b>value judgement</b> rather than a measurement.' },
+    { id:'sdq20', topic:'t4', q:'"Carbon footprint measured in CO₂ equivalent" means:', a:['The product emits only carbon dioxide','All greenhouse gases are weighted by global warming potential and expressed on a common CO₂ scale','Only the carbon content of the material is counted','Carbon dioxide from transportation only'], correct:1, explain:'Methane, nitrous oxide and other greenhouse gases are converted to the mass of CO₂ that would cause equivalent warming. It is a common scale, not a claim about which gas was emitted.' },
+    { id:'sdq21', topic:'t5', q:'What is a functional unit?', a:['The mass of the product being assessed','The quantified performance of the product system, used as the reference for all inputs and outputs','The smallest indivisible component of an assembly','The unit of measurement used for the impact indicators'], correct:1, explain:'It measures <b>function delivered</b>, not the object. "Containing 300 ml of liquid once" is a functional unit; "one cup" is not.' },
+    { id:'sdq22', topic:'t5', q:'Which is the best functional unit for comparing a reusable and a disposable coffee cup?', a:['One cup','One kilogram of cup material','Delivering 350 ml of hot drink on 1,000 occasions','One year of production'], correct:2, explain:'Only a unit expressing <b>service, quantity and duration</b> makes the two systems comparable. Compared per item, a reusable cup always loses; compared per use over its life, it usually wins.' },
+    { id:'sdq23', topic:'t5', q:'Two LCAs of the same product reach opposite conclusions. What is the most likely explanation?', a:['One of them contains fraudulent data','They used different functional units or system boundaries','LCA results are inherently random','One used metric and the other imperial units'], correct:1, explain:'Scope decisions are where nearly all disagreement lives. This is why ISO 14040/14044 require the goal, functional unit and boundary to be stated explicitly.' },
+    { id:'sdq24', topic:'t5', q:'What do cut-off criteria specify in an LCA?', a:['The date after which data is no longer valid','The threshold below which a flow is excluded from the study','The maximum acceptable impact before a design is rejected','The point at which the product is cut from stock'], correct:1, explain:'Cut-off criteria state the threshold — by mass, energy or environmental relevance — under which an input or output is left out. They must be declared so the study can be reviewed.' },
+    { id:'sdq25', topic:'t5', q:'Excluding the use phase from an assessment means that its impact is:', a:['Zero','Unknown','Averaged automatically','Assigned to the manufacturing stage'], correct:1, explain:'A boundary decision never makes an impact zero — it makes it <b>unaccounted for</b>. Omitting the use phase of a powered product usually omits most of the answer.' },
+    { id:'sdq26', topic:'t6', q:'Which standards define LCA principles and requirements?', a:['ISO 9001 and ISO 14001','ISO 14040 and ISO 14044','ISO 26000 and ISO 50001','ISO 14020 and ISO 14006'], correct:1, explain:'<b>ISO 14040</b> gives principles and framework; <b>ISO 14044</b> gives requirements and guidelines. ISO 14001 is an environmental <i>management system</i> — a different thing entirely.' },
+    { id:'sdq27', topic:'t6', q:'What are the four phases of an LCA, in order?', a:['Goal and scope, inventory analysis, impact assessment, interpretation','Planning, measurement, reporting, review','Design, manufacture, use, disposal','Screening, modelling, validation, publication'], correct:0, explain:'Goal & scope → LCI → LCIA → Interpretation. Interpretation also runs alongside the other three; the ISO framework diagram has arrows in both directions.' },
+    { id:'sdq28', topic:'t6', q:'What happens during the inventory analysis (LCI) phase?', a:['Impacts are grouped into categories such as acidification','Every input and output flow — energy, materials, emissions, waste — is compiled','The goal of the study is agreed with the client','Conclusions and recommendations are drawn'], correct:1, explain:'LCI is the data-gathering phase: the complete flow inventory. Translating those flows into impact categories is the separate <b>LCIA</b> phase.' },
+    { id:'sdq29', topic:'t6', q:'SOLIDWORKS Sustainability is best described as which kind of tool?', a:['A full, ISO 14044-compliant LCA tool suitable for certification','A screening-level LCA tool for fast design-stage comparison','A regulatory compliance database','A carbon accounting system for corporate reporting'], correct:1, explain:'It is a <b>screening</b> tool built on a commercial LCA database, designed for comparing alternatives while the design is still cheap to change. It is directional, not a certifiable full LCA.' },
+    { id:'sdq30', topic:'t6', q:'Why does the geographic region matter so much in an assessment?', a:['Because shipping distance is the largest impact','Because electricity grid mix, and therefore the impact per kWh, varies enormously by region','Because environmental regulations differ by country','Because material prices vary by region'], correct:1, explain:'The same part made or used on a coal-heavy grid versus a hydro-heavy grid has very different carbon and energy figures. This is why the tool asks for manufacturing region <i>and</i> use region separately.' },
+    { id:'sdq31', topic:'t6', q:'What is the purpose of a sensitivity analysis?', a:['To test whether a conclusion survives plausible changes in assumptions','To measure how sensitive a material is to temperature','To identify the most expensive component','To check the model for geometry errors'], correct:0, explain:'If the conclusion flips when a reasonable assumption is varied, it is not a conclusion. Sensitivity analysis belongs to the <b>interpretation</b> phase.' },
+    { id:'sdq32', topic:'t7', q:'Which of these can full SOLIDWORKS Sustainability do that Sustainability Xpress cannot? (Select all that apply.)', a:['Assess assemblies','Model the use phase','Report the four environmental indicators','Assess configurations'], correct:[0,1,3], multi:true, explain:'Xpress is <b>parts only</b>, with no use-phase modelling and a limited material set. Both report the same four indicators — that is the option that does not belong.' },
+    { id:'sdq33', topic:'t7', q:'Which inputs must you supply before SOLIDWORKS Sustainability can calculate a result? (Select all that apply.)', a:['Material','Manufacturing region','Use region','Transportation and end-of-life split'], correct:[0,1,2,3], multi:true, explain:'All four. Manufacturing region sets the factory\'s grid; use region sets the in-service grid; transportation and end-of-life complete the life cycle.' },
+    { id:'sdq34', topic:'t7', q:'What does Set Baseline do?', a:['Resets the model to its default material','Stores the current design so that subsequent changes are reported as a comparison against it','Sets the minimum acceptable environmental performance','Locks the assessment so it cannot be edited'], correct:1, explain:'The baseline is what turns a number into a decision — the dashboard then shows each indicator as better or worse than the stored design. This is the intended workflow.' },
+    { id:'sdq35', topic:'t7', q:'What does the Find Similar function search for?', a:['Parts with similar geometry in the design library','Materials with comparable mechanical properties but lower environmental impact','Suppliers in the same geographic region','Other products with a similar carbon footprint'], correct:1, explain:'It filters the material database on engineering properties you select and surfaces lower-impact candidates. It does not know your application — qualifying the candidate remains your job.' },
+    { id:'sdq36', topic:'t7', q:'What does the Financial Impact output provide?', a:['A certified cost of compliance','An indicative cost estimate so the economic leg can be weighed alongside the environmental one','The carbon price of the product','The resale value at end of life'], correct:1, explain:'It gives an indicative cost, supporting the triple-bottom-line idea that environmental and economic performance should be seen together rather than sequentially.' },
+    { id:'sdq37', topic:'t7', q:'Which statement about the Sustainability dashboard is correct?', a:['It produces a single combined environmental score','It breaks each indicator down by life cycle stage','It shows only the manufacturing impact','It requires a full LCA to be completed first'], correct:1, explain:'The stage-by-stage breakdown is the insight: it tells you <b>which stage owns the impact</b>, and therefore where a design change can actually do something.' },
+    { id:'sdq38', topic:'t2', q:'Which design decisions support Design for Disassembly? (Select all that apply.)', a:['Reducing the number and variety of fasteners','Bonding dissimilar materials with structural adhesive','Marking polymer parts with their material identification','Making high-value components easy to access'], correct:[0,2,3], multi:true, explain:'Structural adhesive between dissimilar materials is the opposite of DfD — it makes separation destructive, which is precisely what you are trying to avoid.' },
+    { id:'sdq39', topic:'t1', q:'Which of the following is NOT part of the triple bottom line?', a:['Environment','Society','Economy','Technology'], correct:3, explain:'Technology is a means, not one of the three dimensions. The three are environment, society and economy.' },
+    { id:'sdq40', topic:'t3', q:'In which life cycle stage does the energy used to move finished goods to a distributor belong?', a:['Manufacturing','Transportation','Use','End of life'], correct:1, explain:'Transportation covers every movement — inbound raw material, inter-factory movement and distribution to market — and it is its own stage, not part of manufacturing.' },
+    { id:'sdq41', topic:'t6', q:'Which statement about LCA results is most accurate?', a:['They predict actual damage to a specific ecosystem','They express potential impacts relative to a functional unit','They are legally binding under ISO 14040','They replace the need for regulatory environmental assessment'], correct:1, explain:'LCA is comparative and relative — it reports <b>potential</b> impact per functional unit. It is not a site-specific risk or environmental impact assessment.' },
+    { id:'sdq42', topic:'t7', q:'A part is manufactured in one country and used in another. Why does the tool ask for both regions?', a:['To calculate import duty','Because the manufacturing grid and the in-service grid have different energy mixes','To determine the correct language for the report','Because material availability differs by region'], correct:1, explain:'Manufacturing region drives the factory\'s electricity mix; use region drives the in-service electricity mix. For a powered product the second usually matters far more.' },
+    { id:'sdq43', topic:'t2', q:'Dematerialization means:', a:['Delivering the same function using less material','Removing all metal from a design','Converting a physical product into a digital service','Reducing packaging only'], correct:0, explain:'Same function, less material. Converting a product to a service is a related but distinct strategy, and packaging is only one place to apply it.' },
+    { id:'sdq44', topic:'t5', q:'Which items belong in the scope definition of an assessment? (Select all that apply.)', a:['System boundary','Functional unit','Data quality requirements','Assumptions and limitations'], correct:[0,1,2,3], multi:true, explain:'All four. Scope is everything that determines what will be counted and how far the conclusions can be pushed.' },
+    { id:'sdq45', topic:'t6', q:'A screening-level assessment is best used to:', a:['Support a certified environmental product declaration','Identify hot spots and rank design alternatives early','Satisfy a legal reporting obligation','Replace supplier primary data collection'], correct:1, explain:'Screening tells you <b>where</b> to act and which option is better, quickly and cheaply, at the design stage. Certification and legal reporting need a full, reviewed study.' }
+  ]
+};
+
+/* ============================ CSWA-S ============================ */
+EXAMS.s = {
+  id: 's', code: 'CSWA-S', name: 'Simulation Associate',
+  accent: '#7FB3C9', accent2: '#9FCADD',
+  tagline: 'Three hands-on problems inside a 20-question paper. The theory is the easy half.',
+  spec: {
+    'Exam length': '2 hours (120 minutes)',
+    'Questions': '20 questions totalling 100 points',
+    'Pass mark': '70 / 100 (70%)',
+    'Format': '3 hands-on problems plus single-answer, multiple-choice, yes/no and multi-select',
+    'Point spread': '3 to 20 points per question, by difficulty',
+    'Software needed': 'SOLIDWORKS Premium 2012+ or SOLIDWORKS Simulation 2012+',
+    'Retake': '14-day wait, new exam credit required',
+    'Assumed experience': '6–9 months with SOLIDWORKS and Simulation',
+    'Background expected': 'Statics, strength of materials, FEA theory, view creation'
+  },
+  mock: { count: 20, minutes: 45, passPoints: 70, totalPoints: 100 },
+  topics: [
+    { id:'t1', title:'Exam Format & Strategy',     blurb:'Where the 100 points sit and how to spend 120 minutes' },
+    { id:'t2', title:'FEA Fundamentals',           blurb:'What the solver assumes — and when that breaks' },
+    { id:'t3', title:'Elements & Degrees of Freedom', blurb:'Solid, shell, beam, truss; draft vs high quality' },
+    { id:'t4', title:'Meshing & Mesh Quality',     blurb:'Aspect ratio, Jacobian, mesh controls, meshers' },
+    { id:'t5', title:'Materials & Units',          blurb:'The unit trap that costs more marks than any theory' },
+    { id:'t6', title:'Fixtures & Restraints',      blurb:'Standard and advanced, and what each one removes' },
+    { id:'t7', title:'External Loads',             blurb:'Force, pressure, bearing, remote, gravity, centrifugal' },
+    { id:'t8', title:'Contacts & Connectors',      blurb:'Bonded, no-penetration, pins, bolts, springs' },
+    { id:'t9', title:'Results & Interpretation',   blurb:'von Mises, URES, FOS, probes, reaction forces' },
+    { id:'t10',title:'Validity & Convergence',     blurb:'Singularities, mesh convergence, sanity checks' }
+  ],
+  cards: {
+    t1: [
+      { id:'s1-1', title:'How the 100 points are distributed', body:'Twenty questions, 100 points, and a very uneven spread. Point allocation runs from 3 to 20 points per question depending on difficulty — which means a handful of questions carry most of the paper.',
+        key:['<b>Three hands-on problems</b>: you build or open a model, run a study, and report a number','The hands-on questions are the high-value ones — expect the 15–20 point items to be here','The remaining questions are theory: single answer, multiple choice, yes/no and multi-select','70 points passes. You can lose an entire hands-on problem and still pass — but only just'],
+        hook:{label:'Budget', text:'120 min ÷ 100 points ≈ <b>1.2 min per point</b>. A 20-point problem deserves 24 minutes; a 3-point theory question deserves 3.'} },
+      { id:'s1-2', title:'Exam mechanics you must know beforehand', body:'The mechanics are identical to every other SOLIDWORKS exam and cost people marks every session.',
+        key:['Delivered through the <b>Tangix TesterPRO Client</b> — Windows only, separate window from SOLIDWORKS','<b>Exams cannot be paused</b> once started. The clock runs through everything','Two monitors is the recommended setup: SOLIDWORKS on one, the tester on the other','If the machine crashes, relaunch — the client is designed to resume, but <b>the timer does not stop</b>','Answers are typed into the client; watch the requested <b>units and decimal places</b>'],
+        trap:'Individual question results are never released. You get a score and a list of topic areas — so a failed attempt tells you very little about <i>which</i> question you lost.' },
+      { id:'s1-3', title:'The strategy that passes', body:'The paper rewards a specific order of work, and it is not front-to-back.',
+        key:['<b>Sweep the theory first.</b> Bank the cheap points while you are fresh and the clock is generous','<b>Then take the hands-on problems in point order</b>, biggest first','On each hands-on problem, <b>set up completely before meshing</b>: material, fixtures, loads, contacts, then mesh','<b>Read the requested units before you compute</b>, not after','If a hands-on problem will not converge, take the partial marks and move on — 20 points is not worth 60 minutes'],
+        hook:{label:'The rule', text:'Never let one problem consume more than its share of the clock. Points per minute is the only metric that matters.'} }
+    ],
+    t2: [
+      { id:'s2-1', title:'What linear static analysis assumes', body:'Every result the exam asks for comes out of a linear static study, and the whole paper is really testing whether you know when those assumptions hold.',
+        key:['<b>Linear material</b> — stress is proportional to strain, forever. There is no yielding in the model, even when the plot says 900 MPa','<b>Small displacements</b> — deformation is small enough that geometry and stiffness do not meaningfully change','<b>Static loading</b> — loads applied slowly; no inertia, no damping, no time','<b>Constant boundary conditions</b> — fixtures and contact do not change during loading'],
+        trap:'A linear static result showing stress above yield is <b>not</b> a prediction of the real stress. It is the answer to "what if this material never yielded" — which is why the factor of safety, not the stress value, is the meaningful output.' },
+      { id:'s2-2', title:'The equation being solved', body:'Underneath everything, the solver assembles and solves one matrix equation. Knowing its shape explains most of the behaviour you will see.',
+        key:['<b>[K]{u} = {F}</b> — stiffness matrix × displacement vector = force vector','The solver computes <b>displacements first</b>; strain comes from the displacement gradient; stress comes from strain via the material law','This is why <b>displacement is always more accurate than stress</b> for a given mesh — stress is one differentiation further from the answer','If the model is under-restrained, [K] is singular and the solve fails or produces enormous displacements'],
+        hook:{label:'Order of accuracy', text:'Displacement → strain → stress. Each step loses accuracy. Refine the mesh where you need <b>stress</b>, not where you need deflection.'} },
+      { id:'s2-3', title:'When linear static is the wrong tool', body:'The exam explicitly tests "understanding the types of problems SOLIDWORKS Simulation can solve".',
+        key:['<b>Large deflection</b> (a fishing rod, a snap fit) → non-linear, or enable large displacement','<b>Material yielding, plasticity, creep</b> → non-linear','<b>Impact, drop, vibration, rotating imbalance</b> → dynamic / frequency / drop test','<b>Buckling</b> → buckling study; a linear static study will happily report a stable structure that would collapse','<b>Temperature-driven stress</b> → thermal study feeding a static study','<b>Repeated loading and life</b> → fatigue study, which needs a static study as its input'],
+        trap:'A slender column under axial compression can show a perfectly acceptable stress and factor of safety in a static study while being nowhere near safe. <b>Stress is not stability.</b>' }
+    ],
+    t3: [
+      { id:'s3-1', title:'The four element families', body:'Which element type a body gets is decided by its geometry and by how you treat it — and it changes the degrees of freedom, the mesh, and what results are available.',
+        key:['<b>Solid (tetrahedral)</b> — for bulky 3D geometry. <b>3 DOF per node</b>: translations only','<b>Shell</b> — for thin walls and sheet metal, meshed on a surface. <b>6 DOF per node</b>: 3 translations + 3 rotations','<b>Beam</b> — for long slender members, typically weldment structural members. 2 nodes, <b>6 DOF per node</b>','<b>Truss</b> — a beam that carries axial load only. <b>3 DOF per node</b>, no moments'],
+        hook:{label:'Why solids have no rotational DOF', text:'A solid element resists rotation through the translation of its other nodes. There is no rotational stiffness at a single solid node — which is exactly why you cannot apply a moment to a solid face node directly.'} },
+      { id:'s3-2', title:'Draft quality vs high quality', body:'The single most consequential mesh setting, and a guaranteed exam question.',
+        key:['<b>Draft quality tetrahedron: 4 nodes</b>, one at each corner. First-order — edges stay straight, strain is constant within the element','<b>High quality tetrahedron: 10 nodes</b> — 4 corners plus 6 mid-side nodes. Second-order — edges curve to follow the geometry, strain varies linearly','High quality is the <b>default</b> and is what you should use for any stress result','Draft quality solves much faster and is for a quick check of the setup, not for an answer','Shells follow the same pattern: <b>draft 3 nodes, high quality 6 nodes</b>'],
+        trap:'Draft-quality elements cannot represent bending accurately — a single first-order tet is far too stiff in bending. If the exam gives an unexpectedly small displacement, check the mesh quality setting first.' },
+      { id:'s3-3', title:'Sheet metal, surfaces and shells', body:'How SOLIDWORKS decides to give you shells, and why you sometimes have to force it.',
+        key:['<b>Sheet metal</b> parts are meshed with <b>shell elements</b> automatically, on the mid-surface','<b>Surface bodies</b> always mesh as shells; you must supply the thickness','A thin solid body can be treated as a shell by defining a shell from the face','Shell thickness is a <b>property of the study</b>, not of the mesh — set it and check it','Thin vs thick shell formulation: thin ignores transverse shear, thick includes it'],
+        hook:{label:'The ratio to remember', text:'If thickness is under roughly one tenth of the other dimensions, shells are the right choice — and vastly cheaper than solids.'} },
+      { id:'s3-4', title:'Multibody parts and mixed meshes', body:'The exam explicitly lists "working with multibody parts as different solid bodies".',
+        key:['Each solid body in a multibody part is meshed and treated <b>separately</b>','Bodies interact only through <b>contact conditions or connectors</b> you define','A multibody part therefore behaves much like an assembly inside a single file','Mixed meshes (solid + shell + beam in one study) are supported, but the connections between different element types need explicit attention','Bodies can be <b>excluded from analysis</b> — and an excluded body contributes no stiffness and no mass'],
+        trap:'Two bodies touching in the CAD model are <b>not</b> connected unless a contact condition says so. Global bonded contact usually does it — but check, because a body that is not bonded and not restrained is a rigid-body-motion failure.' }
+    ],
+    t4: [
+      { id:'s4-1', title:'Aspect ratio and Jacobian', body:'The two mesh quality metrics the exam names directly.',
+        key:['<b>Aspect ratio</b> — for a perfect tetrahedron it is <b>1.0</b>. It grows as the element becomes elongated or flattened','The aspect ratio plot is the quickest way to find where a mesh is degenerate','<b>Jacobian</b> — checks how badly the mid-side nodes of a <b>second-order</b> element are distorted, i.e. whether curved edges have folded','Jacobian check points can be set to 4, 16, 29 points or at nodes','A Jacobian ratio that goes negative means the element is turned inside out and the solve will fail'],
+        hook:{label:'Which is which', text:'<b>Aspect ratio</b> = shape of the element. <b>Jacobian</b> = whether the curved edges of a high-quality element have distorted past legality.'} },
+      { id:'s4-2', title:'Standard, curvature-based and blended meshers', body:'Three mesh generators, and the exam expects you to know when each is appropriate.',
+        key:['<b>Standard mesher</b> — Voronoi-Delaunay based; uses one global element size with local controls','<b>Curvature-based mesher</b> — automatically places smaller elements in areas of high curvature; more robust on complex geometry','<b>Blended curvature-based mesher</b> — the most robust; handles geometry the other two fail on, at greater cost','If a mesh fails, switching mesher is usually a faster fix than adjusting sizes'],
+        trap:'A failed mesh is not always a mesh problem. Slivers, tiny faces and short edges in the <b>geometry</b> are the usual root cause — and the professional fix is to clean the model, not to fight the mesher.' },
+      { id:'s4-3', title:'Mesh control — local refinement', body:'Global refinement is expensive and mostly wasted. Mesh control puts the elements where the answer is.',
+        key:['<b>Mesh control</b> applies a smaller element size to selected faces, edges or vertices','Use it at <b>fillets, holes, notches and contact regions</b> — anywhere the stress gradient is steep','A ratio parameter controls how quickly element size grows away from the controlled region','You need <b>at least two, preferably three, second-order elements through a fillet</b> to resolve its stress'],
+        hook:{label:'Where to spend elements', text:'Where the <b>gradient</b> is steep, not where the stress is high. A uniformly high-stress region needs few elements; a sharp gradient needs many.'} },
+      { id:'s4-4', title:'What a good mesh looks like', body:'Practical criteria you can apply in the exam without a convergence study.',
+        key:['At least <b>2–3 elements through the thickness</b> of any wall carrying bending','Elements small enough at fillets that the fillet is visibly round in the mesh, not faceted','No aspect ratios in the thousands in the region you care about','Mesh fine <b>near the result location</b>; coarse far away is fine and desirable','If the displacement is stable but the stress is still climbing with refinement, you are not converged — or you are at a singularity']
+      }
+    ],
+    t5: [
+      { id:'s5-1', title:'Material properties that matter', body:'A static study will not run without certain properties, and the exam tests which ones.',
+        key:['<b>Elastic modulus (E)</b> and <b>Poisson\'s ratio (ν)</b> are <b>required</b> for a linear static study','<b>Yield strength</b> is required only for a <b>factor of safety</b> plot — the stress solution does not need it','<b>Mass density</b> is required for gravity, centrifugal and any mass-dependent load','A missing required property is flagged in <b>red</b> in the material dialogue','Custom materials are defined in a custom library; the standard library is read-only'],
+        trap:'Because yield strength is not needed for the stress solve, a study can complete perfectly and then refuse to produce a factor-of-safety plot. That is a <b>material definition</b> problem, not a solver problem.' },
+      { id:'s5-2', title:'The unit trap', body:'This costs more marks in this exam than any point of theory, and it is entirely avoidable.',
+        key:['<b>1 MPa = 1 N/mm² = 10⁶ N/m² = 10⁶ Pa</b>','SI in Simulation defaults to <b>N/m²</b> for stress — a plot legend reading 2.5e8 is <b>250 MPa</b>','Set the study units deliberately before reading any result','The exam states the units it wants the answer in; convert at the end, not in your head mid-problem','Check the material\'s own units when you enter a custom material — entering 250 into a N/m² field gives you a material with a yield strength of 250 pascals'],
+        hook:{label:'The three-second check', text:'Does the number have the right <b>order of magnitude</b>? Steel yields around 2–7 ×10⁸ N/m². If your plot peaks at 3×10⁵, you are in the wrong unit or the wrong load.'} },
+      { id:'s5-3', title:'Coordinate systems', body:'The exam lists "defining local and global coordinate systems" explicitly, and it matters for both loads and results.',
+        key:['The <b>global</b> system is the part or assembly origin','A <b>local (reference) coordinate system</b> is a reference-geometry coordinate system you create','Loads, fixtures and results can all be referenced to a local system','Result plots can be displayed in a chosen coordinate system — essential when you need a component of stress or displacement along a non-global direction','Mass properties can be reported about a chosen coordinate system too — a CSWP skill that reappears here']
+      }
+    ],
+    t6: [
+      { id:'s6-1', title:'Standard fixtures', body:'Fixtures remove degrees of freedom. Which ones they remove is the whole content of the topic.',
+        key:['<b>Fixed geometry</b> — removes all DOF at the selection. On a solid this means all <b>three translations</b>; solids have no rotational DOF to remove','<b>Immovable (no translation)</b> — used on shells and beams, where it removes translations but leaves rotations free','<b>Roller/slider</b> — the face can move <b>in its own plane</b> but not normal to it','<b>Fixed hinge</b> — a cylindrical face may <b>rotate about its axis</b> only','On shells and beams, "fixed geometry" removes translations <b>and</b> rotations'],
+        trap:'"Fixed geometry" on a solid and on a shell are not the same restraint, because the two element types do not have the same degrees of freedom to begin with.' },
+      { id:'s6-2', title:'Advanced fixtures', body:'The exam names "standard and advanced fixtures", so know what the advanced set offers.',
+        key:['<b>Symmetry</b> — applied to the cut faces of a symmetric model; restrains normal translation and in-plane rotation','<b>Use reference geometry</b> — restrain selected directions relative to a plane, axis or coordinate system','<b>On flat face / on cylindrical face / on spherical face</b> — restrain specified components in the face\'s natural directions','<b>Elastic support</b> — a distributed spring foundation with defined stiffness','<b>Bearing fixture</b> — a compliant support representing a bearing'],
+        hook:{label:'Symmetry pays twice', text:'A half model has roughly half the elements and solves faster — and the symmetry restraint also removes rigid body motion for free.'} },
+      { id:'s6-3', title:'Rigid body motion — the classic failure', body:'The most common reason a study fails to solve, and the exam will describe the symptom rather than name it.',
+        key:['Every model must be restrained against all six rigid body motions, or [K] is singular','The symptom is a solver error about instability, or a result with <b>absurd displacement</b> (metres, or e+10)','Common causes: a body with no fixture and no bonded contact; a model held only by no-penetration contact; a suppressed fixture','A quick diagnostic: run with <b>soft springs</b> enabled — if it then solves, the model was under-restrained'],
+        trap:'Soft springs are a <b>diagnostic</b>, not a fix. Leaving them on to force a solve hides a modelling error and produces meaningless reaction forces.' }
+    ],
+    t7: [
+      { id:'s7-1', title:'The load types', body:'Know what each load applies and to what geometry.',
+        key:['<b>Force</b> — total force distributed over the selected entities, or per-entity','<b>Pressure</b> — force per unit area, normal to the face by default','<b>Torque</b> — applied about an axis, to a cylindrical face','<b>Gravity</b> — needs <b>mass density</b>; direction from a reference','<b>Centrifugal</b> — angular velocity and acceleration about an axis; also needs density','<b>Bearing load</b> — a non-uniform, cosine-distributed pressure on a cylindrical face, representing shaft contact','<b>Remote load/mass</b> — transfers force or mass from a point in space without modelling the part'],
+        trap:'A <b>force</b> applied to three faces is by default the <b>total</b> split between them, not that value on each. Read the dialogue — "per item" versus "total" changes the answer by a factor of three.' },
+      { id:'s7-2', title:'Bearing load and remote load', body:'The two that appear most often in hands-on problems because they model something real without extra geometry.',
+        key:['<b>Bearing load</b> distributes pressure over roughly half the cylindrical face with a cosine profile — a shaft pushes, it does not pull','A uniform pressure on a full bore is physically wrong for a pin in a hole, and gives a different peak stress','<b>Remote load</b> applies force with the correct moment arm from an offset point — direct transfer, rigid connection or distributed connection','<b>Remote mass</b> lets you include the inertia of a component you have not meshed'],
+        hook:{label:'Why remote loads matter', text:'A load acting 200 mm off the face is not the same as the same force on the face. The <b>moment</b> is what breaks the part.'} },
+      { id:'s7-3', title:'Getting the load direction right', body:'Direction errors are silent — the study runs and gives you a confident wrong answer.',
+        key:['Pressure is <b>normal to the face</b> by default; use reference geometry for any other direction','A negative value reverses the direction','For a force along a non-global direction, select a <b>plane, edge or axis</b> as the reference','Always check the load arrows in the graphics area before meshing — they are drawn for exactly this reason']
+      }
+    ],
+    t8: [
+      { id:'s8-1', title:'Contact types', body:'The exam names "contact sets and contact type" explicitly, and the default catches people out.',
+        key:['<b>Bonded</b> — the parts are glued: no separation, no sliding. This is the <b>global default</b>','<b>No penetration</b> — surfaces may separate and slide, but cannot pass through each other. This makes the problem <b>non-linear</b> and slower','<b>Allow penetration</b> — the bodies ignore each other completely','<b>Shrink fit</b> — models an interference fit','<b>Virtual wall</b> — contact against a defined plane'],
+        trap:'Global bonded contact means two parts merely touching in the CAD model behave as one solid. If a hands-on problem involves parts that should separate or slide, you must define a <b>no-penetration contact set</b>, and the result changes substantially.' },
+      { id:'s8-2', title:'The contact hierarchy', body:'Three levels, and the more specific one wins.',
+        key:['<b>Global contact</b> — applies to the whole assembly','<b>Component contact</b> — applies to a selected component, overriding global','<b>Contact set</b> — applies to specific selected faces, overriding both','Local definitions always take precedence over global ones','This is why checking the contact folder before solving is part of the setup, not an afterthought']
+      },
+      { id:'s8-3', title:'Connectors', body:'Connectors replace geometry you have not modelled with the stiffness it would have provided.',
+        key:['<b>Pin</b> — connects two cylindrical faces; options for with/without retaining ring and key (restrains axial translation and/or rotation)','<b>Bolt</b> — with preload, defined by force or torque; foundation, counterbore or countersunk variants','<b>Spring</b> — axial and/or transverse stiffness between faces','<b>Rigid link</b> — connects two entities with infinite stiffness','<b>Elastic support</b>, <b>bearing</b>, <b>spot weld</b>, <b>edge weld</b> — the remaining set'],
+        hook:{label:'Why connectors, not geometry', text:'Meshing a real bolt thread would cost thousands of elements and give you a singularity at the thread root. A bolt connector gives you the preload and the load path for almost nothing.'} }
+    ],
+    t9: [
+      { id:'s9-1', title:'von Mises stress and why it is the default', body:'The plot you will be asked to read in almost every hands-on problem.',
+        key:['von Mises is an <b>equivalent scalar</b> combining the full stress tensor into one number for comparison with a uniaxial yield strength','It is the <b>distortion energy</b> criterion, appropriate for <b>ductile</b> materials','It is always <b>positive</b> — it cannot tell you tension from compression','<b>Maximum shear stress (Tresca)</b> is the more conservative ductile criterion','<b>Mohr-Coulomb</b> and <b>maximum normal stress</b> are for <b>brittle</b> materials'],
+        trap:'Because von Mises is always positive, a part in pure compression and the same part in pure tension can show identical von Mises plots. For brittle materials, or where you need the sign, use principal stresses (P1, P3).' },
+      { id:'s9-2', title:'Factor of safety', body:'The output the exam most often asks for, and the definition is simple enough to be worth memorising exactly.',
+        key:['<b>FOS = yield strength ÷ von Mises stress</b> at a point, for the ductile criterion','<b>FOS &lt; 1</b> means the criterion is violated at that location','The FOS plot can be shown as a distribution, or filtered to show only regions below a value','Choosing the criterion is part of setting up the plot — the default is von Mises','FOS depends on a valid <b>yield strength</b> in the material definition'],
+        hook:{label:'Read it backwards', text:'FOS = 2 means the load could double before yield <b>according to this model</b> — which is only as good as the mesh, the boundary conditions and the linear assumption.'} },
+      { id:'s9-3', title:'Displacement results', body:'The most trustworthy number the solver produces.',
+        key:['<b>URES</b> is the resultant displacement — the magnitude of the vector','UX, UY, UZ are the components along the chosen coordinate system','Displacement converges faster than stress, so it is the better sanity check','The <b>deformed shape</b> is drawn to an exaggerated scale by default — check the scale factor before believing what you see','A displacement of the wrong order of magnitude almost always means a restraint or unit problem'],
+        trap:'The default deformation scale is automatic and can be hundreds to one. A part that "looks bent in half" may have moved 0.2 mm. Set the scale to 1 before judging whether a deflection is plausible.' },
+      { id:'s9-4', title:'Probing, listing and reaction forces', body:'How you extract the specific number the exam is asking for.',
+        key:['<b>Probe</b> reports the value at a picked node, face or edge — this is how you answer "stress at point A"','<b>List Selected</b> gives values, and averages, over selected entities','<b>Reaction force</b> at a fixture is the check that the model is in equilibrium','The sum of reaction forces should equal the applied load, in the opposite sense — if it does not, something is wrong with the setup','Section clipping and iso clipping let you find a maximum that is buried inside the body'],
+        hook:{label:'The 30-second validation', text:'List the reaction forces. If ΣF does not match the applied load, stop — do not report the stress.'} },
+      { id:'s9-5', title:'Node values vs element values', body:'A subtle setting that changes the number you report.',
+        key:['Stress is computed at <b>Gauss points</b> inside each element','<b>Node values</b> average the contributions of all elements meeting at a node — smoother, and the default','<b>Element values</b> report a single value per element — discontinuous between elements','The <b>difference between them is a mesh quality indicator</b>: a large jump means the mesh is too coarse there','Node values will report a slightly lower peak than element values at a stress concentration']
+      }
+    ],
+    t10: [
+      { id:'s10-1', title:'Stress singularities', body:'The single most important idea for judging whether a result is real, and a favourite of examiners.',
+        key:['At a <b>sharp re-entrant corner</b> the theoretical stress is infinite. Refining the mesh makes the reported stress <b>rise without limit</b>','The stress there is a property of the <b>idealisation</b>, not of the part','Also occurs at <b>point loads</b> and at the edges of <b>fixed geometry</b> restraints','Fixes: model the real <b>fillet</b>; apply the load over an area; move the restraint away from the region of interest','If you cannot remove it, use <b>St. Venant\'s principle</b> — read the stress a characteristic dimension away'],
+        trap:'The test for a singularity is refinement behaviour, not magnitude. <b>If refining the mesh keeps increasing the peak stress, it is a singularity.</b> If the peak settles to a value, it is a genuine stress concentration.' },
+      { id:'s10-2', title:'Mesh convergence', body:'How you demonstrate a result is trustworthy, and the two adaptive methods SOLIDWORKS offers.',
+        key:['Run the study at progressively finer mesh, plot the quantity of interest, and look for it to <b>flatten</b>','A change under roughly 5% between refinements is normally taken as converged','<b>h-adaptive</b> — the solver automatically <b>refines the mesh</b> where the error is high','<b>p-adaptive</b> — the solver increases the <b>polynomial order</b> of the elements instead','Both are available for <b>linear static studies with solid meshes</b>','Displacement converges first, stress later, stress at a concentration later still'],
+        hook:{label:'h vs p', text:'<b>h</b> makes elements <b>smaller</b>. <b>p</b> makes them <b>smarter</b>.'} },
+      { id:'s10-3', title:'Solvers', body:'The exam lists "selecting different solvers as directed to optimize problems".',
+        key:['<b>FFEPlus</b> — iterative; scales well and uses less memory on <b>large</b> models','<b>Direct Sparse</b> — direct; robust, better for smaller models and for problems with very different material stiffnesses','<b>Large Problem Direct Sparse</b> — a direct solver for models too big for memory','<b>Intel Direct Sparse</b> — a faster direct solver making use of available cores/memory','<b>Automatic</b> lets Simulation choose','Solver choice changes speed and memory, <b>not</b> the correct answer'],
+        trap:'If two solvers give materially different answers, the problem is the model — usually an ill-conditioned stiffness matrix from near-rigid-body motion or wildly mismatched stiffnesses — not the solver.' },
+      { id:'s10-4', title:'Deciding whether a result is valid', body:'"Determining if results are valid and make sense" is an examinable objective in its own right.',
+        key:['<b>Check equilibrium</b> — reaction forces must balance the applied load','<b>Check the deformed shape</b> at scale 1 — does it move the way physics says it should?','<b>Check the order of magnitude</b> against a hand calculation: σ = F/A, σ = Mc/I, δ = FL³/3EI','<b>Check the peak location</b> — is it at a fillet (plausible) or at a sharp corner or a restraint edge (suspect)?','<b>Check the assumptions</b> — is the displacement small, is the stress below yield, is it stable?'],
+        hook:{label:'The habit that separates engineers', text:'Never report a simulation number you have not bounded with a hand calculation to within an order of magnitude.'} }
+    ]
+  },
+  questions: [
+    { id:'sq1', topic:'t2', q:'Which of the following are assumptions of linear static analysis? (Select all that apply.)', a:['Stress is proportional to strain throughout','Displacements are small enough not to change the stiffness','Loads are applied slowly, so inertia can be neglected','Boundary conditions remain constant during loading'], correct:[0,1,2,3], multi:true, explain:'All four define linear static analysis. The moment any one of them is violated — yielding, large deflection, impact, changing contact — a linear static result stops describing reality.' },
+    { id:'sq2', topic:'t2', q:'A linear static study reports a peak von Mises stress of 900 MPa in a steel with a yield strength of 250 MPa. What does this tell you?', a:['The part will experience 900 MPa in service','The linear model has been pushed past its validity; the material would have yielded and redistributed the stress','The material data is wrong','The mesh is too fine'], correct:1, explain:'A linear model has no yielding — it extrapolates elastic behaviour indefinitely. The real part would yield and redistribute load. The useful output here is that FOS &lt; 1, not the number 900.' },
+    { id:'sq3', topic:'t2', q:'In [K]{u} = {F}, what does the solver compute first?', a:['Stress','Strain','Displacement','Factor of safety'], correct:2, explain:'Displacements are solved first; strain is derived from the displacement gradient, and stress from strain. That is exactly why displacement is more accurate than stress on the same mesh.' },
+    { id:'sq4', topic:'t2', q:'Which study type is required to assess a slender column that may collapse under axial compression?', a:['Linear static','Buckling','Thermal','Fatigue'], correct:1, explain:'A static study can report a perfectly comfortable stress for a column that is nowhere near stable. <b>Stress is not stability</b> — buckling needs a buckling study.' },
+    { id:'sq5', topic:'t3', q:'How many degrees of freedom does each node of a solid tetrahedral element have?', a:['3 — three translations','6 — three translations and three rotations','2 — in-plane translations','1 — axial displacement'], correct:0, explain:'Solid elements have translational DOF only. This is why a moment cannot be applied directly to a node of a solid mesh, and why "fixed geometry" on a solid removes three DOF, not six.' },
+    { id:'sq6', topic:'t3', q:'How many nodes does a high-quality (second-order) tetrahedral element have?', a:['4','8','10','20'], correct:2, explain:'Ten: four corner nodes plus six mid-side nodes. The mid-side nodes let the edges curve to follow geometry and let strain vary linearly within the element.' },
+    { id:'sq7', topic:'t3', q:'How many nodes does a draft-quality tetrahedral element have?', a:['3','4','6','10'], correct:1, explain:'Four corner nodes, straight edges, constant strain. Fast to solve and poor at bending — use it to check a setup, never to produce an answer.' },
+    { id:'sq8', topic:'t3', q:'How many degrees of freedom does each node of a shell element have?', a:['3','4','6','12'], correct:2, explain:'Six — three translations and three rotations. This is why shells can carry moments applied at nodes and solids cannot.' },
+    { id:'sq9', topic:'t3', q:'A sheet metal part is added to a static study. What element type is used by default?', a:['Solid tetrahedral','Shell','Beam','Truss'], correct:1, explain:'Sheet metal is meshed with shell elements on the mid-surface. That is both faster and more accurate than trying to push several solid elements through a thin wall.' },
+    { id:'sq10', topic:'t3', q:'Which element type carries axial load only, with no bending or moment capacity?', a:['Beam','Truss','Shell','Solid'], correct:1, explain:'A truss element is pin-jointed: 3 DOF per node, axial force only. A beam element has 6 DOF per node and carries shear and bending as well.' },
+    { id:'sq11', topic:'t3', q:'Two solid bodies in a multibody part touch but no contact condition has been defined and global contact has been set to "allow penetration". What happens?', a:['They behave as one continuous solid','They pass through each other and, if unrestrained, cause a rigid body motion failure','The solver bonds them automatically','The study will not mesh'], correct:1, explain:'Bodies interact only through the contact conditions you define. With penetration allowed and no other restraint, an unrestrained body has nothing holding it — the classic instability error.' },
+    { id:'sq12', topic:'t4', q:'What is the aspect ratio of a perfect tetrahedral element?', a:['0','1','10','It has no aspect ratio'], correct:1, explain:'1.0 for an ideal element. The ratio grows as the element becomes elongated or flattened, and the aspect ratio plot is the fastest way to find a degenerate region.' },
+    { id:'sq13', topic:'t4', q:'What does the Jacobian check assess?', a:['Whether the mesh is fine enough for convergence','The distortion of mid-side nodes in second-order elements','The total number of elements in the model','Whether contact surfaces are correctly paired'], correct:1, explain:'Jacobian applies to high-quality elements: it checks whether the curved edges created by the mid-side nodes have distorted past legality. A negative Jacobian means the element is inverted.' },
+    { id:'sq14', topic:'t4', q:'Which mesher automatically places smaller elements in regions of high curvature?', a:['Standard mesher','Curvature-based mesher','Draft mesher','Beam mesher'], correct:1, explain:'The curvature-based mesher sizes elements from local curvature. The blended curvature-based mesher is more robust still, and is the usual next step when a mesh fails.' },
+    { id:'sq15', topic:'t4', q:'What is the purpose of applying mesh control to a fillet?', a:['To reduce total solve time','To place smaller elements where the stress gradient is steep, so the concentration is resolved','To bond the fillet to the adjacent face','To exclude the fillet from the analysis'], correct:1, explain:'Global refinement is expensive and mostly wasted. Mesh control spends elements where the gradient is steep — you want at least two or three second-order elements through the fillet.' },
+    { id:'sq16', topic:'t5', q:'Which material properties are strictly required to run a linear static study? (Select all that apply.)', a:['Elastic modulus','Poisson\'s ratio','Yield strength','Thermal conductivity'], correct:[0,1], multi:true, explain:'E and ν define the elastic stiffness and are required. Yield strength is needed only for a <b>factor of safety</b> plot; thermal conductivity belongs to thermal studies.' },
+    { id:'sq17', topic:'t5', q:'A study solves successfully but will not produce a factor of safety plot. What is the most likely cause?', a:['The mesh is too coarse','The material has no yield strength defined','The solver is set to FFEPlus','No fixtures were applied'], correct:1, explain:'The stress solve needs only E and ν, so it completes. FOS = yield ÷ von Mises, so without a yield strength the plot cannot be produced. It is a material definition problem.' },
+    { id:'sq18', topic:'t5', q:'A stress plot legend reads 2.5e+08 N/m². What is this in MPa?', a:['2.5 MPa','25 MPa','250 MPa','2,500 MPa'], correct:2, explain:'1 MPa = 1 N/mm² = 10⁶ N/m². So 2.5×10⁸ N/m² = 250 MPa — a very typical steel yield strength, which is the sanity check that tells you the number is plausible.' },
+    { id:'sq19', topic:'t5', q:'A custom material is entered with a yield strength of "250" into a field whose units are N/m². What has been created?', a:['A material yielding at 250 MPa','A material yielding at 250 Pa — effectively no strength at all','A material yielding at 250 N/mm²','An invalid material that will not solve'], correct:1, explain:'250 N/m² is 250 pascals. The study will solve happily and report a factor of safety near zero everywhere. Always check the units in the material dialogue.' },
+    { id:'sq20', topic:'t6', q:'"Fixed geometry" applied to a face of a solid body removes how many degrees of freedom at each node?', a:['3 — the translations','6 — translations and rotations','1 — the normal translation','2 — the in-plane translations'], correct:0, explain:'Solid nodes have only three translational DOF, so that is all there is to remove. On a <b>shell</b>, the same fixture removes six, because shell nodes have rotations as well.' },
+    { id:'sq21', topic:'t6', q:'What does a roller/slider fixture allow?', a:['Rotation about the face normal only','Movement within the plane of the face, but not normal to it','Movement normal to the face, but not within it','No movement at all'], correct:1, explain:'It restrains the normal translation and leaves in-plane motion free — the model of a surface resting on a frictionless support.' },
+    { id:'sq22', topic:'t6', q:'A study fails with an instability error and displacements of the order of 10⁹ mm. What is the most likely cause?', a:['The mesh is too fine','The model is under-restrained — rigid body motion','The material yield strength is too low','Too many contact sets are defined'], correct:1, explain:'Absurd displacements and a singular stiffness matrix mean an unrestrained rigid body motion. Enabling soft springs is a <b>diagnostic</b>; the fix is a correct restraint.' },
+    { id:'sq23', topic:'t6', q:'Which fixture is used on the cut faces of a half model to represent the missing half?', a:['Fixed hinge','Symmetry','Elastic support','Bearing fixture'], correct:1, explain:'Symmetry restrains translation normal to the cut face and the in-plane rotations. It halves the model cost and removes rigid body motion at the same time.' },
+    { id:'sq24', topic:'t7', q:'A 900 N force is applied to a selection of three faces with the "total" option. What force does each face carry?', a:['900 N each','300 N each','2,700 N total','It cannot be determined'], correct:1, explain:'"Total" distributes the value across the selection — 300 N per face. Selecting "per item" would apply 900 N to each, for 2,700 N total. Misreading this is a factor-of-three error.' },
+    { id:'sq25', topic:'t7', q:'Which load correctly represents a shaft pressing into a hole?', a:['Uniform pressure on the full cylindrical face','Bearing load','Force on the face','Torque about the axis'], correct:1, explain:'A bearing load applies a cosine-distributed pressure over roughly half the bore, because a shaft pushes and cannot pull. Uniform pressure on the full bore is physically wrong and gives a different peak stress.' },
+    { id:'sq26', topic:'t7', q:'Which loads require the material mass density to be defined? (Select all that apply.)', a:['Gravity','Centrifugal','Pressure','Remote mass'], correct:[0,1,3], multi:true, explain:'Anything whose magnitude derives from mass needs density. A pressure load is specified directly as force per unit area and does not.' },
+    { id:'sq27', topic:'t7', q:'What is the advantage of a remote load over an equivalent force applied directly to the face?', a:['It solves faster','It applies the load at an offset point, so the resulting moment is correctly represented','It automatically refines the mesh','It does not require a fixture'], correct:1, explain:'A force acting 200 mm away from a face produces a moment that the same force applied on the face does not. The moment is usually what breaks the part.' },
+    { id:'sq28', topic:'t8', q:'What is the default global contact condition between touching components?', a:['No penetration','Bonded','Allow penetration','Shrink fit'], correct:1, explain:'Bonded is the default — touching faces behave as if glued. It is linear and fast, and it is wrong for any joint that should be able to separate or slide.' },
+    { id:'sq29', topic:'t8', q:'Which contact type makes the analysis non-linear and therefore slower to solve?', a:['Bonded','No penetration','Allow penetration','Free'], correct:1, explain:'No penetration requires the solver to iterate to find which areas are in contact at the converged solution — the contact area is part of the answer, which is what makes it non-linear.' },
+    { id:'sq30', topic:'t8', q:'A contact set is defined on two faces that also fall under a global bonded condition. Which applies?', a:['The global condition','The contact set','Both are averaged','The study fails with a conflict error'], correct:1, explain:'The hierarchy is global → component → contact set, with the most specific winning. This is why checking the contact folder before solving is part of the setup.' },
+    { id:'sq31', topic:'t8', q:'Why is a bolt connector preferred over modelling the bolt geometry?', a:['Bolt geometry cannot be meshed','It captures preload and the load path without thousands of elements and a thread-root singularity','It automatically applies the correct material','It is required by the exam'], correct:1, explain:'Meshing threads is expensive and produces a singularity at the root. The connector supplies the stiffness and preload for negligible cost.' },
+    { id:'sq32', topic:'t8', q:'A pin connector is defined between two cylindrical faces "with retaining ring". What does this add?', a:['Rotational restraint about the pin axis','Restraint of relative axial translation','Radial stiffness','A preload force'], correct:1, explain:'The retaining ring option prevents the two faces sliding apart along the axis. The separate "with key" option is what restrains relative <b>rotation</b>.' },
+    { id:'sq33', topic:'t9', q:'Von Mises stress is most appropriate for which class of material?', a:['Brittle','Ductile','Composite','Elastomeric'], correct:1, explain:'Von Mises is the distortion-energy criterion for ductile materials. Brittle materials need maximum normal stress or Mohr-Coulomb, which are sensitive to the sign of the stress.' },
+    { id:'sq34', topic:'t9', q:'Why can a von Mises plot not distinguish tension from compression?', a:['Because the mesh averages the values','Because it is an equivalent scalar and is always positive','Because SOLIDWORKS displays absolute values by default','Because the solver discards the sign'], correct:1, explain:'It combines the stress tensor into a single positive equivalent value. Where you need the sign — brittle materials, crack concerns, contact — use the principal stresses P1 and P3.' },
+    { id:'sq35', topic:'t9', q:'A location shows a factor of safety of 0.8. What does this mean?', a:['The part is safe with 20% margin','The von Mises stress exceeds the yield strength at that location','The mesh has not converged','The material density is wrong'], correct:1, explain:'FOS = yield ÷ von Mises, so FOS &lt; 1 means the criterion is violated there. Whether that matters depends on whether the location is a genuine concentration or a singularity.' },
+    { id:'sq36', topic:'t9', q:'What does URES represent in a displacement plot?', a:['Displacement in the X direction','The resultant displacement magnitude','The residual error of the solution','Displacement of the restrained nodes'], correct:1, explain:'URES is the magnitude of the displacement vector. UX, UY and UZ are the components in the selected coordinate system.' },
+    { id:'sq37', topic:'t9', q:'A deformed-shape plot appears to show a bracket bent double. What should you check first?', a:['The material yield strength','The deformation scale factor','The number of elements','The contact definitions'], correct:1, explain:'The default deformation scale is automatic and can be hundreds to one. Set it to 1 before judging plausibility — the part may have moved 0.2 mm.' },
+    { id:'sq38', topic:'t9', q:'What is the fastest check that a static study is correctly set up?', a:['Refine the mesh and re-run','List the reaction forces and confirm they balance the applied load','Change the solver','Switch to element values'], correct:1, explain:'Equilibrium is non-negotiable: ΣF at the fixtures must equal the applied load in the opposite sense. If it does not, do not report the stress.' },
+    { id:'sq39', topic:'t9', q:'A large difference between node values and element values in a region indicates:', a:['A solver error','A mesh that is too coarse in that region','An incorrect material','A missing fixture'], correct:1, explain:'Node values are averaged across elements meeting at a node; element values are not. A large discontinuity between adjacent elements is a direct signal that the mesh cannot resolve the gradient.' },
+    { id:'sq40', topic:'t10', q:'Refining the mesh at a sharp internal corner causes the reported peak stress to keep increasing with every refinement. What is happening?', a:['The mesh is converging correctly','It is a stress singularity — the theoretical stress there is infinite','The material model is wrong','The solver has become unstable'], correct:1, explain:'This refinement behaviour <b>is</b> the definition of a singularity. Model the real fillet, or read the stress a characteristic distance away using St. Venant\'s principle.' },
+    { id:'sq41', topic:'t10', q:'Which of these produce stress singularities? (Select all that apply.)', a:['A sharp re-entrant corner with no fillet','A point load applied to a vertex','The edge of a fixed-geometry restraint','A generously filleted shoulder'], correct:[0,1,2], multi:true, explain:'All idealisations that concentrate load or restraint into zero area produce singularities. A real fillet gives a genuine stress <b>concentration</b>, which converges to a finite value.' },
+    { id:'sq42', topic:'t10', q:'What is the difference between h-adaptive and p-adaptive methods?', a:['h refines the mesh; p increases the polynomial order of the elements','h is for solids; p is for shells','h is iterative; p is direct','There is no difference'], correct:0, explain:'<b>h makes elements smaller; p makes them smarter.</b> Both are available for linear static studies with solid meshes and both aim at a converged, mesh-independent result.' },
+    { id:'sq43', topic:'t10', q:'Which solver is generally most suitable for very large models with limited memory?', a:['Direct Sparse','FFEPlus','Large Problem Direct Sparse','It makes no difference'], correct:1, explain:'FFEPlus is iterative and scales well in memory on large problems. Solver choice affects speed and memory, not the correct answer — if two solvers disagree materially, the model is ill-conditioned.' },
+    { id:'sq44', topic:'t10', q:'A study has converged in displacement but the peak stress is still rising with refinement, and the peak sits at a filleted shoulder. What is the correct interpretation?', a:['It is a singularity; ignore the stress','The stress has not yet converged; refine further at the fillet and re-check','The material is wrong','The load is too high'], correct:1, explain:'A fillet is a genuine concentration and must converge to a finite value. Displacement converges first, stress later, and stress at a concentration later still — so refine locally and confirm it flattens.' },
+    { id:'sq45', topic:'t1', q:'How should the 120 minutes best be allocated across a 100-point paper?', a:['Work strictly front to back','Bank the low-point theory questions first, then take the hands-on problems in descending point order','Do the hands-on problems first, then theory','Spend equal time on every question'], correct:1, explain:'Points per minute is the only metric. Theory questions are cheap and quick; the 15–20 point hands-on problems deserve proportionate time — roughly 1.2 minutes per point.' },
+    { id:'sq46', topic:'t1', q:'Which statements about SOLIDWORKS certification exams are true? (Select all that apply.)', a:['Exams cannot be paused once started','The TesterPRO client can resume after a computer crash','The exam timer pauses during a crash','A dual-monitor setup is recommended'], correct:[0,1,3], multi:true, explain:'The client is designed to resume after a crash, but the clock keeps running throughout — which is exactly why a stable machine and a dual-monitor setup matter.' },
+    { id:'sq47', topic:'t5', q:'What is the purpose of defining a local coordinate system in a study?', a:['To speed up the solve','To apply loads or restraints, and read results, along a direction that is not aligned with the global axes','To change the units of the study','To define the mesh density'], correct:1, explain:'Loads, fixtures and result plots can all reference a local system. It is essential whenever you need a component of stress or displacement along a non-global direction.' },
+    { id:'sq48', topic:'t4', q:'How many second-order elements should ideally sit through a fillet to resolve its stress concentration?', a:['One','At least two, preferably three','Ten or more','It does not matter with high-quality elements'], correct:1, explain:'Two to three second-order elements through the fillet is the practical rule. One element cannot represent the curvature of the stress field, however high its order.' }
+  ]
+};
+
+/* ============================ CSWP ============================ */
+EXAMS.p = {
+  id: 'p', code: 'CSWP', name: 'Design Professional',
+  accent: '#A89BC9', accent2: '#C0B5DC',
+  tagline: 'Three independent segments. Includes the official Segment 1 sample exam, with the real answer key.',
+  spec: {
+    'Structure': 'Three separately purchased, separately scored segments — any order, any time',
+    'Segment 1': 'Part from a drawing — 70 min, 75 of 105 points to pass',
+    'Segment 2': 'Configurations & design tables — 50 min, 77 of 104 points to pass',
+    'Segment 3': 'Assembly modeling — 80 min, 77 of 109 points to pass',
+    'Total length': '3 hours 20 minutes across all three',
+    'Passing a segment': 'Once passed it never needs retaking; fail one and only that one is repurchased',
+    'Software needed': 'SOLIDWORKS 2015 or later, plus Excel for design tables',
+    'Retake': '14-day wait per segment, new credit each attempt',
+    'Prerequisite': 'None (K–12 academic candidates must hold CSWA first)',
+    'Award': 'CSWP is granted automatically once all three segments are passed'
+  },
+  mock: { count: 24, minutes: 70, passPoints: 75, totalPoints: 105 },
+  topics: [
+    { id:'t1', title:'Segment 1 · Equations & Linked Dimensions', blurb:'The technique the whole segment is built on' },
+    { id:'t2', title:'Segment 1 · Modify & Re-measure',           blurb:'Changing parameters without losing design intent' },
+    { id:'t3', title:'Segment 2 · Configurations',                blurb:'Deriving, switching, and what carries over' },
+    { id:'t4', title:'Segment 2 · Design Tables',                 blurb:'Excel-driven configurations and their syntax' },
+    { id:'t5', title:'Segment 3 · Assemblies & Mates',            blurb:'Standard, advanced and mechanical mates' },
+    { id:'t6', title:'Segment 3 · Motion, Collision, Interference',blurb:'The three checks the exam always asks for' },
+    { id:'t7', title:'Segment 3 · Coordinate Systems & Mass',      blurb:'Mass properties about a custom origin' },
+    { id:'t8', title:'Exam Mechanics & Strategy',                 blurb:'TesterPRO, units, decimals, time budgeting' },
+    { id:'t9', title:'★ Official Sample Exam — Segment 1',        blurb:'The five real published questions and answer key' }
+  ],
+  cards: {
+    t1: [
+      { id:'p1-1', title:'What Segment 1 actually tests', body:'You are given a drawing with dimensions labelled A, B, C, D, E and a set of equations such as X = A/3. You build the part, report its mass, and are then asked to change the parameters — repeatedly — and report the mass again each time.',
+        key:['The modelling is not hard. <b>The re-modelling is the exam</b>','If your model rebuilds cleanly when five dimensions change at once, you pass. If it breaks, you run out of time','70 minutes, 105 points, 75 to pass — you can lose one whole question and still pass','Answers are usually multiple choice for the first question of a stage, then <b>fill-in-the-blank</b> for the updates'],
+        hook:{label:'The real skill', text:'This is a <b>parametric robustness</b> exam wearing a modelling exam\'s clothes.'} },
+      { id:'p1-2', title:'Linked values (shared values)', body:'The official hint list puts this first, and it is the single highest-value technique in the segment.',
+        key:['Right-click a dimension → <b>Link Values</b> and give it a name; every dimension sharing that name updates together','Officially also called <b>shared values</b>','Use it wherever the drawing shows the same letter twice — that is the exam telling you the dimensions are linked','Change the value once and every linked instance follows','Managed in the equations dialogue under <b>Global Variables</b>'],
+        trap:'If you type the same number into two dimensions instead of linking them, the model looks identical and rebuilds identically — until the update question, where you must remember to change both. That is exactly how people lose Segment 1.' },
+      { id:'p1-3', title:'Equations and global variables', body:'The exam gives you equations directly (X = A/3, Y = B/3 + 10 mm). Enter them as equations, never as arithmetic you did in your head.',
+        key:['Open <b>Tools → Equations</b>; define global variables A, B, C, D, E first, then driven dimensions','Reference a dimension by its name in double quotes: <span class="mono">"D1@Sketch1" = "A" / 3</span>','Global variables can carry units; be consistent with the document units','Equations are evaluated in order, and the dialogue flags a circular reference','<b>Automatic rebuild</b> should be on so a parameter change propagates immediately'],
+        hook:{label:'Why it matters', text:'When the exam changes A from 213 to 225, one edit updates every dependent dimension. Without equations you are hand-editing a dozen numbers under time pressure.'} },
+      { id:'p1-4', title:'Renaming dimensions — the official hint', body:'Hint 2 in the official sample exam: change the label of the dimensions in your part to A, B, C, D so you can see at a glance which ones the exam is talking about.',
+        key:['Select a dimension → in the PropertyManager, set its <b>Name</b> under Primary Value','Rename to exactly the letters the exam uses','It costs about a minute and removes essentially all risk of updating the wrong dimension','The official alternative (Hint 3) is to drive the whole thing from a <b>design table</b> instead'],
+        trap:'Do the renaming <b>as you build</b>, not afterwards. Going back through a finished tree to find "which dimension was C" is exactly the time sink the hint exists to prevent.' },
+      { id:'p1-5', title:'Building for change, not for looks', body:'Design intent is graded implicitly: a fragile model fails the update questions even if the first answer was right.',
+        key:['Fully define every sketch. An under-defined sketch will move unpredictably when a driving dimension changes','Sketch relations beat dimensions for symmetry — use <b>symmetric, equal, collinear</b>','Avoid dimensioning to a fillet edge or to geometry that may disappear','Keep the tree shallow: fewer, more robust features rebuild more reliably','<b>Save a copy after each stage</b> — the official instructions recommend it, so you can recover a working model'],
+        hook:{label:'The test', text:'Change A by 20 mm and rebuild. If anything goes red, fix it <b>now</b> — not in the exam.'} }
+    ],
+    t2: [
+      { id:'p2-1', title:'Mass properties — the answer format', body:'Almost every Segment 1 question resolves to "what is the mass of the part". Getting the number right and getting it in the right form are two different problems.',
+        key:['<b>Tools → Evaluate → Mass Properties</b>','Set the unit system the question demands — the sample exam uses <b>MMGS</b> (millimetre, gram, second)','Set <b>decimal places to 2</b>, as instructed','Assign the exact material named; the sample specifies Alloy Steel with density 0.0077 g/mm³','If your answer is not among the multiple-choice options, <b>the model is wrong</b> — that is the intended purpose of the options'],
+        trap:'A density of 0.0077 g/mm³ is 7,700 kg/m³. If you set the units to IPS or leave the default material, the mass will be wrong by a clean factor — and the multiple choice will not save you on the fill-in-the-blank questions.' },
+      { id:'p2-2', title:'The update questions', body:'Questions 2, 3 and 5 of the sample exam simply change the parameters and ask for the new mass. This is where the segment is won.',
+        key:['Change only the labelled parameters; <b>everything else must stay as it was</b>','Rebuild and re-run Mass Properties','A well-built model takes about 60 seconds per update; a fragile one takes ten minutes or fails','Watch for an <b>equation that itself changes</b> — in the sample exam, Y goes from B/3 + 10 to B/3 + 15 at Stage 2','Do not rebuild the part from scratch for each stage'],
+        hook:{label:'The whole segment in one line', text:'Build once, change five numbers, read the mass. Four times.'} },
+      { id:'p2-3', title:'Stage 2 — the modify question', body:'Partway through, the exam gives you new images and asks you to modify the existing part into a more complex one, with changes concentrated in labelled areas.',
+        key:['Changes are localised and the images circle them — the sample exam marks areas AA, BB and CC','You are modifying the <b>same part</b>, not starting a new one','This is why saving a copy at the end of Stage 1 matters: if the modification goes wrong you can recover','After modifying, the parameter-update questions start again against the new geometry','Check whether any <b>equation definitions</b> changed along with the geometry']
+      }
+    ],
+    t3: [
+      { id:'p3-1', title:'Configurations — the basics', body:'Segment 2 is 50 minutes on part variation. Configurations are how a single part file holds several versions of itself.',
+        key:['Created in the <b>ConfigurationManager</b> tab','Each configuration can control dimension values, feature <b>suppression</b>, and some properties','<b>Derived configurations</b> inherit from a parent; changing the parent propagates to the child unless the child overrides it','Switching configuration triggers a rebuild — always confirm the active configuration before reading mass properties','Configuration-specific properties are what feed a BOM'],
+        trap:'Mass properties are reported for the <b>active</b> configuration. Reading the mass with the wrong configuration active is the most common way to lose marks in Segment 2, and nothing on screen warns you.' },
+      { id:'p3-2', title:'This configuration vs all configurations', body:'The dialogue every feature and dimension change offers, and the source of most configuration confusion.',
+        key:['<b>This configuration</b> — the change applies only to the active one','<b>All configurations</b> — applies everywhere','<b>Specify configurations</b> — pick a subset','Dimensions changed for "this configuration" become configuration-specific and appear in the design table','Feature suppression is inherently configuration-specific'],
+        hook:{label:'Habit', text:'Read that dialogue every single time. The default is not always what you want, and the mistake is invisible until you switch configuration.'} },
+      { id:'p3-3', title:'Creating configurations from configurations', body:'An explicitly listed exam topic — deriving one configuration from another rather than from the default.',
+        key:['Right-click an existing configuration → <b>Add Derived Configuration</b>','The derived configuration inherits everything not explicitly overridden','Useful for families: a base, then variants that differ in one or two features','Renaming and reordering is done in the ConfigurationManager','Deleting a parent affects its children — check before deleting']
+      }
+    ],
+    t4: [
+      { id:'p4-1', title:'Design tables', body:'An Excel-embedded table that generates and controls configurations. Excel must be installed on the exam machine — the official instructions say so explicitly.',
+        key:['<b>Insert → Tables → Design Table</b>; auto-create populates from existing configurations','Each <b>row is a configuration</b>; each <b>column is a controlled parameter</b>','Cell A1 is reserved; configuration names go down column A from A3; parameter headers go across row 2','Edit in place — the spreadsheet opens inside the SOLIDWORKS window','Right-click the table → <b>Edit Table</b> to reopen it'],
+        trap:'No Excel, no design table. The official exam guide lists Excel as a requirement for Segment 2, and discovering it is missing at the start of a 50-minute timed segment is unrecoverable.' },
+      { id:'p4-2', title:'Design table syntax', body:'The column headers are a small formal language, and the exam expects fluency.',
+        key:['<b>Dimension:</b> <span class="mono">D1@Sketch1</span> — the dimension name and its owning feature/sketch','<b>Suppression:</b> <span class="mono">$STATE@Fillet1</span> — values <span class="mono">S</span> (suppressed) or <span class="mono">U</span> (unsuppressed)','<b>Configuration comment:</b> <span class="mono">$COMMENT</span>','<b>User notes / properties:</b> <span class="mono">$PRP@Description</span>','Feature and dimension names must match the model <b>exactly</b>, including case'],
+        hook:{label:'Fastest route', text:'Let SOLIDWORKS <b>auto-create</b> the table from configurations you have already made — it writes the syntax correctly, and you edit values rather than authoring headers.'} },
+      { id:'p4-3', title:'Rearranging and modifying features', body:'The other half of Segment 2: "changing and/or rearranging features of an existing SOLIDWORKS part."',
+        key:['Features can be <b>dragged</b> in the FeatureManager to change rebuild order','Reordering changes the result — a fillet before a shell is not the same part as a shell before a fillet','The <b>rollback bar</b> lets you insert a feature partway up the tree','Parent-child relationships restrict how far a feature can move; check <b>Parent/Child</b> before dragging','<b>Move/Delete Face</b> edits geometry directly and is an explicitly listed exam tool'],
+        trap:'Reordering can silently change the mass. If a question asks you to reorder and then report mass, the whole point is that the number changes.' }
+    ],
+    t5: [
+      { id:'p5-1', title:'Building the assembly', body:'Segment 3 is 80 minutes, the longest segment, and it starts by assembling parts that are supplied to you.',
+        key:['You download the exam files through the testing client — have a known folder ready','The <b>first component inserted is fixed</b> by default; every later one is floating','Right-click → Float / Fix changes this. A fully fixed assembly cannot be moved for collision checks','<b>Insert Components</b> for existing parts; subassemblies are inserted the same way','A subassembly is <b>rigid</b> by default; make it <b>flexible</b> to allow its internal parts to move'],
+        trap:'Rigid versus flexible subassembly is an explicitly listed exam topic. A rigid subassembly will not articulate, so a motion or collision question against it will give the wrong answer with no error message.' },
+      { id:'p5-2', title:'Standard mates', body:'The everyday set, and the exam expects them to be second nature.',
+        key:['<b>Coincident</b>, <b>Parallel</b>, <b>Perpendicular</b>, <b>Tangent</b>, <b>Concentric</b>','<b>Distance</b> and <b>Angle</b> — these take a value and can be flipped','Mate alignment (aligned / anti-aligned) flips the direction — a frequent cause of a part appearing inside out','Under-mated components still have degrees of freedom, which is exactly what you need for motion questions','Over-defining produces a mate error; the fix is usually to delete a redundant mate, not to add another'],
+        hook:{label:'Count the DOF', text:'A component starts with 6 DOF. Each mate removes some. For a motion question you want <b>exactly one</b> left.'} },
+      { id:'p5-3', title:'Advanced and mechanical mates', body:'These separate CSWP from CSWA, and Segment 3 lists advanced mates explicitly.',
+        key:['<b>Advanced:</b> Width, Limit Distance, Limit Angle, Symmetric, Path, Linear/Linear Coupler','<b>Width</b> centres a tab in a slot — enormously useful and frequently examined','<b>Limit</b> mates define a range of travel, which is what makes a realistic motion study possible','<b>Mechanical:</b> Cam, Gear, Rack and Pinion, Screw, Hinge, Slot, Universal Joint','A <b>Gear</b> mate takes a ratio; a <b>Screw</b> mate couples rotation to translation'],
+        trap:'Gear and cam mates are <b>kinematic constraints</b>, not physics. They enforce a ratio regardless of whether the teeth could actually mesh — so they will not detect an interference you have not asked about.' }
+    ],
+    t6: [
+      { id:'p6-1', title:'Interference detection', body:'A static check: which components occupy the same space in the current position.',
+        key:['<b>Tools → Evaluate → Interference Detection</b>','Reports each interference with its <b>volume</b> — the exam may ask for that number','Options include treating coincident faces as interference, and ignoring hidden or fastener components','It examines the assembly <b>as currently positioned</b>, not through a range of motion','Run it before answering any "do these parts fit" question'],
+        hook:{label:'Static vs dynamic', text:'<b>Interference</b> asks "do they overlap now?" <b>Collision</b> asks "do they hit while moving?" The exam uses both words deliberately.'} },
+      { id:'p6-2', title:'Collision detection', body:'A dynamic check performed while dragging a component — an explicitly listed Segment 3 topic.',
+        key:['Available in <b>Move Component</b> → Collision Detection','Choose between checking <b>all components</b> or a selected subset','<b>Stop at collision</b> halts the drag at the contact point — this is how you find a limit of travel','<b>Physical Dynamics</b> lets the collided part be pushed along','Requires free degrees of freedom: a fully mated component cannot be dragged and cannot collide'],
+        trap:'If nothing moves, the component is either fully mated or fixed. Check for the (f) prefix in the tree — a fixed component is the commonest reason a collision question appears to have no answer.' },
+      { id:'p6-3', title:'Other evaluation tools', body:'The rest of the Evaluate toolbar that Segment 3 can call on.',
+        key:['<b>Clearance Verification</b> — reports the minimum gap between selected components','<b>Hole Alignment</b> — finds holes that do not line up','<b>Measure</b> — distances, angles, arc lengths; the workhorse for any dimensional question','<b>Sensors</b> can watch a mass property or a dimension and alert on a threshold','<b>Assembly Visualization</b> sorts components by mass, cost or a custom property']
+      }
+    ],
+    t7: [
+      { id:'p7-1', title:'Creating a coordinate system', body:'Two of the listed Segment 3 topics are "creating a coordinate system" and "using a coordinate system to perform mass properties analysis". They always appear together.',
+        key:['<b>Insert → Reference Geometry → Coordinate System</b>','Pick a vertex, point or origin for the origin; then define the X, Y and Z directions from edges or faces','The direction arrows can be flipped — an incorrect flip gives correct magnitudes with wrong signs','A coordinate system can be created in a part or in an assembly','Once created it appears in the mass properties dialogue as a reporting option'],
+        hook:{label:'Why the exam loves it', text:'It proves you understand that mass properties are <b>frame-dependent</b> — mass is not, but centre of mass and moments of inertia certainly are.'} },
+      { id:'p7-2', title:'Mass properties about a custom frame', body:'The final question of Segment 3 is very often exactly this.',
+        key:['In <b>Mass Properties</b>, use the <b>Report coordinate values relative to</b> selector to choose your coordinate system','<b>Mass</b> and <b>volume</b> do not change with the frame','<b>Centre of mass</b> coordinates change with the frame','<b>Moments of inertia</b> change with both origin and orientation','Set units and decimal places before reading, exactly as in Segment 1'],
+        trap:'Reporting the centre of mass in the <b>default</b> frame when the question asked for a custom coordinate system gives three plausible-looking numbers that are all wrong. Read the selector every time.' },
+      { id:'p7-3', title:'Replacing a component', body:'"Replacing a part with another part in an assembly" is a listed topic, and it is a mate-management exercise.',
+        key:['Right-click the component → <b>Replace Components</b>','Mate references and matching entity names help mates survive the swap','Any mate that cannot find its reference goes into the <b>Mate Entities</b> repair dialogue','Expect to re-pick a face or two; that is normal, not a failure','After replacing, <b>re-run interference detection</b> — the new part may be a different size']
+      }
+    ],
+    t8: [
+      { id:'p8-1', title:'Before you start the segment', body:'A checklist that costs five minutes and prevents most avoidable failures.',
+        key:['<b>Excel installed and working</b> — required for Segment 2 design tables','A known download folder for exam files, and space on the drive','Dual monitors if possible: SOLIDWORKS on one, TesterPRO on the other','SOLIDWORKS 2015 or later, opened and warmed up <b>before</b> you start the clock','Close everything else — the exam cannot be paused and a crash costs clock time'],
+        trap:'The exam timer starts when you click Start Examination and does not stop for anything: not a crash, not a reboot, not a power cut. The client can resume; the clock cannot.' },
+      { id:'p8-2', title:'Units, decimals and answer format', body:'The most common source of a wrong answer on a correctly built model.',
+        key:['The question states the unit system — the sample exam uses <b>MMGS</b> throughout','It states the decimal places — the sample exam uses <b>2</b>','Set <b>Document Properties → Units</b> to match before you model, not after','Apply the exact material named, and verify its density matches the value given','For fill-in-the-blank answers there is no multiple choice to catch you'],
+        hook:{label:'The check that saves you', text:'On multiple-choice questions, if your answer is not one of the options, <b>the model is wrong</b>. That is what the options are for. Go back before you guess.'} },
+      { id:'p8-3', title:'Time budgeting per segment', body:'Each segment is tight, and each is tight in a different way.',
+        key:['<b>Segment 1 · 70 min</b> — roughly 25 min to build Stage 1, then ~5 min per update. Building slowly is fine; rebuilding slowly is fatal','<b>Segment 2 · 50 min</b> — the shortest. Know the design table syntax cold; there is no time to learn it','<b>Segment 3 · 80 min</b> — longest, but downloading and opening files eats the first 10 minutes','Segments can be taken on different days — <b>do not sit all three in one sitting</b> unless you have to','A failed segment costs only that segment: 14 days and one credit'],
+        hook:{label:'Sequencing advice', text:'Many candidates find Segment 2 the easiest and Segment 1 the hardest. Sitting an easier segment first builds confidence and costs nothing, since order does not matter.'} }
+    ],
+    t9: [
+      { id:'p9-1', title:'About this sample exam', body:'What follows is the <b>official CSWP practice exam published by Dassault Systèmes</b> on solidworks.com, reproduced with its own answer key. It is the closest thing to real exam content that exists in the public domain — the guide itself says it is "designed to give you a preview of the CSWP without disclosing the entirety of the test", drawn from Segment 1, which it calls <b>the hardest segment</b>.',
+        key:['Five questions: one build, two parameter updates, one modify, one further update','Common setup for all five: <b>MMGS</b>, <b>2 decimal places</b>, arbitrary origin, <b>Alloy Steel</b> at <b>0.0077 g/mm³</b>, all holes through all unless shown otherwise','Questions 1 and 4 are multiple choice; questions 2, 3 and 5 are fill-in-the-blank — exactly the real pattern','<b>You need the drawings.</b> The dimension geometry lives in images in the official PDF, which is free to download','The parameter sets and the answer key below are complete and are reproduced exactly'],
+        trap:'Do not attempt to reverse-engineer the geometry from the masses. Download the PDF, model from the images, and use these numbers to <b>check</b> yourself — that is what makes it a valid rehearsal.' },
+      { id:'p9-2', title:'The equations that run through all five questions', body:'Every question in the sample exam uses the same two driven parameters, and one of them changes at Stage 2. That change is the point of the whole exercise.',
+        key:['<b>X = A / 3</b> — in every question','<b>Y = B / 3 + 10 mm</b> — Stage 1 (questions 1, 2, 3)','<b>Y = B / 3 + 15 mm</b> — Stage 2 (questions 4, 5). The guide flags this explicitly: <i>"the equation for Y has changed from the initial part"</i>','Hole F is constant throughout: Hole Wizard, ANSI Metric Counterbore, Hex Bolt ANSI B18.2.3.5M, M8, Close fit, through hole Ø15.00, counterbore Ø30.00 × 10.00 deep, Through All'],
+        hook:{label:'This is the trap in miniature', text:'A candidate who typed <span class="mono">B/3 + 10</span> as a number instead of an equation has to find and fix it under time pressure at Stage 2. A candidate who entered the equation changes one character.'} },
+      { id:'p9-3', title:'The official hints, verbatim in substance', body:'Dassault publishes three hints with this exam. They are worth more than most third-party advice.',
+        key:['<b>Hint 1:</b> use <b>linked dimensions (shared values)</b> to manage dimensions that must stay equal across stages','<b>Hint 2:</b> <b>rename your dimensions to A, B, C, D…</b> to keep visual track of which need changing','<b>Hint 3:</b> as an alternative to Hint 2, drive the changing parameters from a <b>design table</b>','The guide also advises <b>saving a version of the model after each question</b>, so you can recover and so you can fix earlier errors','And it states plainly that <b>no solutions will ever be shared by the certification team</b> — the answer key below is all there is'],
+        trap:'The published disclaimer is blunt: being a professional-level certified user includes the ability to research SOLIDWORKS functionality yourself. Nobody will explain the method to you.' }
+    ]
+  },
+  questions: [
+    /* ---- t9 : the official sample exam, real questions and real answers ---- */
+    { id:'pq1', topic:'t9', official:true, q:'<b>OFFICIAL SAMPLE — Q1 · Stage 1, Initial Part.</b><br>Build the part from the drawing. MMGS, 2 decimal places, arbitrary origin, Alloy Steel, density 0.0077 g/mm³, all holes through all unless shown otherwise.<br><br>A = 213 mm · B = 200 mm · C = 170 mm · D = 130 mm · E = 41 mm<br>X = A/3 · Y = B/3 + 10 mm<br>F = Hole Wizard ANSI Metric Counterbore, Hex Bolt ANSI B18.2.3.5M, M8, Close fit, Ø15.00 through, Ø30.00 counterbore × 10.00 deep, Through All<br><br><b>What is the mass of the part in grams?</b>', a:['14139.65','14298.56','15118.41','14207.34'], correct:3, explain:'<b>Official answer: d) 14207.34 g.</b><br><br>This is the published answer key from the Dassault CSWP sample exam. If your model gives one of the other three values you have almost certainly mis-set a driven dimension — the distractors are built from plausible errors, which is exactly why the multiple choice exists. Note that questions 2, 3 and 5 have <i>no</i> options to check yourself against.' },
+    { id:'pq2', topic:'t9', official:true, q:'<b>OFFICIAL SAMPLE — Q2 · Update parameters.</b><br>Same part, same material and settings. Change only the labelled parameters and rebuild.<br><br>A = 225 mm · B = 210 mm · C = 176 mm · D = 137 mm · E = 39 mm<br>X = A/3 · Y = B/3 + 10 mm<br><br><b>What is the mass of the part in grams?</b>', a:['15100.47','16490.45','14208.00','13206.40'], correct:1, explain:'<b>Official answer: 16490.45 g.</b><br><br>In the real exam this is a <b>fill-in-the-blank</b> — the four options here are the other answers from this same paper, added so you can self-test. A robust model gets this in under a minute: change five global variables, rebuild, re-read mass properties.' },
+    { id:'pq3', topic:'t9', official:true, q:'<b>OFFICIAL SAMPLE — Q3 · Update parameters again.</b><br>Same part and settings.<br><br>A = 209 mm · B = 218 mm · C = 169 mm · D = 125 mm · E = 41 mm<br>X = A/3 · Y = B/3 + 10 mm<br><br><b>What is the mass of the part in grams?</b>', a:['15100.47','14207.34','16490.45','13395.79'], correct:0, explain:'<b>Official answer: 15100.47 g.</b><br><br>Fill-in-the-blank in the real exam. Note that B has <i>increased</i> while A and D decreased — the mass sits between the Q1 and Q2 answers. Sanity-checking the direction of change is a cheap way to catch a broken rebuild.' },
+    { id:'pq4', topic:'t9', official:true, q:'<b>OFFICIAL SAMPLE — Q4 · Stage 2, Modify.</b><br>Modify the part per the Stage 2 images; changes are concentrated in areas AA, BB and CC. Same material and settings.<br><br>A = 221 mm · B = 211 mm · C = 165 mm · D = 121 mm · E = 37 mm<br>X = A/3 · <b>Y = B/3 + 15 mm</b> &nbsp;← the equation for Y has changed<br><br><b>What is the mass of the part in grams?</b>', a:['13095.40','13206.40','13313.35','13395.79'], correct:1, explain:'<b>Official answer: b) 13206.40 g.</b><br><br>The examinable moment of the whole paper: <b>the equation for Y changed</b> from +10 to +15. A candidate who entered Y as a typed number rather than an equation now has to hunt for it. A candidate who used a global variable edits one character. This is precisely what Hints 1–3 are protecting you from.' },
+    { id:'pq5', topic:'t9', official:true, q:'<b>OFFICIAL SAMPLE — Q5 · Stage 2, Update parameters.</b><br>Same Stage 2 geometry and settings.<br><br>A = 229 mm · B = 217 mm · C = 163 mm · D = 119 mm · E = 34 mm<br>X = A/3 · Y = B/3 + 15 mm<br><br><b>What is the mass of the part in grams?</b>', a:['13206.40','14207.34','14208.00','15100.47'], correct:2, explain:'<b>Official answer: 14208.00 g.</b><br><br>Fill-in-the-blank in the real exam. Worth noticing: 14208.00 is only 0.66 g away from the Q1 answer of 14207.34, on completely different geometry and parameters. <b>Coincidences like this are why you must actually rebuild rather than pattern-match.</b>' },
+
+    /* ---- theory and technique ---- */
+    { id:'pq6', topic:'t1', q:'What is the maximum score and pass mark for CSWP Segment 1?', a:['100 points, 70 to pass','105 points, 75 to pass','104 points, 77 to pass','109 points, 77 to pass'], correct:1, explain:'Segment 1 is <b>70 minutes, 75 of 105 points</b>. Segment 2 is 77 of 104 in 50 minutes; Segment 3 is 77 of 109 in 80 minutes. All three differ, and the exam page states each separately.' },
+    { id:'pq7', topic:'t1', q:'Which CSWP segment covers configurations and design tables?', a:['Segment 1','Segment 2','Segment 3','All three'], correct:1, explain:'Segment 2 — 50 minutes, the shortest segment. Segment 1 is part modelling from a drawing; Segment 3 is assemblies.' },
+    { id:'pq8', topic:'t1', q:'What is the official term for dimensions that share a single value across a part?', a:['Global dimensions','Linked values, also called shared values','Driven dimensions','Reference dimensions'], correct:1, explain:'Right-click a dimension → <b>Link Values</b>, give it a name, and every dimension with that name updates together. The official CSWP hints put this technique first.' },
+    { id:'pq9', topic:'t1', q:'In the SOLIDWORKS equations dialogue, how would you drive a dimension to one third of a global variable A?', a:['Type the calculated number into the dimension','"D1@Sketch1" = "A" / 3','Set a linked value named A/3','Use a design table only'], correct:1, explain:'Reference the dimension by name in double quotes and write the expression. Typing a calculated number works until the exam changes A — and then it silently does not.' },
+    { id:'pq10', topic:'t1', q:'Why does the official guide recommend renaming dimensions to A, B, C, D?', a:['It reduces file size','It makes it immediately visible which dimensions the exam is asking you to change','It is required by the exam software','It improves rebuild speed'], correct:1, explain:'Hint 2 of the official sample exam. It costs about a minute and removes the risk of updating the wrong dimension under time pressure. Hint 3 offers a design table as the alternative.' },
+    { id:'pq11', topic:'t1', q:'Which of these make a Segment 1 model robust to parameter changes? (Select all that apply.)', a:['Fully defining every sketch','Using sketch relations such as symmetric and equal','Dimensioning to fillet edges','Driving repeated values with global variables'], correct:[0,1,3], multi:true, explain:'Dimensioning to a fillet edge is fragile — the edge can move or vanish when parameters change. The other three are exactly what keeps a model rebuilding cleanly through four parameter updates.' },
+    { id:'pq12', topic:'t2', q:'Which unit system does the official CSWP sample exam specify?', a:['IPS (inch, pound, second)','MMGS (millimetre, gram, second)','MKS (metre, kilogram, second)','CGS (centimetre, gram, second)'], correct:1, explain:'MMGS throughout, with 2 decimal places. Set Document Properties → Units before modelling — converting afterwards is where errors creep in.' },
+    { id:'pq13', topic:'t2', q:'On a multiple-choice mass question your computed answer is not among the four options. What does this mean?', a:['Round to the nearest option','Your model is wrong — go back and check it','The question is faulty; report it','Choose the closest option'], correct:1, explain:'The official guide states this explicitly: the multiple choice exists so you can verify your model is on the right track. If your answer is not listed, something is wrong — and on fill-in-the-blank questions you get no such warning.' },
+    { id:'pq14', topic:'t2', q:'The sample exam specifies Alloy Steel with a density of 0.0077 g/mm³. What is this in kg/m³?', a:['770','7,700','77,000','0.77'], correct:1, explain:'0.0077 g/mm³ × 10⁶ mm³/m³ = 7,700 g per litre... more directly, 0.0077 g/mm³ = 7,700 kg/m³ — a perfectly normal steel density, and a useful sanity check that your units are right.' },
+    { id:'pq15', topic:'t2', q:'Why does the official guide recommend saving a version of the model after each question?', a:['To reduce rebuild time','So you can recover a known-good model and fix errors discovered later in the test','Because the exam requires file submission','To prevent the software crashing'], correct:1, explain:'Instruction 4 of the official guide. If a Stage 2 modification goes wrong, you can return to a working Stage 1 part instead of rebuilding from nothing with the clock running.' },
+    { id:'pq16', topic:'t3', q:'Mass properties are reported for which configuration?', a:['The default configuration always','The active configuration','An average of all configurations','The first configuration in the list'], correct:1, explain:'The <b>active</b> one. Reading mass with the wrong configuration active is the classic Segment 2 error, and nothing on screen warns you that it has happened.' },
+    { id:'pq17', topic:'t3', q:'A derived configuration inherits from its parent. What happens when the parent is changed?', a:['Nothing; derived configurations are independent','The change propagates to the derived configuration unless that item has been explicitly overridden','The derived configuration is deleted','SOLIDWORKS prompts you to rebuild manually'], correct:1, explain:'Inheritance with override. That is what makes derived configurations useful for families — and what makes them surprising if you forget which items were overridden.' },
+    { id:'pq18', topic:'t3', q:'When changing a dimension, what does choosing "This configuration" do?', a:['Applies the change to every configuration','Applies the change only to the active configuration, making the dimension configuration-specific','Creates a new configuration','Suppresses the feature in other configurations'], correct:1, explain:'It becomes a configuration-specific dimension and will appear as a column in a design table. Read this dialogue every time — the default is not always what you want, and the error is invisible until you switch configurations.' },
+    { id:'pq19', topic:'t4', q:'In a SOLIDWORKS design table, what does the header $STATE@Fillet1 control?', a:['The fillet radius','Whether Fillet1 is suppressed or unsuppressed','The fillet colour','The rebuild order of Fillet1'], correct:1, explain:'Suppression state, with values <span class="mono">S</span> and <span class="mono">U</span>. Dimension columns use <span class="mono">D1@Sketch1</span> form; <span class="mono">$COMMENT</span> and <span class="mono">$PRP@…</span> handle comments and properties.' },
+    { id:'pq20', topic:'t4', q:'In a design table, what does each row represent?', a:['A feature','A configuration','A dimension','A part in an assembly'], correct:1, explain:'Rows are configurations (names in column A from A3 down); columns are the controlled parameters, with headers in row 2. Cell A1 is reserved.' },
+    { id:'pq21', topic:'t4', q:'What software must be installed to use design tables in the CSWP exam?', a:['SOLIDWORKS PDM','Microsoft Excel','SOLIDWORKS Simulation','Microsoft Access'], correct:1, explain:'Excel. The official exam guide lists it as a requirement, and discovering it is missing at the start of a 50-minute timed segment is unrecoverable.' },
+    { id:'pq22', topic:'t4', q:'Reordering features in the FeatureManager tree can change the resulting geometry. Which pair demonstrates this best?', a:['Two sketches on the same plane','A fillet and a shell','Two linear patterns','A plane and an axis'], correct:1, explain:'Shell-then-fillet and fillet-then-shell produce genuinely different parts — different wall geometry and different mass. If a question asks you to reorder and then report mass, the changed number is the point.' },
+    { id:'pq23', topic:'t5', q:'In an assembly, what is the status of the first component inserted?', a:['Floating','Fixed','Under-defined','Flexible'], correct:1, explain:'Fixed by default, shown with an (f) prefix. Every subsequent component is floating. A component that will not move for a collision check is very often simply fixed.' },
+    { id:'pq24', topic:'t5', q:'A subassembly must articulate inside a parent assembly. What must you set?', a:['Make it rigid','Make it flexible','Dissolve the subassembly','Add a gear mate'], correct:1, explain:'Subassemblies are <b>rigid</b> by default and will not articulate. Rigid versus flexible is an explicitly listed Segment 3 topic, and a rigid subassembly gives wrong motion answers silently.' },
+    { id:'pq25', topic:'t5', q:'Which mate centres a tab within a slot?', a:['Symmetric','Width','Distance','Limit'], correct:1, explain:'The <b>Width</b> advanced mate. Symmetric requires a plane and mates two entities symmetrically about it; Width directly centres one set of faces between another.' },
+    { id:'pq26', topic:'t5', q:'Which of these are mechanical mates? (Select all that apply.)', a:['Gear','Rack and Pinion','Concentric','Screw'], correct:[0,1,3], multi:true, explain:'Concentric is a <b>standard</b> mate. Gear, Rack and Pinion, Screw, Cam, Hinge, Slot and Universal Joint are the mechanical set.' },
+    { id:'pq27', topic:'t5', q:'A gear mate is applied between two shafts. What does it guarantee?', a:['That the gear teeth mesh without interference','That the two rotations maintain the specified ratio','That the correct gear module is used','That the assembly will not over-define'], correct:1, explain:'It is a <b>kinematic constraint</b> only — it enforces the ratio regardless of whether real teeth could mesh. Checking that they physically fit is a separate interference question.' },
+    { id:'pq28', topic:'t6', q:'What is the difference between interference detection and collision detection?', a:['They are the same tool with different names','Interference is static — overlap in the current position; collision is dynamic — contact while a component is moved','Interference is for parts, collision is for assemblies','Collision reports volume, interference does not'], correct:1, explain:'Interference asks "do they overlap now?"; collision asks "do they hit while moving?" The exam uses the two words deliberately, and it is interference that reports a <b>volume</b>.' },
+    { id:'pq29', topic:'t6', q:'Interference Detection reports which quantity for each interference found?', a:['The contact force','The interference volume','The clearance','The number of mates involved'], correct:1, explain:'Volume — and the exam may ask for that number directly, so read it in the units the question wants.' },
+    { id:'pq30', topic:'t6', q:'A component will not move when you try to drag it for a collision check. What are the likely reasons? (Select all that apply.)', a:['It is fixed','It is fully mated with no remaining degrees of freedom','Collision detection is disabled','It is in a rigid subassembly'], correct:[0,1,3], multi:true, explain:'All three are about degrees of freedom. Disabling collision detection would not prevent the drag itself — it would just stop reporting contact.' },
+    { id:'pq31', topic:'t7', q:'When mass properties are reported about a custom coordinate system, which values change?', a:['Mass and volume','Centre of mass and moments of inertia','Density','Surface area'], correct:1, explain:'Mass, volume, density and surface area are frame-independent. Centre of mass coordinates and moments of inertia are <b>frame-dependent</b> — which is precisely why the exam pairs the two topics.' },
+    { id:'pq32', topic:'t7', q:'How do you create a coordinate system in SOLIDWORKS?', a:['Tools → Options → Coordinate System','Insert → Reference Geometry → Coordinate System','Right-click the origin → New Coordinate System','It is created automatically with each part'], correct:1, explain:'Insert → Reference Geometry → Coordinate System. Pick an origin point, then define the axis directions from edges or faces — and check the flip arrows, because a wrong flip gives right magnitudes with wrong signs.' },
+    { id:'pq33', topic:'t7', q:'After replacing a component in an assembly, what should you do first?', a:['Rebuild the drawing','Repair any broken mates, then re-run interference detection','Delete and re-add all mates','Save as a new assembly'], correct:1, explain:'Mates that cannot find their references go to the Mate Entities repair dialogue — re-picking a face or two is normal. Then re-check interference, because the new part may be a different size.' },
+    { id:'pq34', topic:'t8', q:'How long must you wait before retaking a failed CSWP segment?', a:['7 days','14 days','30 days','90 days'], correct:1, explain:'14 days per segment, and a new exam credit for that segment. Only the failed segment is repurchased — passed segments never need retaking. (Expert-level exams have a 90-day wait.)' },
+    { id:'pq35', topic:'t8', q:'Can a CSWP segment be paused once started?', a:['Yes, once per segment','Yes, for up to 15 minutes','No — the exam cannot be paused and the timer does not stop','Only with proctor approval'], correct:2, explain:'No pausing, and the clock runs through a crash or reboot. The TesterPRO client is designed to resume after a crash, but the elapsed time is gone.' },
+    { id:'pq36', topic:'t8', q:'In what order must the three CSWP segments be taken?', a:['Strictly 1, then 2, then 3','Any order, at any time','2 and 3 require 1 to be passed first','All three in one sitting'], correct:1, explain:'Any order, any time, purchased together or individually. Once all three are passed the CSWP is awarded automatically — which is why sitting an easier segment first costs nothing.' },
+    { id:'pq37', topic:'t8', q:'What is the minimum SOLIDWORKS version required for the CSWP exam?', a:['2011','2012','2015','2018'], correct:2, explain:'SOLIDWORKS 2015 or later for CSWP — an older version cannot open some of the testing files. CSWA requires 2011+; CSWA-S requires Premium or Simulation 2012+.' },
+    { id:'pq38', topic:'t8', q:'Which describes the correct hardware setup for a SOLIDWORKS certification exam?', a:['The tester client must run on a separate machine','SOLIDWORKS and the tester client on one machine with dual monitors is the preferred setup','A Mac with Boot Camp is required','An internet connection is optional'], correct:1, explain:'One machine, two monitors is the recommended arrangement. A second machine is allowed provided you can transfer the exam files between them. An internet connection is <b>required</b> throughout.' },
+    { id:'pq39', topic:'t1', q:'Segment 1 gives you a drawing with labelled dimensions and equations, then repeatedly changes the parameters. What is it actually testing?', a:['Speed of sketching','Whether your model rebuilds correctly and preserves design intent when parameters change','Knowledge of drawing standards','Ability to read GD&T'], correct:1, explain:'It is a <b>parametric robustness</b> exam. The initial build is straightforward; the four parameter updates are where the marks are lost, and a fragile model fails them all.' },
+    { id:'pq40', topic:'t3', q:'Which of these can a configuration control? (Select all that apply.)', a:['Dimension values','Feature suppression state','Custom properties','The part material'], correct:[0,1,2,3], multi:true, explain:'All four. Dimensions, suppression, configuration-specific custom properties and material can all vary by configuration — which is why the active configuration matters so much when reporting mass.' }
+  ]
+};
+
+/* ============================ ENGINE ============================ */
+const STORE_KEY = 'swx.progress.v2';
+const FONT_KEY  = 'swx.font.v1';
+
+const MOCK_NOTE = {
+  sd: 'This mirrors the real CSWA-SD exam exactly: 30 questions, 60 minutes, 24 to pass. The real exam is knowledge-only, so this is a true rehearsal.',
+  s:  'The real CSWA-S exam is 20 questions in 120 minutes, but three of them are hands-on modelling problems worth up to 20 points each. This drill covers the theory half only — allow the extra time separately for building models in SOLIDWORKS.',
+  p:  'The real CSWP segments are almost entirely hands-on in SOLIDWORKS. This drill tests the knowledge and technique layer that surrounds them. For true rehearsal, work the official sample exam in topic 9 with SOLIDWORKS open.'
+};
+
+function emptyExamProgress() { return { seen: {}, right: {}, wrong: {}, attempts: [] }; }
+function emptyProgress() { return { sd: emptyExamProgress(), s: emptyExamProgress(), p: emptyExamProgress() }; }
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return emptyProgress();
+    const p = JSON.parse(raw), base = emptyProgress();
+    for (const k of Object.keys(base)) {
+      if (p && p[k]) {
+        base[k].seen    = p[k].seen    || {};
+        base[k].right   = p[k].right   || {};
+        base[k].wrong   = p[k].wrong   || {};
+        base[k].attempts= Array.isArray(p[k].attempts) ? p[k].attempts : [];
+      }
+    }
+    return base;
+  } catch (e) { return emptyProgress(); }
+}
+function saveProgress() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state.progress)); } catch (e) {}
+}
+
+const state = {
+  view: 'home', examId: null, topicId: null, cardIdx: 0,
+  quizMode: 'topic', pool: [], qIdx: 0, sel: [], answered: false,
+  mock: null, mockTimer: null,
+  fontSize: 18,
+  progress: loadProgress()
+};
+
+function ex()  { return EXAMS[state.examId]; }
+function prog(){ return state.progress[state.examId]; }
+
+/* ---- font ---- */
+function applyFont() {
+  document.body.className = 'fs-' + state.fontSize;
+}
+function setFont(d) {
+  state.fontSize = Math.max(14, Math.min(28, state.fontSize + d));
+  try { localStorage.setItem(FONT_KEY, String(state.fontSize)); } catch (e) {}
+  applyFont();
+}
+(function () {
+  try { const f = parseInt(localStorage.getItem(FONT_KEY), 10); if (f >= 14 && f <= 28) state.fontSize = f; } catch (e) {}
+})();
+
+/* ---- theming ---- */
+function applyTheme() {
+  const r = document.documentElement.style;
+  if (state.examId) {
+    r.setProperty('--ac',  EXAMS[state.examId].accent);
+    r.setProperty('--ac2', EXAMS[state.examId].accent2);
+  } else {
+    r.setProperty('--ac', '#7DAB87'); r.setProperty('--ac2', '#95C19F');
+  }
+  document.getElementById('brandTxt').textContent =
+    state.examId ? ('SOLIDWORKS ' + EXAMS[state.examId].code) : 'SOLIDWORKS Exam Study';
+}
+
+/* ---- helpers ---- */
+function allCards(e)   { return e.topics.reduce((a, t) => a.concat(e.cards[t.id] || []), []); }
+function topicCards(e, tid) { return e.cards[tid] || []; }
+function topicQs(e, tid)    { return e.questions.filter(q => q.topic === tid); }
+function isMulti(q)    { return Array.isArray(q.correct); }
+function correctSet(q) { return isMulti(q) ? q.correct.slice().sort() : [q.correct]; }
+function sameSet(a, b) { a = a.slice().sort(); b = b.slice().sort();
+  return a.length === b.length && a.every((v, i) => v === b[i]); }
+function shuffled(arr) { const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a; }
+function pct(n, d) { return d > 0 ? Math.round(100 * n / d) : 0; }
+function fmtTime(ms) {
+  if (ms < 0) ms = 0;
+  const s = Math.floor(ms / 1000), m = Math.floor(s / 60);
+  return String(m).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+}
+function masteryOf(e, tid) {
+  const qs = topicQs(e, tid), p = state.progress[e.id];
+  if (!qs.length) return 0;
+  const done = qs.filter(q => p.right[q.id]).length;
+  return pct(done, qs.length);
+}
+function examMastery(e) {
+  const p = state.progress[e.id];
+  const done = e.questions.filter(q => p.right[q.id]).length;
+  return pct(done, e.questions.length);
+}
+
+/* ---- navigation ---- */
+function go(view, opts) {
+  opts = opts || {};
+  if (state.mockTimer) { clearInterval(state.mockTimer); state.mockTimer = null; }
+  if ('examId' in opts) state.examId = opts.examId;
+  if ('topicId' in opts) state.topicId = opts.topicId;
+  if ('cardIdx' in opts) state.cardIdx = opts.cardIdx;
+  state.view = view;
+  if (view === 'home') state.examId = null;
+  applyTheme();
+  render();
+  window.scrollTo(0, 0);
+}
+
+/* ============================ RENDER ============================ */
+function render() {
+  const app = document.getElementById('app');
+  const v = state.view;
+  if (v === 'home')     app.innerHTML = viewHome();
+  else if (v === 'exam')app.innerHTML = viewExam();
+  else if (v === 'study')app.innerHTML = viewStudy();
+  else if (v === 'quiz') app.innerHTML = viewQuiz();
+  else if (v === 'mock') app.innerHTML = viewMock();
+  else if (v === 'result')app.innerHTML = viewResult();
+  else if (v === 'progress')app.innerHTML = viewProgress();
+  else app.innerHTML = viewHome();
+  if (v === 'mock' && state.mock && !state.mock.submitted) startTicker();
+}
+
+/* ---- HOME ---- */
+function viewHome() {
+  const cards = Object.keys(EXAMS).map(id => {
+    const e = EXAMS[id], m = examMastery(e), p = state.progress[id];
+    const seen = Object.keys(p.seen).length, nCards = allCards(e).length;
+    const best = p.attempts.length ? Math.max.apply(null, p.attempts.map(a => a.pct)) : null;
+    return '<button class="exam-card" style="--pc:' + e.accent + '" onclick="go(\'exam\',{examId:\'' + id + '\'})">'
+      + '<div class="code">' + e.code + '</div>'
+      + '<h3>' + e.name + '</h3>'
+      + '<div class="spec">' + e.tagline + '</div>'
+      + '<div class="bar pc" style="--pc:' + e.accent + '"><i style="width:' + m + '%;background:' + e.accent + '"></i></div>'
+      + '<div class="spec">' + m + '% of ' + e.questions.length + ' questions answered correctly &middot; '
+      + seen + '/' + nCards + ' lessons read'
+      + (best !== null ? ' &middot; best mock ' + best + '%' : '')
+      + '</div></button>';
+  }).join('');
+
+  const totQ = Object.keys(EXAMS).reduce((a, id) => a + EXAMS[id].questions.length, 0);
+  const totC = Object.keys(EXAMS).reduce((a, id) => a + allCards(EXAMS[id]).length, 0);
+  const totRight = Object.keys(EXAMS).reduce((a, id) =>
+    a + EXAMS[id].questions.filter(q => state.progress[id].right[q.id]).length, 0);
+
+  return '<h1 class="display">SOLIDWORKS Exam Study</h1>'
+    + '<p class="sub">Three certifications, one app. Lessons, practice questions and timed mock exams — all progress saved on this device.</p>'
+    + '<div class="grid g3" style="margin:24px 0 28px">'
+    + '<div class="stat"><div class="n">' + totQ + '</div><div class="l">practice questions</div></div>'
+    + '<div class="stat"><div class="n">' + totC + '</div><div class="l">lessons</div></div>'
+    + '<div class="stat"><div class="n">' + totRight + '</div><div class="l">answered correctly</div></div>'
+    + '</div>'
+    + '<h2>Choose an exam</h2>'
+    + '<div class="grid" style="gap:16px">' + cards + '</div>'
+    + '<div class="card tight" style="margin-top:26px">'
+    + '<h3>How to use this</h3>'
+    + '<p class="muted"><b>Lessons</b> teach the topic. <b>Practice</b> gives instant feedback and remembers what you got wrong. '
+    + '<b>Mock exam</b> runs a clock and withholds feedback until you submit, like the real thing. '
+    + 'Start with lessons, drill practice until a topic is green, then sit the mock.</p>'
+    + '<p class="fnote">Progress is stored in this browser only. Clearing site data resets it.</p>'
+    + '</div>'
+    + '<div class="srcnote">Exam formats, durations, pass marks and policies verified against solidworks.com and the official SOLIDWORKS certification blog, February 2026. '
+    + 'The CSWP topic 9 questions are reproduced from the free official CSWP sample exam published by Dassault Syst&egrave;mes.</div>';
+}
+
+/* ---- EXAM HOME ---- */
+function viewExam() {
+  const e = ex(), p = prog();
+  const specRows = Object.keys(e.spec).map(k =>
+    '<tr><th style="width:34%">' + k + '</th><td>' + e.spec[k] + '</td></tr>').join('');
+  const topics = e.topics.map((t, i) => {
+    const m = masteryOf(e, t.id), nc = topicCards(e, t.id).length, nq = topicQs(e, t.id).length;
+    const star = t.title.indexOf('★') === 0;
+    return '<button class="trow" onclick="go(\'study\',{topicId:\'' + t.id + '\',cardIdx:0})">'
+      + '<span class="ti">' + (star ? '★' : (i + 1)) + '</span>'
+      + '<span class="tt"><span class="tn">' + t.title.replace('★ ', '') + '</span>'
+      + '<span class="tm">' + t.blurb + ' &middot; ' + nc + ' lessons, ' + nq + ' questions</span></span>'
+      + '<span class="pill ' + (m >= 80 ? 'pill-good' : m > 0 ? 'pill-warn' : 'pill-q') + '">' + m + '%</span>'
+      + '</button>';
+  }).join('');
+
+  const wrongN = e.questions.filter(q => p.wrong[q.id] && !p.right[q.id]).length;
+
+  return '<h1 class="display">' + e.code + '</h1>'
+    + '<p class="sub">' + e.name + ' &mdash; ' + e.tagline + '</p>'
+    + '<div class="grid g3" style="margin:22px 0">'
+    + '<div class="stat"><div class="n">' + examMastery(e) + '%</div><div class="l">questions correct</div></div>'
+    + '<div class="stat"><div class="n">' + Object.keys(p.seen).length + '</div><div class="l">lessons read</div></div>'
+    + '<div class="stat"><div class="n">' + p.attempts.length + '</div><div class="l">mock attempts</div></div>'
+    + '</div>'
+    + '<div class="navrow" style="margin-bottom:24px">'
+    + '<button class="btn" onclick="startQuiz(\'all\')">Practice all questions</button>'
+    + '<button class="btn ghost" onclick="startQuiz(\'wrong\')"' + (wrongN ? '' : ' disabled') + '>Review mistakes (' + wrongN + ')</button>'
+    + '<button class="btn ghost" onclick="startMock()">Timed mock exam</button>'
+    + '<button class="btn ghost" onclick="go(\'progress\')">Progress</button>'
+    + '</div>'
+    + '<h2>Official exam facts</h2>'
+    + '<div class="tbl-wrap"><table>' + specRows + '</table></div>'
+    + '<h2>Topics</h2>' + topics
+    + '<div class="navrow"><button class="btn ghost" onclick="go(\'home\')">&larr; All exams</button></div>';
+}
+
+/* ---- STUDY ---- */
+function viewStudy() {
+  const e = ex(), t = e.topics.find(x => x.id === state.topicId);
+  const cards = topicCards(e, state.topicId);
+  if (!cards.length) return '<div class="empty">No lessons in this topic yet.</div>';
+  const i = Math.max(0, Math.min(state.cardIdx, cards.length - 1));
+  const c = cards[i];
+  prog().seen[c.id] = 1; saveProgress();
+
+  let html = '<p class="sub">' + e.code + ' &middot; ' + t.title.replace('★ ', '') + '</p>'
+    + '<div class="qbar"><span>Lesson ' + (i + 1) + ' of ' + cards.length + '</span>'
+    + '<span class="pill pill-q">' + Math.round(100 * (i + 1) / cards.length) + '% through</span></div>'
+    + '<div class="lesson"><h3>' + c.title + '</h3><p>' + c.body + '</p>';
+  if (c.key) html += '<ul class="keylist">' + c.key.map(k => '<li>' + k + '</li>').join('') + '</ul>';
+  if (c.hook) html += '<div class="hook"><div class="hl">' + c.hook.label + '</div><div>' + c.hook.text + '</div></div>';
+  if (c.trap) html += '<div class="trapbox"><div class="hl">&#9888; Exam trap</div><div>' + c.trap + '</div></div>';
+  html += '</div>'
+    + '<div class="navrow">'
+    + '<button class="btn ghost" onclick="go(\'study\',{cardIdx:' + (i - 1) + '})"' + (i === 0 ? ' disabled' : '') + '>&larr; Previous</button>'
+    + '<span class="spacer"></span>'
+    + (i < cards.length - 1
+        ? '<button class="btn" onclick="go(\'study\',{cardIdx:' + (i + 1) + '})">Next lesson &rarr;</button>'
+        : '<button class="btn" onclick="startQuiz(\'topic\')">Practise this topic &rarr;</button>')
+    + '</div>'
+    + '<div class="navrow"><button class="btn ghost sm" onclick="go(\'exam\')">&larr; ' + e.code + ' topics</button></div>';
+  return html;
+}
+
+/* ---- QUIZ ---- */
+function startQuiz(mode) {
+  const e = ex(), p = prog();
+  state.quizMode = mode;
+  let pool;
+  if (mode === 'topic')      pool = topicQs(e, state.topicId);
+  else if (mode === 'wrong') pool = e.questions.filter(q => p.wrong[q.id] && !p.right[q.id]);
+  else                       pool = e.questions.slice();
+  state.pool = shuffled(pool);
+  state.qIdx = 0; state.sel = []; state.answered = false;
+  go('quiz');
+}
+function pickOpt(i) {
+  if (state.answered) return;
+  const q = state.pool[state.qIdx];
+  if (isMulti(q)) {
+    const at = state.sel.indexOf(i);
+    if (at >= 0) state.sel.splice(at, 1); else state.sel.push(i);
+    render();
+  } else { state.sel = [i]; checkAnswer(); }
+}
+function checkAnswer() {
+  if (state.answered || !state.sel.length) return;
+  const q = state.pool[state.qIdx], p = prog();
+  const ok = sameSet(state.sel, correctSet(q));
+  if (ok) { p.right[q.id] = (p.right[q.id] || 0) + 1; }
+  else    { p.wrong[q.id] = (p.wrong[q.id] || 0) + 1; }
+  saveProgress();
+  state.answered = true;
+  render();
+}
+function nextQ() {
+  if (state.qIdx < state.pool.length - 1) { state.qIdx++; state.sel = []; state.answered = false; render(); window.scrollTo(0,0); }
+  else go('exam');
+}
+function viewQuiz() {
+  const e = ex();
+  if (!state.pool.length) return '<div class="empty"><p>Nothing to practise here yet.</p>'
+    + '<div class="navrow" style="justify-content:center"><button class="btn" onclick="go(\'exam\')">Back</button></div></div>';
+  const q = state.pool[state.qIdx], multi = isMulti(q), cor = correctSet(q);
+  const labels = ['A','B','C','D','E','F'];
+
+  const opts = q.a.map((text, i) => {
+    let cls = 'opt';
+    if (!state.answered && state.sel.indexOf(i) >= 0) cls += ' sel';
+    if (state.answered) {
+      cls += ' locked';
+      if (cor.indexOf(i) >= 0) cls += ' right';
+      else if (state.sel.indexOf(i) >= 0) cls += ' wrong';
+    }
+    return '<button class="' + cls + '" onclick="pickOpt(' + i + ')"><span class="mk">' + labels[i] + '</span><span>' + text + '</span></button>';
+  }).join('');
+
+  const ok = state.answered && sameSet(state.sel, cor);
+  let tail = '';
+  if (state.answered) {
+    tail = '<div class="explain"><div class="verdict ' + (ok ? 'v-ok' : 'v-no') + '">'
+      + (ok ? '&#10003; Correct' : '&#10007; Not this time &mdash; which is exactly when the explanation sticks')
+      + '</div>' + q.explain + '</div>'
+      + '<div class="navrow"><span class="spacer"></span><button class="btn" onclick="nextQ()">'
+      + (state.qIdx < state.pool.length - 1 ? 'Next question &rarr;' : 'Finish') + '</button></div>';
+  } else if (multi) {
+    tail = '<div class="navrow"><span class="spacer"></span><button class="btn" onclick="checkAnswer()"'
+      + (state.sel.length ? '' : ' disabled') + '>Check answer</button></div>';
+  }
+
+  const modeName = state.quizMode === 'wrong' ? 'Reviewing mistakes' : state.quizMode === 'topic' ? 'Topic practice' : 'All questions';
+  return '<div class="qbar"><span>' + e.code + ' &middot; ' + modeName + '</span>'
+    + '<span>Question ' + (state.qIdx + 1) + ' of ' + state.pool.length + '</span></div>'
+    + '<div class="bar"><i style="width:' + Math.round(100 * (state.qIdx + (state.answered ? 1 : 0)) / state.pool.length) + '%"></i></div>'
+    + '<div class="card" style="margin-top:18px">'
+    + (q.official ? '<span class="pill pill-ac" style="margin-bottom:12px">OFFICIAL SAMPLE EXAM</span>' : '')
+    + (multi ? '<span class="pill pill-warn" style="margin-bottom:12px">SELECT ALL THAT APPLY</span>' : '')
+    + '<div class="qtext">' + q.q + '</div>'
+    + '<div class="opts">' + opts + '</div>' + tail + '</div>'
+    + '<div class="navrow"><button class="btn ghost sm" onclick="go(\'exam\')">Exit to topics</button></div>';
+}
+
+/* ---- MOCK EXAM ---- */
+function startMock() {
+  const e = ex(), cfg = e.mock;
+  const n = Math.min(cfg.count, e.questions.length);
+  state.mock = {
+    qs: shuffled(e.questions).slice(0, n),
+    idx: 0, answers: {}, submitted: false,
+    endsAt: Date.now() + cfg.minutes * 60000,
+    minutes: cfg.minutes
+  };
+  go('mock');
+}
+function startTicker() {
+  if (state.mockTimer) clearInterval(state.mockTimer);
+  state.mockTimer = setInterval(function () {
+    if (!state.mock || state.mock.submitted) { clearInterval(state.mockTimer); state.mockTimer = null; return; }
+    const left = state.mock.endsAt - Date.now();
+    const el = document.getElementById('mockTimer');
+    if (el) {
+      el.textContent = fmtTime(left);
+      el.className = 'timer' + (left < 60000 ? ' crit' : left < 300000 ? ' warn' : '');
+    }
+    if (left <= 0) submitMock(true);
+  }, 500);
+}
+function mockPick(i) {
+  const m = state.mock, q = m.qs[m.idx];
+  const cur = m.answers[q.id] || [];
+  if (isMulti(q)) {
+    const at = cur.indexOf(i);
+    if (at >= 0) cur.splice(at, 1); else cur.push(i);
+    m.answers[q.id] = cur;
+  } else { m.answers[q.id] = [i]; }
+  render();
+}
+function mockGo(i) { state.mock.idx = Math.max(0, Math.min(i, state.mock.qs.length - 1)); render(); window.scrollTo(0,0); }
+function submitMock(auto) {
+  const m = state.mock;
+  if (!m || m.submitted) return;
+  if (!auto) {
+    const unanswered = m.qs.filter(q => !(m.answers[q.id] || []).length).length;
+    if (unanswered && !confirm(unanswered + ' question(s) are unanswered. Submit anyway?')) return;
+  }
+  m.submitted = true;
+  if (state.mockTimer) { clearInterval(state.mockTimer); state.mockTimer = null; }
+  const e = ex(), p = prog();
+  let right = 0;
+  m.qs.forEach(q => {
+    const ok = sameSet(m.answers[q.id] || [], correctSet(q));
+    if (ok) { right++; p.right[q.id] = (p.right[q.id] || 0) + 1; }
+    else if ((m.answers[q.id] || []).length) { p.wrong[q.id] = (p.wrong[q.id] || 0) + 1; }
+  });
+  m.right = right;
+  m.pct = pct(right, m.qs.length);
+  const passPct = Math.round(100 * e.mock.passPoints / e.mock.totalPoints);
+  m.passPct = passPct;
+  m.passed = m.pct >= passPct;
+  p.attempts.push({ when: Date.now(), pct: m.pct, right: right, of: m.qs.length, passed: m.passed });
+  saveProgress();
+  go('result');
+}
+function viewMock() {
+  const e = ex(), m = state.mock;
+  if (!m) return '<div class="empty">No mock exam running.</div>';
+  const q = m.qs[m.idx], multi = isMulti(q), sel = m.answers[q.id] || [];
+  const labels = ['A','B','C','D','E','F'];
+  const passPct = Math.round(100 * e.mock.passPoints / e.mock.totalPoints);
+
+  const opts = q.a.map((text, i) =>
+    '<button class="opt' + (sel.indexOf(i) >= 0 ? ' sel' : '') + '" onclick="mockPick(' + i + ')">'
+    + '<span class="mk">' + labels[i] + '</span><span>' + text + '</span></button>').join('');
+
+  const squares = m.qs.map((qq, i) =>
+    '<button class="sq' + ((m.answers[qq.id] || []).length ? ' done' : '') + (i === m.idx ? ' cur' : '') + '" '
+    + 'onclick="mockGo(' + i + ')">' + (i + 1) + '</button>').join('');
+
+  return '<div class="qbar"><span><b>' + e.code + ' mock exam</b> &middot; ' + m.qs.length + ' questions &middot; pass ' + passPct + '%</span>'
+    + '<span class="timer" id="mockTimer">' + fmtTime(m.endsAt - Date.now()) + '</span></div>'
+    + '<div class="card">'
+    + '<div class="qbar" style="margin-bottom:10px"><span>Question ' + (m.idx + 1) + ' of ' + m.qs.length + '</span>'
+    + (multi ? '<span class="pill pill-warn">SELECT ALL THAT APPLY</span>' : '') + '</div>'
+    + (q.official ? '<span class="pill pill-ac" style="margin-bottom:12px">OFFICIAL SAMPLE EXAM</span>' : '')
+    + '<div class="qtext">' + q.q + '</div><div class="opts">' + opts + '</div>'
+    + '<div class="navrow">'
+    + '<button class="btn ghost" onclick="mockGo(' + (m.idx - 1) + ')"' + (m.idx === 0 ? ' disabled' : '') + '>&larr; Previous</button>'
+    + '<span class="spacer"></span>'
+    + '<button class="btn ghost" onclick="mockGo(' + (m.idx + 1) + ')"' + (m.idx === m.qs.length - 1 ? ' disabled' : '') + '>Next &rarr;</button>'
+    + '</div></div>'
+    + '<div class="card tight"><h3>Summary screen</h3>'
+    + '<p class="muted" style="font-size:.9em">Like the real exam, you may answer in any order. Filled squares are answered.</p>'
+    + '<div class="sumgrid">' + squares + '</div>'
+    + '<div class="navrow"><button class="btn" onclick="submitMock(false)">End examination &amp; score</button></div></div>'
+    + '<p class="fnote">' + MOCK_NOTE[e.id] + '</p>';
+}
+
+/* ---- RESULT ---- */
+function viewResult() {
+  const e = ex(), m = state.mock;
+  if (!m || !m.submitted) return '<div class="empty">No result to show.</div>';
+  const byTopic = {};
+  m.qs.forEach(q => {
+    byTopic[q.topic] = byTopic[q.topic] || { n: 0, ok: 0 };
+    byTopic[q.topic].n++;
+    if (sameSet(m.answers[q.id] || [], correctSet(q))) byTopic[q.topic].ok++;
+  });
+  const rows = e.topics.filter(t => byTopic[t.id]).map(t => {
+    const b = byTopic[t.id], pc = pct(b.ok, b.n);
+    return '<tr><td>' + t.title.replace('★ ', '') + '</td><td>' + b.ok + ' / ' + b.n + '</td>'
+      + '<td><span class="pill ' + (pc >= 80 ? 'pill-good' : pc >= 50 ? 'pill-warn' : 'pill-bad') + '">' + pc + '%</span></td></tr>';
+  }).join('');
+
+  const weak = e.topics.filter(t => byTopic[t.id] && pct(byTopic[t.id].ok, byTopic[t.id].n) < 70);
+  const missed = m.qs.filter(q => !sameSet(m.answers[q.id] || [], correctSet(q)));
+
+  const review = missed.map(q => {
+    const cor = correctSet(q), labels = ['A','B','C','D','E','F'];
+    const yours = (m.answers[q.id] || []).map(i => labels[i]).join(', ') || '&mdash;';
+    return '<div class="card tight" style="margin-bottom:12px">'
+      + '<div style="font-weight:700;margin-bottom:8px">' + q.q + '</div>'
+      + '<div class="muted" style="font-size:.9em">Your answer: <b>' + yours + '</b> &nbsp;&middot;&nbsp; Correct: <b>'
+      + cor.map(i => labels[i]).join(', ') + '</b></div>'
+      + '<div class="explain" style="margin-top:10px">' + q.explain + '</div></div>';
+  }).join('');
+
+  return '<div class="banner ' + (m.passed ? 'good' : 'bad') + '">'
+    + '<div class="big">' + (m.passed ? 'Pass' : 'Not yet') + ' &mdash; ' + m.pct + '%</div>'
+    + '<div>' + m.right + ' of ' + m.qs.length + ' correct. Pass mark for ' + e.code + ' is <b>' + m.passPct + '%</b>.</div>'
+    + '</div>'
+    + '<h2>By topic</h2>'
+    + '<div class="tbl-wrap"><table><tr><th>Topic</th><th>Score</th><th></th></tr>' + rows + '</table></div>'
+    + (weak.length
+        ? '<div class="card tight" style="margin-top:18px"><h3>Where to go next</h3><p class="muted">Below 70% in: <b>'
+          + weak.map(t => t.title.replace('★ ', '')).join(', ') + '</b>. Re-read those lessons, then drill them.</p></div>'
+        : '<div class="card tight" style="margin-top:18px"><h3>Solid across the board</h3><p class="muted">No topic under 70%. Re-sit the mock in a few days to confirm it holds.</p></div>')
+    + (missed.length ? '<h2>Every question you missed</h2>' + review : '')
+    + '<div class="navrow"><button class="btn" onclick="startMock()">Sit another mock</button>'
+    + '<button class="btn ghost" onclick="go(\'exam\')">Back to ' + e.code + '</button></div>';
+}
+
+/* ---- PROGRESS ---- */
+function viewProgress() {
+  const e = ex(), p = prog();
+  const rows = e.topics.map(t => {
+    const qs = topicQs(e, t.id), m = masteryOf(e, t.id);
+    const wrong = qs.filter(q => p.wrong[q.id] && !p.right[q.id]).length;
+    const cardsSeen = topicCards(e, t.id).filter(c => p.seen[c.id]).length;
+    return '<tr><td>' + t.title.replace('★ ', '') + '</td>'
+      + '<td>' + cardsSeen + ' / ' + topicCards(e, t.id).length + '</td>'
+      + '<td>' + qs.filter(q => p.right[q.id]).length + ' / ' + qs.length + '</td>'
+      + '<td>' + (wrong ? '<span class="pill pill-bad">' + wrong + '</span>' : '&mdash;') + '</td>'
+      + '<td><span class="pill ' + (m >= 80 ? 'pill-good' : m > 0 ? 'pill-warn' : 'pill-q') + '">' + m + '%</span></td></tr>';
+  }).join('');
+  const att = p.attempts.slice().reverse().map(a =>
+    '<tr><td>' + new Date(a.when).toLocaleString() + '</td><td>' + a.right + ' / ' + a.of + '</td>'
+    + '<td>' + a.pct + '%</td><td><span class="pill ' + (a.passed ? 'pill-good' : 'pill-bad') + '">'
+    + (a.passed ? 'Pass' : 'Fail') + '</span></td></tr>').join('');
+
+  return '<h1 class="display">' + e.code + ' progress</h1>'
+    + '<div class="tbl-wrap" style="margin-top:18px"><table>'
+    + '<tr><th>Topic</th><th>Lessons</th><th>Correct</th><th>Still wrong</th><th>Mastery</th></tr>' + rows + '</table></div>'
+    + '<h2>Mock attempts</h2>'
+    + (att ? '<div class="tbl-wrap"><table><tr><th>When</th><th>Score</th><th>%</th><th></th></tr>' + att + '</table></div>'
+           : '<p class="muted">No mock attempts yet.</p>')
+    + '<div class="navrow"><button class="btn ghost" onclick="go(\'exam\')">&larr; Back</button>'
+    + '<button class="btn danger" onclick="resetExam()">Reset ' + e.code + ' progress</button></div>';
+}
+function resetExam() {
+  if (!confirm('Reset all progress for ' + ex().code + '? This cannot be undone.')) return;
+  state.progress[state.examId] = emptyExamProgress();
+  saveProgress(); render();
+}
+
+/* ---- boot ---- */
+applyFont();
+applyTheme();
+render();
+</script>
+</body>
+</html>
