@@ -1257,11 +1257,13 @@ body {
   color: var(--ds-accent-strong);
 }
 
-@media (max-width: 620px) {
+@media (max-width: 980px) {
   .learning-page .learning-hero {
     grid-template-columns: 1fr;
   }
+}
 
+@media (max-width: 620px) {
   .cert-badge {
     flex-basis: 64px;
     width: 64px;
